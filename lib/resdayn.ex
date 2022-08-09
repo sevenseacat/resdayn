@@ -1,18 +1,16 @@
 defmodule Resdayn do
   @moduledoc """
-  Documentation for `Resdayn`.
+  `Resdayn` is an Elixir application for reading, parsing and formatting data
+  from ESM data files from The Elder Scrolls III: Morrowind.
   """
 
   @doc """
-  Hello world.
+  Load the specified ESM file.
 
-  ## Examples
-
-      iex> Resdayn.hello()
-      :world
-
+  iex> Resdayn.load("Morrowind.esm")
+  [records]
   """
-  def hello do
-    :world
+  def load(filename) do
+    Resdayn.Parser.read(filename)
   end
 end
