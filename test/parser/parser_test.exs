@@ -1,11 +1,11 @@
-defmodule Resdayn.Parser.FileTest do
-  use ExUnit.Case
+defmodule Resdayn.ParserTest do
+  use ExUnit.Case, async: true
 
-  alias Resdayn.Parser.File
+  alias Resdayn.Parser
 
   def read_single_record(binary) do
     {:ok, stream} = StringIO.open(binary)
-    {[record], ^stream} = File.read_record(stream)
+    {[record], ^stream} = Parser.read_record(stream)
     record
   end
 

@@ -1,11 +1,11 @@
-defmodule Resdayn.Parser.File do
+defmodule Resdayn.Parser do
   @moduledoc """
   The main module for reading data from a provided ESM file.
 
   File format interpreted from http://www.uesp.net/morrow/tech/mw_esm.txt
   """
 
-  import Resdayn.{DataSizes, Parser.Helpers}
+  import Resdayn.Parser.{DataSizes, Helpers}
 
   alias Resdayn.Parser.{SubrecordValue}
 

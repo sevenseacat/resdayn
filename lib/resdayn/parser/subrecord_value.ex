@@ -1,5 +1,5 @@
 defmodule Resdayn.Parser.SubrecordValue do
-  import Resdayn.{DataSizes, Parser.Helpers}
+  import Resdayn.Parser.{DataSizes, Helpers}
 
   def parse(
         "TES3",

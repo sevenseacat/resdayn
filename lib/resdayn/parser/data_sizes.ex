@@ -1,4 +1,4 @@
-defmodule Resdayn.DataSizes do
+defmodule Resdayn.Parser.DataSizes do
   @moduledoc """
   Defines common data sizes to be used in pattern matching ESM file contents.
 
