@@ -5,7 +5,7 @@ defmodule Resdayn.MixProject do
     [
       app: :resdayn,
       version: "0.1.0",
-      elixir: "~> 1.12",
+      elixir: "~> 1.13",
       start_permanent: Mix.env() == :prod,
       deps: deps()
     ]
