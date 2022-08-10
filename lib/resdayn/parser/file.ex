@@ -1,11 +1,13 @@
-defmodule Resdayn.Parser do
+defmodule Resdayn.Parser.File do
   @moduledoc """
   The main module for reading data from a provided ESM file.
 
   File format interpreted from http://www.uesp.net/morrow/tech/mw_esm.txt
   """
 
-  import Resdayn.DataSizes
+  import Resdayn.{DataSizes, Parser.Helpers}
+
+  alias Resdayn.Parser.{SubrecordValue}
 
   @doc """
   Return a list of records as read from the ESM file.
@@ -45,17 +47,24 @@ defmodule Resdayn.Parser do
       |> IO.binread(subrecord_size)
       |> parse_subrecords(type)
 
-    %{type: type, flags: flags, subrecords: subrecords}
+    %{
+      type: type,
+      flags: bitmask(flags, blocked: 0x00002000, persistent: 0x00000400),
+      subrecords: subrecords
+    }
   end
 
   defp parse_subrecords("", _type), do: []
 
   defp parse_subrecords(
-         <<name::binary-4, size::long, value::binary-size(size), rest::binary>>,
+         <<subtype::binary-4, size::long, value::binary-size(size), rest::binary>>,
          type
        ) do
     # Each subrecord has an 8-byte header which contains the size of the data, then the data for the record
     # The rest is more subrecords.
-    [{name, value} | parse_subrecords(rest, type)]
+    [
+      {subtype, SubrecordValue.parse(type, subtype, value)}
+      | parse_subrecords(rest, type)
+    ]
   end
 end

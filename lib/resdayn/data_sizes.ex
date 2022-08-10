@@ -14,7 +14,7 @@ defmodule Resdayn.DataSizes do
     quote do: little - integer - 64
   end
 
-  defmacro float do
+  defmacro lfloat do
     quote do: little - float - 32
   end
 

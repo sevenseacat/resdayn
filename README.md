@@ -10,17 +10,20 @@ This uses the amazing work of Dave Humphrey, who detailed the format of ESM file
 iex> Resdayn.load("path/to/your/Morrowind.esm")
 [
   %{
-    flags: 0,
+    flags: %{blocked: false, persistent: false},
     subrecords: [
       {"HEDR",
-       <<154, 153, 153, 63, 1, 0, 0, 0, 66, 101, 116, 104, 101, 115, 100, 97,
-         32, 83, 111, 102, 116, 119, 111, 114, 107, 115, 0, 0, 0, 0, 0, 0, 0, 0,
-         0, 0, 0, 0, 0, 0, 84, 104, 101, 32, ...>>}
+       %{
+         company: "Bethesda Softworks",
+         description: "The main data file For Morrowind",
+         record_count: 48295,
+         version: 1.2
+       }}
     ],
     type: "TES3"
   },
   %{
-    flags: 0,
+    flags: %{blocked: false, persistent: false},
     subrecords: [{"NAME", "sMonthMorningstar"}, {"STRV", "Morning Star"}],
     type: "GMST"
   },
@@ -32,7 +35,7 @@ iex> Resdayn.load("path/to/your/Morrowind.esm")
 
 Most are interesting, some are not, but all will be ticked off, one at a time...
 
-- [ ] `TES3` (Main header record)
+- [x] `TES3` (Main header record)
 - [ ] `GMST` (Game settings)
 - [ ] `GLOB` (Global variables)
 - [ ] `CLAS` (Class definitions)
