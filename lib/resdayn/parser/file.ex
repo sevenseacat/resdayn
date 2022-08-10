@@ -29,7 +29,7 @@ defmodule Resdayn.Parser.File do
     )
   end
 
-  defp read_record(file) do
+  def read_record(file) do
     # Each record has a 16-byte header, immediately followed by zero or more subrecords
     case IO.binread(file, 16) do
       :eof -> {:halt, file}
