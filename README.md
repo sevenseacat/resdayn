@@ -18,6 +18,12 @@ iex> Resdayn.load("path/to/your/Morrowind.esm")
     type: :master,
     version: 1.2
   },
+   %{
+    flags: %{blocked: false, persistent: false},
+    name: "sMonthMorningstar",
+    type: :game_setting,
+    value: "Morning Star"
+  },
   ...
 ]
 ```
@@ -27,7 +33,7 @@ iex> Resdayn.load("path/to/your/Morrowind.esm")
 Most are interesting, some are not, but all will be ticked off, one at a time...
 
 - [x] `TES3` (Main header record)
-- [ ] `GMST` (Game settings)
+- [x] `GMST` (Game settings)
 - [ ] `GLOB` (Global variables)
 - [ ] `CLAS` (Class definitions)
 - [ ] `FACT` (Faction definitions)

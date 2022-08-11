@@ -19,5 +19,9 @@ defmodule Resdayn.Parser.SubrecordValue do
 
   def parse("TES3", "DATA", <<value::long64>>), do: value
 
+  def parse("GMST", "FLTV", <<value::lfloat>>), do: value
+
+  def parse("GMST", "INTV", <<value::long>>), do: value
+
   def parse(_, _, value), do: value
 end
