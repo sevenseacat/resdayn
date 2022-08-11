@@ -11,6 +11,8 @@ defmodule Resdayn do
   [records]
   """
   def load(filename) do
-    Resdayn.Parser.read(filename)
+    filename
+    |> Resdayn.Parser.stream()
+    |> Resdayn.Formatter.format()
   end
 end
