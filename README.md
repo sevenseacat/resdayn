@@ -10,22 +10,13 @@ This uses the amazing work of Dave Humphrey, who detailed the format of ESM file
 iex> Resdayn.load("path/to/your/Morrowind.esm")
 [
   %{
+    company: "Bethesda Softworks",
+    dependencies: [],
+    description: "The main data file For Morrowind",
     flags: %{blocked: false, persistent: false},
-    subrecords: [
-      {"HEDR",
-       %{
-         company: "Bethesda Softworks",
-         description: "The main data file For Morrowind",
-         record_count: 48295,
-         version: 1.2
-       }}
-    ],
-    type: "TES3"
-  },
-  %{
-    flags: %{blocked: false, persistent: false},
-    subrecords: [{"NAME", "sMonthMorningstar"}, {"STRV", "Morning Star"}],
-    type: "GMST"
+    record_count: 48295,
+    type: :master,
+    version: 1.2
   },
   ...
 ]
