@@ -74,3 +74,8 @@ Most are interesting, some are not, but all will be ticked off, one at a time...
 - [ ] `SNDG` (Sound generator)
 - [ ] `DIAL` (Dialogue and journals)
 - [ ] `INFO` (Records that belong to dialogues and journals)
+
+## Stretch goals
+
+- [ ] Parse save files
+- [ ] Load dependent files, ie. loading Tribunal.esm also loads Morrowind.esm and merges the data as appropriate
