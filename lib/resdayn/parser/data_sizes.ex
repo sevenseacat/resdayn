@@ -24,6 +24,12 @@ defmodule Resdayn.Parser.DataSizes do
     end
   end
 
+  defmacro int do
+    quote do
+      little - integer - signed - size(32)
+    end
+  end
+
   defmacro long64 do
     quote do
       little - integer - size(64)
@@ -32,7 +38,7 @@ defmodule Resdayn.Parser.DataSizes do
 
   defmacro lfloat do
     quote do
-      little - float - size(32)
+      little - float - signed - size(32)
     end
   end
 end

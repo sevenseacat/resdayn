@@ -1,6 +1,7 @@
 defmodule Resdayn.Parser.Record do
   @types %{
-    "TES3" => MainHeader
+    "TES3" => MainHeader,
+    "GMST" => GameSetting
   }
 
   @doc """
@@ -28,4 +29,6 @@ defmodule Resdayn.Parser.Record do
 
     [header: header, masters: masters]
   end
+
+  def process_subrecords("GMST", subrecords), do: subrecords
 end

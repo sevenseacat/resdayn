@@ -22,6 +22,22 @@ defmodule Resdayn.Parser.Subrecord do
     {:master_size, value}
   end
 
+  def parse("GMST" = k, "NAME" = v, value) do
+    {:name, printable!(k, v, truncate(value))}
+  end
+
+  def parse("GMST" = k, "STRV" = v, value) do
+    {:value, printable!(k, v, truncate(value))}
+  end
+
+  def parse("GMST", "FLTV", <<value::lfloat()>>) do
+    {:value, Float.round(value, 2)}
+  end
+
+  def parse("GMST", "INTV", <<value::int()>>) do
+    {:value, value}
+  end
+
   defp printable!(type, subtype, name \\ "data", string) do
     if String.printable?(string) do
       string
