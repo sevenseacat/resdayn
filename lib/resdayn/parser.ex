@@ -6,6 +6,7 @@ defmodule Resdayn.Parser do
   """
 
   import Resdayn.Parser.{DataSizes, Helpers}
+  alias Resdayn.Parser.{Record, Subrecord}
 
   @doc """
   Return a list of records as read from the ESM file.
@@ -34,20 +35,23 @@ defmodule Resdayn.Parser do
     subrecords =
       file
       |> IO.binread(subrecord_size)
-      |> parse_subrecords()
+      |> parse_subrecords(type)
 
     %{
-      type: type,
+      type: Record.parse(type),
       flags: bitmask(flags, blocked: 0x00002000, persistent: 0x00000400),
-      data: subrecords
+      data: Record.process_subrecords(type, subrecords)
     }
   end
 
-  defp parse_subrecords(<<>>), do: []
+  defp parse_subrecords(<<>>, _type), do: []
 
-  defp parse_subrecords(<<subtype::char(4), size::long(), value::char(size), rest::binary>>) do
+  defp parse_subrecords(
+         <<subtype::char(4), size::long(), value::char(size), rest::binary>>,
+         type
+       ) do
     # Each subrecord has an 8-byte header which contains the size of the data, then the data for the record
     # The rest is more subrecords.
-    [{subtype, value} | parse_subrecords(rest)]
+    [Subrecord.parse(type, subtype, value) | parse_subrecords(rest, type)]
   end
 end
