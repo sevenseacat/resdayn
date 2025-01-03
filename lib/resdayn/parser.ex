@@ -39,7 +39,8 @@ defmodule Resdayn.Parser do
 
     %{
       type: Record.parse(type),
-      flags: bitmask(flags, blocked: 0x00002000, persistent: 0x00000400),
+      flags:
+        bitmask(flags, blocked: 0x2000, persistent: 0x400, disabled: 0x0800, deleted: 0x0020),
       data: Record.process_subrecords(type, subrecords)
     }
   end
