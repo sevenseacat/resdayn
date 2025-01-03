@@ -24,4 +24,27 @@ defmodule Resdayn.Parser.Helpers do
   def truncate(string) do
     hd(String.split(string, <<0>>))
   end
+
+  @doc """
+  Ensure that a given string is entirely printable,
+  ie. it contains no special characters or no null-byte characters
+
+  If it is not printable, raises an error with info about where it was sourced from
+  for debugging purposes
+  """
+  def printable!(source, field, name \\ "data", string) do
+    string = truncate(string)
+
+    if String.printable?(string) do
+      string
+    else
+      # Debugging to see where the unprintable value is
+      for i <- 0..String.length(string) do
+        if !String.printable?(string, i) do
+          raise RuntimeError,
+                "#{inspect(source)}(#{field}): Unprintable value at #{name}[#{i}]: #{inspect(String.at(string, i - 1))}"
+        end
+      end
+    end
+  end
 end
