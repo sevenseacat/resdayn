@@ -1,41 +1,31 @@
 defmodule Resdayn.Parser.Record.MainHeader do
-  use Resdayn.Parser.Record
-
-  @doc """
+  @moduledoc """
   Contains a single HEDR record, then pairs of MAST/DATA records that should
   be combined.
   """
-  def process(records) do
-    [header | masters] = Enum.map(records, &parse/1)
 
-    masters =
-      masters
-      |> Enum.chunk_every(2)
-      |> Enum.map(fn [name, size] ->
-        %{name: name, size: size}
-      end)
+  use Resdayn.Parser.Record
 
-    %{header: header, masters: masters}
-  end
-
-  def parse({"HEDR" = v, value}) do
+  def process({"HEDR" = v, value}, data) do
     <<version::lfloat(), flags::long(), company::char(32), description::char(256),
       record_count::long()>> = value
 
-    %{
+    header = %{
       version: Float.round(version, 2),
       flags: bitmask(flags, master: 0x1),
       company: printable!(__MODULE__, v, "company", company),
       description: printable!(__MODULE__, v, "description", description),
       record_count: record_count
     }
+
+    record_value(data, :header, header)
   end
 
-  def parse({"MAST" = v, value}) do
-    printable!(__MODULE__, v, value)
+  def process({"MAST" = v, value}, data) do
+    record_pair_key(data, :masters, :name, printable!(__MODULE__, v, value))
   end
 
-  def parse({"DATA", <<value::long64()>>}) do
-    value
+  def process({"DATA", <<value::long64()>>}, data) do
+    record_pair_value(data, :masters, :size, value)
   end
 end

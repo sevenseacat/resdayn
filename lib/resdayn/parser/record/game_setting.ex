@@ -1,27 +1,22 @@
 defmodule Resdayn.Parser.Record.GameSetting do
-  use Resdayn.Parser.Record
-
-  @doc """
+  @moduledoc """
   Contains a single NAME record, then either a STRV, INTV or FLTV record.
   """
-  def process(records) do
-    Enum.map(records, &parse/1)
-    |> Map.new()
+  use Resdayn.Parser.Record
+
+  def process({"NAME" = v, value}, data) do
+    record_value(data, :name, printable!(__MODULE__, v, value))
   end
 
-  defp parse({"NAME" = v, value}) do
-    {:name, printable!(__MODULE__, v, value)}
+  def process({"STRV" = v, value}, data) do
+    record_value(data, :value, printable!(__MODULE__, v, value))
   end
 
-  defp parse({"STRV" = v, value}) do
-    {:value, printable!(__MODULE__, v, value)}
+  def process({"FLTV", <<value::lfloat()>>}, data) do
+    record_value(data, :value, Float.round(value, 2))
   end
 
-  defp parse({"FLTV", <<value::lfloat()>>}) do
-    {:value, Float.round(value, 2)}
-  end
-
-  defp parse({"INTV", <<value::int()>>}) do
-    {:value, value}
+  def process({"INTV", <<value::int()>>}, data) do
+    record_value(data, :value, value)
   end
 end

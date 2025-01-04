@@ -1,19 +1,27 @@
 defmodule Resdayn.Parser.Record.GlobalVariable do
-  use Resdayn.Parser.Record
-
-  @doc """
+  @moduledoc """
   Contains a single NAME record, a FNAM value type, and a FLTV float record
   The FLTV could be an integer, a long, or a float :(
   """
-  def process([{"NAME", name}, {"FNAM", type}, {"FLTV", value}]) do
-    %{
-      name: printable!(__MODULE__, "NAME", name),
-      type: type,
-      value: parse(type, value)
-    }
+  use Resdayn.Parser.Record
+
+  def process({"NAME" = v, value}, data) do
+    record_value(data, :name, printable!(__MODULE__, v, value))
   end
 
-  defp parse("s", value), do: float_to_short(value)
-  defp parse("l", <<value::long()>>), do: value
-  defp parse("f", <<value::lfloat()>>), do: value
+  def process({"FNAM", value}, data) do
+    record_value(data, :type, value)
+  end
+
+  def process({"FLTV", value}, %{type: "s"} = data) do
+    record_value(data, :value, float_to_short(value))
+  end
+
+  def process({"FLTV", <<value::long()>>}, %{type: "l"} = data) do
+    record_value(data, :value, value)
+  end
+
+  def process({"FLTV", <<value::lfloat()>>}, %{type: "f"} = data) do
+    record_value(data, :value, value)
+  end
 end
