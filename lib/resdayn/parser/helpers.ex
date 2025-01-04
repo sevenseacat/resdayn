@@ -1,4 +1,6 @@
 defmodule Resdayn.Parser.Helpers do
+  import Resdayn.Parser.DataSizes
+
   @doc """
   iex> Resdayn.Parser.Helpers.bitmask(0x02, blocked: 0x01, persistent: 0x02)
   %{blocked: false, persistent: true}
@@ -23,6 +25,26 @@ defmodule Resdayn.Parser.Helpers do
   """
   def truncate(string) do
     hd(String.split(string, <<0>>))
+  end
+
+  @doc """
+  Convert a four-byte float into a two-byte short value.
+  Only used in one place - when parsing global variable values.
+  See HelpersTest for tests for all of the values used in `Morrowind.esm`
+  """
+  def float_to_short(value) do
+    if match?(<<_::lfloat()>>, value) do
+      <<parsed::lfloat()>> = value
+
+      # Junk values get discarded
+      if parsed < -32768 || parsed > 32767 do
+        0
+      else
+        round(parsed)
+      end
+    else
+      0
+    end
   end
 
   @doc """
