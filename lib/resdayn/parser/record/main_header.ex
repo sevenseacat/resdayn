@@ -1,5 +1,5 @@
 defmodule Resdayn.Parser.Record.MainHeader do
-  import Resdayn.Parser.{DataSizes, Helpers}
+  use Resdayn.Parser.Record
 
   @doc """
   Contains a single HEDR record, then pairs of MAST/DATA records that should

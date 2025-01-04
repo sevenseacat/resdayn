@@ -1,5 +1,5 @@
 defmodule Resdayn.Parser.Record.GameSetting do
-  import Resdayn.Parser.{DataSizes, Helpers}
+  use Resdayn.Parser.Record
 
   @doc """
   Contains a single NAME record, then either a STRV, INTV or FLTV record.

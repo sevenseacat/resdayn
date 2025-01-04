@@ -1,5 +1,5 @@
 defmodule Resdayn.Parser.Record.GlobalVariable do
-  import Resdayn.Parser.{DataSizes, Helpers}
+  use Resdayn.Parser.Record
 
   @doc """
   Contains a single NAME record, a FNAM value type, and a FLTV float record
