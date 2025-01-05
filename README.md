@@ -22,7 +22,7 @@ Using the amazing work of Dave Humphrey detailed here: http://www.uesp.net/morro
 | ✓      |          | `RACE` (Races) |
 | ✓      |          |` SOUN` (Sound effects) |
 | ✓      |          | `SKIL` (Skills) |
-|        |          | `MGEF` (Magic effects) |
+| ✓      |          | `MGEF` (Magic effects) |
 |        |          | `SCPT` (Scripts) |
 |        |          | `REGN` (Regions) |
 |        |          | `BSGN` (Birth signs) |
