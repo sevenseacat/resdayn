@@ -20,11 +20,11 @@ defmodule Resdayn.Parser.Record.Faction do
   end
 
   def process({"ANAM" = v, value}, data) do
-    record_pair_key(data, :reactions, :faction, printable!(__MODULE__, v, value))
+    record_list_of_maps_key(data, :reactions, :faction, printable!(__MODULE__, v, value))
   end
 
   def process({"INTV", <<value::int32()>>}, data) do
-    record_pair_value(data, :reactions, :adjustment, value)
+    record_list_of_maps_value(data, :reactions, :adjustment, value)
   end
 
   defp ranks([], _), do: []

@@ -9,6 +9,7 @@ defmodule Resdayn.Parser.Record.NPC do
   process_basic_string "BNAM", :head_model_id
   process_basic_string "KNAM", :hair_model_id
   process_inventory "NPCO", :carried_objects
+  process_ai_packages()
 
   def process({"NPDT", value}, data) when byte_size(value) == 52 do
     <<level::uint16(), str::uint8(), int::uint8(), wil::uint8(), agi::uint8(), spd::uint8(),
@@ -52,6 +53,20 @@ defmodule Resdayn.Parser.Record.NPC do
         blood_texture_metal_sparks: 0x0800
       )
     )
+  end
+
+  def process({"DODT", value}, data) do
+    <<pos_x::float32(), pos_y::float32(), pos_z::float32(), rot_x::float32(), rot_y::float32(),
+      rot_z::float32()>> = value
+
+    record_list_of_maps_key(data, :cell_travel, :coordinates, %{
+      position: {pos_x, pos_y, pos_z},
+      rotation: {rot_x, rot_y, rot_z}
+    })
+  end
+
+  def process({"DNAM" = v, value}, data) do
+    record_list_of_maps_value(data, :cell_travel, :cell_name, printable!(__MODULE__, v, value))
   end
 
   defp skills(bitstring) do

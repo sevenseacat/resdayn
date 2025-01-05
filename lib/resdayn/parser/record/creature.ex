@@ -12,6 +12,7 @@ defmodule Resdayn.Parser.Record.Creature do
   process_basic_string "MODL", :nif_model
   process_basic_string "FNAM", :name
   process_inventory "NPCO", :carried_objects
+  process_ai_packages()
 
   def process({"NPDT", value}, data) do
     <<type::uint32(), level::uint32(), str::uint32(), int::uint32(), wil::uint32(), agi::uint32(),
@@ -74,28 +75,4 @@ defmodule Resdayn.Parser.Record.Creature do
       )
     )
   end
-
-  def process({"AIDT", value}, data) do
-    <<hello::uint8(), _::uint8(), fight::uint8(), flee::uint8(), alarm::uint8(), _rest::binary>> =
-      value
-
-    record_value(data, :ai_data, %{hello: hello, fight: fight, flee: flee, alarm: alarm})
-  end
-
-  def process({"AI_W", value}, data) do
-    <<distance::uint16(), duration::uint16(), time_of_day::uint8(), idles::char(8), 1::uint8(),
-      _rest::binary>> = value
-
-    record_list(data, :ai_packages, %{
-      type: :ai_wander,
-      distance: distance,
-      duration: duration(duration),
-      time_of_day: time_of_day,
-      idles: :binary.bin_to_list(idles)
-    })
-  end
-
-  # Duration parameters in all packages are in hours. Any value greater than 24
-  # should be divided by 100, and set to 24 if still greater than 24.
-  defp duration(num), do: min(rem(num, 100), 24)
 end

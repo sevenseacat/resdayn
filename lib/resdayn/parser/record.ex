@@ -116,6 +116,61 @@ defmodule Resdayn.Parser.Record do
     end
   end
 
+  defmacro process_ai_packages do
+    quote do
+      def process({"AIDT", value}, data) do
+        <<hello::uint8(), _::uint8(), fight::uint8(), flee::uint8(), alarm::uint8(), _::char(3),
+          flags::uint32()>> =
+          value
+
+        record_value(data, :ai_data, %{
+          hello: hello,
+          fight: fight,
+          flee: flee,
+          alarm: alarm,
+          flags:
+            bitmask(flags,
+              weapon: 0x00001,
+              armor: 0x00002,
+              clothing: 0x00004,
+              books: 0x00008,
+              ingredients: 0x00010,
+              picks: 0x00020,
+              probes: 0x00040,
+              lights: 0x00080,
+              apparatus: 0x00100,
+              repair: 0x00200,
+              misc: 0x00400,
+              spells: 0x00800,
+              magic_items: 0x01000,
+              potions: 0x02000,
+              training: 0x04000,
+              spellmaking: 0x08000,
+              enchanting: 0x10000,
+              repair_item: 0x20000
+            )
+        })
+      end
+
+      def process({"AI_W", value}, data) do
+        <<distance::uint16(), duration::uint16(), time_of_day::uint8(), idles::char(8),
+          1::uint8(), _rest::binary>> = value
+
+        record_list(data, :ai_packages, %{
+          type: :ai_wander,
+          distance: distance,
+          duration: duration(duration),
+          time_of_day: time_of_day,
+          idles: :binary.bin_to_list(idles)
+        })
+      end
+
+      # Duration parameters in all packages are in hours. Any value greater than 24
+      # should be divided by 100, and set to 24 if still greater than 24.
+      defp duration(num), do: min(rem(num, 100), 24)
+    end
+  end
+
   @doc "Process a single subrecord for thhis record type."
   @callback process({key :: String.t(), value :: any}, data :: map) :: map
 
@@ -137,6 +192,10 @@ defmodule Resdayn.Parser.Record do
       eg. all records only have one NAME subrecord
       """
       def record_value(map, key, value) do
+        if Map.has_key?(map, key) do
+          raise RuntimeError, "Map key `#{key}` already exists in `#{inspect(map)}`"
+        end
+
         Map.put(map, key, value)
       end
 
@@ -169,24 +228,27 @@ defmodule Resdayn.Parser.Record do
       end
 
       @doc """
-      Record a list of values for a record, when fields always appear in pairs.
+      Record a list of values for a record, when fields always appear in sets.
       Lists will maintain their order as they appear in the source file.
 
       eg. a MainHeader record can have multiple pairs of MAST/DATA subrecords,
       representing dependency names and sizes.
       """
-      def record_pair_key(map, pair_key, record_key, value) do
-        Map.update(map, pair_key, [%{record_key => value}], &[%{record_key => value} | &1])
+      def record_list_of_maps_key(map, pair_key, record_key, value) do
+        Map.update(map, pair_key, [%{record_key => value}], &(&1 ++ [%{record_key => value}]))
       end
 
-      def record_pair_value(map, pair_key, record_key, value) do
-        Map.update!(map, pair_key, fn [head | tail] ->
-          if Map.has_key?(head, record_key) do
+      def record_list_of_maps_value(map, pair_key, record_key, value) do
+        Map.update!(map, pair_key, fn list ->
+          length = length(list)
+          last = List.last(list)
+
+          if Map.has_key?(last, record_key) do
             raise RuntimeError,
-                  "Pair #{pair_key} (#{inspect(head)}) already has key `#{record_key}`"
+                  "Pair #{pair_key} (#{inspect(last)}) already has key `#{record_key}`"
           end
 
-          tail ++ [Map.put(head, record_key, value)]
+          List.replace_at(list, length - 1, Map.put(last, record_key, value))
         end)
       end
 

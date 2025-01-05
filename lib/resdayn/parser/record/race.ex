@@ -3,7 +3,7 @@ defmodule Resdayn.Parser.Record.Race do
 
   process_basic_string "NAME", :id
   process_basic_string "FNAM", :name
-  process_basic_string "NPCS", :special_ids
+  process_basic_list "NPCS", :special_ids
   process_basic_string "DESC", :description
 
   def process({"RADT", value}, data) do
