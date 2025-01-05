@@ -6,7 +6,8 @@ defmodule Resdayn.Parser.Record do
     "CLAS" => __MODULE__.Class,
     "FACT" => __MODULE__.Faction,
     "RACE" => __MODULE__.Race,
-    "SOUN" => __MODULE__.Sound
+    "SOUN" => __MODULE__.Sound,
+    "SKIL" => __MODULE__.Skill
   }
 
   @doc """

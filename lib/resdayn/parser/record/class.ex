@@ -1,7 +1,6 @@
 defmodule Resdayn.Parser.Record.Class do
   use Resdayn.Parser.Record
-
-  @specializations %{0 => :combat, 1 => :magic, 2 => :stealth}
+  alias Resdayn.Parser.Record.Specialization
 
   def process({"NAME" = v, value}, data) do
     record_value(data, :id, printable!(__MODULE__, v, value))
@@ -19,7 +18,7 @@ defmodule Resdayn.Parser.Record.Class do
 
     record_unnested_value(data, %{
       attribute_ids: [attribute_1, attribute_2],
-      specialization: Map.fetch!(@specializations, specialization_id),
+      specialization: Specialization.by_id(specialization_id),
       major_skill_ids: [major_1, major_2, major_3, major_4, major_5],
       minor_skill_ids: [minor_1, minor_2, minor_3, minor_4, minor_5],
       playable: playable == 1,
