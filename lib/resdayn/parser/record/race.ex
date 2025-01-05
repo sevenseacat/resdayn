@@ -1,13 +1,10 @@
 defmodule Resdayn.Parser.Record.Race do
   use Resdayn.Parser.Record
 
-  def process({"NAME" = v, value}, data) do
-    record_value(data, :id, printable!(__MODULE__, v, value))
-  end
-
-  def process({"FNAM" = v, value}, data) do
-    record_value(data, :name, printable!(__MODULE__, v, value))
-  end
+  process_basic_string "NAME", :id
+  process_basic_string "FNAM", :name
+  process_basic_string "NPCS", :special_ids
+  process_basic_string "DESC", :description
 
   def process({"RADT", value}, data) do
     <<skills::char(56), str_m::long(), str_f::long(), int_m::long(), int_f::long(), wil_m::long(),
@@ -47,14 +44,6 @@ defmodule Resdayn.Parser.Record.Race do
       }
       |> Map.merge(bitmask(flags, playable: 1, beast: 2))
     )
-  end
-
-  def process({"NPCS" = v, value}, data) do
-    record_list(data, :special_ids, printable!(__MODULE__, v, value))
-  end
-
-  def process({"DESC" = v, value}, data) do
-    record_value(data, :description, printable!(__MODULE__, v, value))
   end
 
   defp skills(<<-1::int(), _rest::binary>>), do: []

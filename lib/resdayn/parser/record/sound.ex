@@ -1,13 +1,8 @@
 defmodule Resdayn.Parser.Record.Sound do
   use Resdayn.Parser.Record
 
-  def process({"NAME" = v, value}, data) do
-    record_value(data, :id, printable!(__MODULE__, v, value))
-  end
-
-  def process({"FNAM" = v, value}, data) do
-    record_value(data, :filename, printable!(__MODULE__, v, value))
-  end
+  process_basic_string "NAME", :id
+  process_basic_string "FNAM", :filename
 
   def process({"DATA", value}, data) do
     <<volume::integer, min_range::integer, max_range::integer>> = value

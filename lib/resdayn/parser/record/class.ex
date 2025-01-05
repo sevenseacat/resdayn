@@ -2,13 +2,9 @@ defmodule Resdayn.Parser.Record.Class do
   use Resdayn.Parser.Record
   alias Resdayn.Parser.Record.Specialization
 
-  def process({"NAME" = v, value}, data) do
-    record_value(data, :id, printable!(__MODULE__, v, value))
-  end
-
-  def process({"FNAM" = v, value}, data) do
-    record_value(data, :name, printable!(__MODULE__, v, value))
-  end
+  process_basic_string "NAME", :id
+  process_basic_string "FNAM", :name
+  process_basic_string "DESC", :description
 
   def process({"CLDT", value}, data) do
     <<attribute_1::long(), attribute_2::long(), specialization_id::long(), minor_1::long(),
@@ -47,9 +43,5 @@ defmodule Resdayn.Parser.Record.Class do
           repairing: 0x20000
         )
     })
-  end
-
-  def process({"DESC" = v, value}, data) do
-    record_value(data, :description, printable!(__MODULE__, v, value))
   end
 end

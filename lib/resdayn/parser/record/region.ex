@@ -1,13 +1,11 @@
 defmodule Resdayn.Parser.Record.Region do
   use Resdayn.Parser.Record
 
-  def process({"NAME" = v, value}, data) do
-    record_value(data, :id, printable!(__MODULE__, v, value))
-  end
+  process_basic_string "NAME", :id
+  process_basic_string "FNAM", :name
 
-  def process({"FNAM" = v, value}, data) do
-    record_value(data, :name, printable!(__MODULE__, v, value))
-  end
+  # what is "sleep creature"???
+  process_basic_string "BNAM", :sleep_creature
 
   def process({"WEAT", value}, data) do
     <<clear::integer, cloudy::integer, foggy::integer, overcast::integer, rain::integer,
@@ -25,11 +23,6 @@ defmodule Resdayn.Parser.Record.Region do
       snow: 0,
       blizzard: 0
     })
-  end
-
-  # what is "sleep creature"???
-  def process({"BNAM" = v, value}, data) do
-    record_value(data, :sleep_creature, printable!(__MODULE__, v, value))
   end
 
   def process({"CNAM", value}, data) do

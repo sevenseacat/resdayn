@@ -13,7 +13,35 @@ defmodule Resdayn.Parser.Record do
     "REGN" => __MODULE__.Region,
     "BSGN" => __MODULE__.Birthsign,
     "LTEX" => __MODULE__.LandTexture,
-    "STAT" => __MODULE__.Static
+    "STAT" => __MODULE__.Static,
+    "DOOR" => __MODULE__.Door,
+    "MISC" => __MODULE__.MiscellaneousItem,
+    "WEAP" => __MODULE__.Weapon,
+    "CONT" => __MODULE__.Container,
+    "SPEL" => __MODULE__.Spell,
+    "CREA" => __MODULE__.Creature,
+    "BODY" => __MODULE__.BodyPart,
+    "LIGH" => __MODULE__.Light,
+    "ENCH" => __MODULE__.Enchantment,
+    "NPC_" => __MODULE__.NPC,
+    "ARMO" => __MODULE__.Armour,
+    "CLOT" => __MODULE__.Clothing,
+    "REPA" => __MODULE__.RepairItem,
+    "ACTI" => __MODULE__.Activator,
+    "APPA" => __MODULE__.AlchemyApparatus,
+    "LOCK" => __MODULE__.Lockpick,
+    "PROB" => __MODULE__.Probe,
+    "INGR" => __MODULE__.Ingredient,
+    "BOOK" => __MODULE__.Book,
+    "ALCH" => __MODULE__.Potion,
+    "LEVI" => __MODULE__.LevelledItem,
+    "LEVC" => __MODULE__.LevelledCreature,
+    "CELL" => __MODULE__.Cell,
+    "LAND" => __MODULE__.Land,
+    "PGRD" => __MODULE__.PathGrid,
+    "SNDG" => __MODULE__.SoundGenerator,
+    "DIAL" => __MODULE__.DialogueTopic,
+    "INFO" => __MODULE__.DialogueResponse
   }
 
   @doc """
@@ -23,13 +51,32 @@ defmodule Resdayn.Parser.Record do
     Map.fetch!(@types, type)
   end
 
+  @doc "Generate a function to process and store a printable string"
+  defmacro process_basic_string(raw, key) do
+    quote do
+      def process({unquote(raw), value}, data) do
+        record_value(data, unquote(key), printable!(__MODULE__, unquote(raw), value))
+      end
+    end
+  end
+
+  @doc "Generate a function to process and store a list of printable strings"
+  defmacro process_basic_list(raw, key) do
+    quote do
+      def process({unquote(raw), value}, data) do
+        record_list(data, unquote(key), printable!(__MODULE__, unquote(raw), value))
+      end
+    end
+  end
+
   @doc "Process a single subrecord for thhis record type."
   @callback process({key :: String.t(), value :: any}, data :: map) :: map
 
   defmacro __using__(_opts) do
     quote do
       @behaviour Resdayn.Parser.Record
-      import Resdayn.Parser.{DataSizes, Helpers}
+      require Resdayn.Parser.Record
+      import Resdayn.Parser.{DataSizes, Helpers, Record}
 
       @doc "Process a collection of subrecords for this record type"
       def process(records) do

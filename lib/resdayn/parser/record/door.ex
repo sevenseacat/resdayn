@@ -1,4 +1,4 @@
-defmodule Resdayn.Parser.Record.Static do
+defmodule Resdayn.Parser.Record.Door do
   use Resdayn.Parser.Record
 
   process_basic_string "NAME", :id

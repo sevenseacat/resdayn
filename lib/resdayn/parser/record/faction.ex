@@ -1,17 +1,9 @@
 defmodule Resdayn.Parser.Record.Faction do
   use Resdayn.Parser.Record
 
-  def process({"NAME" = v, value}, data) do
-    record_value(data, :id, printable!(__MODULE__, v, value))
-  end
-
-  def process({"FNAM" = v, value}, data) do
-    record_value(data, :name, printable!(__MODULE__, v, value))
-  end
-
-  def process({"RNAM" = v, value}, data) do
-    record_list(data, :rank_names, printable!(__MODULE__, v, value))
-  end
+  process_basic_string "NAME", :id
+  process_basic_string "FNAM", :name
+  process_basic_list "RNAM", :rank_names
 
   def process({"FADT", value}, data) do
     <<attribute_1::long(), attribute_2::long(), rankings::char(200), skills::char(24), _::long(),

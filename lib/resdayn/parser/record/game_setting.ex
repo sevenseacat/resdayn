@@ -4,13 +4,8 @@ defmodule Resdayn.Parser.Record.GameSetting do
   """
   use Resdayn.Parser.Record
 
-  def process({"NAME" = v, value}, data) do
-    record_value(data, :name, printable!(__MODULE__, v, value))
-  end
-
-  def process({"STRV" = v, value}, data) do
-    record_value(data, :value, printable!(__MODULE__, v, value))
-  end
+  process_basic_string "NAME", :name
+  process_basic_string "STRV", :value
 
   def process({"FLTV", <<value::lfloat()>>}, data) do
     record_value(data, :value, float(value))

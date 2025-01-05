@@ -5,13 +5,8 @@ defmodule Resdayn.Parser.Record.GlobalVariable do
   """
   use Resdayn.Parser.Record
 
-  def process({"NAME" = v, value}, data) do
-    record_value(data, :name, printable!(__MODULE__, v, value))
-  end
-
-  def process({"FNAM", value}, data) do
-    record_value(data, :type, value)
-  end
+  process_basic_string "NAME", :name
+  process_basic_string "FNAM", :type
 
   def process({"FLTV", value}, %{type: "s"} = data) do
     record_value(data, :value, float_to_short(value))

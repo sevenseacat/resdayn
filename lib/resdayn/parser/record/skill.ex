@@ -32,6 +32,8 @@ defmodule Resdayn.Parser.Record.Skill do
     26 => "Hand to Hand"
   }
 
+  process_basic_string "DESC", :description
+
   def process({"INDX", <<value::int()>>}, data) do
     record_unnested_value(data, %{id: value, name: Map.fetch!(@skill_names, value)})
   end
@@ -44,10 +46,6 @@ defmodule Resdayn.Parser.Record.Skill do
       specialization: Specialization.by_id(specialization),
       uses: uses(uses)
     })
-  end
-
-  def process({"DESC" = v, value}, data) do
-    record_value(data, :description, printable!(__MODULE__, v, value))
   end
 
   defp uses(<<>>), do: []
