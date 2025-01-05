@@ -11,7 +11,8 @@ defmodule Resdayn.Parser.Record do
     "MGEF" => __MODULE__.MagicEffect,
     "SCPT" => __MODULE__.Script,
     "REGN" => __MODULE__.Region,
-    "BSGN" => __MODULE__.Birthsign
+    "BSGN" => __MODULE__.Birthsign,
+    "LTEX" => __MODULE__.LandTexture
   }
 
   @doc """

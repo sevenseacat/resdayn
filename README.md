@@ -26,7 +26,7 @@ Using the amazing work of Dave Humphrey detailed here: http://www.uesp.net/morro
 | ✓      |          | `SCPT` (Scripts) |
 | ✓      |          | `REGN` (Regions) |
 | ✓      |          | `BSGN` (Birth signs) |
-|        |          | `LTEX` (Land textures) |
+| ✓      |          | `LTEX` (Land textures) |
 |        |          | `STAT` (Static objects) |
 |        |          | `DOOR` (Doors) |
 |        |          | `MISC` (Miscellaneous items) |
