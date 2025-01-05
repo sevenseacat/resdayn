@@ -1,21 +1,62 @@
 # Resdayn
 
-**TODO: Add description**
+The end goal is to create a read-only webapp to present game data used in Morrowind.
 
-## Installation
+Using the amazing work of Dave Humphrey detailed here: http://www.uesp.net/morrow/tech/mw_esm.txt and here: https://en.uesp.net/wiki/Morrowind_Mod:Mod_File_Format
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `resdayn` to your list of dependencies in `mix.exs`:
+## The Long-Term Plan
 
-```elixir
-def deps do
-  [
-    {:resdayn, "~> 0.1.0"}
-  ]
-end
-```
+- Parse the ESM data file into a meaningful format
+- Build Ash resources using the parsed data
+- Use the resources to build an auto-generated admin area to manage the data
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at <https://hexdocs.pm/resdayn>.
+## Record Types
 
+| Parsed | Imported | Name |
+| :---:  | :---:    | :--: |
+| ✓      |          | `TES3` (Main header) |
+| ✓      |          | `GMST` (Game settings) |
+| ✓      |          | `GLOB` (Global variable) |
+| ✓      |          | `CLAS` (Character classes) |
+| ✓      |          | `FACT` (Factions) |
+| ✓      |          | `RACE` (Races) |
+| ✓      |          |` SOUN` (Sound effects) |
+|        |          | `SKIL` (Skills) |
+|        |          | `MGEF` (Magic effects) |
+|        |          | `SCPT` (Scripts) |
+|        |          | `REGN` (Regions) |
+|        |          | `BSGN` (Birth signs) |
+|        |          | `LTEX` (Land textures) |
+|        |          | `STAT` (Static objects) |
+|        |          | `DOOR` (Doors) |
+|        |          | `MISC` (Miscellaneous items) |
+|        |          | `WEAP` (Weapons) |
+|        |          | `CONT` (Containers) |
+|        |          | `SPEL` (Spells) |
+|        |          | `CREA` (Creatures) |
+|        |          | `BODY` (Body parts) |
+|        |          | `LIGH` (Lights) |
+|        |          | `ENCH` (Enchanting effects) |
+|        |          | `NPC_` (NPCs) |
+|        |          | `ARMO` (Armour) |
+|        |          | `CLOT` (Clothing) |
+|        |          | `REPA` (Repair items) |
+|        |          | `ACTI` (Activators) |
+|        |          | `APPA` (Alchemy apparatus) |
+|        |          | `LOCK` (Lockpicking items) |
+|        |          | `PROB` (Probe items) |
+|        |          | `INGR` (Ingredients) |
+|        |          | `BOOK` (Books and papers) |
+|        |          | `ALCH` (Potions) |
+|        |          | `LEVI` (Levelled items) |
+|        |          | `LEVC` (Levelled creatures) |
+|        |          | `CELL` (Cells) |
+|        |          | `LAND` (Landscapes) |
+|        |          | `PGRD` (Path grids) |
+|        |          | `DIAL` (Dialogue/journal topics) |
+|        |          | `INFO` (Dialogue records) |
+|        |          | `INFO` (Journal records) |
+
+## Other Features to Add
+
+* Ability to import multiple files (eg. see data from Morrowind.esm + Tribunal.esm + Bloodmoon.esm)
