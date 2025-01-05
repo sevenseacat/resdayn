@@ -66,6 +66,8 @@ defmodule Resdayn.Parser.Helpers do
       string
       |> truncate()
       |> String.replace(<<146>>, "’")
+      |> String.replace(<<147>>, "“")
+      |> String.replace(<<148>>, "”")
       |> String.replace("\r\n", "\n")
 
     if String.printable?(string) do

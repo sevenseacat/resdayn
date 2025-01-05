@@ -12,7 +12,8 @@ defmodule Resdayn.Parser.Record do
     "SCPT" => __MODULE__.Script,
     "REGN" => __MODULE__.Region,
     "BSGN" => __MODULE__.Birthsign,
-    "LTEX" => __MODULE__.LandTexture
+    "LTEX" => __MODULE__.LandTexture,
+    "STAT" => __MODULE__.Static
   }
 
   @doc """
