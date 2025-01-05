@@ -87,6 +87,35 @@ defmodule Resdayn.Parser.Record do
     end
   end
 
+  @doc """
+  Generate a function to process an enchantment's details
+  This applies to spell effects, and also enchantments on clothing, weapons, etc.
+  """
+  defmacro process_enchantments(raw, key) do
+    quote do
+      def process({unquote(raw), value}, data) do
+        spell_range_mapping = %{
+          0 => :self,
+          1 => :touch,
+          2 => :target
+        }
+
+        <<effect::uint16(), skill::int8(), attribute::int8(), range::uint32(), area::uint32(),
+          duration::uint32(), min::uint32(), max::uint32()>> = value
+
+        record_list(data, unquote(key), %{
+          magic_effect_id: effect,
+          skill_id: nil_if_negative(skill),
+          attribute_id: nil_if_negative(attribute),
+          range: Map.fetch!(spell_range_mapping, range),
+          area: area,
+          duration: duration,
+          magnitude: %{min: min, max: max}
+        })
+      end
+    end
+  end
+
   @doc "Process a single subrecord for thhis record type."
   @callback process({key :: String.t(), value :: any}, data :: map) :: map
 

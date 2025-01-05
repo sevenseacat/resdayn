@@ -93,7 +93,7 @@ defmodule Resdayn.Parser.Helpers do
   @doc """
   Convert an encoded RGB colour value into a hexadecimal value suitable for using in HTML.
   """
-  def color(<<red::integer, green::integer, blue::integer, _rest>>) do
+  def color(<<red::int8(), green::int8(), blue::int8(), 0::int8()>>) do
     color({red, green, blue})
   end
 

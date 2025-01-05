@@ -34,9 +34,9 @@ Using the amazing work of Dave Humphrey detailed here: http://www.uesp.net/morro
 | ✓      |          | `CONT` (Containers) |
 | ✓      |          | `SPEL` (Spells) |
 | ✓      |          | `CREA` (Creatures) |
-|        |          | `BODY` (Body parts) |
-|        |          | `LIGH` (Lights) |
-|        |          | `ENCH` (Enchanting effects) |
+| ✓      |          | `BODY` (Body parts) |
+| ✓      |          | `LIGH` (Lights) |
+| ✓      |          | `ENCH` (Enchanting effects) |
 |        |          | `NPC_` (NPCs) |
 |        |          | `ARMO` (Armour) |
 |        |          | `CLOT` (Clothing) |
