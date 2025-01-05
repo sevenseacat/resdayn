@@ -171,6 +171,32 @@ defmodule Resdayn.Parser.Record do
     end
   end
 
+  defmacro process_body_coverings do
+    quote do
+      def process({"INDX", <<value::uint8()>>}, data) do
+        record_list_of_maps_key(
+          data,
+          :body_parts,
+          :type,
+          Map.fetch!(Resdayn.Parser.Record.BodyPart.coverables(), value)
+        )
+      end
+
+      def process({"BNAM" = v, value}, data) do
+        record_list_of_maps_value(data, :body_parts, :male_name, printable!(__MODULE__, v, value))
+      end
+
+      def process({"CNAM" = v, value}, data) do
+        record_list_of_maps_value(
+          data,
+          :body_parts,
+          :female_name,
+          printable!(__MODULE__, v, value)
+        )
+      end
+    end
+  end
+
   @doc "Process a single subrecord for thhis record type."
   @callback process({key :: String.t(), value :: any}, data :: map) :: map
 

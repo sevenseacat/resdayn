@@ -11,6 +11,9 @@ defmodule Resdayn.Parser.Record.Creature do
   process_basic_string "NAME", :id
   process_basic_string "MODL", :nif_model
   process_basic_string "FNAM", :name
+  process_basic_string "SCRI", :script_id
+  process_basic_string "CNAM", :sound_id
+  process_basic_list "NPCS", :spell_ids
   process_inventory "NPCO", :carried_objects
   process_ai_packages()
 

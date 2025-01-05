@@ -19,6 +19,36 @@ defmodule Resdayn.Parser.Record.BodyPart do
     14 => :tail
   }
 
+  @body_part_coverables %{
+    0 => :head,
+    1 => :hair,
+    2 => :neck,
+    3 => :cuirass,
+    4 => :groin,
+    5 => :skirt,
+    6 => :right_hand,
+    7 => :left_hand,
+    8 => :right_wrist,
+    9 => :left_wrist,
+    10 => :shield,
+    11 => :right_forearm,
+    12 => :left_forearm,
+    13 => :right_upper_arm,
+    14 => :left_upper_arm,
+    15 => :right_foot,
+    16 => :left_foot,
+    17 => :right_ankle,
+    18 => :left_ankle,
+    19 => :right_knee,
+    20 => :left_knee,
+    21 => :right_upper_leg,
+    22 => :left_upper_leg,
+    23 => :right_pauldron,
+    24 => :left_pauldron,
+    25 => :weapon,
+    26 => :tail
+  }
+
   @equipment_types %{
     0 => :skin,
     1 => :clothing,
@@ -39,4 +69,6 @@ defmodule Resdayn.Parser.Record.BodyPart do
       equipment_type: Map.fetch!(@equipment_types, equipment_type)
     })
   end
+
+  def coverables, do: @body_part_coverables
 end

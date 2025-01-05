@@ -4,6 +4,7 @@ defmodule Resdayn.Parser.Record.Weapon do
   process_basic_string "NAME", :id
   process_basic_string "MODL", :nif_model
   process_basic_string "FNAM", :name
+  process_basic_string "ITEX", :icon
 
   def process({"WPDT", value}, data) do
     <<weight::float32(), value::uint32(), type::uint16(), health::uint16(), speed::float32(),
@@ -19,12 +20,9 @@ defmodule Resdayn.Parser.Record.Weapon do
       speed: float(speed),
       reach: reach,
       enchantment_points: enchantment_points,
-      chop_min: chop_min,
-      chop_max: chop_max,
-      slash_min: slash_min,
-      slash_max: slash_max,
-      thrust_min: thrust_min,
-      thrust_max: thrust_max,
+      chop: %{min: chop_min, max: chop_max},
+      slash: %{min: slash_min, max: slash_max},
+      thrust: %{min: thrust_min, max: thrust_max},
       flags: bitmask(flags, ignore_resistance: 1, silver: 2)
     })
   end
