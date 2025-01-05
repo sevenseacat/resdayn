@@ -5,7 +5,8 @@ defmodule Resdayn.Parser.Record do
     "GLOB" => __MODULE__.GlobalVariable,
     "CLAS" => __MODULE__.Class,
     "FACT" => __MODULE__.Faction,
-    "RACE" => __MODULE__.Race
+    "RACE" => __MODULE__.Race,
+    "SOUN" => __MODULE__.Sound
   }
 
   @doc """
