@@ -11,6 +11,7 @@ defmodule Resdayn.Parser.Record.Creature do
   process_basic_string "NAME", :id
   process_basic_string "MODL", :nif_model
   process_basic_string "FNAM", :name
+  process_inventory "NPCO", :carried_objects
 
   def process({"NPDT", value}, data) do
     <<type::uint32(), level::uint32(), str::uint32(), int::uint32(), wil::uint32(), agi::uint32(),
@@ -70,16 +71,6 @@ defmodule Resdayn.Parser.Record.Creature do
         blood_type_7: 0x1C00
       )
     )
-  end
-
-  def process({"NPCO" = v, value}, data) do
-    <<count::uint32(), id::char(32)>> = value
-
-    record_list(data, :carried_objects, %{
-      count: abs(count),
-      id: printable!(__MODULE__, v, id),
-      restocking: count < 0
-    })
   end
 
   def process({"AIDT", value}, data) do

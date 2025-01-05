@@ -69,6 +69,24 @@ defmodule Resdayn.Parser.Record do
     end
   end
 
+  @doc """
+  Generate a function to process and store a list of held items/quantities
+  Used for container contents, and NPC/creature inventories
+  """
+  defmacro process_inventory(raw, key) do
+    quote do
+      def process({unquote(raw), value}, data) do
+        <<count::uint32(), id::char(32)>> = value
+
+        record_list(data, unquote(key), %{
+          count: abs(count),
+          id: printable!(__MODULE__, unquote(key), id),
+          restocking: count < 0
+        })
+      end
+    end
+  end
+
   @doc "Process a single subrecord for thhis record type."
   @callback process({key :: String.t(), value :: any}, data :: map) :: map
 
