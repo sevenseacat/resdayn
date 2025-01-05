@@ -11,7 +11,7 @@ defmodule Resdayn.Parser.Record.MainHeader do
       record_count::long()>> = value
 
     header = %{
-      version: Float.round(version, 2),
+      version: float(version),
       flags: bitmask(flags, master: 0x1),
       company: printable!(__MODULE__, v, "company", company),
       description: printable!(__MODULE__, v, "description", description),

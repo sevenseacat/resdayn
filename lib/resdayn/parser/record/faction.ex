@@ -51,6 +51,7 @@ defmodule Resdayn.Parser.Record.Faction do
     [rank | ranks(names, rest)]
   end
 
+  defp skills(<<-1::int(), _rest::binary>>), do: []
   defp skills(<<>>), do: []
 
   defp skills(<<skill::long(), rest::binary>>) do

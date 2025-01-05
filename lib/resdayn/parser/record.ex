@@ -4,7 +4,8 @@ defmodule Resdayn.Parser.Record do
     "GMST" => __MODULE__.GameSetting,
     "GLOB" => __MODULE__.GlobalVariable,
     "CLAS" => __MODULE__.Class,
-    "FACT" => __MODULE__.Faction
+    "FACT" => __MODULE__.Faction,
+    "RACE" => __MODULE__.Race
   }
 
   @doc """

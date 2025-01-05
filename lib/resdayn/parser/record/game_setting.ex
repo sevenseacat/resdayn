@@ -13,7 +13,7 @@ defmodule Resdayn.Parser.Record.GameSetting do
   end
 
   def process({"FLTV", <<value::lfloat()>>}, data) do
-    record_value(data, :value, Float.round(value, 2))
+    record_value(data, :value, float(value))
   end
 
   def process({"INTV", <<value::int()>>}, data) do

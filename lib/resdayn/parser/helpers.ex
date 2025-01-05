@@ -28,6 +28,13 @@ defmodule Resdayn.Parser.Helpers do
   end
 
   @doc """
+  Round a floating-point number to a reasonable number of decimal places.
+  """
+  def float(float) do
+    Float.round(float, 2)
+  end
+
+  @doc """
   Convert a four-byte float into a two-byte short value.
   Only used in one place - when parsing global variable values.
   See HelpersTest for tests for all of the values used in `Morrowind.esm`
