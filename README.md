@@ -31,9 +31,9 @@ Using the amazing work of Dave Humphrey detailed here: http://www.uesp.net/morro
 | ✓      |          | `DOOR` (Doors) |
 | ✓      |          | `MISC` (Miscellaneous items) |
 | ✓      |          | `WEAP` (Weapons) |
-|        |          | `CONT` (Containers) |
-|        |          | `SPEL` (Spells) |
-|        |          | `CREA` (Creatures) |
+| ✓      |          | `CONT` (Containers) |
+| ✓      |          | `SPEL` (Spells) |
+| ✓      |          | `CREA` (Creatures) |
 |        |          | `BODY` (Body parts) |
 |        |          | `LIGH` (Lights) |
 |        |          | `ENCH` (Enchanting effects) |
