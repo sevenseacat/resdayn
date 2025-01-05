@@ -170,7 +170,7 @@ defmodule Resdayn.Parser.Record.MagicEffect do
     142 => "sEffectSummonCreature05"
   }
 
-  def process({"INDX", <<value::int()>>}, data) do
+  def process({"INDX", <<value::uint32()>>}, data) do
     record_unnested_value(
       data,
       %{
@@ -181,8 +181,8 @@ defmodule Resdayn.Parser.Record.MagicEffect do
   end
 
   def process({"MEDT", value}, data) do
-    <<school::long(), base_cost::lfloat(), flags::long(), red::long(), green::long(),
-      blue::long(), speed::lfloat(), size::lfloat(), size_cap::lfloat()>> = value
+    <<school::uint32(), base_cost::float32(), flags::uint32(), red::uint32(), green::uint32(),
+      blue::uint32(), speed::float32(), size::float32(), size_cap::float32()>> = value
 
     record_unnested_value(data, %{
       skill_id: school_to_skill_id(school),

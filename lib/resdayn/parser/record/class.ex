@@ -7,10 +7,10 @@ defmodule Resdayn.Parser.Record.Class do
   process_basic_string "DESC", :description
 
   def process({"CLDT", value}, data) do
-    <<attribute_1::long(), attribute_2::long(), specialization_id::long(), minor_1::long(),
-      major_1::long(), minor_2::long(), major_2::long(), minor_3::long(), major_3::long(),
-      minor_4::long(), major_4::long(), minor_5::long(), major_5::long(), playable::long(),
-      flags::long()>> = value
+    <<attribute_1::uint32(), attribute_2::uint32(), specialization_id::uint32(),
+      minor_1::uint32(), major_1::uint32(), minor_2::uint32(), major_2::uint32(),
+      minor_3::uint32(), major_3::uint32(), minor_4::uint32(), major_4::uint32(),
+      minor_5::uint32(), major_5::uint32(), playable::uint32(), flags::uint32()>> = value
 
     record_unnested_value(data, %{
       attribute_ids: [attribute_1, attribute_2],

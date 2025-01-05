@@ -7,11 +7,11 @@ defmodule Resdayn.Parser.Record.GameSetting do
   process_basic_string "NAME", :name
   process_basic_string "STRV", :value
 
-  def process({"FLTV", <<value::lfloat()>>}, data) do
+  def process({"FLTV", <<value::float32()>>}, data) do
     record_value(data, :value, float(value))
   end
 
-  def process({"INTV", <<value::int()>>}, data) do
+  def process({"INTV", <<value::int32()>>}, data) do
     record_value(data, :value, value)
   end
 end

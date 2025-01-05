@@ -104,7 +104,7 @@ defmodule Resdayn.Parser.Record do
       def record_unnested_value(map, new_data) do
         if key = Enum.find(Map.keys(new_data), &Map.has_key?(map, &1)) do
           raise RuntimeError,
-                "Unnesting data #{inspect(new_data)} for record #{inspect(map)} would overwrite key #{key}"
+                "Unnesting data #{inspect(new_data)} for record #{inspect(map)} would overwrite key `#{key}`"
         end
 
         Map.merge(map, new_data)
@@ -136,7 +136,7 @@ defmodule Resdayn.Parser.Record do
         Map.update!(map, pair_key, fn [head | tail] ->
           if Map.has_key?(head, record_key) do
             raise RuntimeError,
-                  "Pair #{pair_key} (#{inspect(head)}) already has key #{record_key}"
+                  "Pair #{pair_key} (#{inspect(head)}) already has key `#{record_key}`"
           end
 
           tail ++ [Map.put(head, record_key, value)]

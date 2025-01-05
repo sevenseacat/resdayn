@@ -29,7 +29,7 @@ defmodule Resdayn.Parser do
 
   defp parse_record(
          file,
-         <<type_raw::char(4), subrecord_size::long(), _header1::char(4), flags::long()>>
+         <<type_raw::char(4), subrecord_size::uint32(), _header1::char(4), flags::uint32()>>
        ) do
     type = Record.to_module(type_raw)
 
@@ -49,7 +49,7 @@ defmodule Resdayn.Parser do
 
   defp parse_subrecords(<<>>), do: []
 
-  defp parse_subrecords(<<subtype::char(4), size::long(), value::char(size), rest::binary>>) do
+  defp parse_subrecords(<<subtype::char(4), size::uint32(), value::char(size), rest::binary>>) do
     # Each subrecord has an 8-byte header which contains the size of the data, then the data for the record
     # The rest is more subrecords.
     # Don't attempt to convert the data to anything meaningful yet

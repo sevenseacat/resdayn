@@ -28,9 +28,9 @@ Using the amazing work of Dave Humphrey detailed here: http://www.uesp.net/morro
 | ✓      |          | `BSGN` (Birth signs) |
 | ✓      |          | `LTEX` (Land textures) |
 | ✓      |          | `STAT` (Static objects) |
-|        |          | `DOOR` (Doors) |
-|        |          | `MISC` (Miscellaneous items) |
-|        |          | `WEAP` (Weapons) |
+| ✓      |          | `DOOR` (Doors) |
+| ✓      |          | `MISC` (Miscellaneous items) |
+| ✓      |          | `WEAP` (Weapons) |
 |        |          | `CONT` (Containers) |
 |        |          | `SPEL` (Spells) |
 |        |          | `CREA` (Creatures) |

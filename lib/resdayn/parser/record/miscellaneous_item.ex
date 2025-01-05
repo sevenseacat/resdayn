@@ -7,7 +7,7 @@ defmodule Resdayn.Parser.Record.MiscellaneousItem do
   process_basic_string "ITEX", :icon_filename
 
   def process({"MCDT", value}, data) do
-    <<weight::lfloat(), value::long(), _::binary>> = value
+    <<weight::float32(), value::uint32(), _::binary>> = value
     record_unnested_value(data, %{weight: float(weight), value: value})
   end
 end

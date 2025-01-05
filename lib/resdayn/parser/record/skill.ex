@@ -34,12 +34,12 @@ defmodule Resdayn.Parser.Record.Skill do
 
   process_basic_string "DESC", :description
 
-  def process({"INDX", <<value::int()>>}, data) do
+  def process({"INDX", <<value::uint32()>>}, data) do
     record_unnested_value(data, %{id: value, name: Map.fetch!(@skill_names, value)})
   end
 
   def process({"SKDT", value}, data) do
-    <<attribute_id::long(), specialization::long(), uses::binary>> = value
+    <<attribute_id::uint32(), specialization::uint32(), uses::binary>> = value
 
     record_unnested_value(data, %{
       attribute_id: attribute_id,
@@ -50,7 +50,7 @@ defmodule Resdayn.Parser.Record.Skill do
 
   defp uses(<<>>), do: []
 
-  defp uses(<<value::lfloat(), rest::binary>>) do
+  defp uses(<<value::float32(), rest::binary>>) do
     [float(value) | uses(rest)]
   end
 end

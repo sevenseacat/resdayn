@@ -12,11 +12,11 @@ defmodule Resdayn.Parser.Record.GlobalVariable do
     record_value(data, :value, float_to_short(value))
   end
 
-  def process({"FLTV", <<value::long()>>}, %{type: "l"} = data) do
+  def process({"FLTV", <<value::uint32()>>}, %{type: "l"} = data) do
     record_value(data, :value, value)
   end
 
-  def process({"FLTV", <<value::lfloat()>>}, %{type: "f"} = data) do
+  def process({"FLTV", <<value::float32()>>}, %{type: "f"} = data) do
     record_value(data, :value, value)
   end
 end

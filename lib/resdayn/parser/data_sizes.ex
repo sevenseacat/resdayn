@@ -2,15 +2,11 @@ defmodule Resdayn.Parser.DataSizes do
   @moduledoc """
   Defines common data sizes to be used in pattern matching ESM file contents.
 
-  The type names reflect the names used in the master mw_esm.txt file, where possible.
-
-  ## Differences
-
-  * float -> lfloat (conflicts with default Elixir float type)
+  The type names reflect the names used in the UESP wiki, where possible.
 
   ## Examples
 
-  iex> <<value::long()>> = File.read(file, 32)
+  iex> <<value::uint32()>> = File.read(file, 32)
   """
   defmacro char(size) do
     quote do
@@ -18,27 +14,45 @@ defmodule Resdayn.Parser.DataSizes do
     end
   end
 
-  defmacro int do
+  defmacro int8 do
+    quote do
+      little - integer - signed - size(8)
+    end
+  end
+
+  defmacro uint8 do
+    quote do
+      little - integer - unsigned - size(8)
+    end
+  end
+
+  defmacro uint16 do
+    quote do
+      little - integer - signed - size(16)
+    end
+  end
+
+  defmacro float32 do
+    quote do
+      little - float - size(32)
+    end
+  end
+
+  defmacro int32 do
     quote do
       little - integer - signed - size(32)
     end
   end
 
-  defmacro lfloat do
+  defmacro uint32 do
     quote do
-      little - float - signed - size(32)
+      little - integer - unsigned - size(32)
     end
   end
 
-  defmacro long do
+  defmacro uint64 do
     quote do
-      little - integer - size(32)
-    end
-  end
-
-  defmacro long64 do
-    quote do
-      little - integer - size(64)
+      little - integer - unsigned - size(64)
     end
   end
 end

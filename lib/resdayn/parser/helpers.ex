@@ -40,8 +40,8 @@ defmodule Resdayn.Parser.Helpers do
   See HelpersTest for tests for all of the values used in `Morrowind.esm`
   """
   def float_to_short(value) do
-    if match?(<<_::lfloat()>>, value) do
-      <<parsed::lfloat()>> = value
+    if match?(<<_::float32()>>, value) do
+      <<parsed::float32()>> = value
 
       # Junk values get discarded
       if parsed < -32768 || parsed > 32767 do
@@ -100,4 +100,11 @@ defmodule Resdayn.Parser.Helpers do
   def color({red, green, blue}) do
     "#" <> Base.encode16(<<red, green, blue>>)
   end
+
+  @doc """
+  Unset "N/A" negative values of subrecords.
+  This is used for fields like "which skill ID does this spell affect, -1 if none"
+  """
+  def nil_if_negative(value) when value < 0, do: nil
+  def nil_if_negative(value), do: value
 end

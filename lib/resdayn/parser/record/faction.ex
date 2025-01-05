@@ -6,8 +6,8 @@ defmodule Resdayn.Parser.Record.Faction do
   process_basic_list "RNAM", :rank_names
 
   def process({"FADT", value}, data) do
-    <<attribute_1::long(), attribute_2::long(), rankings::char(200), skills::char(24), _::long(),
-      flags::long()>> = value
+    <<attribute_1::uint32(), attribute_2::uint32(), rankings::char(200), skills::char(24),
+      _::uint32(), flags::uint32()>> = value
 
     {rank_names, data} = pop_value(data, :rank_names, [])
 
@@ -23,15 +23,15 @@ defmodule Resdayn.Parser.Record.Faction do
     record_pair_key(data, :reactions, :faction, printable!(__MODULE__, v, value))
   end
 
-  def process({"INTV", <<value::int()>>}, data) do
+  def process({"INTV", <<value::int32()>>}, data) do
     record_pair_value(data, :reactions, :adjustment, value)
   end
 
   defp ranks([], _), do: []
 
   defp ranks([name | names], value) do
-    <<attribute_1::long(), attribute_2::long(), skill_1::long(), skill_2::long(),
-      reputation::long(), rest::binary>> = value
+    <<attribute_1::uint32(), attribute_2::uint32(), skill_1::uint32(), skill_2::uint32(),
+      reputation::uint32(), rest::binary>> = value
 
     rank = %{
       name: name,
@@ -43,10 +43,10 @@ defmodule Resdayn.Parser.Record.Faction do
     [rank | ranks(names, rest)]
   end
 
-  defp skills(<<-1::int(), _rest::binary>>), do: []
+  defp skills(<<-1::int32(), _rest::binary>>), do: []
   defp skills(<<>>), do: []
 
-  defp skills(<<skill::long(), rest::binary>>) do
+  defp skills(<<skill::uint32(), rest::binary>>) do
     [skill | skills(rest)]
   end
 end

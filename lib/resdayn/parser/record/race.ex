@@ -7,11 +7,11 @@ defmodule Resdayn.Parser.Record.Race do
   process_basic_string "DESC", :description
 
   def process({"RADT", value}, data) do
-    <<skills::char(56), str_m::long(), str_f::long(), int_m::long(), int_f::long(), wil_m::long(),
-      wil_f::long(), agi_m::long(), agi_f::long(), spd_m::long(), spd_f::long(), end_m::long(),
-      end_f::long(), per_m::long(), per_f::long(), luc_m::long(), luc_f::long(),
-      height_m::lfloat(), height_f::lfloat(), weight_m::lfloat(), weight_f::lfloat(),
-      flags::long()>> = value
+    <<skills::char(56), str_m::uint32(), str_f::uint32(), int_m::uint32(), int_f::uint32(),
+      wil_m::uint32(), wil_f::uint32(), agi_m::uint32(), agi_f::uint32(), spd_m::uint32(),
+      spd_f::uint32(), end_m::uint32(), end_f::uint32(), per_m::uint32(), per_f::uint32(),
+      luc_m::uint32(), luc_f::uint32(), height_m::float32(), height_f::float32(),
+      weight_m::float32(), weight_f::float32(), flags::uint32()>> = value
 
     record_unnested_value(
       data,
@@ -46,10 +46,10 @@ defmodule Resdayn.Parser.Record.Race do
     )
   end
 
-  defp skills(<<-1::int(), _rest::binary>>), do: []
+  defp skills(<<-1::int32(), _rest::binary>>), do: []
   defp skills(<<>>), do: []
 
-  defp skills(<<skill::long(), bonus::long(), rest::binary>>) do
+  defp skills(<<skill::int32(), bonus::int32(), rest::binary>>) do
     [%{skill_id: skill, bonus: bonus} | skills(rest)]
   end
 end

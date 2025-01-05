@@ -7,8 +7,8 @@ defmodule Resdayn.Parser.Record.MainHeader do
   use Resdayn.Parser.Record
 
   def process({"HEDR" = v, value}, data) do
-    <<version::lfloat(), flags::long(), company::char(32), description::char(256),
-      record_count::long()>> = value
+    <<version::float32(), flags::uint32(), company::char(32), description::char(256),
+      record_count::uint32()>> = value
 
     header = %{
       version: float(version),
@@ -25,7 +25,7 @@ defmodule Resdayn.Parser.Record.MainHeader do
     record_pair_key(data, :masters, :name, printable!(__MODULE__, v, value))
   end
 
-  def process({"DATA", <<value::long64()>>}, data) do
+  def process({"DATA", <<value::uint64()>>}, data) do
     record_pair_value(data, :masters, :size, value)
   end
 end
