@@ -10,7 +10,8 @@ defmodule Resdayn.Parser.Record do
     "SKIL" => __MODULE__.Skill,
     "MGEF" => __MODULE__.MagicEffect,
     "SCPT" => __MODULE__.Script,
-    "REGN" => __MODULE__.Region
+    "REGN" => __MODULE__.Region,
+    "BSGN" => __MODULE__.Birthsign
   }
 
   @doc """

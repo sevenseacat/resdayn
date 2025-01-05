@@ -25,7 +25,7 @@ Using the amazing work of Dave Humphrey detailed here: http://www.uesp.net/morro
 | ✓      |          | `MGEF` (Magic effects) |
 | ✓      |          | `SCPT` (Scripts) |
 | ✓      |          | `REGN` (Regions) |
-|        |          | `BSGN` (Birth signs) |
+| ✓      |          | `BSGN` (Birth signs) |
 |        |          | `LTEX` (Land textures) |
 |        |          | `STAT` (Static objects) |
 |        |          | `DOOR` (Doors) |
