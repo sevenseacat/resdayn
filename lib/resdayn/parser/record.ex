@@ -8,7 +8,8 @@ defmodule Resdayn.Parser.Record do
     "RACE" => __MODULE__.Race,
     "SOUN" => __MODULE__.Sound,
     "SKIL" => __MODULE__.Skill,
-    "MGEF" => __MODULE__.MagicEffect
+    "MGEF" => __MODULE__.MagicEffect,
+    "SCPT" => __MODULE__.Script
   }
 
   @doc """

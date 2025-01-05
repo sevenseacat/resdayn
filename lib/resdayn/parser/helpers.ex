@@ -62,7 +62,11 @@ defmodule Resdayn.Parser.Helpers do
   for debugging purposes
   """
   def printable!(source, field, name \\ "data", string) do
-    string = truncate(string)
+    string =
+      string
+      |> truncate()
+      |> String.replace(<<146>>, "’")
+      |> String.replace("\r\n", "\n")
 
     if String.printable?(string) do
       string
@@ -75,6 +79,13 @@ defmodule Resdayn.Parser.Helpers do
         end
       end
     end
+  end
+
+  def null_separated!(source, field, string) do
+    string
+    |> truncate()
+    |> String.split(<<0>>)
+    |> Enum.map(&printable!(source, field, &1))
   end
 
   @doc """
