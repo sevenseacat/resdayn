@@ -71,7 +71,11 @@ defmodule Resdayn.Parser.Helpers do
       |> String.replace("\r\n", "\n")
 
     if String.printable?(string) do
-      string
+      if string == "" do
+        nil
+      else
+        string
+      end
     else
       # Debugging to see where the unprintable value is
       for i <- 0..String.length(string) do
