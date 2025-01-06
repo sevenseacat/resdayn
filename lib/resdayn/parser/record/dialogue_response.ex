@@ -155,6 +155,18 @@ defmodule Resdayn.Parser.Record.DialogueResponse do
     record_list_of_maps_value(data, :conditions, :value, value)
   end
 
+  def process({"QSTN", value}, data) do
+    record_value(data, :quest_name, value == <<1>>)
+  end
+
+  def process({"QSTF", value}, data) do
+    record_value(data, :quest_finished, value == <<1>>)
+  end
+
+  def process({"QSTR", value}, data) do
+    record_value(data, :quest_restart, value == <<1>>)
+  end
+
   defp gender(-1), do: :none
   defp gender(0), do: :male
   defp gender(1), do: :female

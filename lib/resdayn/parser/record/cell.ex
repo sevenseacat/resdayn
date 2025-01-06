@@ -29,6 +29,10 @@ defmodule Resdayn.Parser.Record.Cell do
     record_value(data, :water_height, value)
   end
 
+  def process({"WHGT", <<value::float32()>>}, data) when not is_map_key(data, :references) do
+    record_value(data, :water_height, float(value))
+  end
+
   def process({"AMBI", value}, data) do
     <<ambient::char(4), sunlight::char(4), fog::char(4), fog_density::float32()>> = value
 

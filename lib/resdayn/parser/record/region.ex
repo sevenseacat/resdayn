@@ -7,7 +7,7 @@ defmodule Resdayn.Parser.Record.Region do
   # what is "sleep creature"???
   process_basic_string "BNAM", :sleep_creature
 
-  def process({"WEAT", value}, data) do
+  def process({"WEAT", value}, data) when byte_size(value) == 8 do
     <<clear::integer, cloudy::integer, foggy::integer, overcast::integer, rain::integer,
       thunder::integer, ash::integer, blight::integer>> = value
 
@@ -22,6 +22,24 @@ defmodule Resdayn.Parser.Record.Region do
       blight: blight,
       snow: 0,
       blizzard: 0
+    })
+  end
+
+  def process({"WEAT", value}, data) when byte_size(value) == 10 do
+    <<clear::integer, cloudy::integer, foggy::integer, overcast::integer, rain::integer,
+      thunder::integer, ash::integer, blight::integer, snow::integer, blizzard::integer>> = value
+
+    record_value(data, :weather, %{
+      clear: clear,
+      cloudy: cloudy,
+      foggy: foggy,
+      overcast: overcast,
+      rain: rain,
+      thunder: thunder,
+      ash: ash,
+      blight: blight,
+      snow: snow,
+      blizzard: blizzard
     })
   end
 

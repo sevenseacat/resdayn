@@ -78,4 +78,8 @@ defmodule Resdayn.Parser.Record.Creature do
       )
     )
   end
+
+  def process({"XSCL", <<value::float32()>>}, data) do
+    record_value(data, :scale, value)
+  end
 end

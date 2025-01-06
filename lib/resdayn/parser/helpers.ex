@@ -66,13 +66,17 @@ defmodule Resdayn.Parser.Helpers do
     # 173 is a "soft hyphen" - just delete them
     # 239 is a ï as in naïve - it works if you tell Elixir it's encoded in UTF8 but not otherwise
     # 250 is a ú - same deal
+    # 133 is a ...
+    # 233 is é
     string =
       string
       |> truncate()
+      |> String.replace(<<133>>, <<"...">>)
       |> String.replace(<<146>>, "’")
       |> String.replace(<<147>>, "“")
       |> String.replace(<<148>>, "”")
       |> String.replace(<<173>>, "")
+      |> String.replace(<<233>>, <<233::utf8>>)
       |> String.replace(<<239>>, <<239::utf8>>)
       |> String.replace(<<250>>, <<250::utf8>>)
       |> String.replace("\r\n", "\n")

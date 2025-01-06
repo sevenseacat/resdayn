@@ -41,7 +41,8 @@ defmodule Resdayn.Parser.Record do
     "PGRD" => __MODULE__.PathGrid,
     "SNDG" => __MODULE__.SoundGenerator,
     "DIAL" => __MODULE__.DialogueTopic,
-    "INFO" => __MODULE__.DialogueResponse
+    "INFO" => __MODULE__.DialogueResponse,
+    "SSCR" => __MODULE__.StartScript
   }
 
   @doc """
@@ -169,23 +170,12 @@ defmodule Resdayn.Parser.Record do
         })
       end
 
-      def process({"AI_F" = v, value}, data) do
-        <<x::float32(), y::float32(), z::float32(), duration::uint16(), id::char(32),
-          _rest::binary>> = value
+      def process({"AI_E", value}, data) do
+        follow_or_escort(data, :escort, value)
+      end
 
-        id = printable!(__MODULE__, v, id)
-
-        if id == nil do
-          raise RuntimeError,
-                "check what the position is #{inspect({float(x), float(y), float(z)})}"
-        end
-
-        record_list(data, :ai_packages, %{
-          type: :follow,
-          position: {float(x), float(y), float(z)},
-          duration: duration(duration),
-          id: id
-        })
+      def process({"AI_F", value}, data) do
+        follow_or_escort(data, :follow, value)
       end
 
       def process({"AI_T", value}, data) do
@@ -200,6 +190,25 @@ defmodule Resdayn.Parser.Record do
       # Duration parameters in all packages are in hours. Any value greater than 24
       # should be divided by 100, and set to 24 if still greater than 24.
       defp duration(num), do: min(rem(num, 100), 24)
+
+      defp follow_or_escort(data, type, value) do
+        <<x::float32(), y::float32(), z::float32(), duration::uint16(), id::char(32),
+          _rest::binary>> = value
+
+        id = printable!(__MODULE__, type, id)
+
+        if id == nil do
+          raise RuntimeError,
+                "check what the position is #{inspect({float(x), float(y), float(z)})}"
+        end
+
+        record_list(data, :ai_packages, %{
+          type: type,
+          position: {float(x), float(y), float(z)},
+          duration: duration(duration),
+          id: id
+        })
+      end
     end
   end
 
