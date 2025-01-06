@@ -37,25 +37,25 @@ Using the amazing work of Dave Humphrey detailed here: http://www.uesp.net/morro
 | ✓      |          | `BODY` (Body parts) |
 | ✓      |          | `LIGH` (Lights) |
 | ✓      |          | `ENCH` (Enchanting effects) |
-|        |          | `NPC_` (NPCs) |
-|        |          | `ARMO` (Armour) |
-|        |          | `CLOT` (Clothing) |
-|        |          | `REPA` (Repair items) |
-|        |          | `ACTI` (Activators) |
-|        |          | `APPA` (Alchemy apparatus) |
-|        |          | `LOCK` (Lockpicking items) |
-|        |          | `PROB` (Probe items) |
-|        |          | `INGR` (Ingredients) |
-|        |          | `BOOK` (Books and papers) |
-|        |          | `ALCH` (Potions) |
-|        |          | `LEVI` (Levelled items) |
-|        |          | `LEVC` (Levelled creatures) |
-|        |          | `CELL` (Cells) |
-|        |          | `LAND` (Landscapes) |
-|        |          | `PGRD` (Path grids) |
-|        |          | `DIAL` (Dialogue/journal topics) |
-|        |          | `INFO` (Dialogue records) |
-|        |          | `INFO` (Journal records) |
+| ✓      |          | `NPC_` (NPCs) |
+| ✓      |          | `ARMO` (Armour) |
+| ✓      |          | `CLOT` (Clothing) |
+| ✓      |          | `REPA` (Repair items) |
+| ✓      |          | `ACTI` (Activators) |
+| ✓      |          | `APPA` (Alchemy apparatus) |
+| ✓      |          | `LOCK` (Lockpicking items) |
+| ✓      |          | `PROB` (Probe items) |
+| ✓      |          | `INGR` (Ingredients) |
+| ✓      |          | `BOOK` (Books and papers) |
+| ✓      |          | `ALCH` (Potions) |
+| ✓      |          | `LEVI` (Levelled items) |
+| ✓      |          | `LEVC` (Levelled creatures) |
+| ✓      |          | `CELL` (Cells) |
+| x      |          | `LAND` (Landscapes) |
+| x      |          | `PGRD` (Path grids) |
+| ✓      |          | `DIAL` (Dialogue/journal topics) |
+| ✓      |          | `INFO` (Dialogue records) |
+| ✓      |          | `INFO` (Journal records) |
 
 ## Other Features to Add
 
