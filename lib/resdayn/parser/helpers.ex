@@ -118,4 +118,18 @@ defmodule Resdayn.Parser.Helpers do
   """
   def nil_if_negative(value) when value < 0, do: nil
   def nil_if_negative(value), do: value
+
+  @doc """
+  Parse a set of position/rotation coordinates.
+  Used for positioning of items and travel destinations
+  """
+  def coordinates(value) do
+    <<pos_x::float32(), pos_y::float32(), pos_z::float32(), rot_x::float32(), rot_y::float32(),
+      rot_z::float32()>> = value
+
+    %{
+      position: {float(pos_x), float(pos_y), float(pos_z)},
+      rotation: {float(rot_x), float(rot_y), float(rot_z)}
+    }
+  end
 end

@@ -72,13 +72,7 @@ defmodule Resdayn.Parser.Record.NPC do
   end
 
   def process({"DODT", value}, data) do
-    <<pos_x::float32(), pos_y::float32(), pos_z::float32(), rot_x::float32(), rot_y::float32(),
-      rot_z::float32()>> = value
-
-    record_list_of_maps_key(data, :transport, :coordinates, %{
-      position: {float(pos_x), float(pos_y), float(pos_z)},
-      rotation: {float(rot_x), float(rot_y), float(rot_z)}
-    })
+    record_list_of_maps_key(data, :transport, :coordinates, coordinates(value))
   end
 
   def process({"DNAM" = v, value}, data) do
