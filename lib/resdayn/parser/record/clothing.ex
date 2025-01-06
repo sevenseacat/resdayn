@@ -18,6 +18,8 @@ defmodule Resdayn.Parser.Record.Clothing do
   process_basic_string "MODL", :nif_model
   process_basic_string "FNAM", :name
   process_basic_string "ITEX", :icon
+  process_basic_string "ENAM", :enchantment
+  process_basic_string "SCRI", :script_id
   process_body_coverings()
 
   def process({"CTDT", value}, data) do

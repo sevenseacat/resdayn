@@ -3,13 +3,29 @@ defmodule Resdayn.Parser.Record.NPC do
 
   process_basic_string "NAME", :id
   process_basic_string "FNAM", :name
+  process_basic_string "MODL", :nif_model
   process_basic_string "RNAM", :race_id
   process_basic_string "CNAM", :class_id
   process_basic_string "ANAM", :faction_id
   process_basic_string "BNAM", :head_model_id
   process_basic_string "KNAM", :hair_model_id
+  process_basic_string "SCRI", :script_id
+  process_basic_list "NPCS", :spell_ids
   process_inventory "NPCO", :carried_objects
   process_ai_packages()
+
+  def process({"NPDT", value}, data) when byte_size(value) == 12 do
+    <<level::uint16(), disposition::uint8(), reputation::uint8(), rank::uint8(), _::char(3),
+      gold::uint32()>> = value
+
+    record_unnested_value(data, %{
+      level: level,
+      disposition: disposition,
+      reputation: reputation,
+      rank: rank,
+      gold: gold
+    })
+  end
 
   def process({"NPDT", value}, data) when byte_size(value) == 52 do
     <<level::uint16(), str::uint8(), int::uint8(), wil::uint8(), agi::uint8(), spd::uint8(),
@@ -59,14 +75,14 @@ defmodule Resdayn.Parser.Record.NPC do
     <<pos_x::float32(), pos_y::float32(), pos_z::float32(), rot_x::float32(), rot_y::float32(),
       rot_z::float32()>> = value
 
-    record_list_of_maps_key(data, :cell_travel, :coordinates, %{
-      position: {pos_x, pos_y, pos_z},
-      rotation: {rot_x, rot_y, rot_z}
+    record_list_of_maps_key(data, :transport, :coordinates, %{
+      position: {float(pos_x), float(pos_y), float(pos_z)},
+      rotation: {float(rot_x), float(rot_y), float(rot_z)}
     })
   end
 
   def process({"DNAM" = v, value}, data) do
-    record_list_of_maps_value(data, :cell_travel, :cell_name, printable!(__MODULE__, v, value))
+    record_list_of_maps_value(data, :transport, :cell_name, printable!(__MODULE__, v, value))
   end
 
   defp skills(bitstring) do

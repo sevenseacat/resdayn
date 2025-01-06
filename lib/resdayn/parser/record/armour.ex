@@ -20,6 +20,7 @@ defmodule Resdayn.Parser.Record.Armour do
   process_basic_string "FNAM", :name
   process_basic_string "ITEX", :icon
   process_basic_string "SCRI", :script_id
+  process_basic_string "ENAM", :enchantment
   process_body_coverings()
 
   def process({"AODT", value}, data) do

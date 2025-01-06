@@ -62,12 +62,19 @@ defmodule Resdayn.Parser.Helpers do
   for debugging purposes
   """
   def printable!(source, field, name \\ "data", string) do
+    # 147 and 148 are Windows-specific smart quotes - replace with Unicode quotes
+    # 173 is a "soft hyphen" - just delete them
+    # 239 is a ï as in naïve - it works if you tell Elixir it's encoded in UTF8 but not otherwise
+    # 250 is a ú - same deal
     string =
       string
       |> truncate()
       |> String.replace(<<146>>, "’")
       |> String.replace(<<147>>, "“")
       |> String.replace(<<148>>, "”")
+      |> String.replace(<<173>>, "")
+      |> String.replace(<<239>>, <<239::utf8>>)
+      |> String.replace(<<250>>, <<250::utf8>>)
       |> String.replace("\r\n", "\n")
 
     if String.printable?(string) do

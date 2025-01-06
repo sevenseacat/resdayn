@@ -4,6 +4,9 @@ defmodule Resdayn.Parser.Record.Light do
   process_basic_string "NAME", :id
   process_basic_string "MODL", :nif_model
   process_basic_string "SNAM", :sound_id
+  process_basic_string "FNAM", :name
+  process_basic_string "ITEX", :icon
+  process_basic_string "SCRI", :script_id
 
   def process({"LHDT", value}, data) do
     <<weight::float32(), value::uint32(), time::int32(), radius::uint32(), color::char(4),

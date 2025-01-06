@@ -4,6 +4,7 @@ defmodule Resdayn.Parser.Record.Container do
   process_basic_string "NAME", :id
   process_basic_string "MODL", :nif_model
   process_basic_string "FNAM", :name
+  process_basic_string "SCRI", :script_id
   process_inventory "NPCO", :contents
 
   def process({"CNDT", <<value::float32()>>}, data) do

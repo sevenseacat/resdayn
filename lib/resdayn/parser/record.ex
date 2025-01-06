@@ -76,7 +76,7 @@ defmodule Resdayn.Parser.Record do
   defmacro process_inventory(raw, key) do
     quote do
       def process({unquote(raw), value}, data) do
-        <<count::uint32(), id::char(32)>> = value
+        <<count::int32(), id::char(32)>> = value
 
         record_list(data, unquote(key), %{
           count: abs(count),
@@ -152,16 +152,48 @@ defmodule Resdayn.Parser.Record do
         })
       end
 
+      def process({"CNDT" = v, value}, data) do
+        record_list_of_maps_value(data, :ai_packages, :cell, printable!(__MODULE__, v, value))
+      end
+
       def process({"AI_W", value}, data) do
         <<distance::uint16(), duration::uint16(), time_of_day::uint8(), idles::char(8),
           1::uint8(), _rest::binary>> = value
 
         record_list(data, :ai_packages, %{
-          type: :ai_wander,
+          type: :wander,
           distance: distance,
           duration: duration(duration),
           time_of_day: time_of_day,
           idles: :binary.bin_to_list(idles)
+        })
+      end
+
+      def process({"AI_F" = v, value}, data) do
+        <<x::float32(), y::float32(), z::float32(), duration::uint16(), id::char(32),
+          _rest::binary>> = value
+
+        id = printable!(__MODULE__, v, id)
+
+        if id == nil do
+          raise RuntimeError,
+                "check what the position is #{inspect({float(x), float(y), float(z)})}"
+        end
+
+        record_list(data, :ai_packages, %{
+          type: :follow,
+          position: {float(x), float(y), float(z)},
+          duration: duration(duration),
+          id: id
+        })
+      end
+
+      def process({"AI_T", value}, data) do
+        <<x::float32(), y::float32(), z::float32(), 1::uint8(), _rest::binary>> = value
+
+        record_list(data, :ai_packages, %{
+          type: :travel,
+          position: {float(x), float(y), float(z)}
         })
       end
 

@@ -1,10 +1,29 @@
 defmodule Resdayn.Parser.Record.Weapon do
   use Resdayn.Parser.Record
 
+  @weapon_types %{
+    0 => :short_blade_1_hand,
+    1 => :long_blade_1_hand,
+    2 => :long_blade_2_hand,
+    3 => :blunt_1_hand,
+    4 => :blunt_2_hand_close,
+    5 => :blunt_2_hand_wide,
+    6 => :spear,
+    7 => :axe_1_hand,
+    8 => :axe_2_hand,
+    9 => :bow,
+    10 => :crossbow,
+    11 => :thrown,
+    12 => :arrow,
+    13 => :bolt
+  }
+
   process_basic_string "NAME", :id
   process_basic_string "MODL", :nif_model
   process_basic_string "FNAM", :name
   process_basic_string "ITEX", :icon
+  process_basic_string "ENAM", :enchantment
+  process_basic_string "SCRI", :script_id
 
   def process({"WPDT", value}, data) do
     <<weight::float32(), value::uint32(), type::uint16(), health::uint16(), speed::float32(),
@@ -13,9 +32,9 @@ defmodule Resdayn.Parser.Record.Weapon do
       flags::uint32()>> = value
 
     record_unnested_value(data, %{
-      weight: weight,
+      weight: float(weight),
       value: value,
-      type: type,
+      type: Map.fetch!(@weapon_types, type),
       health: health,
       speed: float(speed),
       reach: reach,
