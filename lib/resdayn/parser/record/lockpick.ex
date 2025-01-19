@@ -5,6 +5,7 @@ defmodule Resdayn.Parser.Record.Lockpick do
   process_basic_string "MODL", :nif_model
   process_basic_string "FNAM", :name
   process_basic_string "ITEX", :icon
+  process_basic_string "SCRI", :script_id
 
   def process({"LKDT", value}, data) do
     <<weight::float32(), value::uint32(), quality::float32(), uses::uint32()>> = value

@@ -68,6 +68,7 @@ defmodule Resdayn.Parser.Helpers do
     # 250 is a ú - same deal
     # 133 is a ...
     # 233 is é
+    # 160 is a non-breaking space!?
     string =
       string
       |> truncate()
@@ -80,6 +81,7 @@ defmodule Resdayn.Parser.Helpers do
       |> String.replace(<<239>>, <<239::utf8>>)
       |> String.replace(<<250>>, <<250::utf8>>)
       |> String.replace("\r\n", "\n")
+      |> String.replace(<<160>>, "")
 
     if String.printable?(string) do
       if string == "" do

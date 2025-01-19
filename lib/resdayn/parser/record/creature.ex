@@ -82,4 +82,12 @@ defmodule Resdayn.Parser.Record.Creature do
   def process({"XSCL", <<value::float32()>>}, data) do
     record_value(data, :scale, value)
   end
+
+  def process({"DODT", value}, data) do
+    record_list_of_maps_key(data, :transport, :coordinates, coordinates(value))
+  end
+
+  def process({"DNAM" = v, value}, data) do
+    record_list_of_maps_value(data, :transport, :cell_name, printable!(__MODULE__, v, value))
+  end
 end

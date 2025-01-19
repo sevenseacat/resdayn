@@ -5,6 +5,7 @@ defmodule Resdayn.Parser.Record.Potion do
   process_basic_string "MODL", :nif_model
   process_basic_string "TEXT", :icon
   process_basic_string "FNAM", :name
+  process_basic_string "SCRI", :script_id
   process_enchantments "ENAM", :effects
 
   def process({"ALDT", value}, data) do
