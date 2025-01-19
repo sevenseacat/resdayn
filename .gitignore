@@ -24,3 +24,6 @@ resdayn-*.tar
 
 # Temporary files, for example, from tests.
 /tmp/
+
+# Silly macOS files
+.DS_Store
