@@ -17,21 +17,65 @@ defmodule Mix.Tasks.Resdayn.ImportCodex do
 
   def run(_argv) do
     Application.ensure_all_started(:resdayn)
+    Logger.configure(level: :info)
 
-    @all_files
-    |> Enum.each(fn filename ->
-      records = Resdayn.Parser.read("../data/#{filename}") |> Enum.to_list()
+    Enum.each(@all_files, &run_importer/1)
+  end
 
-      [
-        {Mechanics.DataFile, Record.MainHeader},
-        {Mechanics.Script, [Record.Script, Record.StartScript]}
-      ]
-      |> Enum.each(fn {resource, keys} ->
-        records
-        |> process(keys, filename: filename)
-        |> Ash.bulk_create!(resource, :import, return_errors?: true, stop_on_error?: true)
-      end)
+  def run_importer(filename) do
+    records = load_records(filename)
+
+    [
+      {Mechanics.DataFile, Record.MainHeader},
+      {Mechanics.Script, [Record.Script, Record.StartScript]}
+    ]
+    |> Enum.each(fn {resource, keys} ->
+      import_records(records, resource, keys, filename: filename)
     end)
+
+    IO.puts("")
+  end
+
+  defp load_records(filename) do
+    Owl.Spinner.start(id: filename)
+    Owl.Spinner.update_label(id: filename, label: "#{filename}: Parsing...")
+
+    {time, result} =
+      :timer.tc(
+        fn -> Resdayn.Parser.read(Path.join(["../data/", filename])) |> Enum.to_list() end,
+        :millisecond
+      )
+
+    Owl.Spinner.stop(
+      id: filename,
+      resolution: :ok,
+      label: "#{filename}: #{length(result)} records parsed in #{Float.round(time / 1000, 2)}s."
+    )
+
+    result
+  end
+
+  defp import_records(records, resource, keys, opts) do
+    name = String.split(Atom.to_string(resource), ".") |> List.last()
+
+    Owl.Spinner.start(id: resource)
+    Owl.Spinner.update_label(id: resource, label: "#{name}: Processing...")
+
+    records = process(records, keys, opts)
+    length = length(records)
+
+    Owl.Spinner.update_label(id: resource, label: "#{name}: Inserting #{length} records...")
+
+    result =
+      Ash.bulk_create!(records, resource, :import, return_errors?: true, stop_on_error?: true)
+
+    if result.status != :success do
+      label = "#{name}: #{result.error_count} errors received."
+      Owl.Spinner.stop(id: resource, resolution: :error, label: label)
+    else
+      label = "#{name}: #{length} records inserted."
+      Owl.Spinner.stop(id: resource, resolution: :ok, label: label)
+    end
   end
 
   defp process(records, [Record.Script, Record.StartScript], _opts) do

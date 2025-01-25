@@ -24,6 +24,7 @@ defmodule Resdayn.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
+      {:owl, "~> 0.12"},
       {:sourceror, "~> 1.7", only: [:dev, :test]},
       {:ash_postgres, "~> 2.0"},
       {:ash, "~> 3.0"},
