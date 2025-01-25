@@ -14,7 +14,7 @@ Using the amazing work of Dave Humphrey detailed here: http://www.uesp.net/morro
 
 | Parsed | Imported | Name |
 | :---:  | :---:    | :--: |
-| ✓      |          | `TES3` (Main header) |
+| ✓      | ✓        | `TES3` (Main header) |
 | ✓      |          | `GMST` (Game settings) |
 | ✓      |          | `GLOB` (Global variable) |
 | ✓      |          | `CLAS` (Character classes) |

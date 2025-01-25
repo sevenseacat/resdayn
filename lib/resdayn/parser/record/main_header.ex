@@ -22,10 +22,10 @@ defmodule Resdayn.Parser.Record.MainHeader do
   end
 
   def process({"MAST" = v, value}, data) do
-    record_list_of_maps_key(data, :masters, :name, printable!(__MODULE__, v, value))
+    record_list_of_maps_key(data, :dependencies, :filename, printable!(__MODULE__, v, value))
   end
 
   def process({"DATA", <<value::uint64()>>}, data) do
-    record_list_of_maps_value(data, :masters, :size, value)
+    record_list_of_maps_value(data, :dependencies, :size, value)
   end
 end

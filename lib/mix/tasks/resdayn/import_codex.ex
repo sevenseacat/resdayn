@@ -22,16 +22,19 @@ defmodule Mix.Tasks.Resdayn.ImportCodex do
     |> Enum.each(fn filename ->
       records = Resdayn.Parser.read("../data/#{filename}") |> Enum.to_list()
 
-      [{Mechanics.Script, [Record.Script, Record.StartScript]}]
-      |> Enum.map(fn {resource, keys} ->
+      [
+        {Mechanics.DataFile, Record.MainHeader},
+        {Mechanics.Script, [Record.Script, Record.StartScript]}
+      ]
+      |> Enum.each(fn {resource, keys} ->
         records
-        |> process(keys)
+        |> process(keys, filename: filename)
         |> Ash.bulk_create!(resource, :import, return_errors?: true, stop_on_error?: true)
       end)
     end)
   end
 
-  defp process(records, [Record.Script, Record.StartScript]) do
+  defp process(records, [Record.Script, Record.StartScript], _opts) do
     start_scripts = of_type(records, Record.StartScript) |> Enum.map(& &1.data.script_id)
 
     of_type(records, Record.Script)
@@ -41,6 +44,23 @@ defmodule Mix.Tasks.Resdayn.ImportCodex do
       |> Map.put(:start_script, record.data.id in start_scripts)
       |> Map.put(:flags, record.flags)
     end)
+  end
+
+  defp process(records, Record.MainHeader, opts) do
+    with [header] <- of_type(records, Record.MainHeader) do
+      [
+        header.data.header
+        |> Map.take([:version, :company, :description])
+        |> Map.merge(%{
+          filename: Keyword.fetch!(opts, :filename),
+          master: header.data.header.flags.master,
+          dependencies: header.data[:dependencies] || []
+        })
+        |> Map.put(:flags, header.flags)
+      ]
+    else
+      [] -> raise RuntimeError, "No main header found in file"
+    end
   end
 
   defp of_type(records, type) when is_atom(type) do
