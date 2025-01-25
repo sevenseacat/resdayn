@@ -2,19 +2,12 @@ defmodule Resdayn.Codex.Mechanics.Script do
   use Ash.Resource,
     otp_app: :resdayn,
     domain: Resdayn.Codex.Mechanics,
-    data_layer: AshPostgres.DataLayer
+    data_layer: AshPostgres.DataLayer,
+    extensions: [Resdayn.Codex.Importable]
 
   postgres do
     table "scripts"
     repo Resdayn.Repo
-  end
-
-  actions do
-    create :import do
-      accept [:*]
-      upsert? true
-      upsert_fields :replace_all
-    end
   end
 
   attributes do
