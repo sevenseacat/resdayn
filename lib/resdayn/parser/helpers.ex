@@ -67,8 +67,11 @@ defmodule Resdayn.Parser.Helpers do
     # 239 is a ï as in naïve - it works if you tell Elixir it's encoded in UTF8 but not otherwise
     # 250 is a ú - same deal
     # 133 is a ...
+    # 232 is è
     # 233 is é
     # 160 is a non-breaking space!?
+    # 225 is a á
+    # 251 is a û
     string =
       string
       |> truncate()
@@ -77,9 +80,13 @@ defmodule Resdayn.Parser.Helpers do
       |> String.replace(<<147>>, "“")
       |> String.replace(<<148>>, "”")
       |> String.replace(<<173>>, "")
+      |> String.replace(<<225>>, <<225::utf8>>)
+      |> String.replace(<<232>>, <<232::utf8>>)
       |> String.replace(<<233>>, <<233::utf8>>)
       |> String.replace(<<239>>, <<239::utf8>>)
+      |> String.replace(<<246>>, <<246::utf8>>)
       |> String.replace(<<250>>, <<250::utf8>>)
+      |> String.replace(<<251>>, <<251::utf8>>)
       |> String.replace("\r\n", "\n")
       |> String.replace(<<160>>, "")
 

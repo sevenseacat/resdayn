@@ -23,7 +23,7 @@ Using the amazing work of Dave Humphrey detailed here: http://www.uesp.net/morro
 | ✓      |          |` SOUN` (Sound effects) |
 | ✓      |          | `SKIL` (Skills) |
 | ✓      |          | `MGEF` (Magic effects) |
-| ✓      |          | `SCPT` (Scripts) |
+| ✓      | ✓        | `SCPT` (Scripts) |
 | ✓      |          | `REGN` (Regions) |
 | ✓      |          | `BSGN` (Birth signs) |
 | ✓      |          | `LTEX` (Land textures) |

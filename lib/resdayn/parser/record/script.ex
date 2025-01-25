@@ -4,11 +4,11 @@ defmodule Resdayn.Parser.Record.Script do
   process_basic_string "SCTX", :text
 
   def process({"SCHD" = v, value}, data) do
-    <<name::char(32), num_shorts::uint32(), num_longs::uint32(), num_floats::uint32(),
+    <<id::char(32), num_shorts::uint32(), num_longs::uint32(), num_floats::uint32(),
       data_size::uint32(), local_variable_size::uint32()>> = value
 
     record_unnested_value(data, %{
-      name: printable!(__MODULE__, v, name),
+      id: printable!(__MODULE__, v, id),
       num_shorts: num_shorts,
       num_longs: num_longs,
       num_floats: num_floats,
