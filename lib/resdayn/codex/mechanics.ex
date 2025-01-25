@@ -4,6 +4,7 @@ defmodule Resdayn.Codex.Mechanics do
 
   resources do
     resource Resdayn.Codex.Mechanics.DataFile
+    resource Resdayn.Codex.Mechanics.GameSetting
     resource Resdayn.Codex.Mechanics.Script
   end
 end

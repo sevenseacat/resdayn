@@ -27,6 +27,7 @@ defmodule Mix.Tasks.Resdayn.ImportCodex do
 
     [
       {Mechanics.DataFile, Record.MainHeader},
+      {Mechanics.GameSetting, Record.GameSetting},
       {Mechanics.Script, [Record.Script, Record.StartScript]}
     ]
     |> Enum.each(fn {resource, keys} ->
@@ -86,6 +87,16 @@ defmodule Mix.Tasks.Resdayn.ImportCodex do
       record.data
       |> Map.take([:id, :text, :local_variables])
       |> Map.put(:start_script, record.data.id in start_scripts)
+      |> Map.put(:flags, record.flags)
+    end)
+  end
+
+  defp process(records, Record.GameSetting, _opts) do
+    records
+    |> of_type(Record.GameSetting)
+    |> Enum.map(fn record ->
+      record.data
+      |> Map.take([:name, :value])
       |> Map.put(:flags, record.flags)
     end)
   end
