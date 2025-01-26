@@ -1,8 +1,7 @@
 defmodule Mix.Tasks.Resdayn.ImportCodex do
   use Mix.Task
 
-  alias Resdayn.Parser.Record
-  alias Resdayn.Codex.Mechanics
+  alias Resdayn.Importer.Record
 
   # All of the files we care about parsing.
   @all_files [
@@ -15,6 +14,54 @@ defmodule Mix.Tasks.Resdayn.ImportCodex do
     "TR_Factions.esp"
   ]
 
+  # To be imported
+  # Record.GlobalVariable,
+  # Record.Class,
+  # Record.Faction,
+  # Record.Race,
+  # Record.Sound,
+  # Record.Skill,
+  # Record.MagicEffect,
+  # Record.Region,
+  # Record.Birthsign,
+  # Record.LandTexture,
+  # Record.Static,
+  # Record.Door,
+  # Record.MiscellaneousItem,
+  # Record.Weapon,
+  # Record.Container,
+  # Record.Spell,
+  # Record.Creature,
+  # Record.BodyPart,
+  # Record.Light,
+  # Record.Enchantment,
+  # Record.NPC,
+  # Record.Armour,
+  # Record.Clothing,
+  # Record.RepairItem,
+  # Record.Activator,
+  # Record.AlchemyApparatus,
+  # Record.Lockpick,
+  # Record.Probe,
+  # Record.Ingredient,
+  # Record.Book,
+  # Record.Potion,
+  # Record.LevelledItem,
+  # Record.LevelledCreature,
+  # Record.Cell,
+  # Record.Land,
+  # Record.PathGrid,
+  # Record.SoundGenerator,
+  # Record.DialogueTopic,
+  # Record.DialogueResponse,
+
+  def run([filename]) do
+    Application.ensure_all_started(:resdayn)
+    Logger.configure(level: :info)
+
+    run_importer(filename)
+  end
+
   def run(_argv) do
     Application.ensure_all_started(:resdayn)
     Logger.configure(level: :info)
@@ -26,12 +73,13 @@ defmodule Mix.Tasks.Resdayn.ImportCodex do
     records = load_records(filename)
 
     [
-      {Mechanics.DataFile, Record.MainHeader},
-      {Mechanics.GameSetting, Record.GameSetting},
-      {Mechanics.Script, [Record.Script, Record.StartScript]}
+      Record.DataFile,
+      Record.Attribute,
+      Record.GameSetting,
+      Record.Script
     ]
-    |> Enum.each(fn {resource, keys} ->
-      import_records(records, resource, keys, filename: filename)
+    |> Enum.each(fn importer ->
+      import_records(importer, records, filename: filename)
     end)
 
     IO.puts("")
@@ -56,69 +104,26 @@ defmodule Mix.Tasks.Resdayn.ImportCodex do
     result
   end
 
-  defp import_records(records, resource, keys, opts) do
-    name = String.split(Atom.to_string(resource), ".") |> List.last()
+  defp import_records(importer, records, opts) do
+    name = String.split(Atom.to_string(importer), ".") |> List.last()
 
-    Owl.Spinner.start(id: resource)
-    Owl.Spinner.update_label(id: resource, label: "#{name}: Processing...")
+    Owl.Spinner.start(id: importer)
+    Owl.Spinner.update_label(id: importer, label: "#{name}: Processing...")
 
-    records = process(records, keys, opts)
-    length = length(records)
+    %{resource: resource, data: data} = apply(importer, :process, [records, opts])
+    length = length(data)
 
-    Owl.Spinner.update_label(id: resource, label: "#{name}: Inserting #{length} records...")
+    Owl.Spinner.update_label(id: importer, label: "#{name}: Inserting #{length} records...")
 
     result =
-      Ash.bulk_create!(records, resource, :import, return_errors?: true, stop_on_error?: true)
+      Ash.bulk_create!(data, resource, :import, return_errors?: true, stop_on_error?: true)
 
     if result.status != :success do
       label = "#{name}: #{result.error_count} errors received."
-      Owl.Spinner.stop(id: resource, resolution: :error, label: label)
+      Owl.Spinner.stop(id: importer, resolution: :error, label: label)
     else
       label = "#{name}: #{length} records inserted."
-      Owl.Spinner.stop(id: resource, resolution: :ok, label: label)
+      Owl.Spinner.stop(id: importer, resolution: :ok, label: label)
     end
-  end
-
-  defp process(records, [Record.Script, Record.StartScript], _opts) do
-    start_scripts = of_type(records, Record.StartScript) |> Enum.map(& &1.data.script_id)
-
-    of_type(records, Record.Script)
-    |> Enum.map(fn record ->
-      record.data
-      |> Map.take([:id, :text, :local_variables])
-      |> Map.put(:start_script, record.data.id in start_scripts)
-      |> Map.put(:flags, record.flags)
-    end)
-  end
-
-  defp process(records, Record.GameSetting, _opts) do
-    records
-    |> of_type(Record.GameSetting)
-    |> Enum.map(fn record ->
-      record.data
-      |> Map.take([:name, :value])
-      |> Map.put(:flags, record.flags)
-    end)
-  end
-
-  defp process(records, Record.MainHeader, opts) do
-    with [header] <- of_type(records, Record.MainHeader) do
-      [
-        header.data.header
-        |> Map.take([:version, :company, :description])
-        |> Map.merge(%{
-          filename: Keyword.fetch!(opts, :filename),
-          master: header.data.header.flags.master,
-          dependencies: header.data[:dependencies] || []
-        })
-        |> Map.put(:flags, header.flags)
-      ]
-    else
-      [] -> raise RuntimeError, "No main header found in file"
-    end
-  end
-
-  defp of_type(records, type) when is_atom(type) do
-    Enum.filter(records, &(&1.type == type))
   end
 end
