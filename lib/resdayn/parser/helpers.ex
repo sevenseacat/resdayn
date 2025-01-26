@@ -137,12 +137,22 @@ defmodule Resdayn.Parser.Helpers do
   Used for positioning of items and travel destinations
   """
   def coordinates(value) do
-    <<pos_x::float32(), pos_y::float32(), pos_z::float32(), rot_x::float32(), rot_y::float32(),
-      rot_z::float32()>> = value
+    # One buggy reference in Tamriel Rebuilt - in the cell "Firewatch, Sewers: Uriel's Quarter"
+    # has a malformed `rot_x` value for some reason
+    radians_to_degrees = fn num -> num * 180 / :math.pi() end
+
+    <<pos_x::float32(), pos_y::float32(), pos_z::float32(), rot_x::binary-size(4),
+      rot_y::float32(), rot_z::float32()>> = value
+
+    rot_x =
+      case rot_x do
+        <<rot_x::float32()>> -> float(radians_to_degrees.(rot_x))
+        _ -> nil
+      end
 
     %{
       position: {float(pos_x), float(pos_y), float(pos_z)},
-      rotation: {float(rot_x), float(rot_y), float(rot_z)}
+      rotation: {rot_x, float(radians_to_degrees.(rot_y)), float(radians_to_degrees.(rot_z))}
     }
   end
 end

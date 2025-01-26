@@ -56,4 +56,34 @@ defmodule Resdayn.Parser.HelpersTest do
       end
     end
   end
+
+  describe "coordinates/1" do
+    test "valid rot_x value" do
+      actual =
+        <<49, 214, 29, 69, 227, 177, 12, 69, 120, 32, 138, 66, 184, 206, 150, 64, 0, 0, 0, 128,
+          219, 15, 73, 64>>
+        |> Helpers.coordinates()
+
+      expected = %{
+        position: {2525.39, 2251.12, 69.06},
+        rotation: {270.02, 0.0, 180}
+      }
+
+      assert actual == expected
+    end
+
+    test "the dodgy rot_x value" do
+      actual =
+        <<205, 111, 38, 69, 252, 35, 6, 69, 227, 40, 130, 66, 0, 0, 192, 255, 219, 15, 201, 63, 0,
+          0, 0, 0>>
+        |> Helpers.coordinates()
+
+      expected = %{
+        position: {2662.99, 2146.25, 65.08},
+        rotation: {nil, 90, 0}
+      }
+
+      assert actual == expected
+    end
+  end
 end
