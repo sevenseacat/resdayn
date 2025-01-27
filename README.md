@@ -20,7 +20,7 @@ Using the amazing work of Dave Humphrey detailed here: http://www.uesp.net/morro
 | ✓      |          | `CLAS` (Character classes) |
 | ✓      |          | `FACT` (Factions) |
 | ✓      |          | `RACE` (Races) |
-| ✓      |          |` SOUN` (Sound effects) |
+| ✓      | ✓        |` SOUN` (Sound effects) |
 | ✓      | ✓        | `SKIL` (Skills) |
 | ✓      |          | `MGEF` (Magic effects) |
 | ✓      | ✓        | `SCPT` (Scripts) |
