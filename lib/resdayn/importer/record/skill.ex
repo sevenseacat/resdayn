@@ -6,7 +6,7 @@ defmodule Resdayn.Importer.Record.Skill do
       records
       |> of_type(Resdayn.Parser.Record.Skill)
       |> Enum.map(fn record ->
-        Map.put(record.data, :flags, record.flags)
+        with_flags(record.data, record)
       end)
 
     %{

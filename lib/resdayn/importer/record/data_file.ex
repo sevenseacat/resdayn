@@ -13,7 +13,7 @@ defmodule Resdayn.Importer.Record.DataFile do
             master: header.data.header.flags.master,
             dependencies: header.data[:dependencies] || []
           })
-          |> Map.put(:flags, header.flags)
+          |> with_flags(header)
         ]
       }
     else

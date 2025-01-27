@@ -8,7 +8,7 @@ defmodule Resdayn.Importer.Record.GameSetting do
       |> Enum.map(fn record ->
         record.data
         |> Map.take([:name, :value])
-        |> Map.put(:flags, record.flags)
+        |> with_flags(record)
       end)
 
     %{
