@@ -20,7 +20,6 @@ defmodule Mix.Tasks.Resdayn.ImportCodex do
   # Record.Faction,
   # Record.Race,
   # Record.Sound,
-  # Record.Skill,
   # Record.MagicEffect,
   # Record.Region,
   # Record.Birthsign,
@@ -62,6 +61,14 @@ defmodule Mix.Tasks.Resdayn.ImportCodex do
     run_importer(filename)
   end
 
+  def run([filename, resource]) do
+    Application.ensure_all_started(:resdayn)
+    Logger.configure(level: :info)
+
+    records = load_records(filename)
+    import_records(:"Elixir.Resdayn.Importer.Record.#{resource}", records, filename: filename)
+  end
+
   def run(_argv) do
     Application.ensure_all_started(:resdayn)
     Logger.configure(level: :info)
@@ -75,6 +82,7 @@ defmodule Mix.Tasks.Resdayn.ImportCodex do
     [
       Record.DataFile,
       Record.Attribute,
+      Record.Skill,
       Record.GameSetting,
       Record.Script
     ]

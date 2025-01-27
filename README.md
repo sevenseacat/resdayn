@@ -21,7 +21,7 @@ Using the amazing work of Dave Humphrey detailed here: http://www.uesp.net/morro
 | ✓      |          | `FACT` (Factions) |
 | ✓      |          | `RACE` (Races) |
 | ✓      |          |` SOUN` (Sound effects) |
-| ✓      |          | `SKIL` (Skills) |
+| ✓      | ✓        | `SKIL` (Skills) |
 | ✓      |          | `MGEF` (Magic effects) |
 | ✓      | ✓        | `SCPT` (Scripts) |
 | ✓      |          | `REGN` (Regions) |

@@ -1,6 +1,8 @@
 import Config
 
-config :resdayn, ecto_repos: [Resdayn.Repo], ash_domains: [Resdayn.Codex.Mechanics]
+config :resdayn,
+  ecto_repos: [Resdayn.Repo],
+  ash_domains: [Resdayn.Codex.Characters, Resdayn.Codex.Mechanics]
 
 config :ash,
   allow_forbidden_field_for_relationships_by_default?: true,
