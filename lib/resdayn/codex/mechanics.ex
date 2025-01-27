@@ -8,5 +8,6 @@ defmodule Resdayn.Codex.Mechanics do
     resource Resdayn.Codex.Mechanics.GameSetting
     resource Resdayn.Codex.Mechanics.MagicEffect
     resource Resdayn.Codex.Mechanics.Script
+    resource Resdayn.Codex.Mechanics.GlobalVariable
   end
 end

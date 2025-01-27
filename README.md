@@ -16,13 +16,13 @@ Using the amazing work of Dave Humphrey detailed here: http://www.uesp.net/morro
 | :---:  | :---:    | :--: |
 | ✓      | ✓        | `TES3` (Main header) |
 | ✓      | ✓        | `GMST` (Game settings) |
-| ✓      |          | `GLOB` (Global variable) |
+| ✓      | ✓        | `GLOB` (Global variable) |
 | ✓      |          | `CLAS` (Character classes) |
 | ✓      |          | `FACT` (Factions) |
 | ✓      |          | `RACE` (Races) |
 | ✓      | ✓        |` SOUN` (Sound effects) |
 | ✓      | ✓        | `SKIL` (Skills) |
-| ✓      |          | `MGEF` (Magic effects) |
+| ✓      | ✓        | `MGEF` (Magic effects) |
 | ✓      | ✓        | `SCPT` (Scripts) |
 | ✓      |          | `REGN` (Regions) |
 | ✓      |          | `BSGN` (Birth signs) |

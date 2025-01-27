@@ -14,8 +14,9 @@ defmodule Mix.Tasks.Resdayn.ImportCodex do
     "TR_Factions.esp"
   ]
 
+  @requirements ["app.start"]
+
   # To be imported
-  # Record.GlobalVariable,
   # Record.Class,
   # Record.Faction,
   # Record.Race,
@@ -53,24 +54,18 @@ defmodule Mix.Tasks.Resdayn.ImportCodex do
   # Record.DialogueResponse,
 
   def run([filename]) do
-    Application.ensure_all_started(:resdayn)
     Logger.configure(level: :info)
-
     run_importer(filename)
   end
 
   def run([filename, resource]) do
-    Application.ensure_all_started(:resdayn)
     Logger.configure(level: :info)
-
     records = load_records(filename)
     import_records(:"Elixir.Resdayn.Importer.Record.#{resource}", records, filename: filename)
   end
 
   def run(_argv) do
-    Application.ensure_all_started(:resdayn)
     Logger.configure(level: :info)
-
     Enum.each(@all_files, &run_importer/1)
   end
 
@@ -80,6 +75,7 @@ defmodule Mix.Tasks.Resdayn.ImportCodex do
     [
       Record.DataFile,
       Record.Attribute,
+      Record.GlobalVariable,
       Record.Skill,
       Record.GameSetting,
       Record.Sound,
@@ -90,7 +86,7 @@ defmodule Mix.Tasks.Resdayn.ImportCodex do
       import_records(importer, records, filename: filename)
     end)
 
-    IO.puts("")
+    Owl.IO.puts("")
   end
 
   defp load_records(filename) do
@@ -123,15 +119,8 @@ defmodule Mix.Tasks.Resdayn.ImportCodex do
 
     Owl.Spinner.update_label(id: importer, label: "#{name}: Inserting #{length} records...")
 
-    result =
-      Ash.bulk_create!(data, resource, :import, return_errors?: true, stop_on_error?: true)
+    Ash.bulk_create!(data, resource, :import)
 
-    if result.status != :success do
-      label = "#{name}: #{result.error_count} errors received."
-      Owl.Spinner.stop(id: importer, resolution: :error, label: label)
-    else
-      label = "#{name}: #{length} records inserted."
-      Owl.Spinner.stop(id: importer, resolution: :ok, label: label)
-    end
+    Owl.Spinner.stop(id: importer, resolution: :ok, label: "#{name}: #{length} records inserted.")
   end
 end
