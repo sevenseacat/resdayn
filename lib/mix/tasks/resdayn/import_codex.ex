@@ -19,7 +19,6 @@ defmodule Mix.Tasks.Resdayn.ImportCodex do
   # Record.Class,
   # Record.Faction,
   # Record.Race,
-  # Record.MagicEffect,
   # Record.Region,
   # Record.Birthsign,
   # Record.LandTexture,
@@ -84,6 +83,7 @@ defmodule Mix.Tasks.Resdayn.ImportCodex do
       Record.Skill,
       Record.GameSetting,
       Record.Sound,
+      Record.MagicEffect,
       Record.Script
     ]
     |> Enum.each(fn importer ->

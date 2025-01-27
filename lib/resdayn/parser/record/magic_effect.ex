@@ -11,17 +11,17 @@ defmodule Resdayn.Parser.Record.MagicEffect do
   }
 
   @field_name_mappings %{
-    "ITEX" => :icon,
-    "PTEX" => :particle_texture,
+    "ITEX" => :icon_filename,
+    "PTEX" => :particle_texture_filename,
     "CVFX" => :casting_visual,
     "BVFX" => :bolt_visual,
     "HVFX" => :hit_visual,
-    "AVFX" => :aria_visual,
+    "AVFX" => :area_visual,
     "DESC" => :description,
-    "BSND" => :bolt_sound,
-    "CSND" => :casting_sound,
-    "HSND" => :hit_sound,
-    "ASND" => :area_sound
+    "BSND" => :bolt_sound_id,
+    "CSND" => :casting_sound_id,
+    "HSND" => :hit_sound_id,
+    "ASND" => :area_sound_id
   }
 
   @game_setting_ids %{
@@ -36,7 +36,7 @@ defmodule Resdayn.Parser.Record.MagicEffect do
     8 => "sEffectFeather",
     9 => "sEffectJump",
     10 => "sEffectLevitate",
-    11 => "sEffectSlowFal",
+    11 => "sEffectSlowFall",
     12 => "sEffectLock",
     13 => "sEffectOpen",
     14 => "sEffectFireDamage",
@@ -193,9 +193,9 @@ defmodule Resdayn.Parser.Record.MagicEffect do
       size_cap: float(size_cap),
       flags:
         bitmask(flags,
-          spellmaking: 0x00200,
-          enchanting: 0x00400,
-          negative: 0x00800
+          allows_spellmaking: 0x00200,
+          allows_enchanting: 0x00400,
+          negative_light: 0x00800
         )
     })
   end

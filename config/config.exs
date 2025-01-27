@@ -36,6 +36,6 @@ config :spark,
     "Ash.Domain": [section_order: [:resources, :policies, :authorization, :domain, :execution]]
   ]
 
-config :ash, :custom_types, range: Resdayn.Codex.Range
+config :ash, :custom_types, range: Resdayn.Codex.Range, color: Resdayn.Codex.Color
 
 import_config "#{config_env()}.exs"
