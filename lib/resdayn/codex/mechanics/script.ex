@@ -11,12 +11,12 @@ defmodule Resdayn.Codex.Mechanics.Script do
   end
 
   attributes do
-    attribute :id, :string, primary_key?: true, allow_nil?: false, public?: true
+    attribute :id, :string, primary_key?: true, allow_nil?: false
 
-    attribute :text, :string, allow_nil?: false, public?: true
-    attribute :local_variables, {:array, :string}, default: [], public?: true
-    attribute :start_script, :boolean, default: false, public?: true
+    attribute :text, :string, allow_nil?: false
+    attribute :local_variables, {:array, :string}, default: []
+    attribute :start_script, :boolean, default: false
 
-    attribute :flags, Resdayn.Codex.Flags, allow_nil?: false, public?: true
+    attribute :flags, Resdayn.Codex.Flags, allow_nil?: false
   end
 end

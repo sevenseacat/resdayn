@@ -11,9 +11,9 @@ defmodule Resdayn.Codex.Mechanics.GlobalVariable do
   end
 
   attributes do
-    attribute :id, :string, primary_key?: true, allow_nil?: false, public?: true
-    attribute :value, Resdayn.Codex.Mechanics.Number, allow_nil?: false, public?: true
+    attribute :id, :string, primary_key?: true, allow_nil?: false
+    attribute :value, Resdayn.Codex.Mechanics.Number, allow_nil?: false
 
-    attribute :flags, Resdayn.Codex.Flags, allow_nil?: false, public?: true
+    attribute :flags, Resdayn.Codex.Flags, allow_nil?: false
   end
 end

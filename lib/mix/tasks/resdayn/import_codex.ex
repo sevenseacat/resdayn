@@ -119,7 +119,7 @@ defmodule Mix.Tasks.Resdayn.ImportCodex do
 
     Owl.Spinner.update_label(id: importer, label: "#{name}: Inserting #{length} records...")
 
-    Ash.bulk_create!(data, resource, :import)
+    Ash.bulk_create!(data, resource, :import, return_errors?: true)
 
     Owl.Spinner.stop(id: importer, resolution: :ok, label: "#{name}: #{length} records inserted.")
   end

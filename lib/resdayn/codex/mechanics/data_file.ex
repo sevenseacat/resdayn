@@ -11,14 +11,14 @@ defmodule Resdayn.Codex.Mechanics.DataFile do
   end
 
   attributes do
-    attribute :filename, :string, primary_key?: true, allow_nil?: false, public?: true
+    attribute :filename, :string, primary_key?: true, allow_nil?: false
 
-    attribute :description, :string, public?: true
-    attribute :version, :decimal, allow_nil?: false, public?: true
-    attribute :master, :boolean, public?: true, default: false
-    attribute :company, :string, public?: true
-    attribute :dependencies, {:array, __MODULE__.Dependency}, default: [], public?: true
+    attribute :description, :string
+    attribute :version, :decimal, allow_nil?: false
+    attribute :master, :boolean, default: false
+    attribute :company, :string
+    attribute :dependencies, {:array, __MODULE__.Dependency}, default: []
 
-    attribute :flags, Resdayn.Codex.Flags, allow_nil?: false, public?: true
+    attribute :flags, Resdayn.Codex.Flags, allow_nil?: false
   end
 end

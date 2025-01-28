@@ -11,7 +11,7 @@ defmodule Resdayn.Codex.Mechanics.Attribute do
   end
 
   attributes do
-    attribute :id, :integer, primary_key?: true, allow_nil?: false, public?: true
-    attribute :name, :string, allow_nil?: false, public?: true
+    attribute :id, :integer, primary_key?: true, allow_nil?: false
+    attribute :name, :string, allow_nil?: false
   end
 end

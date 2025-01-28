@@ -15,12 +15,12 @@ defmodule Resdayn.Codex.Assets.Sound do
   end
 
   attributes do
-    attribute :id, :string, primary_key?: true, allow_nil?: false, public?: true
+    attribute :id, :string, primary_key?: true, allow_nil?: false
 
-    attribute :filename, :string, allow_nil?: true, public?: true
-    attribute :volume, :integer, allow_nil?: false, public?: true, constraints: [min: 0, max: 255]
-    attribute :range, :range, allow_nil?: false, public?: true, constraints: [validate?: false]
+    attribute :filename, :string, allow_nil?: true
+    attribute :volume, :integer, allow_nil?: false, constraints: [min: 0, max: 255]
+    attribute :range, :range, allow_nil?: false, constraints: [validate?: false]
 
-    attribute :flags, Resdayn.Codex.Flags, allow_nil?: false, public?: true
+    attribute :flags, Resdayn.Codex.Flags, allow_nil?: false
   end
 end

@@ -13,9 +13,15 @@ defmodule Resdayn.Codex.Importable do
     use Spark.Dsl.Transformer
 
     def transform(dsl_state) do
+      attribute_names = Enum.map(Ash.Resource.Info.attributes(dsl_state), & &1.name)
+
+      belongs_to_ids =
+        Enum.filter(Ash.Resource.Info.relationships(dsl_state), &(&1.type == :belongs_to))
+        |> Enum.map(& &1.source_attribute)
+
       dsl_state
       |> Ash.Resource.Builder.add_action(:create, :import,
-        accept: [:*],
+        accept: attribute_names ++ belongs_to_ids,
         upsert?: true,
         upsert_fields: :replace_all
       )

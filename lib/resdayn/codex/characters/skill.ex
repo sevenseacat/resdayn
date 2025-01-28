@@ -11,10 +11,10 @@ defmodule Resdayn.Codex.Characters.Skill do
   end
 
   attributes do
-    attribute :id, :integer, primary_key?: true, allow_nil?: false, public?: true
+    attribute :id, :integer, primary_key?: true, allow_nil?: false
 
-    attribute :name, :string, allow_nil?: false, public?: true
-    attribute :description, :string, allow_nil?: false, public?: true
+    attribute :name, :string, allow_nil?: false
+    attribute :description, :string, allow_nil?: false
 
     attribute :uses, {:array, :float},
       allow_nil?: false,
@@ -25,7 +25,7 @@ defmodule Resdayn.Codex.Characters.Skill do
       allow_nil?: false,
       public?: true
 
-    attribute :flags, Resdayn.Codex.Flags, allow_nil?: false, public?: true
+    attribute :flags, Resdayn.Codex.Flags, allow_nil?: false
   end
 
   relationships do
