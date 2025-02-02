@@ -24,8 +24,6 @@ defmodule Resdayn.Codex.Characters.Skill do
     attribute :specialization, Resdayn.Codex.Characters.Specialization,
       allow_nil?: false,
       public?: true
-
-    attribute :flags, Resdayn.Codex.Flags, allow_nil?: false
   end
 
   relationships do

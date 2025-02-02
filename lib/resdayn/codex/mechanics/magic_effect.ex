@@ -31,8 +31,6 @@ defmodule Resdayn.Codex.Mechanics.MagicEffect do
     attribute :allows_spellmaking, :boolean, allow_nil?: false
     attribute :allows_enchanting, :boolean, allow_nil?: false
     attribute :negative_light, :boolean, allow_nil?: false
-
-    attribute :flags, Resdayn.Codex.Flags, allow_nil?: false
   end
 
   relationships do

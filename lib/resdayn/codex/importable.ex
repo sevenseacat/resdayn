@@ -21,9 +21,13 @@ defmodule Resdayn.Codex.Importable do
 
       dsl_state
       |> Ash.Resource.Builder.add_action(:create, :import,
-        accept: attribute_names ++ belongs_to_ids,
+        accept: attribute_names ++ belongs_to_ids ++ [:flags],
         upsert?: true,
         upsert_fields: :replace_all
+      )
+      |> Ash.Resource.Builder.add_attribute(:flags, {:array, Resdayn.Codex.Flags},
+        allow_nil?: false,
+        default: []
       )
     end
 

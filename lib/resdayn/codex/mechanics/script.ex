@@ -16,7 +16,5 @@ defmodule Resdayn.Codex.Mechanics.Script do
     attribute :text, :string, allow_nil?: false
     attribute :local_variables, {:array, :string}, default: []
     attribute :start_script, :boolean, default: false
-
-    attribute :flags, Resdayn.Codex.Flags, allow_nil?: false
   end
 end

@@ -18,7 +18,5 @@ defmodule Resdayn.Codex.Mechanics.DataFile do
     attribute :master, :boolean, default: false
     attribute :company, :string
     attribute :dependencies, {:array, __MODULE__.Dependency}, default: []
-
-    attribute :flags, Resdayn.Codex.Flags, allow_nil?: false
   end
 end
