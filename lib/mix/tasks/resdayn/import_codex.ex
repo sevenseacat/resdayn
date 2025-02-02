@@ -122,5 +122,6 @@ defmodule Mix.Tasks.Resdayn.ImportCodex do
     Ash.bulk_create!(data, resource, :import, return_errors?: true)
 
     Owl.Spinner.stop(id: importer, resolution: :ok, label: "#{name}: #{length} records inserted.")
+    Owl.LiveScreen.flush()
   end
 end
