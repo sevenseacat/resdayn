@@ -3,11 +3,12 @@ defmodule Resdayn.Codex.Mechanics do
     otp_app: :resdayn
 
   resources do
-    resource Resdayn.Codex.Mechanics.Attribute
-    resource Resdayn.Codex.Mechanics.DataFile
-    resource Resdayn.Codex.Mechanics.GameSetting
-    resource Resdayn.Codex.Mechanics.MagicEffect
-    resource Resdayn.Codex.Mechanics.Script
-    resource Resdayn.Codex.Mechanics.GlobalVariable
+    resource __MODULE__.Attribute
+    resource __MODULE__.DataFile
+    resource __MODULE__.Enchantment
+    resource __MODULE__.GameSetting
+    resource __MODULE__.MagicEffect
+    resource __MODULE__.Script
+    resource __MODULE__.GlobalVariable
   end
 end

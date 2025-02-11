@@ -17,7 +17,7 @@ Using the amazing work of Dave Humphrey detailed here: http://www.uesp.net/morro
 | ✓      | ✓        | `TES3` (Main header) |
 | ✓      | ✓        | `GMST` (Game settings) |
 | ✓      | ✓        | `GLOB` (Global variable) |
-| ✓      |          | `CLAS` (Character classes) |
+| ✓      | ✓        | `CLAS` (Character classes) |
 | ✓      |          | `FACT` (Factions) |
 | ✓      |          | `RACE` (Races) |
 | ✓      | ✓        |` SOUN` (Sound effects) |
@@ -36,7 +36,7 @@ Using the amazing work of Dave Humphrey detailed here: http://www.uesp.net/morro
 | ✓      |          | `CREA` (Creatures) |
 | ✓      |          | `BODY` (Body parts) |
 | ✓      |          | `LIGH` (Lights) |
-| ✓      |          | `ENCH` (Enchanting effects) |
+| ✓      | ✓        | `ENCH` (Enchanting effects) |
 | ✓      |          | `NPC_` (NPCs) |
 | ✓      |          | `ARMO` (Armour) |
 | ✓      |          | `CLOT` (Clothing) |

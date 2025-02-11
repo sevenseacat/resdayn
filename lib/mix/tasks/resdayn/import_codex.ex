@@ -31,7 +31,6 @@ defmodule Mix.Tasks.Resdayn.ImportCodex do
   # Record.Creature,
   # Record.BodyPart,
   # Record.Light,
-  # Record.Enchantment,
   # Record.NPC,
   # Record.Armour,
   # Record.Clothing,
@@ -81,6 +80,7 @@ defmodule Mix.Tasks.Resdayn.ImportCodex do
       Record.GameSetting,
       Record.Sound,
       Record.MagicEffect,
+      Record.Enchantment,
       Record.Script
     ]
     |> Enum.each(fn importer ->
