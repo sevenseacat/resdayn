@@ -17,7 +17,7 @@ defmodule Resdayn.Importer.Record.MagicEffect do
           Map.update(acc, field, nil, &String.downcase(&1))
         end)
         |> Map.merge(bool_flags)
-        |> with_flags(record)
+        |> with_flags(:flags, record.flags)
       end)
 
     %{resource: Resdayn.Codex.Mechanics.MagicEffect, data: data}

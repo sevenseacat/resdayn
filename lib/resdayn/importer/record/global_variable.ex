@@ -8,7 +8,7 @@ defmodule Resdayn.Importer.Record.GlobalVariable do
       |> Enum.map(fn record ->
         record.data
         |> Map.take([:id, :value])
-        |> with_flags(record)
+        |> with_flags(:flags, record.flags)
       end)
 
     %{

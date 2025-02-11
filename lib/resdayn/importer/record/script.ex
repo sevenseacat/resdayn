@@ -12,7 +12,7 @@ defmodule Resdayn.Importer.Record.Script do
         record.data
         |> Map.take([:id, :text, :local_variables])
         |> Map.put(:start_script, record.data.id in start_scripts)
-        |> with_flags(record)
+        |> with_flags(:flags, record.flags)
       end)
 
     %{

@@ -12,7 +12,7 @@ defmodule Resdayn.Importer.Record.Sound do
           volume: record.data.attenuation.volume,
           range: [record.data.attenuation.min_range, record.data.attenuation.max_range]
         }
-        |> with_flags(record)
+        |> with_flags(:flags, record.flags)
       end)
 
     %{resource: Resdayn.Codex.Assets.Sound, data: data}
