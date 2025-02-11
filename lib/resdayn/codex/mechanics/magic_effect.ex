@@ -37,13 +37,11 @@ defmodule Resdayn.Codex.Mechanics.MagicEffect do
     belongs_to :game_setting, Resdayn.Codex.Mechanics.GameSetting,
       attribute_type: :string,
       destination_attribute: :name,
-      allow_nil?: false,
-      public?: true
+      allow_nil?: false
 
     belongs_to :skill, Resdayn.Codex.Characters.Skill,
       attribute_type: :integer,
-      allow_nil?: false,
-      public?: true
+      allow_nil?: false
 
     belongs_to :area_sound, Resdayn.Codex.Assets.Sound, attribute_type: :string
     belongs_to :bolt_sound, Resdayn.Codex.Assets.Sound, attribute_type: :string

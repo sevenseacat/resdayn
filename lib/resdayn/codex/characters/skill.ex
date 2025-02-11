@@ -18,18 +18,14 @@ defmodule Resdayn.Codex.Characters.Skill do
 
     attribute :uses, {:array, :float},
       allow_nil?: false,
-      public?: true,
       constraints: [min_length: 4, max_length: 4]
 
-    attribute :specialization, Resdayn.Codex.Characters.Specialization,
-      allow_nil?: false,
-      public?: true
+    attribute :specialization, Resdayn.Codex.Characters.Specialization, allow_nil?: false
   end
 
   relationships do
     belongs_to :attribute, Resdayn.Codex.Mechanics.Attribute,
       allow_nil?: false,
-      attribute_type: :integer,
-      attribute_public?: true
+      attribute_type: :integer
   end
 end

@@ -17,7 +17,6 @@ defmodule Mix.Tasks.Resdayn.ImportCodex do
   @requirements ["app.start"]
 
   # To be imported
-  # Record.Class,
   # Record.Faction,
   # Record.Race,
   # Record.Region,
@@ -77,6 +76,8 @@ defmodule Mix.Tasks.Resdayn.ImportCodex do
       Record.Attribute,
       Record.GlobalVariable,
       Record.Skill,
+      Record.Class,
+      Record.ClassSkill,
       Record.GameSetting,
       Record.Sound,
       Record.MagicEffect,
@@ -119,7 +120,7 @@ defmodule Mix.Tasks.Resdayn.ImportCodex do
 
     Owl.Spinner.update_label(id: importer, label: "#{name}: Inserting #{length} records...")
 
-    Ash.bulk_create!(data, resource, :import, return_errors?: true)
+    Ash.bulk_create!(data, resource, :import, return_errors?: true, stop_on_error?: true)
 
     Owl.Spinner.stop(id: importer, resolution: :ok, label: "#{name}: #{length} records inserted.")
   end
