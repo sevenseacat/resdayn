@@ -45,7 +45,7 @@ Using the amazing work of Dave Humphrey detailed here: http://www.uesp.net/morro
 | ✓      |          | `APPA` (Alchemy apparatus) |
 | ✓      |          | `LOCK` (Lockpicking items) |
 | ✓      |          | `PROB` (Probe items) |
-| ✓      |          | `INGR` (Ingredients) |
+| ✓      | ✓        | `INGR` (Ingredients) |
 | ✓      |          | `BOOK` (Books and papers) |
 | ✓      |          | `ALCH` (Potions) |
 | ✓      |          | `LEVI` (Levelled items) |

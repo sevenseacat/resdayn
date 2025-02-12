@@ -2,7 +2,12 @@ import Config
 
 config :resdayn,
   ecto_repos: [Resdayn.Repo],
-  ash_domains: [Resdayn.Codex.Assets, Resdayn.Codex.Characters, Resdayn.Codex.Mechanics]
+  ash_domains: [
+    Resdayn.Codex.Items,
+    Resdayn.Codex.Assets,
+    Resdayn.Codex.Characters,
+    Resdayn.Codex.Mechanics
+  ]
 
 config :ash,
   allow_forbidden_field_for_relationships_by_default?: true,

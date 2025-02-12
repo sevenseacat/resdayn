@@ -39,7 +39,6 @@ defmodule Mix.Tasks.Resdayn.ImportCodex do
   # Record.AlchemyApparatus,
   # Record.Lockpick,
   # Record.Probe,
-  # Record.Ingredient,
   # Record.Book,
   # Record.Potion,
   # Record.LevelledItem,
@@ -81,7 +80,8 @@ defmodule Mix.Tasks.Resdayn.ImportCodex do
       Record.Sound,
       Record.MagicEffect,
       Record.Enchantment,
-      Record.Script
+      Record.Script,
+      Record.Ingredient
     ]
     |> Enum.each(fn importer ->
       import_records(importer, records, filename: filename)

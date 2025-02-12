@@ -2,9 +2,9 @@ defmodule Resdayn.Parser.Record.Ingredient do
   use Resdayn.Parser.Record
 
   process_basic_string "NAME", :id
-  process_basic_string "MODL", :nif_model
+  process_basic_string "MODL", :nif_model_filename
   process_basic_string "FNAM", :name
-  process_basic_string "ITEX", :icon
+  process_basic_string "ITEX", :icon_filename
   process_basic_string "SCRI", :script_id
 
   def process({"IRDT", value}, data) do
@@ -34,7 +34,11 @@ defmodule Resdayn.Parser.Record.Ingredient do
          <<attribute_id::int32(), attribute_ids::binary>>
        ) do
     [
-      %{magic_effect_id: effect, skill_id: skill_id, attribute_id: attribute_id}
+      %{
+        magic_effect_id: effect,
+        skill_id: nil_if_negative(skill_id),
+        attribute_id: nil_if_negative(attribute_id)
+      }
       | effects(effects, skill_ids, attribute_ids)
     ]
   end
