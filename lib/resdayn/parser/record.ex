@@ -286,36 +286,37 @@ defmodule Resdayn.Parser.Record do
       @doc """
       Record a list of values for a record.
       Used when a record has multiple instances of a given subrecord type.
-      Lists will maintain their order as they appear in the source file.
+
+      **IMPORTANT**: Lists will be returned in reverse order than they appear in
+      the source record - if order is important, make sure to reverse the list before use.
 
       eg. a Faction record has ten RNAM (rank name) subrecords
       """
       def record_list(map, key, value) do
-        Map.update(map, key, [value], &(&1 ++ [value]))
+        Map.update(map, key, [value], &[value | &1])
       end
 
       @doc """
       Record a list of values for a record, when fields always appear in sets.
-      Lists will maintain their order as they appear in the source file.
+
+      **IMPORTANT**: Lists will be returned in reverse order than they appear in
+      the source record - if order is important, make sure to reverse the list before use.
 
       eg. a MainHeader record can have multiple pairs of MAST/DATA subrecords,
       representing dependency names and sizes.
       """
       def record_list_of_maps_key(map, pair_key, record_key, value) do
-        Map.update(map, pair_key, [%{record_key => value}], &(&1 ++ [%{record_key => value}]))
+        Map.update(map, pair_key, [%{record_key => value}], &[%{record_key => value} | &1])
       end
 
       def record_list_of_maps_value(map, pair_key, record_key, value) do
-        Map.update!(map, pair_key, fn list ->
-          length = length(list)
-          last = List.last(list)
-
-          if Map.has_key?(last, record_key) do
+        Map.update!(map, pair_key, fn [head | rest] ->
+          if Map.has_key?(head, record_key) do
             raise RuntimeError,
-                  "Pair #{pair_key} (#{inspect(last)}) already has key `#{record_key}`"
+                  "Pair #{pair_key} (#{inspect(head)}) already has key `#{record_key}`"
           end
 
-          List.replace_at(list, length - 1, Map.put(last, record_key, value))
+          [Map.put(head, record_key, value) | rest]
         end)
       end
 

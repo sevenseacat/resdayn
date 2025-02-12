@@ -13,7 +13,7 @@ defmodule Resdayn.Parser.Record.Faction do
 
     record_unnested_value(data, %{
       attribute_ids: [attribute_1, attribute_2],
-      ranks: ranks(rank_names, rankings),
+      ranks: ranks(Enum.reverse(rank_names), rankings),
       skill_ids: skills(skills),
       hidden: flags == 1
     })
