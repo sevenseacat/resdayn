@@ -52,7 +52,10 @@ defmodule Mix.Tasks.Resdayn.ImportCodex do
 
   def run([filename]) do
     Logger.configure(level: :info)
-    run_importer(filename)
+
+    filename
+    |> load_records()
+    |> run_importer(filename)
   end
 
   def run([filename, resource]) do
@@ -63,11 +66,23 @@ defmodule Mix.Tasks.Resdayn.ImportCodex do
 
   def run(_argv) do
     Logger.configure(level: :info)
-    Enum.each(@all_files, &run_importer/1)
+
+    Owl.IO.puts("* File parsing")
+
+    Task.async_stream(
+      @all_files,
+      fn filename -> {filename, load_records(filename)} end,
+      ordered: true,
+      timeout: 20_000
+    )
+    |> Enum.to_list()
+    |> Enum.map(fn {:ok, {filename, records}} ->
+      run_importer(records, filename)
+    end)
   end
 
-  def run_importer(filename) do
-    records = load_records(filename)
+  def run_importer(records, filename) do
+    Owl.IO.puts("\n* #{filename}")
 
     [
       Record.DataFile,
@@ -86,8 +101,6 @@ defmodule Mix.Tasks.Resdayn.ImportCodex do
     |> Enum.each(fn importer ->
       import_records(importer, records, filename: filename)
     end)
-
-    Owl.IO.puts("")
   end
 
   defp load_records(filename) do
@@ -111,17 +124,12 @@ defmodule Mix.Tasks.Resdayn.ImportCodex do
 
   defp import_records(importer, records, opts) do
     name = String.split(Atom.to_string(importer), ".") |> List.last()
-
-    Owl.Spinner.start(id: importer)
-    Owl.Spinner.update_label(id: importer, label: "#{name}: Processing...")
-
     %{resource: resource, data: data} = apply(importer, :process, [records, opts])
     length = length(data)
 
-    Owl.Spinner.update_label(id: importer, label: "#{name}: Inserting #{length} records...")
-
-    Ash.bulk_create!(data, resource, :import, return_errors?: true, stop_on_error?: true)
-
-    Owl.Spinner.stop(id: importer, resolution: :ok, label: "#{name}: #{length} records inserted.")
+    if length > 0 do
+      Ash.bulk_create!(data, resource, :import, return_errors?: true, stop_on_error?: true)
+      Owl.IO.puts("#{name}: #{length} records inserted.")
+    end
   end
 end
