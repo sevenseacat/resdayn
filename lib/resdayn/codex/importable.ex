@@ -20,7 +20,7 @@ defmodule Resdayn.Codex.Importable do
         |> Enum.map(& &1.source_attribute)
 
       dsl_state
-      |> Ash.Resource.Builder.add_action(:create, :import,
+      |> Ash.Resource.Builder.add_new_action(:create, :import,
         accept: attribute_names ++ belongs_to_ids ++ [:flags],
         upsert?: true,
         upsert_fields: :replace_all

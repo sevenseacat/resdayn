@@ -10,6 +10,33 @@ defmodule Resdayn.Codex.Characters.Class do
     repo Resdayn.Repo
   end
 
+  actions do
+    create :import do
+      description "Custom importer to allow for related skills"
+      upsert? true
+      upsert_fields :replace_all
+
+      accept [
+        :id,
+        :name,
+        :description,
+        :services_offered,
+        :playable,
+        :specialization,
+        :items_vendored,
+        :attribute1_id,
+        :attribute2_id,
+        :flags
+      ]
+
+      argument :major_skill_ids, {:array, :integer}, allow_nil?: false
+      argument :minor_skill_ids, {:array, :integer}, allow_nil?: false
+
+      change {Resdayn.Codex.Characters.Changes.ImportSkills, type: :minor}
+      change {Resdayn.Codex.Characters.Changes.ImportSkills, type: :major}
+    end
+  end
+
   attributes do
     attribute :id, :string, primary_key?: true, allow_nil?: false
 

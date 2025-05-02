@@ -90,7 +90,6 @@ defmodule Mix.Tasks.Resdayn.ImportCodex do
       Record.GlobalVariable,
       Record.Skill,
       Record.Class,
-      Record.ClassSkill,
       Record.GameSetting,
       Record.Sound,
       Record.MagicEffect,
