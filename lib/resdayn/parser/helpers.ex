@@ -77,11 +77,15 @@ defmodule Resdayn.Parser.Helpers do
     string =
       string
       |> truncate()
+      |> String.replace(<<1>>, "")
+      |> String.replace(<<33>>, "!")
       |> String.replace(<<133>>, <<"...">>)
       |> String.replace(<<146>>, "’")
       |> String.replace(<<147>>, "“")
       |> String.replace(<<148>>, "”")
+      |> String.replace(<<151>>, <<151::utf8>>)
       |> String.replace(<<173>>, "")
+      |> String.replace(<<194, 151>>, <<"—">>)
       |> String.replace(<<225>>, <<225::utf8>>)
       |> String.replace(<<232>>, <<232::utf8>>)
       |> String.replace(<<233>>, <<233::utf8>>)

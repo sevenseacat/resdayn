@@ -11,7 +11,9 @@ defmodule Mix.Tasks.Resdayn.ImportCodex do
     "master_index.esp",
     "Tamriel_Data.esm",
     "TR_Mainland.esm",
-    "TR_Factions.esp"
+    "TR_Factions.esp",
+    "Sky_Main.esm",
+    "Cyr_Main.esm"
   ]
 
   @requirements ["app.start"]
@@ -73,7 +75,7 @@ defmodule Mix.Tasks.Resdayn.ImportCodex do
       @all_files,
       fn filename -> {filename, load_records(filename)} end,
       ordered: true,
-      timeout: 20_000
+      timeout: 30_000
     )
     |> Enum.to_list()
     |> Enum.map(fn {:ok, {filename, records}} ->
