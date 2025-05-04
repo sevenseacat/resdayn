@@ -61,14 +61,12 @@ defmodule Resdayn.Codex.Characters.Class do
       allow_nil?: false,
       attribute_type: :integer
 
-    has_many :major_skill_relationships, Resdayn.Codex.Characters.ClassSkill,
-      filter: expr(category == :major)
+    has_many :major_skill_relationships, __MODULE__.Skill, filter: expr(category == :major)
 
     many_to_many :major_skills, Resdayn.Codex.Characters.Skill,
       join_relationship: :major_skill_relationships
 
-    has_many :minor_skill_relationships, Resdayn.Codex.Characters.ClassSkill,
-      filter: expr(category == :minor)
+    has_many :minor_skill_relationships, __MODULE__.Skill, filter: expr(category == :minor)
 
     many_to_many :minor_skills, Resdayn.Codex.Characters.Skill,
       join_relationship: :minor_skill_relationships

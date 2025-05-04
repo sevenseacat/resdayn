@@ -1,4 +1,4 @@
-defmodule Resdayn.Codex.Characters.ClassSkill do
+defmodule Resdayn.Codex.Characters.Class.Skill do
   use Ash.Resource,
     otp_app: :resdayn,
     domain: Resdayn.Codex.Characters,
