@@ -6,8 +6,8 @@ defmodule Resdayn.Parser.Record.Faction do
   process_basic_list "RNAM", :rank_names
 
   def process({"FADT", value}, data) do
-    <<attribute_1::uint32(), attribute_2::uint32(), rankings::char(200), skills::char(24),
-      _::uint32(), flags::uint32()>> = value
+    <<attribute_1::uint32(), attribute_2::uint32(), rankings::char(200), skills::char(28),
+      flags::uint32()>> = value
 
     {rank_names, data} = pop_value(data, :rank_names, [])
 
