@@ -1,7 +1,28 @@
 defmodule Resdayn.Parser.Record.Cell do
   use Resdayn.Parser.Record
 
+  import Bitwise
+
   process_basic_string "RGNN", :region_name
+
+  # This reference is being deleted in this file
+  def process({"DELE", _value}, data) do
+    [deleted | rest] = data.references
+
+    deleted = Map.update!(deleted, :id, &decode_deleted_ref_id/1)
+
+    data
+    |> Map.put(:references, rest)
+    |> Map.update(:deleted, [deleted], &[deleted | &1])
+  end
+
+  def process({"MVRF", <<value::uint32()>>}, data) do
+    record_list_of_maps_key(data, :moved_references, :id, value)
+  end
+
+  def process({"CNDT", <<x::int32(), y::int32()>>}, data) do
+    record_list_of_maps_value(data, :moved_references, :cell_coordinates, {x, y})
+  end
 
   # The `NAME` for the cell itself
   def process({"NAME" = v, value}, data) when not is_map_key(data, :references) do
@@ -128,12 +149,24 @@ defmodule Resdayn.Parser.Record.Cell do
   end
 
   def process({"CNAM" = v, value}, data) do
-    record_list_of_maps_value(
-      data,
-      :references,
-      :owner_faction_id,
-      printable!(__MODULE__, v, value)
-    )
+    # CNAM can be *either* moved reference cell name (if coming directly after
+    # a MVRF) or owner faction ID (if for a reference)
+    # If the top moved reference is only an ID and not a cell name/coords, then it goes there
+    if Map.has_key?(data, :moved_references) && Map.keys(hd(data.moved_references)) == [:id] do
+      record_list_of_maps_value(
+        data,
+        :moved_references,
+        :cell_name,
+        printable!(__MODULE__, v, value)
+      )
+    else
+      record_list_of_maps_value(
+        data,
+        :references,
+        :owner_faction_id,
+        printable!(__MODULE__, v, value)
+      )
+    end
   end
 
   def process({"INDX", <<value::uint32()>>}, data) do
@@ -163,5 +196,15 @@ defmodule Resdayn.Parser.Record.Cell do
 
   def process({"UNAM", _}, data) do
     record_list_of_maps_value(data, :references, :blocked, true)
+  end
+
+  # Written by Claude
+  # Top 8 bits - plugin index
+  # Remaining 24 bits - ref ID in that plugin
+  defp decode_deleted_ref_id(id) do
+    # 1-based index (1=Morrowind.esm, 2=Tribunal.esm, etc.) in the dependency list of the file
+    plugin_index = id >>> 24
+    local_id = id &&& 0xFFFFFF
+    {plugin_index, local_id}
   end
 end

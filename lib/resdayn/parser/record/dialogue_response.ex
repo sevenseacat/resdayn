@@ -107,6 +107,10 @@ defmodule Resdayn.Parser.Record.DialogueResponse do
   process_basic_string "SNAM", :sound_id
   process_basic_string "RNAM", :race
 
+  def process({"DELE", <<0::uint32()>>}, data) do
+    Map.put(data, :deleted, true)
+  end
+
   def process({"DATA", value}, data) do
     <<type::uint8(), _::char(3), disposition_or_journal_index::uint32(), rank::int8(),
       gender::int8(), pc_rank::int8(), _::binary>> = value
