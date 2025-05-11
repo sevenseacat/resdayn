@@ -11,6 +11,8 @@ defmodule Resdayn.Codex.Characters.Class do
   end
 
   actions do
+    defaults [:read]
+
     create :import do
       description "Custom importer to allow for related skills"
       upsert? true
@@ -32,8 +34,26 @@ defmodule Resdayn.Codex.Characters.Class do
       argument :major_skill_ids, {:array, :integer}, allow_nil?: false
       argument :minor_skill_ids, {:array, :integer}, allow_nil?: false
 
-      change {Resdayn.Codex.Characters.Changes.ImportSkills, type: :minor}
-      change {Resdayn.Codex.Characters.Changes.ImportSkills, type: :major}
+      change after_action(fn changeset, record, _context ->
+               skill_ids = Map.take(changeset.arguments, [:major_skill_ids, :minor_skill_ids])
+
+               {record, notifications} =
+                 record
+                 |> Ash.Changeset.for_update(:update, skill_ids)
+                 |> Ash.update!(return_notifications?: true)
+
+               {:ok, record, notifications}
+             end)
+    end
+
+    update :update do
+      require_atomic? false
+
+      argument :major_skill_ids, {:array, :integer}, allow_nil?: false
+      argument :minor_skill_ids, {:array, :integer}, allow_nil?: false
+
+      change {Resdayn.Codex.Characters.Changes.SaveRelatedSkills, type: :minor}
+      change {Resdayn.Codex.Characters.Changes.SaveRelatedSkills, type: :major}
     end
   end
 
@@ -70,5 +90,10 @@ defmodule Resdayn.Codex.Characters.Class do
 
     many_to_many :minor_skills, Resdayn.Codex.Characters.Skill,
       join_relationship: :minor_skill_relationships
+  end
+
+  aggregates do
+    list :major_skill_ids, :major_skills, :id
+    list :minor_skill_ids, :minor_skills, :id
   end
 end

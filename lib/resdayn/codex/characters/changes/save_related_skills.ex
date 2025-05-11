@@ -1,4 +1,4 @@
-defmodule Resdayn.Codex.Characters.Changes.ImportSkills do
+defmodule Resdayn.Codex.Characters.Changes.SaveRelatedSkills do
   use Ash.Resource.Change
 
   @impl true
@@ -10,8 +10,7 @@ defmodule Resdayn.Codex.Characters.Changes.ImportSkills do
 
     changeset
     |> Ash.Changeset.manage_relationship("#{type}_skill_relationships", relationships,
-      type: :direct_control,
-      on_no_match: {:create, :import}
+      type: :direct_control
     )
   end
 end
