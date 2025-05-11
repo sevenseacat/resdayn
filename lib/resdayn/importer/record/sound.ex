@@ -8,7 +8,7 @@ defmodule Resdayn.Importer.Record.Sound do
       |> Enum.map(fn record ->
         %{
           id: record.data.id,
-          filename: record.data.filename,
+          filename: record.data[:filename],
           volume: record.data.attenuation.volume,
           range: [record.data.attenuation.min_range, record.data.attenuation.max_range]
         }
