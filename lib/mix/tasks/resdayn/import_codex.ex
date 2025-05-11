@@ -19,7 +19,6 @@ defmodule Mix.Tasks.Resdayn.ImportCodex do
   @requirements ["app.start"]
 
   # To be imported
-  # Record.Faction,
   # Record.Race,
   # Record.Region,
   # Record.Birthsign,
@@ -97,7 +96,8 @@ defmodule Mix.Tasks.Resdayn.ImportCodex do
       Record.Script,
       Record.MagicEffect,
       Record.Enchantment,
-      Record.Ingredient
+      Record.Ingredient,
+      Record.Faction
     ]
     |> Enum.each(fn importer ->
       import_records(importer, records, filename: filename)

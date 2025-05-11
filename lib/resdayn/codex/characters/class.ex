@@ -34,16 +34,8 @@ defmodule Resdayn.Codex.Characters.Class do
       argument :major_skill_ids, {:array, :integer}, allow_nil?: false
       argument :minor_skill_ids, {:array, :integer}, allow_nil?: false
 
-      change after_action(fn changeset, record, _context ->
-               skill_ids = Map.take(changeset.arguments, [:major_skill_ids, :minor_skill_ids])
-
-               {record, notifications} =
-                 record
-                 |> Ash.Changeset.for_update(:update, skill_ids)
-                 |> Ash.update!(return_notifications?: true)
-
-               {:ok, record, notifications}
-             end)
+      change {Resdayn.Codex.Characters.Changes.UpdateRelationships,
+              arguments: [:major_skill_ids, :minor_skill_ids]}
     end
 
     update :update do

@@ -1,25 +1,21 @@
-defmodule Resdayn.Codex.Characters.Class.Skill do
+defmodule Resdayn.Codex.Characters.Faction.Skill do
   use Ash.Resource,
     otp_app: :resdayn,
     domain: Resdayn.Codex.Characters,
     data_layer: AshPostgres.DataLayer
 
   postgres do
-    table "class_skills"
+    table "faction_skills"
     repo Resdayn.Repo
   end
 
   actions do
     defaults [:create, :read, :update, :destroy]
-    default_accept [:class_id, :category, :skill_id]
-  end
-
-  attributes do
-    attribute :category, :atom, constraints: [one_of: [:major, :minor]], allow_nil?: false
+    default_accept [:faction_id, :skill_id]
   end
 
   relationships do
-    belongs_to :class, Resdayn.Codex.Characters.Class,
+    belongs_to :faction, Resdayn.Codex.Characters.Faction,
       primary_key?: true,
       allow_nil?: false,
       attribute_type: :string

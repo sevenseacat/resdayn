@@ -18,7 +18,7 @@ Using the amazing work of Dave Humphrey detailed here: http://www.uesp.net/morro
 | ✓      | ✓        | `GMST` (Game settings) |
 | ✓      | ✓        | `GLOB` (Global variable) |
 | ✓      | ✓        | `CLAS` (Character classes) |
-| ✓      |          | `FACT` (Factions) |
+| ✓      | ✓        | `FACT` (Factions) |
 | ✓      |          | `RACE` (Races) |
 | ✓      | ✓        |` SOUN` (Sound effects) |
 | ✓      | ✓        | `SKIL` (Skills) |

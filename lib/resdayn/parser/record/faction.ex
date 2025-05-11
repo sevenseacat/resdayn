@@ -20,7 +20,7 @@ defmodule Resdayn.Parser.Record.Faction do
   end
 
   def process({"ANAM" = v, value}, data) do
-    record_list_of_maps_key(data, :reactions, :faction, printable!(__MODULE__, v, value))
+    record_list_of_maps_key(data, :reactions, :target_id, printable!(__MODULE__, v, value))
   end
 
   def process({"INTV", <<value::int32()>>}, data) do
@@ -35,9 +35,9 @@ defmodule Resdayn.Parser.Record.Faction do
 
     rank = %{
       name: name,
-      attribute_levels: [attribute_1, attribute_2],
-      skill_levels: [skill_1, skill_2],
-      reputation: reputation
+      required_attribute_levels: [attribute_1, attribute_2],
+      required_skill_levels: [skill_1, skill_2],
+      required_reputation: reputation
     }
 
     [rank | ranks(names, rest)]
