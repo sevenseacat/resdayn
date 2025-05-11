@@ -88,15 +88,15 @@ defmodule Mix.Tasks.Resdayn.ImportCodex do
 
     [
       Record.DataFile,
+      Record.GameSetting,
       Record.Attribute,
       Record.GlobalVariable,
       Record.Skill,
       Record.Class,
-      Record.GameSetting,
       Record.Sound,
+      Record.Script,
       Record.MagicEffect,
       Record.Enchantment,
-      Record.Script,
       Record.Ingredient
     ]
     |> Enum.each(fn importer ->

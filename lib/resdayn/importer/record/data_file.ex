@@ -11,7 +11,7 @@ defmodule Resdayn.Importer.Record.DataFile do
           |> Map.merge(%{
             filename: Keyword.fetch!(opts, :filename),
             master: header.data.header.flags.master,
-            dependencies: header.data[:dependencies] || []
+            dependencies: Enum.reverse(header.data[:dependencies] || [])
           })
           |> with_flags(:flags, header.flags)
         ]

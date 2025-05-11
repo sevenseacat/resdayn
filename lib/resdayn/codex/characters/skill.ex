@@ -10,6 +10,10 @@ defmodule Resdayn.Codex.Characters.Skill do
     repo Resdayn.Repo
   end
 
+  actions do
+    defaults [:read]
+  end
+
   attributes do
     attribute :id, :integer, primary_key?: true, allow_nil?: false
 

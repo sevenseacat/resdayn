@@ -10,6 +10,10 @@ defmodule Resdayn.Codex.Items.Ingredient do
     repo Resdayn.Repo
   end
 
+  actions do
+    defaults [:read]
+  end
+
   attributes do
     attribute :id, :string, primary_key?: true, allow_nil?: false
 

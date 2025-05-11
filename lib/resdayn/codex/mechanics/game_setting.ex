@@ -10,6 +10,10 @@ defmodule Resdayn.Codex.Mechanics.GameSetting do
     repo Resdayn.Repo
   end
 
+  actions do
+    defaults [:read]
+  end
+
   attributes do
     attribute :name, :string, primary_key?: true, allow_nil?: false
     attribute :value, __MODULE__.Value, allow_nil?: true

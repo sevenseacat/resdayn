@@ -10,6 +10,10 @@ defmodule Resdayn.Codex.Mechanics.MagicEffect do
     repo Resdayn.Repo
   end
 
+  actions do
+    defaults [:read]
+  end
+
   attributes do
     attribute :id, :integer, primary_key?: true, allow_nil?: false
 
@@ -49,7 +53,7 @@ defmodule Resdayn.Codex.Mechanics.MagicEffect do
     belongs_to :hit_sound, Resdayn.Codex.Assets.Sound, attribute_type: :string
   end
 
-  aggregates do
-    first :name, :game_setting, :value
+  calculations do
+    calculate :name, :string, expr(game_setting.value[:value])
   end
 end
