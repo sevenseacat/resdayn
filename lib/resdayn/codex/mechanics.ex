@@ -10,5 +10,6 @@ defmodule Resdayn.Codex.Mechanics do
     resource __MODULE__.MagicEffect
     resource __MODULE__.Script
     resource __MODULE__.GlobalVariable
+    resource __MODULE__.Spell
   end
 end

@@ -95,6 +95,7 @@ defmodule Mix.Tasks.Resdayn.ImportCodex do
       Record.Sound,
       Record.Script,
       Record.MagicEffect,
+      Record.Spell,
       Record.Enchantment,
       Record.Ingredient,
       Record.Faction
