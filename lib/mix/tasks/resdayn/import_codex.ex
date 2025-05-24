@@ -95,7 +95,8 @@ defmodule Mix.Tasks.Resdayn.ImportCodex do
       Record.Potion,
       Record.StaticObject,
       Record.Activator,
-      Record.Light
+      Record.Light,
+      Record.Birthsign
     ]
     |> Enum.each(fn importer ->
       import_records(importer, records, filename: filename)
