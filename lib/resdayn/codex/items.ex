@@ -3,10 +3,10 @@ defmodule Resdayn.Codex.Items do
     otp_app: :resdayn
 
   resources do
-    resource Resdayn.Codex.Items.Ingredient
-    resource Resdayn.Codex.Items.MiscellaneousItem
-    resource Resdayn.Codex.Items.Tool
-    resource Resdayn.Codex.Items.AlchemyApparatus
-    resource Resdayn.Codex.Items.Potion
+    resource __MODULE__.Ingredient
+    resource __MODULE__.MiscellaneousItem
+    resource __MODULE__.Tool
+    resource __MODULE__.AlchemyApparatus
+    resource __MODULE__.Potion
   end
 end
