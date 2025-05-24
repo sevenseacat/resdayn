@@ -46,13 +46,13 @@ Using the amazing work of Dave Humphrey detailed here: http://www.uesp.net/morro
 | ✓      | ✓        | `LOCK` (Lockpicking items) * |
 | ✓      | ✓        | `PROB` (Probe items) * |
 | ✓      | ✓        | `INGR` (Ingredients) |
-| ✓      |          | `BOOK` (Books and papers) |
+| ✓      | ✓        | `BOOK` (Books and papers) |
 | ✓      | ✓        | `ALCH` (Potions) |
 | ✓      |          | `LEVI` (Levelled items) |
 | ✓      |          | `LEVC` (Levelled creatures) |
 | ✓      |          | `CELL` (Cells) |
-| x      |          | `LAND` (Landscapes) |
-| x      |          | `PGRD` (Path grids) |
+| x      | x        | `LAND` (Landscapes) |
+| x      | x        | `PGRD` (Path grids) |
 | ✓      |          | `DIAL` (Dialogue/journal topics) |
 | ✓      |          | `INFO` (Dialogue records) |
 | ✓      |          | `INFO` (Journal records) |

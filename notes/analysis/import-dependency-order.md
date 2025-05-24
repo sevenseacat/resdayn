@@ -72,7 +72,7 @@ These records have no dependencies on other records or only reference already-im
 Based on the dependency analysis, the recommended import order is:
 
 **Phase 1 (Immediate):**
-1. REGN, BSGN, LTEX, STAT, BODY, MISC, REPA, ACTI, APPA, LOCK, PROB, ALCH, LIGH
+1. BSGN, STAT, BODY, MISC, REPA, ACTI, APPA, LOCK, PROB, ALCH, LIGH
 
 **Phase 2 (After Phase 1):**
 2. DOOR, CONT, WEAP, ARMO, CLOT, BOOK
@@ -84,7 +84,7 @@ Based on the dependency analysis, the recommended import order is:
 4. LEVI, LEVC
 
 **Phase 5 (After Phase 4):**
-5. CELL
+5. REGN, CELL
 
 **Phase 6 (After Phase 5):**
 6. DIAL, then INFO (both dialogue and journal)

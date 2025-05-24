@@ -8,5 +8,6 @@ defmodule Resdayn.Codex.Items do
     resource __MODULE__.Tool
     resource __MODULE__.AlchemyApparatus
     resource __MODULE__.Potion
+    resource __MODULE__.Book
   end
 end

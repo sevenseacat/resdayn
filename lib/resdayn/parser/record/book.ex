@@ -2,12 +2,12 @@ defmodule Resdayn.Parser.Record.Book do
   use Resdayn.Parser.Record
 
   process_basic_string "NAME", :id
-  process_basic_string "MODL", :nif_model
+  process_basic_string "MODL", :nif_model_filename
   process_basic_string "FNAM", :name
-  process_basic_string "ITEX", :icon
+  process_basic_string "ITEX", :icon_filename
   process_basic_string "TEXT", :content
   process_basic_string "SCRI", :script_id
-  process_basic_string "ENAM", :enchantment
+  process_basic_string "ENAM", :enchantment_id
 
   def process({"BKDT", value}, data) do
     <<weight::float32(), value::uint32(), flags::uint32(), skill_id::int32(),
