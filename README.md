@@ -19,7 +19,7 @@ Using the amazing work of Dave Humphrey detailed here: http://www.uesp.net/morro
 | ✓      | ✓        | `GLOB` (Global variable) |
 | ✓      | ✓        | `CLAS` (Character classes) |
 | ✓      | ✓        | `FACT` (Factions) |
-| ✓      |          | `RACE` (Races) |
+| ✓      | ✓        | `RACE` (Races) |
 | ✓      | ✓        |` SOUN` (Sound effects) |
 | ✓      | ✓        | `SKIL` (Skills) |
 | ✓      | ✓        | `MGEF` (Magic effects) |
@@ -32,7 +32,7 @@ Using the amazing work of Dave Humphrey detailed here: http://www.uesp.net/morro
 | ✓      |          | `MISC` (Miscellaneous items) |
 | ✓      |          | `WEAP` (Weapons) |
 | ✓      |          | `CONT` (Containers) |
-| ✓      |          | `SPEL` (Spells) |
+| ✓      | ✓        | `SPEL` (Spells) |
 | ✓      |          | `CREA` (Creatures) |
 | ✓      |          | `BODY` (Body parts) |
 | ✓      |          | `LIGH` (Lights) |

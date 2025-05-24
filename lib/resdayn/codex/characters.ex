@@ -9,5 +9,8 @@ defmodule Resdayn.Codex.Characters do
     resource Resdayn.Codex.Characters.Faction
     resource Resdayn.Codex.Characters.Faction.Reaction
     resource Resdayn.Codex.Characters.Faction.Skill
+    resource Resdayn.Codex.Characters.Race
+    resource Resdayn.Codex.Characters.Race.SkillBonus
+    resource Resdayn.Codex.Characters.Race.SpellBonus
   end
 end
