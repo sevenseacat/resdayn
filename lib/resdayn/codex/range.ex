@@ -30,8 +30,6 @@ defmodule Resdayn.Codex.Range do
   @impl true
   def cast_stored(nil, _), do: {:ok, nil}
   def cast_stored([min, max], _), do: {:ok, %{min: min, max: max}}
-  def cast_stored(%{"min" => min, "max" => max}, _), do: {:ok, %{min: min, max: max}}
-  def cast_stored(%{min: _min, max: _max} = value, _), do: {:ok, value}
 
   @impl true
   def dump_to_native(nil, _), do: {:ok, nil}
