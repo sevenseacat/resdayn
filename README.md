@@ -27,7 +27,7 @@ Using the amazing work of Dave Humphrey detailed here: http://www.uesp.net/morro
 | ✓      |          | `REGN` (Regions) |
 | ✓      |          | `BSGN` (Birth signs) |
 | ✓      |          | `LTEX` (Land textures) |
-| ✓      |          | `STAT` (Static objects) |
+| ✓      | ✓        | `STAT` (Static objects) |
 | ✓      |          | `DOOR` (Doors) |
 | ✓      | ✓        | `MISC` (Miscellaneous items) |
 | ✓      |          | `WEAP` (Weapons) |
@@ -35,13 +35,13 @@ Using the amazing work of Dave Humphrey detailed here: http://www.uesp.net/morro
 | ✓      | ✓        | `SPEL` (Spells) |
 | ✓      |          | `CREA` (Creatures) |
 | ✓      |          | `BODY` (Body parts) |
-| ✓      |          | `LIGH` (Lights) |
+| ✓      | ✓        | `LIGH` (Lights) |
 | ✓      | ✓        | `ENCH` (Enchanting effects) |
 | ✓      |          | `NPC_` (NPCs) |
 | ✓      |          | `ARMO` (Armour) |
 | ✓      |          | `CLOT` (Clothing) |
 | ✓      | ✓        | `REPA` (Repair items) * |
-| ✓      |          | `ACTI` (Activators) |
+| ✓      | ✓        | `ACTI` (Activators) |
 | ✓      | ✓        | `APPA` (Alchemy apparatus) |
 | ✓      | ✓        | `LOCK` (Lockpicking items) * |
 | ✓      | ✓        | `PROB` (Probe items) * |

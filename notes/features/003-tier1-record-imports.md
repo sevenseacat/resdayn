@@ -156,8 +156,8 @@ This plan establishes the foundation for importing the majority of remaining rec
 - ✓ TOOL (Repair items, Lockpicks, Probes) - COMPLETED (Consolidated)
 - ✓ APPA (Alchemy apparatus) - COMPLETED
 - ✓ ALCH (Potions) - COMPLETED
-- Next: Asset objects (STAT, ACTI, LIGH)
-- Finally: Character-related (BSGN, BODY) and World assets (REGN, LTEX)
+- ✓ Asset objects (STAT, ACTI, LIGH) - COMPLETED
+- Next: Character-related (BSGN, BODY) and World assets (REGN, LTEX)
 
 ### REPA (Repair Items) - COMPLETED ✓
 
@@ -361,3 +361,51 @@ After implementing ALCH (Potions), identified code duplication and inconsistency
 - No breaking changes to existing functionality
 
 This refactoring establishes a clean, consistent foundation for all magical effect systems in the codebase.
+
+### Asset Objects (STAT, ACTI, LIGH) - COMPLETED ✓
+
+**Implementation Details:**
+- Created `Resdayn.Codex.Assets.StaticObject` resource for non-interactive world objects
+- Created `Resdayn.Codex.Assets.Activator` resource for interactive world objects
+- Created `Resdayn.Codex.Assets.Light` resource for light sources with complex properties
+- Created corresponding importers for all three record types
+- Added all resources to `Resdayn.Codex.Assets` domain
+- Generated migrations and added to import task
+
+**Key Findings:**
+1. **STAT Records (2788):** Simplest structure - just `id` and `nif_model` filename
+2. **ACTI Records (697):** Interactive objects with `name` and optional `script_id` for behavior
+3. **LIGH Records (574):** Most complex with light properties, flags, and optional sound/script references
+4. **Distinct Complexity Levels:** Each warranted separate resources due to different field requirements
+5. **Optional Fields:** Light records demonstrated optional `icon` field requiring graceful handling
+
+**Technical Details:**
+- **StaticObject**: Minimal resource for decorative world objects (trees, rocks, architecture)
+- **Activator**: Interactive objects with script support (beds, signs, levers)
+- **Light**: Complex light sources with properties:
+  - Physical: weight, value, time (duration), radius, color
+  - Behavior flags: dynamic, can_carry, fire, flicker variants, pulse variants
+  - Relationships: script_id for interactive lights, sound_id for ambient sounds
+
+**Asset Domain Organization:**
+All three resources properly organized under `Resdayn.Codex.Assets` domain alongside existing Sound resource, establishing clear separation between world assets and game mechanics.
+
+**Import Results:**
+- Successfully imported all 4,059 asset objects from Morrowind.esm:
+  - 2,788 static objects (e.g., "ex_stronghold_dome00")
+  - 697 activators (e.g., "active_de_bedroll" - Bedroll)
+  - 574 lights (e.g., "light_de_lamp_02_256" with #F58C28 color, 256 radius)
+
+**Architectural Patterns:**
+- **Progressive Complexity**: From simple STAT to complex LIGH, validating flexible resource design
+- **Optional Field Handling**: Used `Map.get/2` for optional fields like icon filenames
+- **Flag Expansion**: Converted packed light flags into individual boolean attributes for query efficiency
+- **Relationship Consistency**: Maintained script and sound relationships across all applicable asset types
+
+**Validation:**
+- All asset objects imported without errors
+- Complex light properties correctly parsed from binary data
+- Optional fields handled gracefully without breaking import process
+- Flag transformations properly converted to individual boolean attributes
+
+This completes all simple-to-moderate complexity Tier 1 record types, establishing solid patterns for the remaining character-related and world asset records.

@@ -21,7 +21,7 @@ defmodule Resdayn.Codex.Mechanics.Spell do
     attribute :type, __MODULE__.Type, allow_nil?: false
     attribute :cost, :integer, allow_nil?: false
 
-    attribute :spell_flags, {:array, :string},
+    attribute :spell_flags, {:array, Resdayn.Codex.Mechanics.SpellFlag},
       allow_nil?: false,
       default: []
 

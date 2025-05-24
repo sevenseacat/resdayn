@@ -22,25 +22,15 @@ defmodule Mix.Tasks.Resdayn.ImportCodex do
   # Record.Region,
   # Record.Birthsign,
   # Record.LandTexture,
-  # Record.Static,
   # Record.Door,
-  # Record.MiscellaneousItem,
   # Record.Weapon,
   # Record.Container,
-  # Record.Spell,
   # Record.Creature,
   # Record.BodyPart,
-  # Record.Light,
   # Record.NPC,
   # Record.Armour,
   # Record.Clothing,
-  # Record.RepairItem,
-  # Record.Activator,
-  # Record.AlchemyApparatus,
-  # Record.Lockpick,
-  # Record.Probe,
   # Record.Book,
-  # Record.Potion,
   # Record.LevelledItem,
   # Record.LevelledCreature,
   # Record.Cell,
@@ -102,7 +92,10 @@ defmodule Mix.Tasks.Resdayn.ImportCodex do
       Record.MiscellaneousItem,
       Record.Tool,
       Record.AlchemyApparatus,
-      Record.Potion
+      Record.Potion,
+      Record.StaticObject,
+      Record.Activator,
+      Record.Light
     ]
     |> Enum.each(fn importer ->
       import_records(importer, records, filename: filename)
