@@ -19,7 +19,6 @@ defmodule Mix.Tasks.Resdayn.ImportCodex do
   @requirements ["app.start"]
 
   # To be imported
-  # Record.Race,
   # Record.Region,
   # Record.Birthsign,
   # Record.LandTexture,

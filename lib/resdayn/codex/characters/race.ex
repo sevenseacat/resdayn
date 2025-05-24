@@ -13,22 +13,8 @@ defmodule Resdayn.Codex.Characters.Race do
   actions do
     defaults [:read]
 
-    create :create do
-      primary? true
-      accept [
-        :id,
-        :name,
-        :description,
-        :playable,
-        :beast,
-        :male_stats,
-        :female_stats,
-        :flags
-      ]
-    end
-
     create :import do
-      description "Custom importer to allow for related skills and spells"
+      description "Custom importer to allow for related skill bonuses"
       upsert? true
       upsert_fields :replace_all
 
@@ -40,13 +26,20 @@ defmodule Resdayn.Codex.Characters.Race do
         :beast,
         :male_stats,
         :female_stats,
+        :special_spells,
         :flags
       ]
 
       argument :skill_bonuses, {:array, :map}, allow_nil?: false
-      argument :special_spell_ids, {:array, :string}, allow_nil?: false
 
-      change Resdayn.Codex.Characters.Changes.SaveRaceRelationships
+      change {Resdayn.Codex.Characters.Changes.UpdateRelationships, arguments: [:skill_bonuses]}
+    end
+
+    update :update do
+      require_atomic? false
+      argument :skill_bonuses, {:array, :map}, allow_nil?: false
+
+      change Resdayn.Codex.Characters.Changes.SaveRaceSkills
     end
   end
 
@@ -65,15 +58,16 @@ defmodule Resdayn.Codex.Characters.Race do
     attribute :female_stats, __MODULE__.Stats,
       allow_nil?: false,
       public?: true
+
+    attribute :special_spells, {:array, __MODULE__.SpellBonus},
+      allow_nil?: false,
+      default: [],
+      public?: true
   end
 
   relationships do
     has_many :skill_bonuses, __MODULE__.SkillBonus
 
-    many_to_many :skills, Resdayn.Codex.Characters.Skill,
-      join_relationship: :skill_bonuses
-
-    many_to_many :special_spells, Resdayn.Codex.Mechanics.Spell,
-      through: Resdayn.Codex.Characters.Race.SpellBonus
+    many_to_many :skills, Resdayn.Codex.Characters.Skill, join_relationship: :skill_bonuses
   end
 end

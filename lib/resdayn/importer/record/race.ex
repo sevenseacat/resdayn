@@ -11,7 +11,7 @@ defmodule Resdayn.Importer.Record.Race do
         |> Map.put(:male_stats, transform_stats(record.data.male_attributes))
         |> Map.put(:female_stats, transform_stats(record.data.female_attributes))
         |> Map.put(:skill_bonuses, record.data.skill_bonuses || [])
-        |> Map.put(:special_spell_ids, record.data.special_ids || [])
+        |> Map.put(:special_spells, transform_special_spells(record.data.special_ids || []))
         |> with_flags(:flags, record.flags)
       end)
 
@@ -40,6 +40,12 @@ defmodule Resdayn.Importer.Record.Race do
   end
 
 
+
+  defp transform_special_spells(spell_ids) do
+    Enum.map(spell_ids, fn spell_id ->
+      %{spell_id: spell_id}
+    end)
+  end
 
   # Map attribute names to their IDs based on the existing Attribute resource
   defp attribute_name_to_id(:strength), do: 0

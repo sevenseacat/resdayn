@@ -199,9 +199,16 @@ Based on the existing `Resdayn.Parser.Record.Race` structure:
 - Confirmed skill bonus relationships are properly replaced on upsert
 - Spell relationships handled correctly with append_and_remove strategy
 
+✅ **Final Issue Resolution - Embedded Spell Bonuses**:
+- Converted spell bonuses from relationship to embedded list for simplicity
+- Eliminated constraint violations by removing join table approach
+- Updated importer to handle embedded special_spells directly
+- Dropped race_spell_bonuses table and added special_spells column to races
+
 ✅ **Final Integration Test Passed**:
 - Complete import/re-import cycle tested successfully
 - Skill bonus relationships properly replaced (2 bonuses → 1 bonus)
+- Embedded spell bonuses working correctly (2 spells → 1 spell)
 - Database transactions and constraints working correctly
 - No constraint violations on re-import
 
@@ -228,10 +235,12 @@ Feature 002: Race Resource Implementation has been **successfully completed** wi
 - Added `on_delete: :delete` behavior to foreign key constraints
 
 ✅ **Issue Resolution**
-- Fixed import constraint violations using `manage_relationship` with `type: :direct_control`
-- Added proper `on_delete` behavior to all foreign key relationships
+- Fixed import constraint violations by simplifying spell bonuses to embedded resources
+- Reverted to manual skill bonus management using after_action for reliability
+- Added proper `on_delete` behavior to skill bonus foreign key relationships
 - Implemented `default_accept` for clean action definitions in join table resources
 - Resolved primary action requirements for all supporting resources
+- Eliminated complex relationship management by using embedded approach for spells
 
 ✅ **Testing & Verification**
 - All code compiles without errors or warnings
@@ -244,7 +253,7 @@ Feature 002: Race Resource Implementation has been **successfully completed** wi
 ### Key Features Delivered
 
 1. **Embedded Resource Architecture**: Uses `StartingAttribute` and `Stats` embedded resources for male/female character statistics
-2. **Robust Relationship Management**: Full many-to-many relationships with proper upsert handling
+2. **Robust Relationship Management**: Skill bonuses via join table, spell bonuses via embedded list
 3. **Production-Ready Import System**: Custom import action handles complex nested data with relationship management
 4. **Database Integrity**: PostgreSQL storage with proper foreign key constraints and cascade behavior
 5. **Clean API**: Follows established Ash resource patterns for consistency
@@ -252,10 +261,10 @@ Feature 002: Race Resource Implementation has been **successfully completed** wi
 ### Technical Implementation Details
 
 - **Resource Structure**: Race → Stats (embedded) → StartingAttribute[] (embedded)
-- **Relationships**: Race ↔ Skills (via SkillBonus), Race ↔ Spells (via SpellBonus)  
+- **Relationships**: Race ↔ Skills (via SkillBonus join table), Spells (embedded list)
 - **Data Flow**: Parser → Importer → Resource → Database
-- **Storage**: JSONB columns for embedded stats, separate join tables for relationships
-- **Upsert Strategy**: `manage_relationship` with `direct_control` for skill bonuses, `append_and_remove` for spells
+- **Storage**: JSONB columns for embedded stats and spell bonuses, join table for skill bonuses
+- **Upsert Strategy**: Manual delete/create cycle for skill bonuses, direct embedded replacement for spells
 
 ### Success Metrics Met
 
@@ -275,10 +284,11 @@ All planned success criteria were achieved:
 ### Production Readiness Verified
 
 The implementation has been thoroughly tested and verified for production use:
-- Import/re-import cycles work correctly without data corruption
-- Foreign key constraints properly maintain database integrity
-- Relationship management handles complex scenarios gracefully
-- Performance is optimized with proper database indexing
+- Import/re-import cycles work correctly without constraint violations
+- Foreign key constraints properly maintain database integrity for skill bonuses
+- Embedded spell bonuses eliminate relationship complexity while maintaining functionality
+- Performance is optimized with JSONB storage for embedded data and proper indexing
+- Simplified architecture reduces potential failure points in import operations
 
 ### Impact
 
