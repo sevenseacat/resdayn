@@ -154,9 +154,10 @@ This plan establishes the foundation for importing the majority of remaining rec
 **Updated Implementation Order:**
 - ✓ MISC (Miscellaneous items) - COMPLETED
 - ✓ TOOL (Repair items, Lockpicks, Probes) - COMPLETED (Consolidated)
-- Next: APPA (Alchemy apparatus) - Complex items with special properties
-- Then: ALCH (Potions) - Items with magical effects
-- Continue with asset objects (STAT, ACTI, LIGH)
+- ✓ APPA (Alchemy apparatus) - COMPLETED
+- Next: ALCH (Potions) - Items with magical effects
+- Then: Asset objects (STAT, ACTI, LIGH)
+- Finally: Character-related (BSGN, BODY) and World assets (REGN, LTEX)
 
 ### REPA (Repair Items) - COMPLETED ✓
 
@@ -217,3 +218,44 @@ After analyzing parser structures for REPA, LOCK, and PROB records, discovered t
 
 **Pattern Established:**
 This consolidation validates that when record types share identical structures and serve related purposes, consolidation with discriminator fields is preferable to separate resources, especially for small datasets in legacy games with no future expansions.
+
+### APPA (Alchemy Apparatus) - COMPLETED ✓
+
+**Implementation Details:**
+- Created `Resdayn.Codex.Items.AlchemyApparatus` resource (separate from Tools)
+- Created `Resdayn.Importer.Record.AlchemyApparatus` importer
+- Added to `Resdayn.Codex.Items` domain
+- Generated migration with `mix ash.codegen create_alchemy_apparatus`
+- Added to import task in `lib/mix/tasks/resdayn/import_codex.ex`
+
+**Key Findings:**
+1. **Distinct from Tools:** Although similar structure (weight, value, quality), APPA lacks `uses` field and has different semantic purpose
+2. **Apparatus Types:** Four distinct types with good distribution: mortar_and_pestle, alembic, calcinator, retort
+3. **Quality Ranges:** Wide quality range from 0.15 (basic) to 2.0 (master level equipment)
+4. **Import Success:** Successfully imported 22 alchemy apparatus from Morrowind.esm
+5. **Type Distribution:** 7 alembics, 5 each of mortar/pestle, calcinators, and retorts
+
+**Technical Details:**
+- Uses `apparatus_type` atom field with constrained values for the four alchemy equipment types
+- Parser provides type mapping from numeric codes to meaningful atom values
+- Standard item attributes: id, name, weight, value, plus alchemy-specific quality
+- Parser structure: `AADT` chunk contains packed binary data for type/quality/weight/value
+
+**Architectural Decision:**
+Kept APPA as separate resource rather than consolidating with Tools because:
+- Different field structure (no `uses` field)
+- Different semantic domain (crafting equipment vs utility tools)
+- Larger dataset (22 vs 18 records)
+- Distinct apparatus type categories requiring specific constraints
+
+**Validation:**
+- All 22 alchemy apparatus imported without errors
+- Proper type distribution across all four apparatus categories
+- Quality values correctly parsed from binary data
+- No foreign key constraint violations
+
+**Examples by Type:**
+- Mortar & Pestle: "SecretMaster's Mortar and Pestl" (quality: 2.0)
+- Alembic: "Tsiya's Skooma Pipe" (quality: 0.15)
+- Calcinator: "SecretMaster's Calcinator" (quality: 2.0)  
+- Retort: "SecretMaster's Retort" (quality: 2.0)

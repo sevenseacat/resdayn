@@ -19,7 +19,7 @@ defmodule Resdayn.Parser.Record.AlchemyApparatus do
 
     record_unnested_value(data, %{
       type: Map.fetch!(@apparatus_types, type),
-      quality: quality,
+      quality: float(quality),
       weight: weight,
       value: value
     })
