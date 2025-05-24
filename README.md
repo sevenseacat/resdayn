@@ -25,8 +25,8 @@ Using the amazing work of Dave Humphrey detailed here: http://www.uesp.net/morro
 | ✓      | ✓        | `MGEF` (Magic effects) |
 | ✓      | ✓        | `SCPT` (Scripts) |
 | ✓      |          | `REGN` (Regions) |
-| ✓      |          | `BSGN` (Birth signs) |
-| ✓      |          | `LTEX` (Land textures) |
+| ✓      | ✓        | `BSGN` (Birth signs) |
+| ✓      | x        | `LTEX` (Land textures) |
 | ✓      | ✓        | `STAT` (Static objects) |
 | ✓      |          | `DOOR` (Doors) |
 | ✓      | ✓        | `MISC` (Miscellaneous items) |
@@ -34,7 +34,7 @@ Using the amazing work of Dave Humphrey detailed here: http://www.uesp.net/morro
 | ✓      |          | `CONT` (Containers) |
 | ✓      | ✓        | `SPEL` (Spells) |
 | ✓      |          | `CREA` (Creatures) |
-| ✓      |          | `BODY` (Body parts) |
+| ✓      | ✓        | `BODY` (Body parts) |
 | ✓      | ✓        | `LIGH` (Lights) |
 | ✓      | ✓        | `ENCH` (Enchanting effects) |
 | ✓      |          | `NPC_` (NPCs) |

@@ -12,5 +12,6 @@ defmodule Resdayn.Codex.Characters do
     resource Resdayn.Codex.Characters.Race
     resource Resdayn.Codex.Characters.Race.SkillBonus
     resource Resdayn.Codex.Characters.Birthsign
+    resource Resdayn.Codex.Characters.BodyPart
   end
 end
