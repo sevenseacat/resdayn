@@ -153,6 +153,67 @@ This plan establishes the foundation for importing the majority of remaining rec
 
 **Updated Implementation Order:**
 - ✓ MISC (Miscellaneous items) - COMPLETED
-- Next: REPA (Repair items) - Similar simple item structure
-- Then: LOCK, PROB - Also simple items
+- ✓ TOOL (Repair items, Lockpicks, Probes) - COMPLETED (Consolidated)
+- Next: APPA (Alchemy apparatus) - Complex items with special properties
+- Then: ALCH (Potions) - Items with magical effects
 - Continue with asset objects (STAT, ACTI, LIGH)
+
+### REPA (Repair Items) - COMPLETED ✓
+
+**Implementation Details:**
+- Created `Resdayn.Codex.Items.RepairItem` resource
+- Created `Resdayn.Importer.Record.RepairItem` importer
+- Added to `Resdayn.Codex.Items` domain
+- Generated migration with `mix ash.codegen create_repair_items`
+- Added to import task in `lib/mix/tasks/resdayn/import_codex.ex`
+
+**Key Findings:**
+1. **Flags Conflict:** The `Importable` extension automatically adds a `flags` attribute, so manual definition causes conflicts
+2. **Repair-Specific Fields:** Parser provides repair-specific data (uses, quality) in addition to standard item fields
+3. **Field Structure:** Parser maps `nif_model` → `nif_model_filename` and `icon` → `icon_filename`
+4. **Import Success:** Successfully imported 6 repair items from Morrowind.esm
+5. **Pattern Consistency:** Follows same successful pattern as MISC implementation
+
+**Technical Details:**
+- Uses standard item attributes: id, name, weight, value
+- Adds repair-specific attributes: uses (integer), quality (float)
+- Maintains script relationship for interactive repair items
+- Parser structure: `RIDT` chunk contains packed binary data for weight/value/uses/quality
+
+**Validation:**
+- All 6 repair items imported without errors
+- Database schema properly created with repair-specific fields
+- Field mapping correctly transforms parser data to resource attributes
+- No foreign key constraint violations
+
+### TOOL (Repair Items, Lockpicks, Probes) - CONSOLIDATED ✓
+
+**Major Refactoring Decision:**
+After analyzing parser structures for REPA, LOCK, and PROB records, discovered they have identical field structures:
+- Common fields: id, name, nif_model, icon, script_id, weight, value, quality, uses
+- Only difference: data chunk names (RIDT, LKDT, PBDT) and field order in binary
+- Small dataset: 6 records each = 18 total records
+
+**Consolidation Implementation:**
+- Refactored RepairItem into consolidated `Resdayn.Codex.Items.Tool` resource
+- Added `tool_type` discriminator field with values: `:repair_item`, `:lockpick`, `:probe`
+- Created unified `Resdayn.Importer.Record.Tool` importer handling all three parser types
+- Removed duplicate RepairItem resource and migration files
+- Single database table `tools` with tool_type column for efficient storage
+
+**Technical Benefits:**
+1. **Eliminated Code Duplication:** 3 resources → 1, 3 importers → 1
+2. **Efficient Storage:** No wasted columns, single table for related data
+3. **Simplified Maintenance:** Single codebase to maintain for similar functionality
+4. **Clean Architecture:** Logical grouping of conceptually related items
+
+**Import Results:**
+- Successfully imported all 18 tools from Morrowind.esm:
+  - 6 repair items (e.g., "Sirollus Saccus' Hammer")
+  - 6 lockpicks (e.g., "The Skeleton Key")
+  - 6 probes (e.g., "Secret Master's Probe")
+- All tools properly categorized by tool_type
+- Database schema optimal for querying and filtering
+
+**Pattern Established:**
+This consolidation validates that when record types share identical structures and serve related purposes, consolidation with discriminator fields is preferable to separate resources, especially for small datasets in legacy games with no future expansions.

@@ -5,5 +5,6 @@ defmodule Resdayn.Codex.Items do
   resources do
     resource Resdayn.Codex.Items.Ingredient
     resource Resdayn.Codex.Items.MiscellaneousItem
+    resource Resdayn.Codex.Items.Tool
   end
 end

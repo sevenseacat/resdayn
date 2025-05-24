@@ -10,6 +10,11 @@ defmodule Resdayn.Parser.Record.Lockpick do
   def process({"LKDT", value}, data) do
     <<weight::float32(), value::uint32(), quality::float32(), uses::uint32()>> = value
 
-    record_unnested_value(data, %{weight: weight, value: value, quality: quality, uses: uses})
+    record_unnested_value(data, %{
+      weight: weight,
+      value: value,
+      quality: float(quality),
+      uses: uses
+    })
   end
 end
