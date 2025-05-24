@@ -1,4 +1,4 @@
-defmodule Resdayn.Codex.Mechanics.Spell.Effect do
+defmodule Resdayn.Codex.Items.Potion.Effect do
   use Ash.Resource,
     otp_app: :resdayn,
     data_layer: :embedded

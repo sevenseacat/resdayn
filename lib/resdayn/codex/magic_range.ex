@@ -1,3 +1,3 @@
-defmodule Resdayn.Codex.Mechanics.Spell.Range do
+defmodule Resdayn.Codex.MagicRange do
   use Ash.Type.Enum, values: [:self, :touch, :target]
 end

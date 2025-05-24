@@ -12,7 +12,7 @@ defmodule Resdayn.Codex.Mechanics.Enchantment.Effect do
       public?: true,
       constraints: [validate?: false]
 
-    attribute :range, Resdayn.Codex.Mechanics.Enchantment.Range, allow_nil?: false, public?: true
+    attribute :range, Resdayn.Codex.MagicRange, allow_nil?: false, public?: true
     attribute :area, :integer, allow_nil?: false, public?: true
   end
 

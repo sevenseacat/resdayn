@@ -155,8 +155,8 @@ This plan establishes the foundation for importing the majority of remaining rec
 - ✓ MISC (Miscellaneous items) - COMPLETED
 - ✓ TOOL (Repair items, Lockpicks, Probes) - COMPLETED (Consolidated)
 - ✓ APPA (Alchemy apparatus) - COMPLETED
-- Next: ALCH (Potions) - Items with magical effects
-- Then: Asset objects (STAT, ACTI, LIGH)
+- ✓ ALCH (Potions) - COMPLETED
+- Next: Asset objects (STAT, ACTI, LIGH)
 - Finally: Character-related (BSGN, BODY) and World assets (REGN, LTEX)
 
 ### REPA (Repair Items) - COMPLETED ✓
@@ -259,3 +259,105 @@ Kept APPA as separate resource rather than consolidating with Tools because:
 - Alembic: "Tsiya's Skooma Pipe" (quality: 0.15)
 - Calcinator: "SecretMaster's Calcinator" (quality: 2.0)  
 - Retort: "SecretMaster's Retort" (quality: 2.0)
+
+### ALCH (Potions) - COMPLETED ✓
+
+**Implementation Details:**
+- Created `Resdayn.Codex.Items.Potion` resource with embedded magical effects
+- Created `Resdayn.Codex.Items.Potion.Effect` embedded resource for magical effects
+- Created `Resdayn.Codex.Items.Potion.Range` enum for effect targeting
+- Created `Resdayn.Importer.Record.Potion` importer
+- Added to `Resdayn.Codex.Items` domain
+- Generated migration with `mix ash.codegen create_potions`
+- Added to import task in `lib/mix/tasks/resdayn/import_codex.ex`
+
+**Key Findings:**
+1. **Complex Magical Effects:** Potions have arrays of magical effects similar to spells and enchantments
+2. **Effect Structure:** Each effect has duration, magnitude (min/max), range, area, and references to magic effects/attributes/skills
+3. **Large Dataset:** 258 potions imported from Morrowind.esm
+4. **Effect Distribution:** Most potions (236) have 1 effect, complex ones like Skooma have up to 6 effects
+5. **Manual Crafting:** All potions are manually crafted (autocalc: false), showing careful game design
+
+**Technical Details:**
+- Uses embedded `Effect` resources to store magical effect arrays in JSONB
+- Effect structure mirrors spell/enchantment effects for consistency
+- Parser provides complex effect data with magic_effect_id, attribute_id, skill_id references
+- `autocalc` flag extracted from parser flags (all false in Morrowind.esm)
+- Parser structure: `ALDT` chunk for basic data, `ENAM` chunks for magical effects
+
+**Architectural Consistency:**
+- Follows established pattern from Spell and Enchantment effects
+- Uses embedded resources for complex nested data
+- Maintains referential integrity to MagicEffect, Attribute, and Skill resources
+- Range enum consistent with other magical effect systems
+
+**Import Results:**
+- Successfully imported all 258 potions without errors
+- Effect counts: 1 effect (236), 2 effects (17), 3 effects (3), 4 effects (1), 6 effects (1)
+- Value range: 5 gold (bargain potions) to 500 gold (Skooma)
+- Complex examples: Skooma with 4 effects using magic effects 17 and 79
+- **Range analysis**: All 289 potion effects are `:self` range - no `:touch` or `:target` effects found
+
+**Examples:**
+- Simple: "Bargain Fortify Willpower" (5 gold, 1 effect)
+- Complex: "Skooma" (500 gold, 4 effects with 60-second duration)
+- Quality range: "Cheap" to "Exclusive" indicating different potency levels
+
+**Validation:**
+- All 258 potions imported without errors
+- Magical effects properly structured and stored as JSONB
+- Foreign key relationships maintained for magic effects, attributes, skills
+- Effect data correctly mapped from parser enchantment structure
+
+**Game Design Insight:**
+Analysis reveals that **all potion effects in Morrowind are self-targeted** (289 effects across 258 potions). This makes logical sense:
+- Potions are consumed, not cast at targets
+- No thrown or projectile potions exist in the base game
+- Consistent with Elder Scrolls lore where potions affect the drinker directly
+
+While our architecture supports `:touch` and `:target` ranges for consistency with spells/enchantments, potions will never use these values in practice. This validates our decision to maintain consistent magical effect structure across all systems, even if some fields remain unused for specific item types.
+
+### Refactoring: Shared MagicRange and Magnitude Types ✓
+
+**Post-Implementation Refactoring:**
+After implementing ALCH (Potions), identified code duplication and inconsistency in magical effect systems:
+
+**Problems Identified:**
+1. **Duplicate Range Enums:** Three identical range enums with `[:self, :touch, :target]`
+   - `Resdayn.Codex.Mechanics.Spell.Range`
+   - `Resdayn.Codex.Mechanics.Enchantment.Range`  
+   - `Resdayn.Codex.Items.Potion.Range`
+2. **Inconsistent Magnitude Types:**
+   - Spell effects: `:map` type
+   - Enchantment effects: `:range` type (builtin)
+   - Potion effects: `:map` type (copied from spells)
+
+**Refactoring Implementation:**
+1. **Created shared `Resdayn.Codex.MagicRange`** enum for all magical effect targeting
+2. **Standardized magnitude type** to builtin `:range` type across all effect systems
+3. **Updated all Effect resources** to use shared types:
+   - `Resdayn.Codex.Mechanics.Spell.Effect`
+   - `Resdayn.Codex.Mechanics.Enchantment.Effect`
+   - `Resdayn.Codex.Items.Potion.Effect`
+4. **Enhanced Range type** to handle legacy map format for backward compatibility
+5. **Removed duplicate range files** - eliminated 3 duplicate enum definitions
+
+**Technical Benefits:**
+- **Single source of truth** for magical effect ranges
+- **Consistent magnitude handling** across all magical systems
+- **Reduced code duplication** - 3 range enums → 1 shared enum
+- **Type safety** - builtin `:range` type with proper validation
+- **Backward compatibility** - existing data continues to work
+
+**Migration Handling:**
+- No database migration required (JSONB storage compatible)
+- Enhanced `Resdayn.Codex.Range.cast_stored/2` to handle legacy `%{"min" => x, "max" => y}` format
+- All existing magical effects continue to work seamlessly
+
+**Validation:**
+- All tests pass after refactoring
+- Existing spell and potion data loads correctly
+- Fresh imports use consistent type format
+- No breaking changes to existing functionality
+
+This refactoring establishes a clean, consistent foundation for all magical effect systems in the codebase.

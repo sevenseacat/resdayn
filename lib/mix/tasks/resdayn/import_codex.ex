@@ -101,7 +101,8 @@ defmodule Mix.Tasks.Resdayn.ImportCodex do
       Record.Faction,
       Record.MiscellaneousItem,
       Record.Tool,
-      Record.AlchemyApparatus
+      Record.AlchemyApparatus,
+      Record.Potion
     ]
     |> Enum.each(fn importer ->
       import_records(importer, records, filename: filename)
