@@ -29,7 +29,7 @@ Using the amazing work of Dave Humphrey detailed here: http://www.uesp.net/morro
 | ✓      |          | `LTEX` (Land textures) |
 | ✓      |          | `STAT` (Static objects) |
 | ✓      |          | `DOOR` (Doors) |
-| ✓      |          | `MISC` (Miscellaneous items) |
+| ✓      | ✓        | `MISC` (Miscellaneous items) |
 | ✓      |          | `WEAP` (Weapons) |
 | ✓      |          | `CONT` (Containers) |
 | ✓      | ✓        | `SPEL` (Spells) |
@@ -40,14 +40,14 @@ Using the amazing work of Dave Humphrey detailed here: http://www.uesp.net/morro
 | ✓      |          | `NPC_` (NPCs) |
 | ✓      |          | `ARMO` (Armour) |
 | ✓      |          | `CLOT` (Clothing) |
-| ✓      |          | `REPA` (Repair items) |
+| ✓      | ✓        | `REPA` (Repair items) * |
 | ✓      |          | `ACTI` (Activators) |
-| ✓      |          | `APPA` (Alchemy apparatus) |
-| ✓      |          | `LOCK` (Lockpicking items) |
-| ✓      |          | `PROB` (Probe items) |
+| ✓      | ✓        | `APPA` (Alchemy apparatus) |
+| ✓      | ✓        | `LOCK` (Lockpicking items) * |
+| ✓      | ✓        | `PROB` (Probe items) * |
 | ✓      | ✓        | `INGR` (Ingredients) |
 | ✓      |          | `BOOK` (Books and papers) |
-| ✓      |          | `ALCH` (Potions) |
+| ✓      | ✓        | `ALCH` (Potions) |
 | ✓      |          | `LEVI` (Levelled items) |
 | ✓      |          | `LEVC` (Levelled creatures) |
 | ✓      |          | `CELL` (Cells) |
@@ -56,6 +56,10 @@ Using the amazing work of Dave Humphrey detailed here: http://www.uesp.net/morro
 | ✓      |          | `DIAL` (Dialogue/journal topics) |
 | ✓      |          | `INFO` (Dialogue records) |
 | ✓      |          | `INFO` (Journal records) |
+
+## Implementation Notes
+
+\* REPA, LOCK, and PROB records are consolidated into a single `Tool` resource with a `tool_type` discriminator field, as they share identical data structures and serve related purposes.
 
 ## Other Features to Add
 
