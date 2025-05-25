@@ -5,7 +5,7 @@ defmodule Resdayn.Parser.Record.Book do
   process_basic_string "MODL", :nif_model_filename
   process_basic_string "FNAM", :name
   process_basic_string "ITEX", :icon_filename
-  process_basic_string "TEXT", :content
+  process_basic_string "TEXT", :text
   process_basic_string "SCRI", :script_id
   process_basic_string "ENAM", :enchantment_id
 

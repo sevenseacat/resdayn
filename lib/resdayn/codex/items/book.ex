@@ -27,7 +27,7 @@ defmodule Resdayn.Codex.Items.Book do
     attribute :enchantment_points, :integer, allow_nil?: false, constraints: [min: 0]
     attribute :scroll, :boolean, default: false
 
-    attribute :content, :string
+    attribute :text, :string
   end
 
   relationships do

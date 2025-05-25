@@ -2,9 +2,9 @@ defmodule Resdayn.Parser.Record.Probe do
   use Resdayn.Parser.Record
 
   process_basic_string "NAME", :id
-  process_basic_string "MODL", :nif_model
+  process_basic_string "MODL", :nif_model_filename
   process_basic_string "FNAM", :name
-  process_basic_string "ITEX", :icon
+  process_basic_string "ITEX", :icon_filename
   process_basic_string "SCRI", :script_id
 
   def process({"PBDT", value}, data) do

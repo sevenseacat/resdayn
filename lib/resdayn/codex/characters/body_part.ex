@@ -17,13 +17,13 @@ defmodule Resdayn.Codex.Characters.BodyPart do
   attributes do
     attribute :id, :string, primary_key?: true, allow_nil?: false
     attribute :nif_model_filename, :string
-    attribute :race, :string
-    attribute :body_part_type, __MODULE__.Type, allow_nil?: false
+    attribute :type, __MODULE__.Type, allow_nil?: false
     attribute :equipment_type, __MODULE__.EquipmentType, allow_nil?: false
     attribute :vampire, :boolean, default: false
     attribute :body_part_flags, {:array, __MODULE__.Flag}, allow_nil?: false, default: []
   end
 
   relationships do
+    belongs_to :race, Resdayn.Codex.Characters.Race, attribute_type: :string
   end
 end

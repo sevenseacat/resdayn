@@ -17,7 +17,7 @@ defmodule Resdayn.Codex.Items.AlchemyApparatus do
   attributes do
     attribute :id, :string, primary_key?: true, allow_nil?: false
     attribute :name, :string, allow_nil?: false
-    attribute :apparatus_type, :atom, constraints: [one_of: [:mortar_and_pestle, :alembic, :calcinator, :retort]], allow_nil?: false
+    attribute :type, __MODULE__.Type, allow_nil?: false
     attribute :nif_model_filename, :string
     attribute :icon_filename, :string
     attribute :weight, :float

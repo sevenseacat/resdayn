@@ -2,8 +2,8 @@ defmodule Resdayn.Parser.Record.Potion do
   use Resdayn.Parser.Record
 
   process_basic_string "NAME", :id
-  process_basic_string "MODL", :nif_model
-  process_basic_string "TEXT", :icon
+  process_basic_string "MODL", :nif_model_filename
+  process_basic_string "TEXT", :icon_filename
   process_basic_string "FNAM", :name
   process_basic_string "SCRI", :script_id
   process_enchantments "ENAM", :effects

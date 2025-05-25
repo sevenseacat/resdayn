@@ -22,7 +22,7 @@ defmodule Resdayn.Importer.Record.Race do
   end
 
   defp transform_stats(attrs) do
-    starting_attributes = 
+    starting_attributes =
       attrs
       |> Map.drop([:height, :weight])
       |> Enum.map(fn {attr_name, value} ->
@@ -39,8 +39,6 @@ defmodule Resdayn.Importer.Record.Race do
     }
   end
 
-
-
   defp transform_special_spells(spell_ids) do
     Enum.map(spell_ids, fn spell_id ->
       %{spell_id: spell_id}
@@ -49,7 +47,7 @@ defmodule Resdayn.Importer.Record.Race do
 
   # Map attribute names to their IDs based on the existing Attribute resource
   defp attribute_name_to_id(:strength), do: 0
-  defp attribute_name_to_id(:intelligence), do: 1  
+  defp attribute_name_to_id(:intelligence), do: 1
   defp attribute_name_to_id(:willpower), do: 2
   defp attribute_name_to_id(:agility), do: 3
   defp attribute_name_to_id(:speed), do: 4

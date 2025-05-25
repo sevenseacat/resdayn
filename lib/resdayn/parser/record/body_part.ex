@@ -56,8 +56,8 @@ defmodule Resdayn.Parser.Record.BodyPart do
   }
 
   process_basic_string "NAME", :id
-  process_basic_string "MODL", :nif_model
-  process_basic_string "FNAM", :race
+  process_basic_string "MODL", :nif_model_filename
+  process_basic_string "FNAM", :race_id
 
   def process({"BYDT", value}, data) do
     <<type::uint8(), vampire::uint8(), flags::uint8(), equipment_type::uint8()>> = value

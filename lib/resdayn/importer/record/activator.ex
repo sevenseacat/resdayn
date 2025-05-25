@@ -7,8 +7,7 @@ defmodule Resdayn.Importer.Record.Activator do
       |> of_type(Resdayn.Parser.Record.Activator)
       |> Enum.map(fn record ->
         record.data
-        |> Map.take([:id, :name, :script_id])
-        |> Map.put(:nif_model_filename, record.data.nif_model)
+        |> Map.take([:id, :name, :script_id, :nif_model_filename])
         |> with_flags(:flags, record.flags)
       end)
 

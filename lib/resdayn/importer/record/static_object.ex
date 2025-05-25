@@ -7,8 +7,7 @@ defmodule Resdayn.Importer.Record.StaticObject do
       |> of_type(Resdayn.Parser.Record.Static)
       |> Enum.map(fn record ->
         record.data
-        |> Map.take([:id])
-        |> Map.put(:nif_model_filename, record.data.nif_model)
+        |> Map.take([:id, :nif_model_filename])
         |> with_flags(:flags, record.flags)
       end)
 
