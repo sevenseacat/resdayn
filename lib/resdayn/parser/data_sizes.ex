@@ -28,7 +28,7 @@ defmodule Resdayn.Parser.DataSizes do
 
   defmacro uint16 do
     quote do
-      little - integer - signed - size(16)
+      little - integer - unsigned - size(16)
     end
   end
 

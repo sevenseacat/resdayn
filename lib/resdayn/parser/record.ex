@@ -217,21 +217,26 @@ defmodule Resdayn.Parser.Record do
       def process({"INDX", <<value::uint8()>>}, data) do
         record_list_of_maps_key(
           data,
-          :body_parts,
+          :body_part_coverings,
           :type,
           Map.fetch!(Resdayn.Parser.Record.BodyPart.coverables(), value)
         )
       end
 
       def process({"BNAM" = v, value}, data) do
-        record_list_of_maps_value(data, :body_parts, :male_name, printable!(__MODULE__, v, value))
+        record_list_of_maps_value(
+          data,
+          :body_part_coverings,
+          :base_nif_model_filename,
+          printable!(__MODULE__, v, value)
+        )
       end
 
       def process({"CNAM" = v, value}, data) do
         record_list_of_maps_value(
           data,
-          :body_parts,
-          :female_name,
+          :body_part_coverings,
+          :female_nif_model_filename,
           printable!(__MODULE__, v, value)
         )
       end

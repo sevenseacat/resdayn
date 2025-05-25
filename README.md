@@ -39,7 +39,7 @@ Using the amazing work of Dave Humphrey detailed here: http://www.uesp.net/morro
 | ✓      | ✓        | `ENCH` (Enchanting effects) |
 | ✓      |          | `NPC_` (NPCs) |
 | ✓      |          | `ARMO` (Armour) |
-| ✓      |          | `CLOT` (Clothing) |
+| ✓      | ✓        | `CLOT` (Clothing) |
 | ✓      | ✓        | `REPA` (Repair items) * |
 | ✓      | ✓        | `ACTI` (Activators) |
 | ✓      | ✓        | `APPA` (Alchemy apparatus) |

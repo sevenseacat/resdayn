@@ -1,0 +1,32 @@
+defmodule Resdayn.Codex.Characters.BodyPart.CoverableType do
+  use Ash.Type.Enum,
+    values: [
+      :head,
+      :hair,
+      :neck,
+      :cuirass,
+      :groin,
+      :skirt,
+      :right_hand,
+      :left_hand,
+      :right_wrist,
+      :left_wrist,
+      :shield,
+      :right_forearm,
+      :left_forearm,
+      :right_upper_arm,
+      :left_upper_arm,
+      :right_foot,
+      :left_foot,
+      :right_ankle,
+      :left_ankle,
+      :right_knee,
+      :left_knee,
+      :right_upper_leg,
+      :left_upper_leg,
+      :right_pauldron,
+      :left_pauldron,
+      :weapon,
+      :tail
+    ]
+end

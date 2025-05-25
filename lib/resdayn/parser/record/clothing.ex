@@ -15,10 +15,10 @@ defmodule Resdayn.Parser.Record.Clothing do
   }
 
   process_basic_string "NAME", :id
-  process_basic_string "MODL", :nif_model
+  process_basic_string "MODL", :nif_model_filename
   process_basic_string "FNAM", :name
-  process_basic_string "ITEX", :icon
-  process_basic_string "ENAM", :enchantment
+  process_basic_string "ITEX", :icon_filename
+  process_basic_string "ENAM", :enchantment_id
   process_basic_string "SCRI", :script_id
   process_body_coverings()
 
@@ -27,7 +27,7 @@ defmodule Resdayn.Parser.Record.Clothing do
 
     record_unnested_value(data, %{
       type: Map.fetch!(@clothing_types, type),
-      weight: weight,
+      weight: float(weight),
       value: value,
       enchantment_points: enchantment_points
     })
