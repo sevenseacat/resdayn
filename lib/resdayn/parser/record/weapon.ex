@@ -2,7 +2,7 @@ defmodule Resdayn.Parser.Record.Weapon do
   use Resdayn.Parser.Record
 
   @weapon_types %{
-    0 => :short_blade_1_hand,
+    0 => :short_blade,
     1 => :long_blade_1_hand,
     2 => :long_blade_2_hand,
     3 => :blunt_1_hand,
@@ -19,10 +19,10 @@ defmodule Resdayn.Parser.Record.Weapon do
   }
 
   process_basic_string "NAME", :id
-  process_basic_string "MODL", :nif_model
+  process_basic_string "MODL", :nif_model_filename
   process_basic_string "FNAM", :name
-  process_basic_string "ITEX", :icon
-  process_basic_string "ENAM", :enchantment
+  process_basic_string "ITEX", :icon_filename
+  process_basic_string "ENAM", :enchantment_id
   process_basic_string "SCRI", :script_id
 
   def process({"WPDT", value}, data) do
@@ -37,11 +37,11 @@ defmodule Resdayn.Parser.Record.Weapon do
       type: Map.fetch!(@weapon_types, type),
       health: health,
       speed: float(speed),
-      reach: reach,
+      reach: float(reach),
       enchantment_points: enchantment_points,
-      chop: %{min: chop_min, max: chop_max},
-      slash: %{min: slash_min, max: slash_max},
-      thrust: %{min: thrust_min, max: thrust_max},
+      chop_magnitude: %{min: chop_min, max: chop_max},
+      slash_magnitude: %{min: slash_min, max: slash_max},
+      thrust_magnitude: %{min: thrust_min, max: thrust_max},
       flags: bitmask(flags, ignore_resistance: 1, silver: 2)
     })
   end

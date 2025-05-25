@@ -10,5 +10,6 @@ defmodule Resdayn.Codex.Items do
     resource __MODULE__.Potion
     resource __MODULE__.Book
     resource __MODULE__.Clothing
+    resource __MODULE__.Weapon
   end
 end

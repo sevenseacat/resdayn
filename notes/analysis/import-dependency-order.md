@@ -72,10 +72,10 @@ These records have no dependencies on other records or only reference already-im
 Based on the dependency analysis, the recommended import order is:
 
 **Phase 1 (Immediate):**
-1. BSGN, STAT, BODY, MISC, REPA, ACTI, APPA, LOCK, PROB, ALCH, LIGH
+1. BSGN ✓, STAT ✓, BODY ✓, MISC ✓, REPA ✓, ACTI ✓, APPA ✓, LOCK ✓, PROB ✓, ALCH ✓, LIGH ✓
 
 **Phase 2 (After Phase 1):**
-2. DOOR, WEAP, ARMO, CLOT, BOOK
+2. DOOR ✓, WEAP ✓, ARMO, CLOT ✓, BOOK ✓
 
 **Phase 3 (After Phase 2):**
 3. CREA, NPC_

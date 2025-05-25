@@ -30,7 +30,7 @@ Using the amazing work of Dave Humphrey detailed here: http://www.uesp.net/morro
 | ✓      | ✓        | `STAT` (Static objects) |
 | ✓      | ✓        | `DOOR` (Doors) |
 | ✓      | ✓        | `MISC` (Miscellaneous items) |
-| ✓      |          | `WEAP` (Weapons) |
+| ✓      | ✓        | `WEAP` (Weapons) |
 | ✓      |          | `CONT` (Containers) |
 | ✓      | ✓        | `SPEL` (Spells) |
 | ✓      |          | `CREA` (Creatures) |
