@@ -24,7 +24,7 @@ defmodule Resdayn.Parser.Record do
     "LIGH" => __MODULE__.Light,
     "ENCH" => __MODULE__.Enchantment,
     "NPC_" => __MODULE__.NPC,
-    "ARMO" => __MODULE__.Armour,
+    "ARMO" => __MODULE__.Armor,
     "CLOT" => __MODULE__.Clothing,
     "REPA" => __MODULE__.RepairItem,
     "ACTI" => __MODULE__.Activator,

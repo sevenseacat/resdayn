@@ -1,7 +1,7 @@
-defmodule Resdayn.Parser.Record.Armour do
+defmodule Resdayn.Parser.Record.Armor do
   use Resdayn.Parser.Record
 
-  @armour_types %{
+  @armor_types %{
     0 => :helmet,
     1 => :cuirass,
     2 => :left_pauldron,
@@ -16,24 +16,24 @@ defmodule Resdayn.Parser.Record.Armour do
   }
 
   process_basic_string "NAME", :id
-  process_basic_string "MODL", :nif_model
+  process_basic_string "MODL", :nif_model_filename
   process_basic_string "FNAM", :name
-  process_basic_string "ITEX", :icon
+  process_basic_string "ITEX", :icon_filename
   process_basic_string "SCRI", :script_id
-  process_basic_string "ENAM", :enchantment
+  process_basic_string "ENAM", :enchantment_id
   process_body_coverings()
 
   def process({"AODT", value}, data) do
     <<type::uint32(), weight::float32(), value::uint32(), health::uint32(),
-      enchantment_points::uint32(), armour_rating::uint32()>> = value
+      enchantment_points::uint32(), armor_rating::uint32()>> = value
 
     record_unnested_value(data, %{
-      type: Map.fetch!(@armour_types, type),
-      weight: weight,
+      type: Map.fetch!(@armor_types, type),
+      weight: float(weight),
       value: value,
       health: health,
       enchantment_points: enchantment_points,
-      armour_rating: armour_rating
+      armor_rating: armor_rating
     })
   end
 end

@@ -52,7 +52,7 @@ defmodule Resdayn.Parser.Record.BodyPart do
   @equipment_types %{
     0 => :skin,
     1 => :clothing,
-    2 => :armour
+    2 => :armor
   }
 
   process_basic_string "NAME", :id

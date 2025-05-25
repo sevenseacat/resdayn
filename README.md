@@ -38,7 +38,7 @@ Using the amazing work of Dave Humphrey detailed here: http://www.uesp.net/morro
 | ✓      | ✓        | `LIGH` (Lights) |
 | ✓      | ✓        | `ENCH` (Enchanting effects) |
 | ✓      |          | `NPC_` (NPCs) |
-| ✓      |          | `ARMO` (Armour) |
+| ✓      | ✓        | `ARMO` (Armor) |
 | ✓      | ✓        | `CLOT` (Clothing) |
 | ✓      | ✓        | `REPA` (Repair items) * |
 | ✓      | ✓        | `ACTI` (Activators) |

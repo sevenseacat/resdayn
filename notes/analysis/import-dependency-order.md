@@ -43,7 +43,7 @@ These records have no dependencies on other records or only reference already-im
 14. **`DOOR` (Doors)** - May reference scripts (already imported)
 15. **`CONT` (Containers)** - May reference scripts (already imported)
 16. **`WEAP` (Weapons)** - References enchantments and scripts (both already imported)
-17. **`ARMO` (Armour)** - References enchantments and scripts (both already imported)
+17. **`ARMO` (Armor)** - References enchantments and scripts (both already imported)
 18. **`CLOT` (Clothing)** - Likely references enchantments and scripts (both already imported)
 19. **`BOOK` (Books and papers)** - References enchantments, scripts, and skills (all already imported)
 
@@ -75,7 +75,7 @@ Based on the dependency analysis, the recommended import order is:
 1. BSGN ✓, STAT ✓, BODY ✓, MISC ✓, REPA ✓, ACTI ✓, APPA ✓, LOCK ✓, PROB ✓, ALCH ✓, LIGH ✓
 
 **Phase 2 (After Phase 1):**
-2. DOOR ✓, WEAP ✓, ARMO, CLOT ✓, BOOK ✓
+2. DOOR ✓, WEAP ✓, ARMO ✓, CLOT ✓, BOOK ✓
 
 **Phase 3 (After Phase 2):**
 3. CREA, NPC_
