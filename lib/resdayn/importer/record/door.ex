@@ -1,18 +1,17 @@
-defmodule Resdayn.Importer.Record.Activator do
+defmodule Resdayn.Importer.Record.Door do
   use Resdayn.Importer.Record
 
   def process(records, _opts) do
     data =
       records
-      |> of_type(Resdayn.Parser.Record.Activator)
+      |> of_type(Resdayn.Parser.Record.Door)
       |> Enum.map(fn record ->
         record.data
-        |> Map.take([:id, :name, :script_id, :nif_model_filename])
         |> with_flags(:flags, record.flags)
       end)
 
     %{
-      resource: Resdayn.Codex.World.Activator,
+      resource: Resdayn.Codex.World.Door,
       data: data
     }
   end

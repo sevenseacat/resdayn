@@ -20,7 +20,6 @@ defmodule Mix.Tasks.Resdayn.ImportCodex do
 
   # To be imported
   # Record.Region,
-  # Record.Door,
   # Record.Weapon,
   # Record.Container,
   # Record.Creature,
@@ -29,7 +28,6 @@ defmodule Mix.Tasks.Resdayn.ImportCodex do
   # Record.LevelledItem,
   # Record.LevelledCreature,
   # Record.Cell,
-  # Record.PathGrid,
   # Record.SoundGenerator,
   # Record.DialogueTopic,
   # Record.DialogueResponse,
@@ -93,7 +91,8 @@ defmodule Mix.Tasks.Resdayn.ImportCodex do
       Record.Birthsign,
       Record.BodyPart,
       Record.Book,
-      Record.Clothing
+      Record.Clothing,
+      Record.Door
     ]
     |> Enum.each(fn importer ->
       import_records(importer, records, filename: filename)

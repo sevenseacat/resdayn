@@ -75,19 +75,19 @@ Based on the dependency analysis, the recommended import order is:
 1. BSGN, STAT, BODY, MISC, REPA, ACTI, APPA, LOCK, PROB, ALCH, LIGH
 
 **Phase 2 (After Phase 1):**
-2. DOOR, CONT, WEAP, ARMO, CLOT, BOOK
+2. DOOR, WEAP, ARMO, CLOT, BOOK
 
 **Phase 3 (After Phase 2):**
 3. CREA, NPC_
 
 **Phase 4 (After Phase 3):**
-4. LEVI, LEVC
+4. LEVI, LEVC, SNDG
 
 **Phase 5 (After Phase 4):**
-5. REGN, CELL
+5. REGN, CONT
 
 **Phase 6 (After Phase 5):**
-6. DIAL, then INFO (both dialogue and journal)
+6. CELL, DIAL, then INFO (both dialogue and journal)
 
 ## Notes
 

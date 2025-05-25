@@ -28,7 +28,7 @@ Using the amazing work of Dave Humphrey detailed here: http://www.uesp.net/morro
 | ✓      | ✓        | `BSGN` (Birth signs) |
 | ✓      | x        | `LTEX` (Land textures) |
 | ✓      | ✓        | `STAT` (Static objects) |
-| ✓      |          | `DOOR` (Doors) |
+| ✓      | ✓        | `DOOR` (Doors) |
 | ✓      | ✓        | `MISC` (Miscellaneous items) |
 | ✓      |          | `WEAP` (Weapons) |
 | ✓      |          | `CONT` (Containers) |
@@ -53,6 +53,7 @@ Using the amazing work of Dave Humphrey detailed here: http://www.uesp.net/morro
 | ✓      |          | `CELL` (Cells) |
 | x      | x        | `LAND` (Landscapes) |
 | x      | x        | `PGRD` (Path grids) |
+| ✓      |          | `SNDG` (Sound generators) |
 | ✓      |          | `DIAL` (Dialogue/journal topics) |
 | ✓      |          | `INFO` (Dialogue records) |
 | ✓      |          | `INFO` (Journal records) |

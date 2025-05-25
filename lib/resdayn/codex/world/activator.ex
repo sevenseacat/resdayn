@@ -1,7 +1,7 @@
-defmodule Resdayn.Codex.Assets.Activator do
+defmodule Resdayn.Codex.World.Activator do
   use Ash.Resource,
     otp_app: :resdayn,
-    domain: Resdayn.Codex.Assets,
+    domain: Resdayn.Codex.World,
     data_layer: AshPostgres.DataLayer,
     extensions: [Resdayn.Codex.Importable]
 
