@@ -22,7 +22,6 @@ defmodule Mix.Tasks.Resdayn.ImportCodex do
   # Record.Region,
   # Record.Container,
   # Record.Creature,
-  # Record.NPC,
   # Record.LevelledItem,
   # Record.LevelledCreature,
   # Record.Cell,
@@ -92,7 +91,9 @@ defmodule Mix.Tasks.Resdayn.ImportCodex do
       Record.Clothing,
       Record.Door,
       Record.Weapon,
-      Record.Armor
+      Record.Armor,
+      Record.NPC,
+      Record.InventoryItem
     ]
     |> Enum.each(fn importer ->
       import_records(importer, records, filename: filename)
@@ -125,6 +126,7 @@ defmodule Mix.Tasks.Resdayn.ImportCodex do
 
     if length > 0 do
       Ash.bulk_create!(data, resource, :import, return_errors?: true, stop_on_error?: true)
+
       Owl.IO.puts("#{name}: #{length} records inserted.")
     end
   end

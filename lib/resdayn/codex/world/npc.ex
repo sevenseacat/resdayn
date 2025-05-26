@@ -67,5 +67,7 @@ defmodule Resdayn.Codex.World.NPC do
     belongs_to :race, Resdayn.Codex.Characters.Race, attribute_type: :string, allow_nil?: false
     belongs_to :class, Resdayn.Codex.Characters.Class, attribute_type: :string, allow_nil?: false
     belongs_to :faction, Resdayn.Codex.Characters.Faction, attribute_type: :string
+
+    has_many :inventory_items, Resdayn.Codex.World.InventoryItem
   end
 end

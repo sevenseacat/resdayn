@@ -13,7 +13,10 @@ defmodule Resdayn.Codex.Importable do
     use Spark.Dsl.Transformer
 
     def transform(dsl_state) do
-      attribute_names = Enum.map(Ash.Resource.Info.attributes(dsl_state), & &1.name)
+      attribute_names =
+        Ash.Resource.Info.attributes(dsl_state)
+        |> Enum.filter(& &1.writable?)
+        |> Enum.map(& &1.name)
 
       belongs_to_ids =
         Enum.filter(Ash.Resource.Info.relationships(dsl_state), &(&1.type == :belongs_to))
