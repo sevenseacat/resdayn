@@ -1,4 +1,4 @@
-defmodule Resdayn.Codex.Characters.Class.ItemsVendored do
+defmodule Resdayn.Codex.Characters.ItemsVendored do
   use Ash.Type.Enum,
     values: [
       :weapons,

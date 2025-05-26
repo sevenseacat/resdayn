@@ -3,7 +3,7 @@ defmodule Resdayn.Parser.Record.NPC do
 
   process_basic_string "NAME", :id
   process_basic_string "FNAM", :name
-  process_basic_string "MODL", :nif_model
+  process_basic_string "MODL", :nif_model_filename
   process_basic_string "RNAM", :race_id
   process_basic_string "CNAM", :class_id
   process_basic_string "ANAM", :faction_id
@@ -21,8 +21,8 @@ defmodule Resdayn.Parser.Record.NPC do
     record_unnested_value(data, %{
       level: level,
       disposition: disposition,
-      reputation: reputation,
-      rank: rank,
+      global_reputation: reputation,
+      faction_rank: rank,
       gold: gold
     })
   end
@@ -50,33 +50,46 @@ defmodule Resdayn.Parser.Record.NPC do
       magicka: magicka,
       fatigue: fatigue,
       disposition: disposition,
-      reputation: reputation,
-      rank: rank,
+      global_reputation: reputation,
+      faction_rank: rank,
       gold: gold
     })
   end
 
   def process({"FLAG", <<value::uint32()>>}, data) do
-    record_value(
-      data,
+    blood =
+      case Enum.find(
+             bitmask(value, skeleton: 0x0400, metal_sparks: 0x0800),
+             fn {_key, val} -> val end
+           ) do
+        {key, true} -> key
+        nil -> :default
+      end
+
+    data
+    |> record_value(:blood, blood)
+    |> record_value(
       :flags,
       bitmask(value,
         female: 0x0001,
         essential: 0x0002,
         respawn: 0x0004,
-        autocalc: 0x0010,
-        blood_texture_skeleton: 0x0400,
-        blood_texture_metal_sparks: 0x0800
+        autocalc: 0x0010
       )
     )
   end
 
   def process({"DODT", value}, data) do
-    record_list_of_maps_key(data, :transport, :coordinates, coordinates(value))
+    record_list_of_maps_key(data, :transport_options, :coordinates, coordinates(value))
   end
 
   def process({"DNAM" = v, value}, data) do
-    record_list_of_maps_value(data, :transport, :cell_name, printable!(__MODULE__, v, value))
+    record_list_of_maps_value(
+      data,
+      :transport_options,
+      :cell_name,
+      printable!(__MODULE__, v, value)
+    )
   end
 
   defp skills(bitstring) do

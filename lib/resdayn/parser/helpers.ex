@@ -157,8 +157,12 @@ defmodule Resdayn.Parser.Helpers do
       end
 
     %{
-      position: {float(pos_x), float(pos_y), float(pos_z)},
-      rotation: {rot_x, float(radians_to_degrees.(rot_y)), float(radians_to_degrees.(rot_z))}
+      position: %{x: float(pos_x), y: float(pos_y), z: float(pos_z)},
+      rotation: %{
+        x: rot_x,
+        y: float(radians_to_degrees.(rot_y)),
+        z: float(radians_to_degrees.(rot_z))
+      }
     }
   end
 end

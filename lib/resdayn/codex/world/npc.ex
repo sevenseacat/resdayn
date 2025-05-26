@@ -1,0 +1,71 @@
+defmodule Resdayn.Codex.World.NPC do
+  use Ash.Resource,
+    otp_app: :resdayn,
+    domain: Resdayn.Codex.World,
+    data_layer: AshPostgres.DataLayer,
+    extensions: [Resdayn.Codex.Importable]
+
+  postgres do
+    table "npcs"
+    repo Resdayn.Repo
+  end
+
+  actions do
+    defaults [:read]
+  end
+
+  attributes do
+    attribute :id, :string, primary_key?: true, allow_nil?: false
+    attribute :name, :string
+    attribute :level, :integer, allow_nil?: false, constraints: [min: 0]
+
+    attribute :head_model_id, :string, allow_nil?: false
+    attribute :hair_model_id, :string, allow_nil?: false
+
+    attribute :disposition, :integer, allow_nil?: false, constraints: [min: 0]
+    attribute :global_reputation, :integer, allow_nil?: false, constraints: [min: 0]
+
+    attribute :faction_rank, :integer, constraints: [min: 0, max: 10]
+    attribute :gold, :integer, allow_nil?: false, constraints: [min: 0]
+
+    attribute :health, :integer, constraints: [min: 0]
+    attribute :magicka, :integer, constraints: [min: 0]
+    attribute :fatigue, :integer, constraints: [min: 0]
+
+    attribute :attributes, {:array, Resdayn.Codex.Characters.AttributeValue},
+      allow_nil?: false,
+      default: []
+
+    attribute :skills, {:array, Resdayn.Codex.Characters.SkillValue},
+      allow_nil?: false,
+      default: []
+
+    attribute :alert, Resdayn.Codex.World.Alert, allow_nil?: false
+    attribute :blood, __MODULE__.BloodType, allow_nil?: false
+
+    attribute :spell_links, {:array, Resdayn.Codex.Characters.SpellLink},
+      allow_nil?: false,
+      default: []
+
+    attribute :services_offered, {:array, Resdayn.Codex.Characters.ServicesOffered},
+      default: [],
+      allow_nil?: false
+
+    attribute :items_vendored, {:array, Resdayn.Codex.Characters.ItemsVendored},
+      default: [],
+      allow_nil?: false
+
+    attribute :transport_options, {:array, Resdayn.Codex.World.TransportDestination}
+
+    attribute :ai_packages, {:array, :map}, default: []
+
+    attribute :npc_flags, {:array, __MODULE__.Flag}, allow_nil?: false, default: []
+  end
+
+  relationships do
+    belongs_to :script, Resdayn.Codex.Mechanics.Script, attribute_type: :string
+    belongs_to :race, Resdayn.Codex.Characters.Race, attribute_type: :string, allow_nil?: false
+    belongs_to :class, Resdayn.Codex.Characters.Class, attribute_type: :string, allow_nil?: false
+    belongs_to :faction, Resdayn.Codex.Characters.Faction, attribute_type: :string
+  end
+end

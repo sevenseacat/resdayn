@@ -59,7 +59,7 @@ defmodule Resdayn.Codex.Characters.Race do
       allow_nil?: false,
       public?: true
 
-    attribute :special_spells, {:array, __MODULE__.SpellBonus},
+    attribute :special_spells, {:array, Resdayn.Codex.Characters.SpellLink},
       allow_nil?: false,
       default: [],
       public?: true

@@ -19,7 +19,10 @@ defmodule Resdayn.Codex.Characters.Birthsign do
     attribute :name, :string, allow_nil?: false
     attribute :description, :string
     attribute :artwork_filename, :string
-    attribute :spells, {:array, __MODULE__.Spell}, allow_nil?: false, default: []
+
+    attribute :spells, {:array, Resdayn.Codex.Characters.SpellLink},
+      allow_nil?: false,
+      default: []
   end
 
   relationships do

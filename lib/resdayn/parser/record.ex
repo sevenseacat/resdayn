@@ -125,13 +125,15 @@ defmodule Resdayn.Parser.Record do
           value
 
         record_value(data, :ai_data, %{
-          hello: hello,
-          fight: fight,
-          flee: flee,
-          alarm: alarm,
-          flags:
+          alert: %{
+            hello: hello,
+            fight: fight,
+            flee: flee,
+            alarm: alarm
+          },
+          items_vendored:
             bitmask(flags,
-              weapon: 0x00001,
+              weapons: 0x00001,
               armor: 0x00002,
               clothing: 0x00004,
               books: 0x00008,
@@ -140,15 +142,18 @@ defmodule Resdayn.Parser.Record do
               probes: 0x00040,
               lights: 0x00080,
               apparatus: 0x00100,
-              repair: 0x00200,
+              repair_items: 0x00200,
               misc: 0x00400,
               spells: 0x00800,
               magic_items: 0x01000,
-              potions: 0x02000,
+              potions: 0x02000
+            ),
+          services_offered:
+            bitmask(flags,
               training: 0x04000,
               spellmaking: 0x08000,
               enchanting: 0x10000,
-              repair_item: 0x20000
+              repairing: 0x20000
             )
         })
       end

@@ -1,4 +1,4 @@
-defmodule Resdayn.Codex.Characters.Race.StartingAttribute do
+defmodule Resdayn.Codex.Characters.AttributeValue do
   use Ash.Resource,
     otp_app: :resdayn,
     data_layer: :embedded

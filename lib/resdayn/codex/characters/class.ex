@@ -55,13 +55,25 @@ defmodule Resdayn.Codex.Characters.Class do
     attribute :name, :string, allow_nil?: false
     attribute :description, :string, allow_nil?: true
 
-    attribute :services_offered, {:array, __MODULE__.ServicesOffered},
+    attribute :services_offered, {:array, Resdayn.Codex.Characters.ServicesOffered},
       default: [],
       allow_nil?: false
 
     attribute :playable, :boolean, allow_nil?: false
     attribute :specialization, Resdayn.Codex.Characters.Specialization, allow_nil?: false
-    attribute :items_vendored, {:array, __MODULE__.ItemsVendored}, default: [], allow_nil?: false
+
+    attribute :items_vendored, {:array, Resdayn.Codex.Characters.ItemsVendored},
+      default: [],
+      allow_nil?: false,
+      description: """
+      This doesn't seem to be actually used in the game - more of a guide?
+
+      NPCs have their own set of flags for vendoring different types of items,
+      and they don't have to match those of their assigned class
+
+      eg. specific NPCs of class Apothecary Service (flags apparatus,ingredients,
+      potions) but their own flags are all false - will not have the option to Barter
+      """
   end
 
   relationships do

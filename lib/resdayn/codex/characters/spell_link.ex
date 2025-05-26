@@ -1,4 +1,4 @@
-defmodule Resdayn.Codex.Characters.Race.SpellBonus do
+defmodule Resdayn.Codex.Characters.SpellLink do
   use Ash.Resource,
     otp_app: :resdayn,
     data_layer: :embedded

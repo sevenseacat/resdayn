@@ -6,7 +6,8 @@ defmodule Resdayn.Codex.Characters.Race.Stats do
   attributes do
     attribute :height, :float, allow_nil?: false, public?: true
     attribute :weight, :float, allow_nil?: false, public?: true
-    attribute :starting_attributes, {:array, Resdayn.Codex.Characters.Race.StartingAttribute},
+
+    attribute :starting_attributes, {:array, Resdayn.Codex.Characters.AttributeValue},
       allow_nil?: false,
       default: [],
       public?: true
