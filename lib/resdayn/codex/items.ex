@@ -12,5 +12,6 @@ defmodule Resdayn.Codex.Items do
     resource __MODULE__.Clothing
     resource __MODULE__.Weapon
     resource __MODULE__.Armor
+    resource __MODULE__.ItemLevelledList
   end
 end

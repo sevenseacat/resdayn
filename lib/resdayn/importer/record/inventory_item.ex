@@ -1,4 +1,4 @@
-defmodule Resdayn.Importer.Record.InventoryEntry do
+defmodule Resdayn.Importer.Record.InventoryItem do
   use Resdayn.Importer.Record
 
   def process(records, opts) do
@@ -26,7 +26,7 @@ defmodule Resdayn.Importer.Record.InventoryEntry do
       end)
 
     %{
-      resource: Resdayn.Codex.World.InventoryEntry,
+      resource: Resdayn.Codex.World.InventoryItem,
       data: data
     }
   end

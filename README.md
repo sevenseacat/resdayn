@@ -48,7 +48,7 @@ Using the amazing work of Dave Humphrey detailed here: http://www.uesp.net/morro
 | ✓      | ✓        | `INGR` (Ingredients) |
 | ✓      | ✓        | `BOOK` (Books and papers) |
 | ✓      | ✓        | `ALCH` (Potions) |
-| ✓      |          | `LEVI` (Levelled items) |
+| ✓      | ✓        | `LEVI` (Levelled items) |
 | ✓      |          | `LEVC` (Levelled creatures) |
 | ✓      |          | `CELL` (Cells) |
 | x      | x        | `LAND` (Landscapes) |

@@ -5,15 +5,17 @@ defmodule Resdayn.Importer.ItemRegistry do
   """
 
   @item_resources [
-    {Resdayn.Codex.Items.Tool, :tool},
-    {Resdayn.Codex.Items.Clothing, :clothing},
-    {Resdayn.Codex.Items.Weapon, :weapon},
-    {Resdayn.Codex.Items.Armor, :armor},
-    {Resdayn.Codex.Items.Book, :book},
-    {Resdayn.Codex.Items.Ingredient, :ingredient},
-    {Resdayn.Codex.Items.Potion, :potion},
-    {Resdayn.Codex.Items.AlchemyApparatus, :alchemy_apparatus},
-    {Resdayn.Codex.Items.MiscellaneousItem, :miscellaneous_item}
+    {Resdayn.Codex.Items.Tool, :tool_id},
+    {Resdayn.Codex.Items.Clothing, :clothing_id},
+    {Resdayn.Codex.Items.Weapon, :weapon_id},
+    {Resdayn.Codex.Items.Armor, :armor_id},
+    {Resdayn.Codex.Items.Book, :book_id},
+    {Resdayn.Codex.Items.Ingredient, :ingredient_id},
+    {Resdayn.Codex.Items.Potion, :potion_id},
+    {Resdayn.Codex.Items.AlchemyApparatus, :alchemy_apparatus_id},
+    {Resdayn.Codex.Items.MiscellaneousItem, :miscellaneous_item_id},
+    {Resdayn.Codex.Items.ItemLevelledList, :item_levelled_list_id},
+    {Resdayn.Codex.Assets.Light, :light_id}
   ]
 
   @doc """
@@ -24,12 +26,12 @@ defmodule Resdayn.Importer.ItemRegistry do
     @item_resources
     |> Enum.reduce(%{}, fn {resource, type}, acc ->
       items = Ash.read!(resource)
-      
-      item_map = 
+
+      item_map =
         items
         |> Enum.map(&{&1.id, type})
         |> Enum.into(%{})
-      
+
       Map.merge(acc, item_map)
     end)
   end
@@ -51,18 +53,19 @@ defmodule Resdayn.Importer.ItemRegistry do
     |> Enum.map(fn %{id: item_id, count: count, restocking: restocking} ->
       case lookup_item_type(registry, item_id) do
         nil ->
-          IO.warn("Unknown item ID during inventory import: #{item_id} for #{holder_type} #{holder_id}")
+          IO.warn(
+            "Unknown item ID during inventory import: #{item_id} for #{holder_type} #{holder_id}"
+          )
+
           nil
 
         item_type ->
           %{
-            holder_id: holder_id,
-            holder_type: holder_type,
-            item_id: item_id,
-            item_type: item_type,
+            npc_id: holder_id,
             count: count,
-            restocking: restocking
+            restocking?: restocking
           }
+          |> Map.put(item_type, item_id)
       end
     end)
     |> Enum.reject(&is_nil/1)

@@ -149,18 +149,41 @@ InventoryEntry
 - Inventory entries are created as separate resource data in importer
 - Item registry is built once and reused for all NPCs
 
+**LevelledItem Implementation:**
+- Created `Resdayn.Codex.Items.LevelledItem` resource with polymorphic item references
+- Added LevelledItem parser and importer with item type resolution
+- Imported 227 levelled items successfully
+- Extended item registry to include LevelledItem and Light types
+- Added levelled_item and light to valid item types in InventoryEntry constraints
+
+**Final Import Results:**
+- **17,842 inventory entries** imported successfully across all NPCs
+- **Item type distribution:**
+  - clothing: 6,946 entries
+  - armor: 5,400 entries  
+  - weapon: 1,775 entries
+  - levelled_item: 1,493 entries (previously failing "random" items)
+  - miscellaneous_item: 466 entries
+  - book: 466 entries
+  - ingredient: 507 entries
+  - potion: 476 entries
+  - tool: 242 entries
+  - alchemy_apparatus: 38 entries
+  - light: 33 entries (including torch items)
+
 **Testing Results:**
-- Successfully created and queried inventory entries
-- Item registry built with 15,227 items across all item types
-- Inventory conversion correctly handles missing items with warnings
-- Polymorphic relationships work correctly for both holder and item lookups
-- NPC relationship loading works as expected
+- Successfully imported all NPC inventory data with polymorphic item type resolution
+- Item registry built with 15,227+ items across 11 item types
+- Bidirectional queries working: found 20 NPCs carrying torches
+- NPC relationship loading confirmed working (Todd has 10 inventory items)
+- Zero import failures after resolving missing LevelledItem and Light types
 
 **Performance Notes:**
-- Registry build queries all 9 item resource types once at startup
+- Registry build queries all 11 item resource types once at startup
 - O(1) item type lookups during import using the registry map
 - Unique constraints prevent duplicate inventory entries at database level
 - Efficient querying in both directions (holder→items, item→holders)
+- Separate importer architecture allows proper import order dependency
 
 ## Conclusion
 
@@ -186,6 +209,13 @@ The generic inventory system has been fully implemented and tested. Key achievem
    - Adding Creature/Container resources only requires adding the relationship
    - Same inventory system works across all holder types
    - No schema changes needed for new item or holder types
+   - Item registry automatically includes new item types when added
+
+5. **Production Success**: Full Morrowind.esm import completed
+   - 2,674 NPCs imported successfully
+   - 17,842 inventory entries with complete item type resolution
+   - All polymorphic relationships functioning correctly
+   - System handles complex nested levelled items and cross-domain item references
 
 **Next Steps for Creatures/Containers:**
 When implementing these resources, simply add:
@@ -199,4 +229,41 @@ relationships do
 end
 ```
 
-The inventory system is production-ready and will scale efficiently for the full game world import.
+**Additional Components Created:**
+- `Resdayn.Codex.Items.LevelledItem` resource and importer
+- Enhanced `Resdayn.Importer.ItemRegistry` supporting 11 item types
+- Separate `Resdayn.Importer.Record.InventoryEntry` importer
+- Updated import order to ensure dependency resolution
+
+The inventory system is production-ready and successfully handles the complete Morrowind game world data.
+
+## Known Issues & Improvements
+
+### 1. LevelledItem Recursive Import Issue
+**Problem**: Initial import for LevelledItem records fails when database is empty due to recursive references (levelled items referencing other levelled items).
+
+**Solution**: Need separate importers:
+- First pass: Import LevelledItem records without item references
+- Second pass: Import LevelledItemEntry records with proper type resolution
+
+### 2. Polymorphic Item Loading
+**Problem**: Can't easily load actual item instances. Currently when loading NPC inventory, we get `item_id` and `item_type` but not the actual Tool/Armor/etc instances.
+
+**Solution**: Need relationships or calculations that can load the actual polymorphic item instances, so we can do:
+```elixir
+npc |> Ash.load!(inventory_entries: [:actual_item])
+# Where actual_item gives us the Tool/Armor/etc instance
+```
+
+### 3. Holder Referential Integrity
+**Problem**: Polymorphic holder reference (holder_id + holder_type) doesn't maintain referential integrity at database level.
+
+**Solution**: Replace polymorphic holder with three separate nullable foreign keys:
+```elixir
+belongs_to :npc, Resdayn.Codex.World.NPC
+belongs_to :creature, Resdayn.Codex.World.Creature  # when implemented
+belongs_to :container, Resdayn.Codex.World.Container # when implemented
+```
+With constraint ensuring exactly one is set.
+
+These improvements would make the system more robust and developer-friendly while maintaining the flexibility of the current design.

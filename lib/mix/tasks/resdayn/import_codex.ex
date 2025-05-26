@@ -92,6 +92,7 @@ defmodule Mix.Tasks.Resdayn.ImportCodex do
       Record.Door,
       Record.Weapon,
       Record.Armor,
+      Record.ItemLevelledList,
       Record.NPC,
       Record.InventoryItem
     ]

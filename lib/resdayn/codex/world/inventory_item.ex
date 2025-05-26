@@ -34,6 +34,7 @@ defmodule Resdayn.Codex.World.InventoryItem do
     belongs_to :alchemy_apparatus, Resdayn.Codex.Items.AlchemyApparatus, attribute_type: :string
     belongs_to :light, Resdayn.Codex.Assets.Light, attribute_type: :string
     belongs_to :miscellaneous_item, Resdayn.Codex.Items.MiscellaneousItem, attribute_type: :string
+    belongs_to :item_levelled_list, Resdayn.Codex.Items.ItemLevelledList, attribute_type: :string
   end
 
   calculations do
