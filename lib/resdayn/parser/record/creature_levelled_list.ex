@@ -1,4 +1,4 @@
-defmodule Resdayn.Parser.Record.LevelledCreature do
+defmodule Resdayn.Parser.Record.CreatureLevelledList do
   use Resdayn.Parser.Record
 
   process_basic_string "NAME", :id
