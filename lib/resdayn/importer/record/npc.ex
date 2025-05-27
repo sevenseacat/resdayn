@@ -42,7 +42,8 @@ defmodule Resdayn.Importer.Record.NPC do
           :magicka,
           :fatigue,
           :blood,
-          :transport_options
+          :transport_options,
+          :ai_packages
         ])
         |> Map.put(:attributes, attributes)
         |> Map.put(:skills, skills)

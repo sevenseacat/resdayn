@@ -188,7 +188,7 @@ defmodule Resdayn.Parser.Record do
 
         record_list(data, :ai_packages, %{
           type: :travel,
-          position: {float(x), float(y), float(z)}
+          position: %{x: float(x), y: float(y), z: float(z)}
         })
       end
 
@@ -209,7 +209,7 @@ defmodule Resdayn.Parser.Record do
 
         record_list(data, :ai_packages, %{
           type: type,
-          position: {float(x), float(y), float(z)},
+          position: %{x: float(x), y: float(y), z: float(z)},
           duration: duration(duration),
           id: id
         })

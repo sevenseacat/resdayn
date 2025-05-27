@@ -78,10 +78,10 @@ Based on the dependency analysis, the recommended import order is:
 2. DOOR ✓, WEAP ✓, ARMO ✓, CLOT ✓, BOOK ✓
 
 **Phase 3 (After Phase 2):**
-3. CREA, NPC_
+3. CREA, NPC_ ✓
 
 **Phase 4 (After Phase 3):**
-4. LEVI, LEVC, SNDG
+4. LEVI ✓, LEVC, SNDG
 
 **Phase 5 (After Phase 4):**
 5. REGN, CONT
