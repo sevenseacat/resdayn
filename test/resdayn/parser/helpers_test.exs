@@ -65,8 +65,8 @@ defmodule Resdayn.Parser.HelpersTest do
         |> Helpers.coordinates()
 
       expected = %{
-        position: {2525.39, 2251.12, 69.06},
-        rotation: {270.02, 0.0, 180.0}
+        position: %{x: 2525.39, y: 2251.12, z: 69.06},
+        rotation: %{x: 270.02, y: 0.0, z: 180.0}
       }
 
       assert actual == expected
@@ -79,8 +79,8 @@ defmodule Resdayn.Parser.HelpersTest do
         |> Helpers.coordinates()
 
       expected = %{
-        position: {2662.99, 2146.25, 65.08},
-        rotation: {nil, 90.0, 0.0}
+        position: %{x: 2662.99, y: 2146.25, z: 65.08},
+        rotation: %{x: nil, y: 90.0, z: 0.0}
       }
 
       assert actual == expected
