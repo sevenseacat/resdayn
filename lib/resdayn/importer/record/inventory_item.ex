@@ -2,9 +2,7 @@ defmodule Resdayn.Importer.Record.InventoryItem do
   use Resdayn.Importer.Record
 
   def process(records, opts) do
-    # Build item type registry for inventory processing
-    item_registry =
-      Keyword.get(opts, :item_registry) || Resdayn.Importer.ItemRegistry.build_registry()
+    item_registry = Keyword.get(opts, :item_registry)
 
     data =
       records
@@ -25,9 +23,6 @@ defmodule Resdayn.Importer.Record.InventoryItem do
         end
       end)
 
-    %{
-      resource: Resdayn.Codex.World.InventoryItem,
-      data: data
-    }
+    %{resource: Resdayn.Codex.World.InventoryItem, create: data}
   end
 end

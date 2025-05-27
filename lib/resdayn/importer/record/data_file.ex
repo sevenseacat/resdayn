@@ -1,23 +1,32 @@
 defmodule Resdayn.Importer.Record.DataFile do
   use Resdayn.Importer.Record
+  require Ash.Query
+
+  @resource Resdayn.Codex.Mechanics.DataFile
 
   def process(records, opts) do
-    with [header] <- of_type(records, Resdayn.Parser.Record.MainHeader) do
-      %{
-        resource: Resdayn.Codex.Mechanics.DataFile,
-        data: [
-          header.data.header
-          |> Map.take([:version, :company, :description])
-          |> Map.merge(%{
-            filename: Keyword.fetch!(opts, :filename),
-            master: header.data.header.flags.master,
-            dependencies: Enum.reverse(header.data[:dependencies] || [])
-          })
-          |> with_flags(:flags, header.flags)
-        ]
-      }
+    filename = Keyword.fetch!(opts, :filename)
+    [record] = of_type(records, Resdayn.Parser.Record.MainHeader)
+
+    existing =
+      Ash.Query.for_read(@resource, :read)
+      |> Ash.Query.filter(filename == ^filename)
+      |> Ash.read_one!()
+
+    data =
+      record.data.header
+      |> Map.take([:version, :company, :description])
+      |> Map.merge(%{
+        filename: filename,
+        master: record.data.header.flags.master,
+        dependencies: Enum.reverse(record.data[:dependencies] || [])
+      })
+      |> with_flags(:flags, record.flags)
+
+    if existing do
+      %{resource: @resource, update: [Ash.Changeset.for_update(existing, :import_update, data)]}
     else
-      [] -> raise RuntimeError, "No main header found in file"
+      %{resource: @resource, create: [data]}
     end
   end
 end

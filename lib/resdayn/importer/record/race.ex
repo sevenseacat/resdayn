@@ -2,23 +2,17 @@ defmodule Resdayn.Importer.Record.Race do
   use Resdayn.Importer.Record
 
   def process(records, _opts) do
-    data =
-      records
-      |> of_type(Resdayn.Parser.Record.Race)
-      |> Enum.map(fn record ->
-        record.data
-        |> Map.take([:id, :name, :description, :playable, :beast])
-        |> Map.put(:male_stats, transform_stats(record.data.male_attributes))
-        |> Map.put(:female_stats, transform_stats(record.data.female_attributes))
-        |> Map.put(:skill_bonuses, record.data.skill_bonuses || [])
-        |> Map.put(:special_spells, transform_special_spells(record.data.special_ids || []))
-        |> with_flags(:flags, record.flags)
-      end)
-
-    %{
-      resource: Resdayn.Codex.Characters.Race,
-      data: data
-    }
+    records
+    |> of_type(Resdayn.Parser.Record.Race)
+    |> Enum.map(fn record ->
+      record.data
+      |> Map.take([:id, :name, :description, :playable, :beast])
+      |> Map.put(:male_stats, transform_stats(record.data.male_attributes))
+      |> Map.put(:female_stats, transform_stats(record.data.female_attributes))
+      |> Map.put(:special_spells, transform_special_spells(record.data.special_ids || []))
+      |> with_flags(:flags, record.flags)
+    end)
+    |> separate_for_import(Resdayn.Codex.Characters.Race)
   end
 
   defp transform_stats(attrs) do

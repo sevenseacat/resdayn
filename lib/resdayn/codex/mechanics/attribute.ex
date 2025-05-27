@@ -22,7 +22,6 @@ defmodule Resdayn.Codex.Mechanics.Attribute do
   relationships do
     belongs_to :description_game_setting, Resdayn.Codex.Mechanics.GameSetting do
       description "The game setting that holds the description text for the attribute"
-      destination_attribute :name
       attribute_type :string
     end
   end

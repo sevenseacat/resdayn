@@ -13,32 +13,10 @@ defmodule Resdayn.Codex.Characters.Faction do
   actions do
     defaults [:read]
 
-    create :import do
-      description "Custom importer to allow for related ranks and reactions"
-      upsert? true
-      upsert_fields :replace_all
-
-      accept [
-        :id,
-        :name,
-        :attribute1_id,
-        :attribute2_id,
-        :hidden,
-        :ranks,
-        :flags
-      ]
-
-      argument :skill_ids, {:array, :integer}, default: [], allow_nil?: false
-      argument :reactions, {:array, :map}, default: [], allow_nil?: false
-
-      change {Resdayn.Codex.Characters.Changes.UpdateRelationships,
-              arguments: [:reactions, :skill_ids]}
-    end
-
-    update :update do
+    update :import_relationships do
       require_atomic? false
 
-      argument :skill_ids, {:array, :integer}, allow_nil?: false
+      argument :skill_ids, {:array, :integer}, default: [], allow_nil?: false
       argument :reactions, {:array, :map}, default: [], allow_nil?: false
 
       change manage_relationship(:skill_ids, :favored_skills, type: :append_and_remove)

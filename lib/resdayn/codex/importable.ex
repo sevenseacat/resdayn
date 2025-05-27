@@ -3,9 +3,7 @@ defmodule Resdayn.Codex.Importable do
   An extension to add to all resources that can be imported from data files.
 
   This extension will:
-  * Define an `import` upsert action that accepts all public attributes
-
-  (and more later but this is enough for now)
+  * Define `import_create` and `import_update` actions that accept all public attributes
   """
   use Spark.Dsl.Extension, transformers: [__MODULE__.AddImportAction]
 
@@ -23,10 +21,12 @@ defmodule Resdayn.Codex.Importable do
         |> Enum.map(& &1.source_attribute)
 
       dsl_state
-      |> Ash.Resource.Builder.add_new_action(:create, :import,
+      |> Ash.Resource.Builder.add_new_action(:create, :import_create,
+        accept: attribute_names ++ belongs_to_ids ++ [:flags]
+      )
+      |> Ash.Resource.Builder.add_new_action(:update, :import_update,
         accept: attribute_names ++ belongs_to_ids ++ [:flags],
-        upsert?: true,
-        upsert_fields: :replace_all
+        require_atomic?: false
       )
       |> Ash.Resource.Builder.add_attribute(:flags, {:array, Resdayn.Codex.Flags},
         allow_nil?: false,

@@ -7,10 +7,6 @@ defmodule Resdayn.Codex.Characters.Faction.Reaction do
   postgres do
     table "faction_reactions"
     repo Resdayn.Repo
-
-    references do
-      reference :target, deferrable: :initially
-    end
   end
 
   actions do

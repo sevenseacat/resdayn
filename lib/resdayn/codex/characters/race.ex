@@ -13,29 +13,7 @@ defmodule Resdayn.Codex.Characters.Race do
   actions do
     defaults [:read]
 
-    create :import do
-      description "Custom importer to allow for related skill bonuses"
-      upsert? true
-      upsert_fields :replace_all
-
-      accept [
-        :id,
-        :name,
-        :description,
-        :playable,
-        :beast,
-        :male_stats,
-        :female_stats,
-        :special_spells,
-        :flags
-      ]
-
-      argument :skill_bonuses, {:array, :map}, allow_nil?: false
-
-      change {Resdayn.Codex.Characters.Changes.UpdateRelationships, arguments: [:skill_bonuses]}
-    end
-
-    update :update do
+    update :import_relationships do
       require_atomic? false
       argument :skill_bonuses, {:array, :map}, allow_nil?: false
 

@@ -4,7 +4,7 @@ defmodule Resdayn.Parser.Record.GameSetting do
   """
   use Resdayn.Parser.Record
 
-  process_basic_string "NAME", :name
+  process_basic_string "NAME", :id
   process_basic_string "STRV", :value
 
   def process({"FLTV", <<value::float32()>>}, data) do

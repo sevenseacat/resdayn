@@ -10,6 +10,10 @@ defmodule Resdayn.Codex.Mechanics.Enchantment do
     repo Resdayn.Repo
   end
 
+  actions do
+    defaults [:read]
+  end
+
   attributes do
     attribute :id, :string, primary_key?: true, allow_nil?: false
     attribute :type, __MODULE__.Type, allow_nil?: false

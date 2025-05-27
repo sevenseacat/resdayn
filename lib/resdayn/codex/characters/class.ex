@@ -13,32 +13,7 @@ defmodule Resdayn.Codex.Characters.Class do
   actions do
     defaults [:read]
 
-    create :import do
-      description "Custom importer to allow for related skills"
-      upsert? true
-      upsert_fields :replace_all
-
-      accept [
-        :id,
-        :name,
-        :description,
-        :services_offered,
-        :playable,
-        :specialization,
-        :items_vendored,
-        :attribute1_id,
-        :attribute2_id,
-        :flags
-      ]
-
-      argument :major_skill_ids, {:array, :integer}, allow_nil?: false
-      argument :minor_skill_ids, {:array, :integer}, allow_nil?: false
-
-      change {Resdayn.Codex.Characters.Changes.UpdateRelationships,
-              arguments: [:major_skill_ids, :minor_skill_ids]}
-    end
-
-    update :update do
+    update :import_relationships do
       require_atomic? false
 
       argument :major_skill_ids, {:array, :integer}, allow_nil?: false

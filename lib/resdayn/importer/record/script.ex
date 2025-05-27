@@ -5,19 +5,14 @@ defmodule Resdayn.Importer.Record.Script do
   def process(records, _opts) do
     start_scripts = records |> of_type(Record.StartScript) |> Enum.map(& &1.data.script_id)
 
-    data =
-      records
-      |> of_type(Record.Script)
-      |> Enum.map(fn record ->
-        record.data
-        |> Map.take([:id, :text, :local_variables])
-        |> Map.put(:start_script, record.data.id in start_scripts)
-        |> with_flags(:flags, record.flags)
-      end)
-
-    %{
-      resource: Resdayn.Codex.Mechanics.Script,
-      data: data
-    }
+    records
+    |> of_type(Record.Script)
+    |> Enum.map(fn record ->
+      record.data
+      |> Map.take([:id, :text, :local_variables])
+      |> Map.put(:start_script, record.data.id in start_scripts)
+      |> with_flags(:flags, record.flags)
+    end)
+    |> separate_for_import(Resdayn.Codex.Mechanics.Script)
   end
 end

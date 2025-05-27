@@ -40,7 +40,6 @@ defmodule Resdayn.Codex.Mechanics.MagicEffect do
   relationships do
     belongs_to :game_setting, Resdayn.Codex.Mechanics.GameSetting,
       attribute_type: :string,
-      destination_attribute: :name,
       allow_nil?: false
 
     belongs_to :skill, Resdayn.Codex.Characters.Skill,

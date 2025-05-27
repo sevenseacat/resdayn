@@ -95,6 +95,7 @@ defmodule Resdayn.Parser.Helpers do
       |> String.replace(<<251>>, <<251::utf8>>)
       |> String.replace("\r\n", "\n")
       |> String.replace(<<160>>, "")
+      |> String.trim()
 
     if String.printable?(string) do
       if string == "" do

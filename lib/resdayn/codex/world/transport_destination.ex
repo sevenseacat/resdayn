@@ -7,14 +7,20 @@ defmodule Resdayn.Codex.World.TransportDestination do
         cell_name: [type: :string],
         coordinates: [
           type: :map,
-          fields: [
-            position: [
-              type: :map,
-              fields: [x: [type: :decimal], y: [type: :decimal], z: [type: :decimal]]
-            ],
-            rotation: [
-              type: :map,
-              fields: [x: [type: :decimal], y: [type: :decimal], z: [type: :decimal]]
+          constraints: [
+            fields: [
+              position: [
+                type: :map,
+                constraints: [
+                  fields: [x: [type: :decimal], y: [type: :decimal], z: [type: :decimal]]
+                ]
+              ],
+              rotation: [
+                type: :map,
+                constraints: [
+                  fields: [x: [type: :decimal], y: [type: :decimal], z: [type: :decimal]]
+                ]
+              ]
             ]
           ]
         ]

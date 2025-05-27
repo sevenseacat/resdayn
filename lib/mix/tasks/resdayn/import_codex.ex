@@ -22,7 +22,6 @@ defmodule Mix.Tasks.Resdayn.ImportCodex do
   # Record.Region,
   # Record.Container,
   # Record.Creature,
-  # Record.LevelledItem,
   # Record.LevelledCreature,
   # Record.Cell,
   # Record.SoundGenerator,
@@ -40,7 +39,12 @@ defmodule Mix.Tasks.Resdayn.ImportCodex do
   def run([filename, resource]) do
     Logger.configure(level: :info)
     records = load_records(filename)
-    import_records(:"Elixir.Resdayn.Importer.Record.#{resource}", records, filename: filename)
+    item_registry = Resdayn.Importer.ItemRegistry.build_registry()
+
+    import_records(:"Elixir.Resdayn.Importer.Record.#{resource}", records,
+      filename: filename,
+      item_registry: item_registry
+    )
   end
 
   def run(_argv) do
@@ -70,14 +74,17 @@ defmodule Mix.Tasks.Resdayn.ImportCodex do
       Record.GlobalVariable,
       Record.Skill,
       Record.Class,
+      Record.ClassSkill,
       Record.Sound,
       Record.Script,
       Record.MagicEffect,
       Record.Spell,
       Record.Race,
+      Record.RaceSkillBonus,
       Record.Enchantment,
       Record.Ingredient,
       Record.Faction,
+      Record.FactionReaction,
       Record.MiscellaneousItem,
       Record.Tool,
       Record.AlchemyApparatus,
@@ -92,12 +99,22 @@ defmodule Mix.Tasks.Resdayn.ImportCodex do
       Record.Door,
       Record.Weapon,
       Record.Armor,
-      Record.ItemLevelledList,
-      Record.NPC,
-      Record.InventoryItem
+      Record.NPC
     ]
     |> Enum.each(fn importer ->
       import_records(importer, records, filename: filename)
+    end)
+
+    # Build item type registry for item type resolution
+    # This is needed for things like containers, levelled lists, NPC inventories...
+    item_registry = Resdayn.Importer.ItemRegistry.build_registry()
+
+    [
+      Record.ItemLevelledList,
+      Record.InventoryItem
+    ]
+    |> Enum.each(fn importer ->
+      import_records(importer, records, filename: filename, item_registry: item_registry)
     end)
   end
 
@@ -122,13 +139,33 @@ defmodule Mix.Tasks.Resdayn.ImportCodex do
 
   defp import_records(importer, records, opts) do
     name = String.split(Atom.to_string(importer), ".") |> List.last()
-    %{resource: resource, data: data} = apply(importer, :process, [records, opts])
-    length = length(data)
+    to_perform = apply(importer, :process, [records, opts])
 
-    if length > 0 do
-      Ash.bulk_create!(data, resource, :import, return_errors?: true, stop_on_error?: true)
+    create = Map.get(to_perform, :create, [])
+    create_length = length(create)
 
-      Owl.IO.puts("#{name}: #{length} records inserted.")
+    Ash.bulk_create!(create, to_perform.resource, :import_create,
+      return_errors?: true,
+      stop_on_error?: true
+    )
+
+    update = Map.get(to_perform, :update, [])
+    update_length = length(update)
+
+    Enum.each(update, fn changeset ->
+      case Ash.update(changeset) do
+        {:ok, _} ->
+          :ok
+
+        {:error, error} ->
+          dbg(changeset)
+          dbg(error)
+          exit(1)
+      end
+    end)
+
+    if create_length > 0 || update_length > 0 do
+      Owl.IO.puts("#{name}: #{create_length} records inserted, #{update_length} records updated")
     end
   end
 end

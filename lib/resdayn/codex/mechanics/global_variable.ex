@@ -10,6 +10,10 @@ defmodule Resdayn.Codex.Mechanics.GlobalVariable do
     repo Resdayn.Repo
   end
 
+  actions do
+    defaults [:read]
+  end
+
   attributes do
     attribute :id, :string, primary_key?: true, allow_nil?: false
     attribute :value, Resdayn.Codex.Mechanics.Number, allow_nil?: false
