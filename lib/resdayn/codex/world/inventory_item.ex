@@ -11,33 +11,29 @@ defmodule Resdayn.Codex.World.InventoryItem do
   end
 
   actions do
-    defaults [:read]
+    defaults [:read, :create, :update, :destroy]
+    default_accept [:count, :restocking?, :holder_ref_id, :object_ref_id]
   end
 
   attributes do
-    integer_primary_key :id
-
     attribute :count, :integer, allow_nil?: false, constraints: [min: 1], default: 1
     attribute :restocking?, :boolean, allow_nil?: false, default: false
   end
 
   relationships do
-    belongs_to :npc, Resdayn.Codex.World.NPC, attribute_type: :string
+    belongs_to :holder_ref, Resdayn.Codex.World.ReferencableObject,
+      attribute_type: :string,
+      allow_nil?: false,
+      primary_key?: true
 
-    belongs_to :tool, Resdayn.Codex.Items.Tool, attribute_type: :string
-    belongs_to :clothing, Resdayn.Codex.Items.Clothing, attribute_type: :string
-    belongs_to :weapon, Resdayn.Codex.Items.Weapon, attribute_type: :string
-    belongs_to :armor, Resdayn.Codex.Items.Armor, attribute_type: :string
-    belongs_to :book, Resdayn.Codex.Items.Book, attribute_type: :string
-    belongs_to :ingredient, Resdayn.Codex.Items.Ingredient, attribute_type: :string
-    belongs_to :potion, Resdayn.Codex.Items.Potion, attribute_type: :string
-    belongs_to :alchemy_apparatus, Resdayn.Codex.Items.AlchemyApparatus, attribute_type: :string
-    belongs_to :light, Resdayn.Codex.Assets.Light, attribute_type: :string
-    belongs_to :miscellaneous_item, Resdayn.Codex.Items.MiscellaneousItem, attribute_type: :string
-    belongs_to :item_levelled_list, Resdayn.Codex.Items.ItemLevelledList, attribute_type: :string
+    belongs_to :object_ref, Resdayn.Codex.World.ReferencableObject,
+      attribute_type: :string,
+      allow_nil?: false,
+      primary_key?: true
   end
 
   calculations do
-    calculate :item, :struct, __MODULE__.Item
+    calculate :holder, :struct, {Resdayn.Codex.Calculations.TypedObject, field: :holder_ref}
+    calculate :object, :struct, {Resdayn.Codex.Calculations.TypedObject, field: :object_ref}
   end
 end

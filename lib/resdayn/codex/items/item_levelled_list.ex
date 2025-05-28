@@ -14,6 +14,11 @@ defmodule Resdayn.Codex.Items.ItemLevelledList do
     defaults [:read]
   end
 
+  changes do
+    change {Resdayn.Codex.Changes.CreateReferencableObject, object_type: :item_levelled_list},
+      on: [:create]
+  end
+
   attributes do
     attribute :id, :string, primary_key?: true, allow_nil?: false
 
@@ -22,5 +27,12 @@ defmodule Resdayn.Codex.Items.ItemLevelledList do
     attribute :from_all_lower_levels, :boolean, allow_nil?: false, default: false
 
     attribute :items, {:array, __MODULE__.Item}, default: []
+  end
+
+  relationships do
+    belongs_to :referencable_object, Resdayn.Codex.World.ReferencableObject,
+      source_attribute: :id,
+      destination_attribute: :id,
+      define_attribute?: false
   end
 end

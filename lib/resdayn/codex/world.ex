@@ -7,5 +7,6 @@ defmodule Resdayn.Codex.World do
     resource __MODULE__.Door
     resource __MODULE__.InventoryItem
     resource __MODULE__.NPC
+    resource __MODULE__.ReferencableObject
   end
 end

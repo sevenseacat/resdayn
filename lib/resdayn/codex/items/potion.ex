@@ -14,6 +14,10 @@ defmodule Resdayn.Codex.Items.Potion do
     defaults [:read]
   end
 
+  changes do
+    change {Resdayn.Codex.Changes.CreateReferencableObject, object_type: :potion}, on: [:create]
+  end
+
   attributes do
     attribute :id, :string, primary_key?: true, allow_nil?: false
     attribute :name, :string, allow_nil?: false
@@ -27,5 +31,10 @@ defmodule Resdayn.Codex.Items.Potion do
 
   relationships do
     belongs_to :script, Resdayn.Codex.Mechanics.Script, attribute_type: :string
+
+    belongs_to :referencable_object, Resdayn.Codex.World.ReferencableObject,
+      source_attribute: :id,
+      destination_attribute: :id,
+      define_attribute?: false
   end
 end

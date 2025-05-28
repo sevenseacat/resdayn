@@ -14,6 +14,10 @@ defmodule Resdayn.Codex.Items.Clothing do
     defaults [:read]
   end
 
+  changes do
+    change {Resdayn.Codex.Changes.CreateReferencableObject, object_type: :clothing}, on: [:create]
+  end
+
   attributes do
     attribute :id, :string, primary_key?: true, allow_nil?: false
 
@@ -32,5 +36,10 @@ defmodule Resdayn.Codex.Items.Clothing do
   relationships do
     belongs_to :script, Resdayn.Codex.Mechanics.Script, attribute_type: :string
     belongs_to :enchantment, Resdayn.Codex.Mechanics.Enchantment, attribute_type: :string
+
+    belongs_to :referencable_object, Resdayn.Codex.World.ReferencableObject,
+      source_attribute: :id,
+      destination_attribute: :id,
+      define_attribute?: false
   end
 end

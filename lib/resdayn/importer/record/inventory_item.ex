@@ -1,28 +1,24 @@
 defmodule Resdayn.Importer.Record.InventoryItem do
   use Resdayn.Importer.Record
 
-  def process(records, opts) do
-    item_registry = Keyword.get(opts, :item_registry)
+  def process(records, _opts) do
+    records
+    |> of_type(Resdayn.Parser.Record.NPC)
+    |> Enum.reject(&(&1.data.id == "player"))
+    |> Enum.map(fn record ->
+      carried_objects =
+        Enum.map(record.data[:carried_objects] || [], fn object ->
+          %{
+            object_ref_id: object.id,
+            count: object.count,
+            restocking?: object.restocking
+          }
+        end)
 
-    data =
-      records
-      |> of_type(Resdayn.Parser.Record.NPC)
-      |> Enum.flat_map(fn record ->
-        carried_objects = record.data[:carried_objects] || []
-        npc_id = record.data[:id]
-
-        if npc_id != "player" and not Enum.empty?(carried_objects) do
-          Resdayn.Importer.ItemRegistry.convert_inventory_data(
-            carried_objects,
-            npc_id,
-            :npc,
-            item_registry
-          )
-        else
-          []
-        end
-      end)
-
-    %{resource: Resdayn.Codex.World.InventoryItem, create: data}
+      record.data
+      |> Map.take([:id])
+      |> Map.put(:carried_objects, carried_objects)
+    end)
+    |> separate_for_import(Resdayn.Codex.World.NPC, action: :import_relationships)
   end
 end

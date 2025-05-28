@@ -39,12 +39,7 @@ defmodule Mix.Tasks.Resdayn.ImportCodex do
   def run([filename, resource]) do
     Logger.configure(level: :info)
     records = load_records(filename)
-    item_registry = Resdayn.Importer.ItemRegistry.build_registry()
-
-    import_records(:"Elixir.Resdayn.Importer.Record.#{resource}", records,
-      filename: filename,
-      item_registry: item_registry
-    )
+    import_records(:"Elixir.Resdayn.Importer.Record.#{resource}", records, filename: filename)
   end
 
   def run(_argv) do
@@ -99,22 +94,12 @@ defmodule Mix.Tasks.Resdayn.ImportCodex do
       Record.Door,
       Record.Weapon,
       Record.Armor,
-      Record.NPC
-    ]
-    |> Enum.each(fn importer ->
-      import_records(importer, records, filename: filename)
-    end)
-
-    # Build item type registry for item type resolution
-    # This is needed for things like containers, levelled lists, NPC inventories...
-    item_registry = Resdayn.Importer.ItemRegistry.build_registry()
-
-    [
+      Record.NPC,
       Record.ItemLevelledList,
       Record.InventoryItem
     ]
     |> Enum.each(fn importer ->
-      import_records(importer, records, filename: filename, item_registry: item_registry)
+      import_records(importer, records, filename: filename)
     end)
   end
 
