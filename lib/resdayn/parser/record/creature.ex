@@ -14,7 +14,7 @@ defmodule Resdayn.Parser.Record.Creature do
   process_basic_string "SCRI", :script_id
   process_basic_string "CNAM", :sound_id
   process_basic_list "NPCS", :spell_ids
-  process_inventory "NPCO", :carried_objects
+  process_inventory "NPCO", :inventory
   process_ai_packages()
 
   def process({"NPDT", value}, data) do

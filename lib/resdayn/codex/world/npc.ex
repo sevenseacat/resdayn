@@ -15,8 +15,8 @@ defmodule Resdayn.Codex.World.NPC do
 
     update :import_relationships do
       require_atomic? false
-      argument :carried_objects, {:array, :map}, allow_nil?: false, default: []
-      change manage_relationship(:carried_objects, :inventory_items, type: :direct_control)
+      argument :inventory, {:array, :map}, allow_nil?: false, default: []
+      change manage_relationship(:inventory, :inventory_items, type: :direct_control)
     end
   end
 

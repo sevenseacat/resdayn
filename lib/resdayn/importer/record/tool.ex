@@ -3,13 +3,11 @@ defmodule Resdayn.Importer.Record.Tool do
 
   def process(records, _opts) do
     records
-    |> Enum.filter(fn record ->
-      record.type in [
-        Resdayn.Parser.Record.RepairItem,
-        Resdayn.Parser.Record.Lockpick,
-        Resdayn.Parser.Record.Probe
-      ]
-    end)
+    |> of_type([
+      Resdayn.Parser.Record.RepairItem,
+      Resdayn.Parser.Record.Lockpick,
+      Resdayn.Parser.Record.Probe
+    ])
     |> Enum.map(fn record ->
       tool_type =
         case record.type do

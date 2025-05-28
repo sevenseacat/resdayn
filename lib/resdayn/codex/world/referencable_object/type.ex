@@ -13,7 +13,8 @@ defmodule Resdayn.Codex.World.ReferencableObject.Type do
     static_object: Resdayn.Codex.Assets.StaticObject,
     sound: Resdayn.Codex.Assets.Sound,
     npc: Resdayn.Codex.World.NPC,
-    item_levelled_list: Resdayn.Codex.Items.ItemLevelledList
+    item_levelled_list: Resdayn.Codex.Items.ItemLevelledList,
+    container: Resdayn.Codex.World.Container
   }
 
   use Ash.Type.Enum, values: Map.keys(@types)

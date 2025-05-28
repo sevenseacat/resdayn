@@ -11,7 +11,7 @@ defmodule Resdayn.Parser.Record.NPC do
   process_basic_string "KNAM", :hair_model_id
   process_basic_string "SCRI", :script_id
   process_basic_list "NPCS", :spell_ids
-  process_inventory "NPCO", :carried_objects
+  process_inventory "NPCO", :inventory
   process_ai_packages()
 
   def process({"NPDT", value}, data) when byte_size(value) == 12 do

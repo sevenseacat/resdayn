@@ -1,6 +1,10 @@
 defmodule Resdayn.Importer.Record do
   require Ash.Query
 
+  def of_type(records, types) when is_list(types) do
+    Enum.filter(records, &(&1.type in types))
+  end
+
   def of_type(records, type) when is_atom(type) do
     Enum.filter(records, &(&1.type == type))
   end

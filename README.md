@@ -31,7 +31,7 @@ Using the amazing work of Dave Humphrey detailed here: http://www.uesp.net/morro
 | ✓      | ✓        | `DOOR` (Doors) |
 | ✓      | ✓        | `MISC` (Miscellaneous items) |
 | ✓      | ✓        | `WEAP` (Weapons) |
-| ✓      |          | `CONT` (Containers) |
+| ✓      | ✓        | `CONT` (Containers) |
 | ✓      | ✓        | `SPEL` (Spells) |
 | ✓      |          | `CREA` (Creatures) |
 | ✓      | ✓        | `BODY` (Body parts) |

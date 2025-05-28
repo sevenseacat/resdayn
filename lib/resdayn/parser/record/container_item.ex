@@ -1,10 +1,9 @@
-defmodule Resdayn.Importer.Record.InventoryItem do
+defmodule Resdayn.Importer.Record.ContainerItem do
   use Resdayn.Importer.Record
 
   def process(records, _opts) do
     records
-    |> of_type(Resdayn.Parser.Record.NPC)
-    |> Enum.reject(&(&1.data.id == "player"))
+    |> of_type(Resdayn.Parser.Record.Container)
     |> Enum.map(fn record ->
       inventory =
         Enum.map(record.data[:inventory] || [], fn object ->
@@ -19,6 +18,6 @@ defmodule Resdayn.Importer.Record.InventoryItem do
       |> Map.take([:id])
       |> Map.put(:inventory, inventory)
     end)
-    |> separate_for_import(Resdayn.Codex.World.NPC, action: :import_relationships)
+    |> separate_for_import(Resdayn.Codex.World.Container, action: :import_relationships)
   end
 end
