@@ -96,6 +96,7 @@ defmodule Mix.Tasks.Resdayn.ImportCodex do
       Record.Armor,
       Record.NPC,
       Record.ItemLevelledList,
+      Record.ItemLevelledListItem,
       Record.InventoryItem
     ]
     |> Enum.each(fn importer ->

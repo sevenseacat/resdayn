@@ -37,7 +37,7 @@ Using the amazing work of Dave Humphrey detailed here: http://www.uesp.net/morro
 | ✓      | ✓        | `BODY` (Body parts) |
 | ✓      | ✓        | `LIGH` (Lights) |
 | ✓      | ✓        | `ENCH` (Enchanting effects) |
-| ✓      |          | `NPC_` (NPCs) |
+| ✓      | ✓        | `NPC_` (NPCs) |
 | ✓      | ✓        | `ARMO` (Armor) |
 | ✓      | ✓        | `CLOT` (Clothing) |
 | ✓      | ✓        | `REPA` (Repair items) * |
@@ -48,8 +48,8 @@ Using the amazing work of Dave Humphrey detailed here: http://www.uesp.net/morro
 | ✓      | ✓        | `INGR` (Ingredients) |
 | ✓      | ✓        | `BOOK` (Books and papers) |
 | ✓      | ✓        | `ALCH` (Potions) |
-| ✓      | ✓        | `LEVI` (Levelled items) |
-| ✓      |          | `LEVC` (Levelled creatures) |
+| ✓      | ✓        | `LEVI` (Item levelled list) |
+| ✓      |          | `LEVC` (Creature levelled list) |
 | ✓      |          | `CELL` (Cells) |
 | x      | x        | `LAND` (Landscapes) |
 | x      | x        | `PGRD` (Path grids) |

@@ -1,7 +1,20 @@
 defmodule Resdayn.Codex.Items.ItemLevelledList.Item do
-  use Ash.Type.NewType,
-    subtype_of: :map,
-    constraints: [
-      fields: [item_id: [type: :string], item_type: [type: :atom], player_level: [type: :integer]]
-    ]
+  use Ash.Resource, data_layer: :embedded
+
+  actions do
+    defaults [:create, :read, :update, :destroy]
+    default_accept [:player_level, :item_ref_id]
+  end
+
+  attributes do
+    attribute :player_level, :integer, allow_nil?: false, constraints: [min: 0]
+  end
+
+  relationships do
+    belongs_to :item_ref, Resdayn.Codex.World.ReferencableObject, attribute_type: :string
+  end
+
+  calculations do
+    calculate :item, :struct, {Resdayn.Codex.Calculations.TypedObject, field: :item_ref}
+  end
 end
