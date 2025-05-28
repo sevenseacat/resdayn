@@ -3,7 +3,7 @@ defmodule Resdayn.Codex.Items.MiscellaneousItem do
     otp_app: :resdayn,
     domain: Resdayn.Codex.Items,
     data_layer: AshPostgres.DataLayer,
-    extensions: [Resdayn.Codex.Importable]
+    extensions: [Resdayn.Codex.Importable, Resdayn.Codex.Referencable]
 
   postgres do
     table "miscellaneous_items"
@@ -12,11 +12,6 @@ defmodule Resdayn.Codex.Items.MiscellaneousItem do
 
   actions do
     defaults [:read]
-  end
-
-  changes do
-    change {Resdayn.Codex.Changes.CreateReferencableObject, object_type: :miscellaneous_item},
-      on: [:create]
   end
 
   attributes do
@@ -32,10 +27,5 @@ defmodule Resdayn.Codex.Items.MiscellaneousItem do
 
   relationships do
     belongs_to :script, Resdayn.Codex.Mechanics.Script, attribute_type: :string
-
-    belongs_to :referencable_object, Resdayn.Codex.World.ReferencableObject,
-      source_attribute: :id,
-      destination_attribute: :id,
-      define_attribute?: false
   end
 end

@@ -3,7 +3,7 @@ defmodule Resdayn.Codex.World.NPC do
     otp_app: :resdayn,
     domain: Resdayn.Codex.World,
     data_layer: AshPostgres.DataLayer,
-    extensions: [Resdayn.Codex.Importable]
+    extensions: [Resdayn.Codex.Importable, Resdayn.Codex.Referencable]
 
   postgres do
     table "npcs"
@@ -18,10 +18,6 @@ defmodule Resdayn.Codex.World.NPC do
       argument :carried_objects, {:array, :map}, allow_nil?: false, default: []
       change manage_relationship(:carried_objects, :inventory_items, type: :direct_control)
     end
-  end
-
-  changes do
-    change {Resdayn.Codex.Changes.CreateReferencableObject, object_type: :npc}, on: [:create]
   end
 
   attributes do
@@ -77,11 +73,6 @@ defmodule Resdayn.Codex.World.NPC do
     belongs_to :race, Resdayn.Codex.Characters.Race, attribute_type: :string, allow_nil?: false
     belongs_to :class, Resdayn.Codex.Characters.Class, attribute_type: :string, allow_nil?: false
     belongs_to :faction, Resdayn.Codex.Characters.Faction, attribute_type: :string
-
-    belongs_to :referencable_object, Resdayn.Codex.World.ReferencableObject,
-      source_attribute: :id,
-      destination_attribute: :id,
-      define_attribute?: false
 
     has_many :inventory_items, Resdayn.Codex.World.InventoryItem,
       destination_attribute: :holder_ref_id

@@ -22,4 +22,9 @@ defmodule Resdayn.Codex.World.ReferencableObject.Type do
   def type_to_resource(type) do
     Map.fetch!(@types, type)
   end
+
+  def resource_to_type(type) do
+    Enum.find(@types, fn {_, name} -> name == type end)
+    |> elem(0)
+  end
 end

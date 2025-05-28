@@ -3,7 +3,7 @@ defmodule Resdayn.Codex.Items.Weapon do
     otp_app: :resdayn,
     domain: Resdayn.Codex.Items,
     data_layer: AshPostgres.DataLayer,
-    extensions: [Resdayn.Codex.Importable]
+    extensions: [Resdayn.Codex.Importable, Resdayn.Codex.Referencable]
 
   postgres do
     table "weapons"
@@ -12,10 +12,6 @@ defmodule Resdayn.Codex.Items.Weapon do
 
   actions do
     defaults [:read, :create, :update, :destroy]
-  end
-
-  changes do
-    change {Resdayn.Codex.Changes.CreateReferencableObject, object_type: :weapon}, on: [:create]
   end
 
   attributes do
@@ -51,10 +47,5 @@ defmodule Resdayn.Codex.Items.Weapon do
   relationships do
     belongs_to :script, Resdayn.Codex.Mechanics.Script, attribute_type: :string
     belongs_to :enchantment, Resdayn.Codex.Mechanics.Enchantment, attribute_type: :string
-
-    belongs_to :referencable_object, Resdayn.Codex.World.ReferencableObject,
-      source_attribute: :id,
-      destination_attribute: :id,
-      define_attribute?: false
   end
 end

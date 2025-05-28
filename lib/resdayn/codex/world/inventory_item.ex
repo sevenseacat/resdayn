@@ -8,6 +8,11 @@ defmodule Resdayn.Codex.World.InventoryItem do
   postgres do
     table "inventory_items"
     repo Resdayn.Repo
+
+    references do
+      reference :holder_ref, index?: true, on_delete: :delete
+      reference :object_ref, index?: true, on_delete: :delete
+    end
   end
 
   actions do

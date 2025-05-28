@@ -3,7 +3,7 @@ defmodule Resdayn.Codex.Assets.StaticObject do
     otp_app: :resdayn,
     domain: Resdayn.Codex.Assets,
     data_layer: AshPostgres.DataLayer,
-    extensions: [Resdayn.Codex.Importable]
+    extensions: [Resdayn.Codex.Importable, Resdayn.Codex.Referencable]
 
   postgres do
     table "static_objects"
@@ -14,20 +14,8 @@ defmodule Resdayn.Codex.Assets.StaticObject do
     defaults [:read]
   end
 
-  changes do
-    change {Resdayn.Codex.Changes.CreateReferencableObject, object_type: :static_object},
-      on: [:create]
-  end
-
   attributes do
     attribute :id, :string, primary_key?: true, allow_nil?: false
     attribute :nif_model_filename, :string
-  end
-
-  relationships do
-    belongs_to :referencable_object, Resdayn.Codex.World.ReferencableObject,
-      source_attribute: :id,
-      destination_attribute: :id,
-      define_attribute?: false
   end
 end
