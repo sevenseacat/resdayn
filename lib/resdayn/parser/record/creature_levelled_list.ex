@@ -20,6 +20,6 @@ defmodule Resdayn.Parser.Record.CreatureLevelledList do
   end
 
   def process({"INTV", <<pc_level::uint16()>>}, data) do
-    record_list_of_maps_value(data, :creatures, :pc_level, pc_level)
+    record_list_of_maps_value(data, :creatures, :player_level, pc_level)
   end
 end

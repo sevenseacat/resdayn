@@ -49,7 +49,7 @@ Using the amazing work of Dave Humphrey detailed here: http://www.uesp.net/morro
 | ✓      | ✓        | `BOOK` (Books and papers) |
 | ✓      | ✓        | `ALCH` (Potions) |
 | ✓      | ✓        | `LEVI` (Item levelled list) |
-| ✓      |          | `LEVC` (Creature levelled list) |
+| ✓      | ✓        | `LEVC` (Creature levelled list) |
 | ✓      |          | `CELL` (Cells) |
 | x      | x        | `LAND` (Landscapes) |
 | x      | x        | `PGRD` (Path grids) |

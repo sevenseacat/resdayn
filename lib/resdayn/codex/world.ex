@@ -10,5 +10,6 @@ defmodule Resdayn.Codex.World do
     resource __MODULE__.ReferencableObject
     resource __MODULE__.Container
     resource __MODULE__.Creature
+    resource __MODULE__.CreatureLevelledList
   end
 end
