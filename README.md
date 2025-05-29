@@ -33,7 +33,7 @@ Using the amazing work of Dave Humphrey detailed here: http://www.uesp.net/morro
 | ✓      | ✓        | `WEAP` (Weapons) |
 | ✓      | ✓        | `CONT` (Containers) |
 | ✓      | ✓        | `SPEL` (Spells) |
-| ✓      |          | `CREA` (Creatures) |
+| ✓      | ✓        | `CREA` (Creatures) |
 | ✓      | ✓        | `BODY` (Body parts) |
 | ✓      | ✓        | `LIGH` (Lights) |
 | ✓      | ✓        | `ENCH` (Enchanting effects) |

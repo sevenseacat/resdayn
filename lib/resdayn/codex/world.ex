@@ -9,5 +9,6 @@ defmodule Resdayn.Codex.World do
     resource __MODULE__.NPC
     resource __MODULE__.ReferencableObject
     resource __MODULE__.Container
+    resource __MODULE__.Creature
   end
 end

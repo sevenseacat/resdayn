@@ -99,7 +99,9 @@ defmodule Mix.Tasks.Resdayn.ImportCodex do
       Record.InventoryItem,
       Record.Container,
       Record.ContainerItem,
-      Record.SoundGenerator
+      Record.SoundGenerator,
+      Record.Creature,
+      Record.CreatureInventoryItem
     ]
     |> Enum.each(fn importer ->
       import_records(importer, records, filename: filename)

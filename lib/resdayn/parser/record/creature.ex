@@ -9,10 +9,10 @@ defmodule Resdayn.Parser.Record.Creature do
   }
 
   process_basic_string "NAME", :id
-  process_basic_string "MODL", :nif_model
+  process_basic_string "MODL", :nif_model_filename
   process_basic_string "FNAM", :name
   process_basic_string "SCRI", :script_id
-  process_basic_string "CNAM", :sound_id
+  process_basic_string "CNAM", :sound_generator_key
   process_basic_list "NPCS", :spell_ids
   process_inventory "NPCO", :inventory
   process_ai_packages()

@@ -2,23 +2,6 @@ defmodule Resdayn.Importer.Record.InventoryItem do
   use Resdayn.Importer.Record
 
   def process(records, _opts) do
-    records
-    |> of_type(Resdayn.Parser.Record.NPC)
-    |> Enum.reject(&(&1.data.id == "player"))
-    |> Enum.map(fn record ->
-      inventory =
-        Enum.map(record.data[:inventory] || [], fn object ->
-          %{
-            object_ref_id: object.id,
-            count: object.count,
-            restocking?: object.restocking
-          }
-        end)
-
-      record.data
-      |> Map.take([:id])
-      |> Map.put(:inventory, inventory)
-    end)
-    |> separate_for_import(Resdayn.Codex.World.NPC, action: :import_relationships)
+    process_inventory_items(records, Resdayn.Parser.Record.NPC, Resdayn.Codex.World.NPC)
   end
 end
