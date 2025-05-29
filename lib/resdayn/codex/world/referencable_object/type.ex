@@ -12,6 +12,7 @@ defmodule Resdayn.Codex.World.ReferencableObject.Type do
     light: Resdayn.Codex.Assets.Light,
     static_object: Resdayn.Codex.Assets.StaticObject,
     sound: Resdayn.Codex.Assets.Sound,
+    sound_generator: Resdayn.Codex.Assets.SoundGenerator,
     npc: Resdayn.Codex.World.NPC,
     item_levelled_list: Resdayn.Codex.Items.ItemLevelledList,
     container: Resdayn.Codex.World.Container

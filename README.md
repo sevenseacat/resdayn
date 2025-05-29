@@ -53,7 +53,7 @@ Using the amazing work of Dave Humphrey detailed here: http://www.uesp.net/morro
 | ✓      |          | `CELL` (Cells) |
 | x      | x        | `LAND` (Landscapes) |
 | x      | x        | `PGRD` (Path grids) |
-| ✓      |          | `SNDG` (Sound generators) |
+| ✓      | ✓        | `SNDG` (Sound generators) |
 | ✓      |          | `DIAL` (Dialogue/journal topics) |
 | ✓      |          | `INFO` (Dialogue records) |
 | ✓      |          | `INFO` (Journal records) |

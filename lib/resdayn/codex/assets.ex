@@ -4,6 +4,7 @@ defmodule Resdayn.Codex.Assets do
 
   resources do
     resource __MODULE__.Sound
+    resource __MODULE__.SoundGenerator
     resource __MODULE__.StaticObject
     resource __MODULE__.Light
   end

@@ -13,7 +13,7 @@ defmodule Resdayn.Parser.Record.SoundGenerator do
   }
   process_basic_string "NAME", :id
   process_basic_string "SNAM", :sound_id
-  process_basic_string "CNAM", :creature_name
+  process_basic_string "CNAM", :creature_key
 
   def process({"DATA", <<value::uint32()>>}, data) do
     record_value(data, :sound_type, Map.fetch!(@sound_types, value))
