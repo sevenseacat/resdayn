@@ -11,5 +11,6 @@ defmodule Resdayn.Codex.World do
     resource __MODULE__.Container
     resource __MODULE__.Creature
     resource __MODULE__.CreatureLevelledList
+    resource __MODULE__.Region
   end
 end

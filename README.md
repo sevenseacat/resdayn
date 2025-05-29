@@ -24,7 +24,7 @@ Using the amazing work of Dave Humphrey detailed here: http://www.uesp.net/morro
 | ✓      | ✓        | `SKIL` (Skills) |
 | ✓      | ✓        | `MGEF` (Magic effects) |
 | ✓      | ✓        | `SCPT` (Scripts) |
-| ✓      |          | `REGN` (Regions) |
+| ✓      | ✓        | `REGN` (Regions) |
 | ✓      | ✓        | `BSGN` (Birth signs) |
 | ✓      | x        | `LTEX` (Land textures) |
 | ✓      | ✓        | `STAT` (Static objects) |
