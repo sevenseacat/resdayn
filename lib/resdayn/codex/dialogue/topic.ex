@@ -11,6 +11,19 @@ defmodule Resdayn.Codex.Dialogue.Topic do
 
   actions do
     defaults [:read]
+
+    update :import_relationships do
+      require_atomic? false
+      argument :responses, {:array, :map}, allow_nil?: false, default: []
+
+      change {Resdayn.Codex.Changes.OptimizedRelationshipImport,
+              argument: :responses,
+              relationship: :responses,
+              related_resource: Resdayn.Codex.Dialogue.Response,
+              parent_key: :topic_id,
+              id_field: :id,
+              on_missing: :ignore}
+    end
   end
 
   attributes do
@@ -18,7 +31,7 @@ defmodule Resdayn.Codex.Dialogue.Topic do
     attribute :type, __MODULE__.Type, allow_nil?: false
   end
 
-  # relationships do
-  #   has_many :responses, Resdayn.Codex.Dialogue.Response
-  # end
+  relationships do
+    has_many :responses, Resdayn.Codex.Dialogue.Response
+  end
 end

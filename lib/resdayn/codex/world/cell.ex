@@ -18,12 +18,11 @@ defmodule Resdayn.Codex.World.Cell do
       argument :new_references, {:array, :map}, allow_nil?: false
 
       change {Resdayn.Codex.Changes.OptimizedRelationshipImport,
-        argument: :new_references,
-        relationship: :references,
-        related_resource: Resdayn.Codex.World.Cell.CellReference,
-        parent_key: :cell_id,
-        on_missing: :ignore
-      }
+              argument: :new_references,
+              relationship: :references,
+              related_resource: Resdayn.Codex.World.Cell.CellReference,
+              parent_key: :cell_id,
+              on_missing: :ignore}
     end
   end
 
