@@ -4,7 +4,6 @@ defmodule Resdayn.Parser.Record.Region do
   process_basic_string "NAME", :id
   process_basic_string "FNAM", :name
 
-  # what is "sleep creature"???
   process_basic_string "BNAM", :disturb_sleep_creature_id
 
   def process({"WEAT", value}, data) when byte_size(value) == 8 do

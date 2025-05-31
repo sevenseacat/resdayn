@@ -152,4 +152,51 @@ end
 - Better query capabilities and relationship support
 - Cleaner API when accessing nested data
 - No need to implement custom casting/dumping logic
+
+## Handling Duplicate Records in Importers
+
+### Problem: Duplicate Cell IDs from Game Data
+When importing `Sky_Main.esm`, the Cell importer failed with unique constraint violations. Investigation revealed that the file contained duplicate exterior cells at the same grid coordinates but with different regions.
+
+**Analysis**: Using the parser to check for duplicates:
+```elixir
+# Check for duplicate cell IDs in Sky_Main.esm
+mix run -e "
+records = Resdayn.Parser.read(Path.join(['../data/', 'Sky_Main.esm'])) |> Enum.to_list()
+
+cells = records
+|> Enum.filter(fn record -> record.type == Resdayn.Parser.Record.Cell end)
+|> Enum.map(fn record ->
+  grid_position = if record.data.flags.interior, do: nil, else: record.data.grid_position
+  id = if is_list(grid_position), do: Enum.join(grid_position, ','), else: record.data.name
+  {id, record}
+end)
+
+id_groups = Enum.group_by(cells, fn {id, _} -> id end)
+duplicates = Enum.filter(id_groups, fn {_id, group} -> length(group) > 1 end)
+"
+```
+
+**Findings**: 
+- Cell ID "-101,12": 2 cells (Midkarth Region with 173 references, Vorndgad Forest Region with 0 references)
+- Cell ID "-100,12": 2 cells (Midkarth Region with 146 references, Vorndgad Forest Region with 0 references)
+
+**Learning**: Game data can contain legitimate duplicates where the same coordinates exist in different contexts. The pattern showed that the first cell had content while later cells were empty placeholders.
+
+**Solution**: Modified the Cell importer to keep only the first occurrence of each ID:
+```elixir
+# In Cell importer process/2 function
+records
+|> of_type(Resdayn.Parser.Record.Cell)
+|> Enum.map(fn record ->
+  # ... existing processing logic ...
+  {id, processed_cell_data}
+end)
+# Handle duplicates by keeping only the first cell for each ID
+|> Enum.uniq_by(fn {id, _cell_data} -> id end)
+|> Enum.map(fn {_id, cell_data} -> cell_data end)
+|> separate_for_import(Resdayn.Codex.World.Cell)
+```
+
+**Result**: Successfully reduced 644 cells to 642 by removing empty duplicate cells, keeping the meaningful data while preventing unique constraint violations.
 </edits>

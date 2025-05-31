@@ -12,5 +12,7 @@ defmodule Resdayn.Codex.World do
     resource __MODULE__.Creature
     resource __MODULE__.CreatureLevelledList
     resource __MODULE__.Region
+    resource __MODULE__.Cell
+    resource __MODULE__.Cell.CellReference
   end
 end

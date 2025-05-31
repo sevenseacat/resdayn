@@ -50,7 +50,7 @@ Using the amazing work of Dave Humphrey detailed here: http://www.uesp.net/morro
 | ✓      | ✓        | `ALCH` (Potions) |
 | ✓      | ✓        | `LEVI` (Item levelled list) |
 | ✓      | ✓        | `LEVC` (Creature levelled list) |
-| ✓      |          | `CELL` (Cells) |
+| ✓      | ✓        | `CELL` (Cells) |
 | x      | x        | `LAND` (Landscapes) |
 | x      | x        | `PGRD` (Path grids) |
 | ✓      | ✓        | `SNDG` (Sound generators) |

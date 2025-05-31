@@ -1,4 +1,4 @@
-defmodule Resdayn.Codex.Range do
+defmodule Resdayn.Codex.Types.Range do
   @constraints [
     validate?: [
       type: :boolean,

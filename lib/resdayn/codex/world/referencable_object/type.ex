@@ -15,8 +15,11 @@ defmodule Resdayn.Codex.World.ReferencableObject.Type do
     sound_generator: Resdayn.Codex.Assets.SoundGenerator,
     npc: Resdayn.Codex.World.NPC,
     item_levelled_list: Resdayn.Codex.Items.ItemLevelledList,
+    creature_levelled_list: Resdayn.Codex.World.CreatureLevelledList,
     container: Resdayn.Codex.World.Container,
-    creature: Resdayn.Codex.World.Creature
+    creature: Resdayn.Codex.World.Creature,
+    activator: Resdayn.Codex.World.Activator,
+    door: Resdayn.Codex.World.Door
   }
 
   use Ash.Type.Enum, values: Map.keys(@types)

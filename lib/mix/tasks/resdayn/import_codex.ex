@@ -19,11 +19,6 @@ defmodule Mix.Tasks.Resdayn.ImportCodex do
   @requirements ["app.start"]
 
   # To be imported
-  # Record.Region,
-  # Record.Creature,
-  # Record.LevelledCreature,
-  # Record.Cell,
-  # Record.SoundGenerator,
   # Record.DialogueTopic,
   # Record.DialogueResponse,
 
@@ -103,7 +98,9 @@ defmodule Mix.Tasks.Resdayn.ImportCodex do
       Record.Creature,
       Record.CreatureInventoryItem,
       Record.CreatureLevelledList,
-      Record.Region
+      Record.Region,
+      Record.Cell,
+      Record.CellReference
     ]
     |> Enum.each(fn importer ->
       import_records(importer, records, filename: filename)

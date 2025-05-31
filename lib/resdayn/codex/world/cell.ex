@@ -1,0 +1,44 @@
+defmodule Resdayn.Codex.World.Cell do
+  use Ash.Resource,
+    otp_app: :resdayn,
+    domain: Resdayn.Codex.World,
+    data_layer: AshPostgres.DataLayer,
+    extensions: [Resdayn.Codex.Importable]
+
+  postgres do
+    table "cells"
+    repo Resdayn.Repo
+  end
+
+  actions do
+    defaults [:read]
+
+    update :import_relationships do
+      require_atomic? false
+      argument :new_references, {:array, :map}, allow_nil?: false
+
+      change manage_relationship(:new_references, :references, type: :direct_control, on_missing: :ignore)
+    end
+  end
+
+  attributes do
+    attribute :id, :string, primary_key?: true, allow_nil?: false
+    attribute :name, :string
+    attribute :grid_position, {:array, :integer}, constraints: [min: 2, max: 2]
+    attribute :water_height, :float
+    attribute :light, __MODULE__.Light
+    attribute :map_color, :color
+
+    attribute :cell_flags, {:array, __MODULE__.Flag}, default: []
+
+    # To handle:
+    # * deleted references
+    # * moved references
+  end
+
+  relationships do
+    belongs_to :region, Resdayn.Codex.World.Region, attribute_type: :string
+
+    has_many :references, __MODULE__.CellReference
+  end
+end

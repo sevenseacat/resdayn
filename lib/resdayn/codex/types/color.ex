@@ -1,4 +1,4 @@
-defmodule Resdayn.Codex.Color do
+defmodule Resdayn.Codex.Types.Color do
   @moduledoc """
   Stores a hexadecimal string representing a RGB color.
   """

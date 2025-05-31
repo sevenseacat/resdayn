@@ -16,6 +16,6 @@ defmodule Resdayn.Codex.Mechanics.GlobalVariable do
 
   attributes do
     attribute :id, :string, primary_key?: true, allow_nil?: false
-    attribute :value, Resdayn.Codex.Mechanics.Number, allow_nil?: false
+    attribute :value, :number, allow_nil?: false
   end
 end

@@ -3,7 +3,7 @@ defmodule Resdayn.Parser.Record.Cell do
 
   import Bitwise
 
-  process_basic_string "RGNN", :region_name
+  process_basic_string "RGNN", :region_id
 
   # This reference is being deleted in this file
   def process({"DELE", _value}, data) do
@@ -41,7 +41,7 @@ defmodule Resdayn.Parser.Record.Cell do
           sleeping_illegal: 0x04,
           behave_like_exterior: 0x80
         ),
-      grid_position: {x, y}
+      grid_position: [x, y]
     })
   end
 
@@ -81,7 +81,7 @@ defmodule Resdayn.Parser.Record.Cell do
 
   # The `NAME` for the reference in the cell
   def process({"NAME" = v, value}, data) do
-    record_list_of_maps_value(data, :references, :object_id, printable!(__MODULE__, v, value))
+    record_list_of_maps_value(data, :references, :reference_id, printable!(__MODULE__, v, value))
   end
 
   def process({"XSCL", <<value::float32()>>}, data) do
@@ -107,7 +107,7 @@ defmodule Resdayn.Parser.Record.Cell do
   end
 
   def process({"ANAM" = v, value}, data) do
-    record_list_of_maps_value(data, :references, :owner_npc_id, printable!(__MODULE__, v, value))
+    record_list_of_maps_value(data, :references, :owner_id, printable!(__MODULE__, v, value))
   end
 
   # The type of the value depends on the item type - we don't have that right now, so store both
@@ -137,7 +137,7 @@ defmodule Resdayn.Parser.Record.Cell do
   end
 
   def process({"NAM9", <<value::uint32()>>}, data) do
-    record_list_of_maps_value(data, :references, :value, value)
+    record_list_of_maps_value(data, :references, :count, value)
   end
 
   def process({"FLTV", <<value::uint32()>>}, data) do
@@ -145,7 +145,7 @@ defmodule Resdayn.Parser.Record.Cell do
   end
 
   def process({"KNAM" = v, value}, data) do
-    record_list_of_maps_value(data, :references, :key_name, printable!(__MODULE__, v, value))
+    record_list_of_maps_value(data, :references, :key_id, printable!(__MODULE__, v, value))
   end
 
   def process({"CNAM" = v, value}, data) do
@@ -174,7 +174,7 @@ defmodule Resdayn.Parser.Record.Cell do
   end
 
   def process({"TNAM" = v, value}, data) do
-    record_list_of_maps_value(data, :references, :trap_name, printable!(__MODULE__, v, value))
+    record_list_of_maps_value(data, :references, :trap_id, printable!(__MODULE__, v, value))
   end
 
   def process({"XSOL" = v, value}, data) do

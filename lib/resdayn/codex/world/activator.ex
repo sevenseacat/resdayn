@@ -3,7 +3,7 @@ defmodule Resdayn.Codex.World.Activator do
     otp_app: :resdayn,
     domain: Resdayn.Codex.World,
     data_layer: AshPostgres.DataLayer,
-    extensions: [Resdayn.Codex.Importable]
+    extensions: [Resdayn.Codex.Importable, Resdayn.Codex.Referencable]
 
   postgres do
     table "activators"

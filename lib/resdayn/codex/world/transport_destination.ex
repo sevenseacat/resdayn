@@ -5,25 +5,11 @@ defmodule Resdayn.Codex.World.TransportDestination do
       fields: [
         # TODO: This *should* be a reference to a real cell but not imported yet...
         cell_name: [type: :string],
-        coordinates: [
-          type: :map,
-          constraints: [
-            fields: [
-              position: [
-                type: :map,
-                constraints: [
-                  fields: [x: [type: :decimal], y: [type: :decimal], z: [type: :decimal]]
-                ]
-              ],
-              rotation: [
-                type: :map,
-                constraints: [
-                  fields: [x: [type: :decimal], y: [type: :decimal], z: [type: :decimal]]
-                ]
-              ]
-            ]
-          ]
-        ]
+        coordinates: [type: :coordinates]
       ]
     ]
+
+  @impl true
+  def cast_input(nil, _), do: {:ok, nil}
+  def cast_input(val, _), do: {:ok, val}
 end
