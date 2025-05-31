@@ -1,28 +1,6 @@
 defmodule Resdayn.Importer.Record.CellReference do
   use Resdayn.Importer.Record
 
-  # Normalize angle to -180 to 180 range
-  defp normalize_angle(angle) when is_number(angle) do
-    # Use modulo for floats and integers
-    normalized = angle - 360 * floor(angle / 360)
-    if normalized > 180, do: normalized - 360, else: normalized
-  end
-
-  defp normalize_angle(angle), do: angle
-
-  # Normalize rotation values in coordinates
-  defp normalize_coordinates(%{rotation: rotation} = coords) do
-    normalized_rotation = %{
-      x: normalize_angle(rotation.x),
-      y: normalize_angle(rotation.y),
-      z: normalize_angle(rotation.z)
-    }
-
-    %{coords | rotation: normalized_rotation}
-  end
-
-  defp normalize_coordinates(coords), do: coords
-
   def process(records, _opts) do
     # TR has a lot of dodgy body parts and other non-referencable things as references for some reason?
     referencable =
@@ -91,11 +69,11 @@ defmodule Resdayn.Importer.Record.CellReference do
             :key_id,
             :trap_id,
             :soul_id,
+            :coordinates,
             :global_variable_id
           ])
           # Some stuff is owned by the player in TR?
           |> Map.update(:owner_id, nil, fn o -> if o == "player", do: nil, else: o end)
-          |> Map.update(:coordinates, nil, &normalize_coordinates/1)
           |> Map.put(:usage_remaining, usage)
           |> Map.put(:transport_to, transport)
         end)

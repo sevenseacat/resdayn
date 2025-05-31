@@ -17,7 +17,13 @@ defmodule Resdayn.Codex.World.Cell do
       require_atomic? false
       argument :new_references, {:array, :map}, allow_nil?: false
 
-      change manage_relationship(:new_references, :references, type: :direct_control, on_missing: :ignore)
+      change {Resdayn.Codex.Changes.OptimizedRelationshipImport,
+        argument: :new_references,
+        relationship: :references,
+        related_resource: Resdayn.Codex.World.Cell.CellReference,
+        parent_key: :cell_id,
+        on_missing: :ignore
+      }
     end
   end
 

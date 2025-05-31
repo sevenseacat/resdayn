@@ -139,6 +139,15 @@ defmodule Resdayn.Parser.Helpers do
   def nil_if_negative(value) when value < 0, do: nil
   def nil_if_negative(value), do: value
 
+  # Normalize angle to -180 to 180 range
+  defp normalize_angle(angle) when is_number(angle) do
+    # Use modulo for floats and integers
+    normalized = angle - 360 * floor(angle / 360)
+    if normalized > 180, do: normalized - 360, else: normalized
+  end
+
+  defp normalize_angle(angle), do: angle
+
   @doc """
   Parse a set of position/rotation coordinates.
   Used for positioning of items and travel destinations
@@ -153,7 +162,7 @@ defmodule Resdayn.Parser.Helpers do
 
     rot_x =
       case rot_x do
-        <<rot_x::float32()>> -> float(radians_to_degrees.(rot_x))
+        <<rot_x::float32()>> -> float(normalize_angle(radians_to_degrees.(rot_x)))
         _ -> nil
       end
 
@@ -161,8 +170,8 @@ defmodule Resdayn.Parser.Helpers do
       position: %{x: float(pos_x), y: float(pos_y), z: float(pos_z)},
       rotation: %{
         x: rot_x,
-        y: float(radians_to_degrees.(rot_y)),
-        z: float(radians_to_degrees.(rot_z))
+        y: float(normalize_angle(radians_to_degrees.(rot_y))),
+        z: float(normalize_angle(radians_to_degrees.(rot_z)))
       }
     }
   end

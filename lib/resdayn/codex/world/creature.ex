@@ -16,7 +16,14 @@ defmodule Resdayn.Codex.World.Creature do
     update :import_relationships do
       require_atomic? false
       argument :inventory, {:array, :map}, allow_nil?: false, default: []
-      change manage_relationship(:inventory, :inventory_items, type: :direct_control)
+
+      change {Resdayn.Codex.Changes.OptimizedRelationshipImport,
+              argument: :inventory,
+              relationship: :inventory_items,
+              related_resource: Resdayn.Codex.World.InventoryItem,
+              parent_key: :holder_ref_id,
+              id_field: :object_ref_id,
+              on_missing: :destroy}
     end
   end
 
