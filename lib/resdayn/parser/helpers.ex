@@ -140,13 +140,11 @@ defmodule Resdayn.Parser.Helpers do
   def nil_if_negative(value), do: value
 
   # Normalize angle to -180 to 180 range
-  defp normalize_angle(angle) when is_number(angle) do
+  defp normalize_angle(angle) do
     # Use modulo for floats and integers
     normalized = angle - 360 * floor(angle / 360)
     if normalized > 180, do: normalized - 360, else: normalized
   end
-
-  defp normalize_angle(angle), do: angle
 
   @doc """
   Parse a set of position/rotation coordinates.
