@@ -31,8 +31,7 @@ defmodule Resdayn.Importer.Record.DialogueResponse do
                 raise RuntimeError, "Invalid dialogue condition actor id received: #{actor_id}"
             end
 
-          response.data
-          |> Map.take([
+          fields = [
             :id,
             :content,
             :script_content,
@@ -44,10 +43,13 @@ defmodule Resdayn.Importer.Record.DialogueResponse do
             :next_response_id,
             :speaker_class_id,
             :speaker_faction_id,
-            :cell_id,
+            :cell_name,
             :sound_filename,
             :player_faction_id
-          ])
+          ]
+
+          Map.from_keys(fields, nil)
+          |> Map.merge(Map.take(response.data, fields))
           |> Map.put(:topic_id, topic.data.id)
           |> Map.put(:disposition, response.data.disposition_or_journal_index)
           |> Map.put(:speaker_npc_id, speaker_npc_id)

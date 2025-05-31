@@ -53,8 +53,7 @@ defmodule Resdayn.Importer.Record.CellReference do
               usage -> if usage.as_float, do: usage.as_float, else: usage.as_int
             end
 
-          reference
-          |> Map.take([
+          fields = [
             :id,
             :count,
             :scale,
@@ -71,7 +70,11 @@ defmodule Resdayn.Importer.Record.CellReference do
             :soul_id,
             :coordinates,
             :global_variable_id
-          ])
+          ]
+
+          fields
+          |> Map.from_keys(nil)
+          |> Map.merge(Map.take(reference, fields))
           # Some stuff is owned by the player in TR?
           |> Map.update(:owner_id, nil, fn o -> if o == "player", do: nil, else: o end)
           |> Map.put(:usage_remaining, usage)
