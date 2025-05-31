@@ -66,7 +66,7 @@ defmodule Resdayn.Parser.HelpersTest do
 
       expected = %{
         position: %{x: 2525.39, y: 2251.12, z: 69.06},
-        rotation: %{x: 270.02, y: 0.0, z: 180.0}
+        rotation: %{x: -89.98, y: 0.0, z: -180.0}
       }
 
       assert actual == expected
