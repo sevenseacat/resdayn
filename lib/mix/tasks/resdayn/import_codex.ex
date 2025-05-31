@@ -19,7 +19,6 @@ defmodule Mix.Tasks.Resdayn.ImportCodex do
   @requirements ["app.start"]
 
   # To be imported
-  # Record.DialogueTopic,
   # Record.DialogueResponse,
 
   def run([filename]) do
@@ -102,7 +101,8 @@ defmodule Mix.Tasks.Resdayn.ImportCodex do
       Record.Cell,
       Record.CellReference,
       Record.Quest,
-      Record.JournalEntry
+      Record.JournalEntry,
+      Record.DialogueTopic
     ]
     |> Enum.each(fn importer ->
       import_records(importer, records, filename: filename)

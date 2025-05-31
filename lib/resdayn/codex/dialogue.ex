@@ -4,5 +4,6 @@ defmodule Resdayn.Codex.Dialogue do
   resources do
     resource __MODULE__.Quest
     resource __MODULE__.JournalEntry
+    resource __MODULE__.Topic
   end
 end
