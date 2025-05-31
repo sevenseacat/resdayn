@@ -43,6 +43,9 @@ config :spark,
     "Ash.Domain": [section_order: [:resources, :policies, :authorization, :domain, :execution]]
   ]
 
+config :ash,
+  default_belongs_to_type: :string
+
 config :ash, :custom_types,
   range: Resdayn.Codex.Types.Range,
   color: Resdayn.Codex.Types.Color,

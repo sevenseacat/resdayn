@@ -46,10 +46,10 @@ defmodule Resdayn.Codex.Mechanics.MagicEffect do
       attribute_type: :integer,
       allow_nil?: false
 
-    belongs_to :area_sound, Resdayn.Codex.Assets.Sound, attribute_type: :string
-    belongs_to :bolt_sound, Resdayn.Codex.Assets.Sound, attribute_type: :string
-    belongs_to :casting_sound, Resdayn.Codex.Assets.Sound, attribute_type: :string
-    belongs_to :hit_sound, Resdayn.Codex.Assets.Sound, attribute_type: :string
+    belongs_to :area_sound, Resdayn.Codex.Assets.Sound
+    belongs_to :bolt_sound, Resdayn.Codex.Assets.Sound
+    belongs_to :casting_sound, Resdayn.Codex.Assets.Sound
+    belongs_to :hit_sound, Resdayn.Codex.Assets.Sound
   end
 
   calculations do

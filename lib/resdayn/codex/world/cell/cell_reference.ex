@@ -63,12 +63,12 @@ defmodule Resdayn.Codex.World.Cell.CellReference do
       attribute_type: :string,
       allow_nil?: false
 
-    belongs_to :owner, Resdayn.Codex.World.NPC, attribute_type: :string
-    belongs_to :owner_faction, Resdayn.Codex.Characters.Faction, attribute_type: :string
+    belongs_to :owner, Resdayn.Codex.World.NPC
+    belongs_to :owner_faction, Resdayn.Codex.Characters.Faction
 
-    belongs_to :key, Resdayn.Codex.World.ReferencableObject, attribute_type: :string
-    belongs_to :trap, Resdayn.Codex.Mechanics.Spell, attribute_type: :string
-    belongs_to :soul, Resdayn.Codex.World.Creature, attribute_type: :string
-    belongs_to :global_variable, Resdayn.Codex.Mechanics.GlobalVariable, attribute_type: :string
+    belongs_to :key, Resdayn.Codex.World.ReferencableObject
+    belongs_to :trap, Resdayn.Codex.Mechanics.Spell
+    belongs_to :soul, Resdayn.Codex.World.Creature
+    belongs_to :global_variable, Resdayn.Codex.Mechanics.GlobalVariable
   end
 end

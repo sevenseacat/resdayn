@@ -39,7 +39,7 @@ defmodule Resdayn.Codex.World.Container do
   end
 
   relationships do
-    belongs_to :script, Resdayn.Codex.Mechanics.Script, attribute_type: :string
+    belongs_to :script, Resdayn.Codex.Mechanics.Script
 
     has_many :items_contained, Resdayn.Codex.World.InventoryItem,
       destination_attribute: :holder_ref_id

@@ -76,10 +76,10 @@ defmodule Resdayn.Codex.World.NPC do
   end
 
   relationships do
-    belongs_to :script, Resdayn.Codex.Mechanics.Script, attribute_type: :string
-    belongs_to :race, Resdayn.Codex.Characters.Race, attribute_type: :string, allow_nil?: false
-    belongs_to :class, Resdayn.Codex.Characters.Class, attribute_type: :string, allow_nil?: false
-    belongs_to :faction, Resdayn.Codex.Characters.Faction, attribute_type: :string
+    belongs_to :script, Resdayn.Codex.Mechanics.Script
+    belongs_to :race, Resdayn.Codex.Characters.Race, allow_nil?: false
+    belongs_to :class, Resdayn.Codex.Characters.Class, allow_nil?: false
+    belongs_to :faction, Resdayn.Codex.Characters.Faction
 
     has_many :inventory_items, Resdayn.Codex.World.InventoryItem,
       destination_attribute: :holder_ref_id

@@ -27,6 +27,6 @@ defmodule Resdayn.Codex.Items.Tool do
   end
 
   relationships do
-    belongs_to :script, Resdayn.Codex.Mechanics.Script, attribute_type: :string
+    belongs_to :script, Resdayn.Codex.Mechanics.Script
   end
 end

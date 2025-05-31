@@ -13,6 +13,6 @@ defmodule Resdayn.Codex.World.Region.RegionSound do
   end
 
   relationships do
-    belongs_to :sound, Resdayn.Codex.Assets.Sound, attribute_type: :string
+    belongs_to :sound, Resdayn.Codex.Assets.Sound
   end
 end

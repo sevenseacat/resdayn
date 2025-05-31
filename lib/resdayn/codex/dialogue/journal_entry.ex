@@ -25,6 +25,6 @@ defmodule Resdayn.Codex.Dialogue.JournalEntry do
   end
 
   relationships do
-    belongs_to :quest, Resdayn.Codex.Dialogue.Quest, attribute_type: :string
+    belongs_to :quest, Resdayn.Codex.Dialogue.Quest
   end
 end

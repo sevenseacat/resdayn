@@ -11,6 +11,6 @@ defmodule Resdayn.Codex.World.CreatureLevelledList.Creature do
   end
 
   relationships do
-    belongs_to :creature, Resdayn.Codex.World.Creature, attribute_type: :string
+    belongs_to :creature, Resdayn.Codex.World.Creature
   end
 end

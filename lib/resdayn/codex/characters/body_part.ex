@@ -24,6 +24,6 @@ defmodule Resdayn.Codex.Characters.BodyPart do
   end
 
   relationships do
-    belongs_to :race, Resdayn.Codex.Characters.Race, attribute_type: :string
+    belongs_to :race, Resdayn.Codex.Characters.Race
   end
 end

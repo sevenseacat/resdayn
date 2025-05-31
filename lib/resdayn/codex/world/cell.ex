@@ -42,7 +42,7 @@ defmodule Resdayn.Codex.World.Cell do
   end
 
   relationships do
-    belongs_to :region, Resdayn.Codex.World.Region, attribute_type: :string
+    belongs_to :region, Resdayn.Codex.World.Region
 
     has_many :references, __MODULE__.CellReference
   end

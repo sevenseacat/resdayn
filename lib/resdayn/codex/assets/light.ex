@@ -31,7 +31,7 @@ defmodule Resdayn.Codex.Assets.Light do
   end
 
   relationships do
-    belongs_to :script, Resdayn.Codex.Mechanics.Script, attribute_type: :string
-    belongs_to :sound, Resdayn.Codex.Assets.Sound, attribute_type: :string
+    belongs_to :script, Resdayn.Codex.Mechanics.Script
+    belongs_to :sound, Resdayn.Codex.Assets.Sound
   end
 end

@@ -57,12 +57,12 @@ defmodule Resdayn.Codex.Dialogue.Response do
       primary_key?: true,
       allow_nil?: false
 
-    belongs_to :speaker_npc, Resdayn.Codex.World.NPC, attribute_type: :string
-    belongs_to :speaker_creature, Resdayn.Codex.World.Creature, attribute_type: :string
-    belongs_to :speaker_class, Resdayn.Codex.Characters.Class, attribute_type: :string
-    belongs_to :speaker_race, Resdayn.Codex.Characters.Race, attribute_type: :string
-    belongs_to :speaker_faction, Resdayn.Codex.Characters.Faction, attribute_type: :string
+    belongs_to :speaker_npc, Resdayn.Codex.World.NPC
+    belongs_to :speaker_creature, Resdayn.Codex.World.Creature
+    belongs_to :speaker_class, Resdayn.Codex.Characters.Class
+    belongs_to :speaker_race, Resdayn.Codex.Characters.Race
+    belongs_to :speaker_faction, Resdayn.Codex.Characters.Faction
 
-    belongs_to :player_faction, Resdayn.Codex.Characters.Faction, attribute_type: :string
+    belongs_to :player_faction, Resdayn.Codex.Characters.Faction
   end
 end

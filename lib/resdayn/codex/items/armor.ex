@@ -33,7 +33,7 @@ defmodule Resdayn.Codex.Items.Armor do
   end
 
   relationships do
-    belongs_to :script, Resdayn.Codex.Mechanics.Script, attribute_type: :string
-    belongs_to :enchantment, Resdayn.Codex.Mechanics.Enchantment, attribute_type: :string
+    belongs_to :script, Resdayn.Codex.Mechanics.Script
+    belongs_to :enchantment, Resdayn.Codex.Mechanics.Enchantment
   end
 end

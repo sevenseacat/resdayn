@@ -11,7 +11,7 @@ defmodule Resdayn.Codex.Items.ItemLevelledList.Item do
   end
 
   relationships do
-    belongs_to :item_ref, Resdayn.Codex.World.ReferencableObject, attribute_type: :string
+    belongs_to :item_ref, Resdayn.Codex.World.ReferencableObject
   end
 
   calculations do

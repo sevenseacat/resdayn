@@ -31,8 +31,8 @@ defmodule Resdayn.Codex.Items.Book do
   end
 
   relationships do
-    belongs_to :script, Resdayn.Codex.Mechanics.Script, attribute_type: :string
-    belongs_to :enchantment, Resdayn.Codex.Mechanics.Enchantment, attribute_type: :string
+    belongs_to :script, Resdayn.Codex.Mechanics.Script
+    belongs_to :enchantment, Resdayn.Codex.Mechanics.Enchantment
     belongs_to :skill, Resdayn.Codex.Characters.Skill, attribute_type: :integer
   end
 end
