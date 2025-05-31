@@ -74,6 +74,7 @@ defmodule Resdayn.Parser.Record.DialogueResponse do
     "69" => :alarm,
     "70" => :flee,
     "71" => :should_attack,
+    "72" => :werewolf_kill,
     "sX" => :not_local,
     "JX" => :journal,
     "IX" => :item,
@@ -141,7 +142,7 @@ defmodule Resdayn.Parser.Record.DialogueResponse do
         type == "2" -> :global
         type == "3" -> :local
         type == "C" -> :not_local
-        true -> Map.fetch(@functions, function)
+        true -> Map.get(@functions, function, {:unknown_function, function})
       end
 
     record_list(data, :conditions, %{
@@ -164,14 +165,14 @@ defmodule Resdayn.Parser.Record.DialogueResponse do
   end
 
   def process({"QSTF", value}, data) do
-    record_value(data, :quest_finished, value == <<1>>)
+    record_value(data, :finishes_quest, value == <<1>>)
   end
 
   def process({"QSTR", value}, data) do
-    record_value(data, :quest_restart, value == <<1>>)
+    record_value(data, :restarts_quest, value == <<1>>)
   end
 
-  defp gender(-1), do: :none
+  defp gender(-1), do: nil
   defp gender(0), do: :male
   defp gender(1), do: :female
 end

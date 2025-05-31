@@ -67,6 +67,26 @@ defmodule Resdayn.Importer.Record do
     |> separate_for_import(codex_type, action: :import_relationships)
   end
 
+  def chunked_dialogues(records, type \\ nil) do
+    records
+    |> Enum.drop_while(fn record -> record.type != Resdayn.Parser.Record.DialogueTopic end)
+    |> Enum.chunk_while(
+      {nil, []},
+      fn
+        %{type: Resdayn.Parser.Record.DialogueTopic} = record, acc ->
+          {:cont, acc, {record, []}}
+
+        %{type: Resdayn.Parser.Record.DialogueResponse} = record, {topic, responses} ->
+          {:cont, {topic, [record | responses]}}
+      end,
+      fn acc -> {:cont, acc, []} end
+    )
+    |> tl()
+    |> Enum.filter(fn {topic, _} ->
+      topic.data.type == :journal == (type == :journal)
+    end)
+  end
+
   defmacro __using__(_opts) do
     quote do
       import Resdayn.Importer.Record

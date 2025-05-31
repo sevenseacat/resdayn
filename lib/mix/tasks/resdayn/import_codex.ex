@@ -100,7 +100,9 @@ defmodule Mix.Tasks.Resdayn.ImportCodex do
       Record.CreatureLevelledList,
       Record.Region,
       Record.Cell,
-      Record.CellReference
+      Record.CellReference,
+      Record.Quest,
+      Record.JournalEntry
     ]
     |> Enum.each(fn importer ->
       import_records(importer, records, filename: filename)
