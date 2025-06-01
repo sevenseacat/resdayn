@@ -12,6 +12,11 @@ defmodule Resdayn.Codex.Dialogue.Topic do
   actions do
     defaults [:read]
 
+    read :for_npc do
+      argument :npc_id, :string, allow_nil?: false
+      filter expr(exists(responses, valid_for_npc_id(npc_id: ^arg(:npc_id))))
+    end
+
     update :import_relationships do
       require_atomic? false
       argument :responses, {:array, :map}, allow_nil?: false, default: []

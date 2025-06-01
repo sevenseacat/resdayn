@@ -11,6 +11,14 @@ defmodule Resdayn.Codex.Dialogue.Response do
   actions do
     defaults [:read, :create, :update, :destroy]
 
+    read :for_npc do
+      argument :npc_id, :string, allow_nil?: false
+      argument :topic, :string, allow_nil?: false
+
+      filter expr(valid_for_npc_id(npc_id: ^arg(:npc_id)))
+      filter expr(topic_id == ^arg(:topic))
+    end
+
     default_accept [
       :id,
       :content,
@@ -64,5 +72,13 @@ defmodule Resdayn.Codex.Dialogue.Response do
     belongs_to :speaker_faction, Resdayn.Codex.Characters.Faction
 
     belongs_to :player_faction, Resdayn.Codex.Characters.Faction
+  end
+
+  calculations do
+    calculate :valid_for_npc_id,
+              :boolean,
+              Resdayn.Codex.Dialogue.Calculations.NPCResponseFilter do
+      argument :npc_id, :string, allow_nil?: false
+    end
   end
 end
