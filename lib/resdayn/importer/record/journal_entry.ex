@@ -12,11 +12,11 @@ defmodule Resdayn.Importer.Record.JournalEntry do
         |> Enum.reverse()
         |> Enum.reject(& &1.data[:quest_name])
         |> Enum.map(fn entry ->
-          fields = [:id, :content, :finishes_quest, :restarts_quest]
+          fields = [:id, :content, :finishes_quest, :restarts_quest, :deleted]
 
           Map.from_keys(fields, nil)
           |> Map.merge(Map.take(entry.data, fields))
-          |> Map.put(:index, entry.data.disposition_or_journal_index)
+          |> Map.put(:index, entry.data[:disposition_or_journal_index])
         end)
 
       topic =

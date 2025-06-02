@@ -211,7 +211,13 @@ defmodule Resdayn.Codex.Changes.OptimizedRelationshipImport do
 
     # Add parent key to all new records
     creates_with_parent =
-      Enum.map(creates, &(Map.put(&1, parent_key, parent_id) |> Map.delete(:deleted)))
+      creates
+      |> Enum.reject(& &1[:deleted])
+      |> Enum.map(fn record ->
+        record
+        |> Map.put(parent_key, parent_id)
+        |> Map.delete(:deleted)
+      end)
 
     # Perform bulk create for new records
     if not Enum.empty?(creates_with_parent) do
