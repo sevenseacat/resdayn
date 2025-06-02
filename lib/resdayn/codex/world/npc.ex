@@ -83,5 +83,8 @@ defmodule Resdayn.Codex.World.NPC do
 
     has_many :inventory_items, Resdayn.Codex.World.InventoryItem,
       destination_attribute: :holder_ref_id
+
+    has_many :cell_references, Resdayn.Codex.World.Cell.CellReference,
+      destination_attribute: :reference_id
   end
 end

@@ -7,9 +7,14 @@ defmodule Resdayn.Codex.Dialogue.Response do
     table "dialogue_responses"
     repo Resdayn.Repo
 
+    references do
+      reference :topic, on_delete: :delete
+    end
+
     custom_indexes do
       index [:previous_response_id]
       index [:next_response_id]
+      index [:id, :topic_id]
     end
   end
 
@@ -77,6 +82,11 @@ defmodule Resdayn.Codex.Dialogue.Response do
     belongs_to :speaker_faction, Resdayn.Codex.Characters.Faction
 
     belongs_to :player_faction, Resdayn.Codex.Characters.Faction
+
+    has_many :cell_references, Resdayn.Codex.World.Cell.CellReference do
+      no_attributes? true
+      filter expr(cell.name == parent(cell_name))
+    end
   end
 
   calculations do
