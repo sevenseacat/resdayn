@@ -81,7 +81,12 @@ defmodule Resdayn.Importer.Record.CellReference do
           |> Map.put(:transport_to, transport)
         end)
 
-      %{id: cell_id, new_references: references}
+      deleted =
+        record.data
+        |> Map.get(:deleted, [])
+        |> Enum.map(fn %{id: {_index, ref_id}} -> %{id: ref_id, cell_id: cell_id} end)
+
+      %{id: cell_id, new_references: references, deleted_references: deleted}
     end)
     |> separate_for_import(Resdayn.Codex.World.Cell, action: :import_relationships)
   end

@@ -16,6 +16,9 @@ defmodule Resdayn.Codex.World.Cell do
     update :import_relationships do
       require_atomic? false
       argument :new_references, {:array, :map}, allow_nil?: false
+      argument :deleted_references, {:array, :map}, allow_nil?: false
+
+      change manage_relationship(:deleted_references, :references, on_match: :destroy)
 
       change {Resdayn.Codex.Changes.OptimizedRelationshipImport,
               argument: :new_references,
