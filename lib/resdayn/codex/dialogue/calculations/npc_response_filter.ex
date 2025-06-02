@@ -3,15 +3,19 @@ defmodule Resdayn.Codex.Dialogue.Calculations.NPCResponseFilter do
 
   @impl true
   def expression(_opts, context) do
-    npc = Ash.get!(Resdayn.Codex.World.NPC, context.arguments.npc_id)
+    npc_id = context.arguments[:npc_id]
 
-    expr(
-      # Basic NPC identity filters
-      (is_nil(speaker_npc_id) or speaker_npc_id == ^npc.id) and
-        (is_nil(speaker_class_id) or speaker_class_id == ^npc.class_id) and
-        (is_nil(speaker_race_id) or speaker_race_id == ^npc.race_id) and
-        (is_nil(speaker_faction_id) or
-           (not is_nil(^npc.faction_id) and speaker_faction_id == ^npc.faction_id))
+    if npc_id do
+      npc = Ash.get!(Resdayn.Codex.World.NPC, npc_id)
+
+      expr(
+        # Basic NPC identity filters
+        (is_nil(speaker_npc_id) or speaker_npc_id == ^npc.id) and
+          (is_nil(speaker_class_id) or speaker_class_id == ^npc.class_id) and
+          (is_nil(speaker_race_id) or speaker_race_id == ^npc.race_id) and
+          (is_nil(speaker_faction_id) or
+             (not is_nil(^npc.faction_id) and speaker_faction_id == ^npc.faction_id))
+      )
 
       # To add:
       # =======
@@ -37,6 +41,9 @@ defmodule Resdayn.Codex.Dialogue.Calculations.NPCResponseFilter do
       #
       #   * local/not_local
       #     These relate to variables in the script associated to the NPC
-    )
+      #     probably the only useful one we can use is nolore
+    else
+      expr(true)
+    end
   end
 end

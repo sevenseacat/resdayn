@@ -6,6 +6,11 @@ defmodule Resdayn.Codex.Dialogue.Response do
   postgres do
     table "dialogue_responses"
     repo Resdayn.Repo
+
+    custom_indexes do
+      index [:previous_response_id]
+      index [:next_response_id]
+    end
   end
 
   actions do
@@ -75,10 +80,10 @@ defmodule Resdayn.Codex.Dialogue.Response do
   end
 
   calculations do
-    calculate :valid_for_npc_id,
+    calculate :valid_for_npc?,
               :boolean,
               Resdayn.Codex.Dialogue.Calculations.NPCResponseFilter do
-      argument :npc_id, :string, allow_nil?: false
+      argument :npc_id, :string
     end
   end
 end
