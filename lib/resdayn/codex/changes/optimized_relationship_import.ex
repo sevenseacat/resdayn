@@ -197,9 +197,11 @@ defmodule Resdayn.Codex.Changes.OptimizedRelationshipImport do
         Map.get(record, id_field) not in existing_ids
       end)
 
-    # Filter updates to only include changed records
+    # Filter updates to only include non-deleted changed records
     actual_updates =
-      Enum.filter(potential_updates, fn record ->
+      potential_updates
+      |> Enum.reject(& &1[:deleted])
+      |> Enum.filter(fn record ->
         existing = existing_records[Map.get(record, id_field)]
 
         Enum.any?(compare_fields, fn field ->
@@ -208,7 +210,8 @@ defmodule Resdayn.Codex.Changes.OptimizedRelationshipImport do
       end)
 
     # Add parent key to all new records
-    creates_with_parent = Enum.map(creates, &Map.put(&1, parent_key, parent_id))
+    creates_with_parent =
+      Enum.map(creates, &(Map.put(&1, parent_key, parent_id) |> Map.delete(:deleted)))
 
     # Perform bulk create for new records
     if not Enum.empty?(creates_with_parent) do
@@ -223,10 +226,15 @@ defmodule Resdayn.Codex.Changes.OptimizedRelationshipImport do
     # Perform individual updates for changed records
     Enum.each(actual_updates, fn record ->
       existing_record = existing_records[Map.get(record, id_field)]
-      update_data = Map.take(record, compare_fields)
+      update_data = Map.take(record, compare_fields) |> Map.delete(:deleted)
 
       Ash.update!(existing_record, update_data, authorize?: false)
     end)
+
+    potential_updates
+    |> Enum.filter(& &1[:deleted])
+    |> Enum.map(&existing_records[Map.get(&1, id_field)])
+    |> Ash.bulk_destroy!(:destroy, %{}, return_records?: true)
 
     # Handle missing records based on on_missing option
     if on_missing == :destroy do

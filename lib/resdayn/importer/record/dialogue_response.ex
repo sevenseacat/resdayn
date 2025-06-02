@@ -45,13 +45,14 @@ defmodule Resdayn.Importer.Record.DialogueResponse do
             :speaker_faction_id,
             :cell_name,
             :sound_filename,
-            :player_faction_id
+            :player_faction_id,
+            :deleted
           ]
 
           Map.from_keys(fields, nil)
           |> Map.merge(Map.take(response.data, fields))
           |> Map.put(:topic_id, topic.data.id)
-          |> Map.put(:disposition, response.data.disposition_or_journal_index)
+          |> Map.put(:disposition, response.data[:disposition_or_journal_index])
           |> Map.put(:speaker_npc_id, speaker_npc_id)
           |> Map.put(:speaker_creature_id, speaker_creature_id)
         end)
