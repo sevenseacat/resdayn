@@ -1,7 +1,7 @@
 defmodule Resdayn.Importer.Record.Light do
   use Resdayn.Importer.Record
 
-  def process(records, _opts) do
+  def process(records, opts) do
     records
     |> of_type(Resdayn.Parser.Record.Light)
     |> Enum.map(fn record ->
@@ -22,6 +22,6 @@ defmodule Resdayn.Importer.Record.Light do
       |> with_flags(:light_flags, record.data.flags)
       |> with_flags(:flags, record.flags)
     end)
-    |> separate_for_import(Resdayn.Codex.Assets.Light)
+    |> separate_for_import(Resdayn.Codex.Assets.Light, opts)
   end
 end

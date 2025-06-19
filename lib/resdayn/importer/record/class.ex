@@ -1,7 +1,7 @@
 defmodule Resdayn.Importer.Record.Class do
   use Resdayn.Importer.Record
 
-  def process(records, _opts) do
+  def process(records, opts) do
     records
     |> of_type(Resdayn.Parser.Record.Class)
     |> Enum.map(fn record ->
@@ -20,6 +20,6 @@ defmodule Resdayn.Importer.Record.Class do
       |> with_flags(:items_vendored, record.data.vendor_for)
       |> with_flags(:services_offered, record.data.services)
     end)
-    |> separate_for_import(Resdayn.Codex.Characters.Class)
+    |> separate_for_import(Resdayn.Codex.Characters.Class, opts)
   end
 end

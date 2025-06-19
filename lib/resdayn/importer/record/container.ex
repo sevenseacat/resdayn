@@ -1,7 +1,7 @@
 defmodule Resdayn.Importer.Record.Container do
   use Resdayn.Importer.Record
 
-  def process(records, _opts) do
+  def process(records, opts) do
     records
     |> of_type(Resdayn.Parser.Record.Container)
     |> Enum.map(fn record ->
@@ -10,6 +10,6 @@ defmodule Resdayn.Importer.Record.Container do
       |> with_flags(:container_flags, record.data.flags)
       |> with_flags(:flags, record.flags)
     end)
-    |> separate_for_import(Resdayn.Codex.World.Container)
+    |> separate_for_import(Resdayn.Codex.World.Container, opts)
   end
 end

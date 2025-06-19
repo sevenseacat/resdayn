@@ -16,6 +16,8 @@ defmodule Resdayn.Codex.Characters.Faction do
     update :import_relationships do
       require_atomic? false
 
+      accept [:source_file_ids]
+
       argument :skill_ids, {:array, :integer}, default: [], allow_nil?: false
       argument :reactions, {:array, :map}, default: [], allow_nil?: false
 

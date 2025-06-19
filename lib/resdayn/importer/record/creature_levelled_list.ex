@@ -1,7 +1,7 @@
 defmodule Resdayn.Importer.Record.CreatureLevelledList do
   use Resdayn.Importer.Record
 
-  def process(records, _opts) do
+  def process(records, opts) do
     records
     |> of_type(Resdayn.Parser.Record.CreatureLevelledList)
     |> Enum.map(fn record ->
@@ -25,6 +25,6 @@ defmodule Resdayn.Importer.Record.CreatureLevelledList do
       )
       |> with_flags(:flags, record.flags)
     end)
-    |> separate_for_import(Resdayn.Codex.World.CreatureLevelledList)
+    |> separate_for_import(Resdayn.Codex.World.CreatureLevelledList, opts)
   end
 end

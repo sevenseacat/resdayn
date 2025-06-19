@@ -1,7 +1,7 @@
 defmodule Resdayn.Importer.Record.Race do
   use Resdayn.Importer.Record
 
-  def process(records, _opts) do
+  def process(records, opts) do
     records
     |> of_type(Resdayn.Parser.Record.Race)
     |> Enum.map(fn record ->
@@ -12,7 +12,7 @@ defmodule Resdayn.Importer.Record.Race do
       |> Map.put(:special_spells, transform_special_spells(record.data.special_ids || []))
       |> with_flags(:flags, record.flags)
     end)
-    |> separate_for_import(Resdayn.Codex.Characters.Race)
+    |> separate_for_import(Resdayn.Codex.Characters.Race, opts)
   end
 
   defp transform_stats(attrs) do

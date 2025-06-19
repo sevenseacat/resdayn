@@ -1,7 +1,7 @@
 defmodule Resdayn.Importer.Record.NPC do
   use Resdayn.Importer.Record
 
-  def process(records, _opts) do
+  def process(records, opts) do
     records
     |> of_type(Resdayn.Parser.Record.NPC)
     |> Enum.map(fn record ->
@@ -57,6 +57,6 @@ defmodule Resdayn.Importer.Record.NPC do
       |> with_flags(:flags, record.flags)
     end)
     |> Enum.reject(&(&1.id == "player"))
-    |> separate_for_import(Resdayn.Codex.World.NPC)
+    |> separate_for_import(Resdayn.Codex.World.NPC, opts)
   end
 end

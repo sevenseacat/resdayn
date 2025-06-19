@@ -1,7 +1,7 @@
 defmodule Resdayn.Importer.Record.Potion do
   use Resdayn.Importer.Record
 
-  def process(records, _opts) do
+  def process(records, opts) do
     records
     |> of_type(Resdayn.Parser.Record.Potion)
     |> Enum.map(fn record ->
@@ -19,6 +19,6 @@ defmodule Resdayn.Importer.Record.Potion do
       |> Map.put(:autocalc, record.data.flags.autocalc)
       |> with_flags(:flags, record.flags)
     end)
-    |> separate_for_import(Resdayn.Codex.Items.Potion)
+    |> separate_for_import(Resdayn.Codex.Items.Potion, opts)
   end
 end

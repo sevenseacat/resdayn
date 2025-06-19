@@ -90,7 +90,12 @@ defmodule Resdayn.Parser.Record.Cell do
 
   # The `DATA` for the reference in the cell
   def process({"DATA", value}, data) do
-    record_list_of_maps_value(data, :references, :coordinates, coordinates(value))
+    record_list_of_maps_value(
+      data,
+      :references,
+      :coordinates,
+      coordinates(value)
+    )
   end
 
   def process({"DODT", value}, data) do

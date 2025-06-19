@@ -1,7 +1,7 @@
 defmodule Resdayn.Importer.Record.Spell do
   use Resdayn.Importer.Record
 
-  def process(records, _opts) do
+  def process(records, opts) do
     records
     |> of_type(Resdayn.Parser.Record.Spell)
     |> Enum.map(fn record ->
@@ -11,7 +11,7 @@ defmodule Resdayn.Importer.Record.Spell do
       |> with_flags(:flags, record.flags)
       |> with_flags(:spell_flags, record.data.flags)
     end)
-    |> separate_for_import(Resdayn.Codex.Mechanics.Spell)
+    |> separate_for_import(Resdayn.Codex.Mechanics.Spell, opts)
   end
 
   defp transform_effects(enchantments) do

@@ -1,7 +1,7 @@
 defmodule Resdayn.Importer.Record.DialogueResponse do
   use Resdayn.Importer.Record
 
-  def process(records, _opts) do
+  def process(records, opts) do
     npcs = Ash.read!(Resdayn.Codex.World.NPC) |> Enum.map(& &1.id)
     creatures = Ash.read!(Resdayn.Codex.World.Creature) |> Enum.map(& &1.id)
 
@@ -61,6 +61,9 @@ defmodule Resdayn.Importer.Record.DialogueResponse do
       |> Map.take([:id])
       |> Map.put(:responses, responses)
     end)
-    |> separate_for_import(Resdayn.Codex.Dialogue.Topic, action: :import_relationships)
+    |> separate_for_import(
+      Resdayn.Codex.Dialogue.Topic,
+      Keyword.put(opts, :action, :import_relationships)
+    )
   end
 end

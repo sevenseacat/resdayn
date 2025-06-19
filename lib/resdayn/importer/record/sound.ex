@@ -1,7 +1,7 @@
 defmodule Resdayn.Importer.Record.Sound do
   use Resdayn.Importer.Record
 
-  def process(records, _opts) do
+  def process(records, opts) do
     records
     |> of_type(Resdayn.Parser.Record.Sound)
     |> Enum.map(fn record ->
@@ -13,6 +13,6 @@ defmodule Resdayn.Importer.Record.Sound do
       }
       |> with_flags(:flags, record.flags)
     end)
-    |> separate_for_import(Resdayn.Codex.Assets.Sound)
+    |> separate_for_import(Resdayn.Codex.Assets.Sound, opts)
   end
 end

@@ -17,6 +17,6 @@ defmodule Resdayn.Importer.Record.Attribute do
     else
       []
     end
-    |> separate_for_import(Resdayn.Codex.Mechanics.Attribute)
+    |> separate_for_import(Resdayn.Codex.Mechanics.Attribute, opts)
   end
 end

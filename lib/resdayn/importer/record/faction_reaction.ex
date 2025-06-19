@@ -1,7 +1,7 @@
 defmodule Resdayn.Importer.Record.FactionReaction do
   use Resdayn.Importer.Record
 
-  def process(records, _opts) do
+  def process(records, opts) do
     records
     |> of_type(Resdayn.Parser.Record.Faction)
     |> Enum.map(fn record ->
@@ -11,6 +11,9 @@ defmodule Resdayn.Importer.Record.FactionReaction do
         Enum.uniq_by(Enum.reverse(reactions), & &1.target_id)
       end)
     end)
-    |> separate_for_import(Resdayn.Codex.Characters.Faction, action: :import_relationships)
+    |> separate_for_import(
+      Resdayn.Codex.Characters.Faction,
+      Keyword.put(opts, :action, :import_relationships)
+    )
   end
 end

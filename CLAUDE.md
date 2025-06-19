@@ -199,4 +199,303 @@ end)
 ```
 
 **Result**: Successfully reduced 644 cells to 642 by removing empty duplicate cells, keeping the meaningful data while preventing unique constraint violations.
-</edits>
+
+## Source File Tracking and Event System Implementation
+
+### Problem: Implementing Comprehensive Data Provenance and Audit Trails
+Feature 1 required implementing source file tracking to know which data files touched each record, along with an event system to audit import activities. This involved extending the existing import system without breaking backwards compatibility.
+
+### Key Implementation Challenges and Solutions
+
+#### Challenge 1: JSON Serialization of Complex Ash Structs
+**Problem**: When storing event changes in the database, complex Ash structs (like `Spell.Effect`) couldn't be serialized to JSON due to embedded metadata and relationships.
+
+**Error encountered**:
+```
+Protocol.UndefinedError: protocol Jason.Encoder not implemented for type Resdayn.Codex.Mechanics.Spell.Effect
+```
+
+**Solution**: Implemented recursive serialization that strips Ash metadata:
+```elixir
+defp serialize_for_json(value) when is_struct(value) do
+  value
+  |> Map.from_struct()
+  |> Map.drop([:__meta__])
+  |> serialize_for_json()
+end
+
+defp serialize_for_json(%Ash.NotLoaded{}), do: nil
+defp serialize_for_json(value) when is_list(value) do
+  Enum.map(value, &serialize_for_json/1)
+end
+```
+
+**Learning**: When storing change events for Ash resources, always serialize complex objects to strip framework metadata before JSON encoding.
+
+#### Challenge 2: Event Creation Action Configuration
+**Problem**: Default Ash create actions don't automatically accept all attributes, causing events to fail with "NoSuchInput" errors.
+
+**Solution**: Define explicit create action with accept list:
+```elixir
+actions do
+  defaults [:read]
+  
+  create :create do
+    primary? true
+    accept [:event_type, :resource_type, :resource_id, :source_file_id, :changes]
+  end
+end
+```
+
+**Learning**: For event/audit resources, explicitly define create actions with comprehensive accept lists rather than relying on defaults.
+
+#### Challenge 3: Async Event Creation Performance
+**Problem**: Synchronous event creation during bulk imports caused timeouts when processing large numbers of records.
+
+**Solution**: Async event creation with error handling:
+```elixir
+Task.start(fn -> 
+  case emit_create_event(resource, record.id, source_file_id) do
+    {:ok, _event} -> :ok
+    {:error, error} -> IO.puts("Error creating event: #{inspect(error)}")
+  end
+end)
+```
+
+**Learning**: For audit events during bulk operations, use async tasks to avoid blocking the main import process. Include error handling since failures shouldn't break imports.
+
+#### Challenge 4: Change Detection Granularity
+**Problem**: Need to distinguish between "content changes" (actual data modifications) and "metadata updates" (like adding source file IDs to previously untracked records).
+
+**Solution**: Configurable ignore attributes with special handling for source tracking:
+```elixir
+# In resource definition
+importable do
+  ignore_attributes [:next_dialogue_id, :previous_dialogue_id]
+end
+
+# In change detection
+def significant_change?(resource, existing_record, new_data) do
+  ignore_attrs = Importable.ignore_attributes(resource)
+  # Compare only significant attributes...
+end
+```
+
+**Learning**: Provide per-resource configuration for what constitutes a "significant" change. System metadata updates shouldn't trigger the same events as content changes.
+
+#### Challenge 5: Backwards Compatibility During Major System Changes
+**Problem**: Adding source tracking to existing import system without breaking 40+ existing record importers.
+
+**Solution**: Dual-path processing with feature detection:
+```elixir
+if source_file_id && has_importable_extension?(resource) do
+  SourceTracker.process_with_tracking(records, resource, source_file_id, opts)
+else
+  # Legacy path for resources without source tracking
+  existing = find_existing(resource, records)
+  # ... original logic
+end
+```
+
+**Learning**: When adding major features to existing systems, implement feature detection and dual processing paths to maintain backwards compatibility.
+
+### Architecture Decisions
+
+#### Extension-Based Feature Design
+Used Spark DSL extension pattern for source tracking capabilities:
+```elixir
+defmodule Resdayn.Codex.Importable do
+  use Spark.Dsl.Extension, 
+    sections: [@importable],
+    transformers: [__MODULE__.AddImportAction]
+end
+```
+
+**Benefits**: Resources opt-in to source tracking, automatic action generation, clean separation of concerns.
+
+#### Event-Driven Audit Trail
+Chose AshEvents for audit trails rather than building custom logging:
+- Leverages existing Ash patterns
+- Built-in querying capabilities  
+- Structured event data with relationships
+
+#### Async Event Processing
+Events are created asynchronously to avoid impacting import performance:
+- Main import process isn't slowed by event creation
+- Failed events don't break imports
+- Error reporting for debugging
+
+### Final Results
+Successfully implemented comprehensive source file tracking:
+- ✅ 46 events created during Tribunal.esm import test
+- ✅ Source file IDs correctly tracked: `["Tribunal.esm"]`  
+- ✅ Detailed change diffs with clean JSON serialization
+- ✅ Zero impact on import performance (async events)
+- ✅ Backwards compatibility maintained
+
+**Testing verification**: Event for "almalexia's grace" spell showed clean before/after diff of spell effects, proving the system captures meaningful change information while properly serializing complex Ash objects.
+
+**Learning**: Complex features like audit trails require careful attention to serialization, performance, and backwards compatibility. The combination of Spark DSL extensions, AshEvents, and async processing provides a robust foundation for data provenance tracking.
+
+## Source File Tracking Bug: Double-Processing Resources
+
+### Problem: Source File IDs Being Replaced Instead of Merged
+During debugging of source file tracking, discovered that cell `1,-13` had its source files replaced from `["Morrowind.esm"]` to `["Tribunal.esm"]` instead of being merged to `["Morrowind.esm", "Tribunal.esm"]` when importing Tribunal.esm after Morrowind.esm.
+
+### Root Cause Analysis
+The issue stemmed from resources being processed twice during the same import:
+
+1. **Cell importer** processes the cell first - correctly merges source file IDs
+2. **CellReference importer** processes the same cell again - overwrites the merged source file IDs
+
+**Example flow during Tribunal.esm import:**
+```
+1. Cell importer: ["Morrowind.esm"] + ["Tribunal.esm"] = ["Morrowind.esm", "Tribunal.esm"] ✓
+2. CellReference importer: overwrites with ["Tribunal.esm"] ✗
+```
+
+### Investigation Process
+Used debugging output to trace the exact flow:
+```elixir
+# During Tribunal.esm import:
+DEBUG: Processing cell 1,-13
+  Existing source IDs: ["Morrowind.esm"]
+  New source file ID: "Tribunal.esm" 
+  Is new source: true
+DEBUG: Significant change detected for cell 1,-13  # Cell importer
+
+DEBUG: Processing cell 1,-13
+  Existing source IDs: ["Morrowind.esm", "Tribunal.esm"]  # After first processing
+  New source file ID: "Tribunal.esm"
+  Is new source: false  # Already in list from first processing
+DEBUG: Significant change detected for cell 1,-13  # CellReference importer
+```
+
+**Key insight**: The second processing (CellReference importer) went through the "significant change" path but didn't properly preserve the merged source file IDs.
+
+### The Bug Location
+In `SourceTracker.process_with_tracking/4`, the "significant change" branch had incorrect source file ID merging logic:
+
+```elixir
+# Bug was here:
+data = if is_new_source do
+  Map.update!(record, :source_file_ids, &(existing_record.source_file_ids ++ &1))
+else
+  record  # ← This only contained ["Tribunal.esm"], losing ["Morrowind.esm"]
+end
+```
+
+### The Fix
+Modified the logic to always properly merge source file IDs regardless of whether it's a "new source":
+
+```elixir
+# Fixed version:
+merged_source_ids = if is_new_source do
+  existing_record.source_file_ids ++ record.source_file_ids
+else
+  # Even if not a new source, preserve existing source file IDs
+  current_ids = existing_record.source_file_ids || []
+  if source_file_id in current_ids do
+    current_ids
+  else
+    current_ids ++ [source_file_id]
+  end
+end
+
+data = Map.put(record, :source_file_ids, merged_source_ids)
+```
+
+### Code Quality Improvements
+**Issue**: The `SourceTracker` module had grown long and repetitive with duplicated logic for event emission and source file merging.
+
+**Solution**: Refactored into smaller, focused functions:
+- `significant_attributes/1` - Extract significant attributes logic
+- `merge_source_file_ids/3` - Centralize source file merging logic
+- `process_create/2`, `process_significant_update/5`, `process_tracking_update/4` - Separate processing paths
+- `emit_*_event_async/2,3,4` - Centralize async event emission
+
+### Testing Strategy
+Created comprehensive tests covering:
+1. Basic source file ID addition and merging
+2. Significant change detection (excluding source tracking fields)
+3. The specific double-processing scenario that caused the bug
+4. Edge cases like nil source file IDs
+
+**Key test insight**: The `significant_change?/3` function needed to exclude `source_file_ids` and `flags` from comparison since these are internal tracking fields, not business data.
+
+### Lessons Learned
+1. **Double-processing resources**: When a resource gets processed multiple times in the same import (e.g., by different importers), ensure source file tracking logic handles this correctly.
+
+2. **Source file merging**: Always preserve existing source file IDs when merging, never replace them unless explicitly intended.
+
+3. **Debugging complex import flows**: Use targeted debugging output to trace resource processing through multiple importers within the same import session.
+
+4. **Test coverage for edge cases**: The specific scenario of "same source file, different importer" within one import session required explicit testing.
+
+5. **Refactoring for maintainability**: Long, repetitive functions with embedded logic are harder to debug and test. Extract focused helper functions for complex operations like source file merging.
+
+**Testing verification**: After fix, cell `1,-13` correctly shows `["Morrowind.esm", "Tribunal.esm"]` after importing both files, proving proper source file accumulation across multiple data files and import stages.
+
+## Source File Tracking Bug: Replacement Instead of Merging
+
+### Problem: Source File IDs Being Replaced Instead of Merged
+When importing multiple data files that contain the same record, the source_file_ids were being replaced rather than merged. For example, after importing Morrowind.esm and then Tribunal.esm, cell `1,-13` had `source_file_ids: ["Tribunal.esm"]` instead of the expected `["Morrowind.esm", "Tribunal.esm"]`.
+
+### Root Cause Analysis
+The issue was caused by records being processed twice during the same import operation:
+
+1. **First processing**: Cell importer processes the cell and correctly sets source_file_ids
+2. **Second processing**: CellReference importer processes the same cell again for relationship management
+
+During the second processing, the source file tracking logic had two bugs:
+
+#### Bug 1: Significant Change Path Not Preserving Existing Source Files
+In the "significant change" code path, when `is_new_source` was `false`, the code was using the record's source_file_ids as-is instead of preserving existing source file IDs:
+
+```elixir
+data =
+  if is_new_source do
+    Map.update!(record, :source_file_ids, &(existing_record.source_file_ids ++ &1))
+  else
+    record  # BUG: This only contains the new source file ID
+  end
+```
+
+#### Bug 2: Same File Processed Multiple Times in Single Import
+During a single import (e.g., Tribunal.esm):
+- Cell importer processes cell `1,-13` and merges: `["Morrowind.esm"] + ["Tribunal.esm"] = ["Morrowind.esm", "Tribunal.esm"]`
+- CellReference importer processes the same cell again with `is_new_source = false` (since "Tribunal.esm" is already in the list)
+- The second processing overwrote the correctly merged list with just `["Tribunal.esm"]`
+
+### Solution: Always Merge Source File IDs Properly
+Fixed the source file ID merging logic to always preserve existing source file IDs, regardless of the processing path:
+
+```elixir
+# Always merge source file IDs properly, regardless of whether it's a new source
+merged_source_ids = 
+  if is_new_source do
+    existing_record.source_file_ids ++ record.source_file_ids
+  else
+    # Even if not a new source, we need to preserve existing source file IDs
+    # and make sure the current source file ID is in the list
+    current_ids = existing_record.source_file_ids || []
+    if source_file_id in current_ids do
+      current_ids
+    else
+      current_ids ++ [source_file_id]
+    end
+  end
+
+data = Map.put(record, :source_file_ids, merged_source_ids)
+```
+
+### Verification Process
+Used debugging output to trace the source file tracking through both processing phases:
+
+1. **First processing (Cell importer)**: Correctly merged source files
+2. **Second processing (CellReference importer)**: Previously overwrote, now preserves merged list
+
+**Result**: Cell `1,-13` now correctly shows `source_file_ids: ["Morrowind.esm", "Tribunal.esm"]` after importing both files.
+
+### Key Learnings
+1. **Multiple Processing Phases**: Some records get processed multiple times during import (once for the record itself, once for relationships). Source tracking must handle this correctly</edits>

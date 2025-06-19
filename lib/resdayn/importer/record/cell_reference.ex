@@ -1,7 +1,7 @@
 defmodule Resdayn.Importer.Record.CellReference do
   use Resdayn.Importer.Record
 
-  def process(records, _opts) do
+  def process(records, opts) do
     # TR has a lot of dodgy body parts and other non-referencable things as references for some reason?
     referencable =
       Ash.read!(Resdayn.Codex.World.ReferencableObject)
@@ -68,7 +68,6 @@ defmodule Resdayn.Importer.Record.CellReference do
             :key_id,
             :trap_id,
             :soul_id,
-            :coordinates,
             :global_variable_id
           ]
 
@@ -88,6 +87,9 @@ defmodule Resdayn.Importer.Record.CellReference do
 
       %{id: cell_id, new_references: references, deleted_references: deleted}
     end)
-    |> separate_for_import(Resdayn.Codex.World.Cell, action: :import_relationships)
+    |> separate_for_import(
+      Resdayn.Codex.World.Cell,
+      Keyword.put(opts, :action, :import_relationships)
+    )
   end
 end

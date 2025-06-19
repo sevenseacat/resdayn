@@ -1,7 +1,7 @@
 defmodule Resdayn.Importer.Record.JournalEntry do
   use Resdayn.Importer.Record
 
-  def process(records, _opts) do
+  def process(records, opts) do
     records
     |> chunked_dialogues(:journal)
     |> Enum.map(fn {topic, entries} ->
@@ -30,6 +30,9 @@ defmodule Resdayn.Importer.Record.JournalEntry do
         topic
       end
     end)
-    |> separate_for_import(Resdayn.Codex.Dialogue.Quest, action: :import_relationships)
+    |> separate_for_import(
+      Resdayn.Codex.Dialogue.Quest,
+      Keyword.put(opts, :action, :import_relationships)
+    )
   end
 end

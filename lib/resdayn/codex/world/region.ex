@@ -29,5 +29,11 @@ defmodule Resdayn.Codex.World.Region do
     belongs_to :disturb_sleep_creature, Resdayn.Codex.World.CreatureLevelledList,
       attribute_type: :string,
       allow_nil?: true
+
+    has_many :cells, Resdayn.Codex.World.Cell
+  end
+
+  aggregates do
+    count :cell_count, :cells
   end
 end

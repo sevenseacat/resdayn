@@ -1,7 +1,7 @@
 defmodule Resdayn.Importer.Record.Book do
   use Resdayn.Importer.Record
 
-  def process(records, _opts) do
+  def process(records, opts) do
     records
     |> of_type(Resdayn.Parser.Record.Book)
     |> Enum.map(fn record ->
@@ -11,6 +11,6 @@ defmodule Resdayn.Importer.Record.Book do
     end)
     # Remove the one help-the-user no-name book in Tamriel_Data.esm
     |> Enum.filter(&Map.has_key?(&1, :name))
-    |> separate_for_import(Resdayn.Codex.Items.Book)
+    |> separate_for_import(Resdayn.Codex.Items.Book, opts)
   end
 end

@@ -1,7 +1,7 @@
 defmodule Resdayn.Importer.Record.Weapon do
   use Resdayn.Importer.Record
 
-  def process(records, _opts) do
+  def process(records, opts) do
     records
     |> of_type(Resdayn.Parser.Record.Weapon)
     |> Enum.map(fn record ->
@@ -9,6 +9,6 @@ defmodule Resdayn.Importer.Record.Weapon do
       |> with_flags(:weapon_flags, record.data.flags)
       |> with_flags(:flags, record.flags)
     end)
-    |> separate_for_import(Resdayn.Codex.Items.Weapon)
+    |> separate_for_import(Resdayn.Codex.Items.Weapon, opts)
   end
 end

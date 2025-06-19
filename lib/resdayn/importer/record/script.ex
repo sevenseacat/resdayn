@@ -2,7 +2,7 @@ defmodule Resdayn.Importer.Record.Script do
   use Resdayn.Importer.Record
   alias Resdayn.Parser.Record
 
-  def process(records, _opts) do
+  def process(records, opts) do
     start_scripts = records |> of_type(Record.StartScript) |> Enum.map(& &1.data.script_id)
 
     records
@@ -13,6 +13,6 @@ defmodule Resdayn.Importer.Record.Script do
       |> Map.put(:start_script, record.data.id in start_scripts)
       |> with_flags(:flags, record.flags)
     end)
-    |> separate_for_import(Resdayn.Codex.Mechanics.Script)
+    |> separate_for_import(Resdayn.Codex.Mechanics.Script, opts)
   end
 end

@@ -1,7 +1,7 @@
 defmodule Resdayn.Importer.Record.AlchemyApparatus do
   use Resdayn.Importer.Record
 
-  def process(records, _opts) do
+  def process(records, opts) do
     records
     |> of_type(Resdayn.Parser.Record.AlchemyApparatus)
     |> Enum.map(fn record ->
@@ -19,6 +19,6 @@ defmodule Resdayn.Importer.Record.AlchemyApparatus do
       ])
       |> with_flags(:flags, record.flags)
     end)
-    |> separate_for_import(Resdayn.Codex.Items.AlchemyApparatus)
+    |> separate_for_import(Resdayn.Codex.Items.AlchemyApparatus, opts)
   end
 end

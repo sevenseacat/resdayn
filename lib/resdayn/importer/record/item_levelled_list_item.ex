@@ -1,7 +1,7 @@
 defmodule Resdayn.Importer.Record.ItemLevelledListItem do
   use Resdayn.Importer.Record
 
-  def process(records, _opts) do
+  def process(records, opts) do
     records
     |> of_type(Resdayn.Parser.Record.ItemLevelledList)
     |> Enum.map(fn record ->
@@ -19,6 +19,6 @@ defmodule Resdayn.Importer.Record.ItemLevelledListItem do
       |> Map.take([:id])
       |> Map.put(:items, items)
     end)
-    |> separate_for_import(Resdayn.Codex.Items.ItemLevelledList)
+    |> separate_for_import(Resdayn.Codex.Items.ItemLevelledList, opts)
   end
 end

@@ -1,7 +1,7 @@
 defmodule Resdayn.Importer.Record.Birthsign do
   use Resdayn.Importer.Record
 
-  def process(records, _opts) do
+  def process(records, opts) do
     records
     |> of_type(Resdayn.Parser.Record.Birthsign)
     |> Enum.map(fn record ->
@@ -16,6 +16,6 @@ defmodule Resdayn.Importer.Record.Birthsign do
       |> Map.put(:spells, spells)
       |> with_flags(:flags, record.flags)
     end)
-    |> separate_for_import(Resdayn.Codex.Characters.Birthsign)
+    |> separate_for_import(Resdayn.Codex.Characters.Birthsign, opts)
   end
 end

@@ -1,7 +1,7 @@
 defmodule Resdayn.Importer.Record.Faction do
   use Resdayn.Importer.Record
 
-  def process(records, _opts) do
+  def process(records, opts) do
     records
     |> of_type(Resdayn.Parser.Record.Faction)
     |> Enum.map(fn record ->
@@ -11,6 +11,6 @@ defmodule Resdayn.Importer.Record.Faction do
       |> Map.put(:attribute2_id, Enum.at(record.data.attribute_ids, 1))
       |> with_flags(:flags, record.flags)
     end)
-    |> separate_for_import(Resdayn.Codex.Characters.Faction)
+    |> separate_for_import(Resdayn.Codex.Characters.Faction, opts)
   end
 end

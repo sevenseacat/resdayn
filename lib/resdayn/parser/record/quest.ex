@@ -1,7 +1,7 @@
 defmodule Resdayn.Importer.Record.Quest do
   use Resdayn.Importer.Record
 
-  def process(records, _opts) do
+  def process(records, opts) do
     records
     |> chunked_dialogues(:journal)
     |> Enum.map(fn {topic, responses} ->
@@ -14,6 +14,6 @@ defmodule Resdayn.Importer.Record.Quest do
       end
     end)
     |> Enum.filter(& &1)
-    |> separate_for_import(Resdayn.Codex.Dialogue.Quest)
+    |> separate_for_import(Resdayn.Codex.Dialogue.Quest, opts)
   end
 end

@@ -1,7 +1,7 @@
 defmodule Resdayn.Importer.Record.BodyPart do
   use Resdayn.Importer.Record
 
-  def process(records, _opts) do
+  def process(records, opts) do
     records
     |> of_type(Resdayn.Parser.Record.BodyPart)
     |> Enum.map(fn record ->
@@ -10,6 +10,6 @@ defmodule Resdayn.Importer.Record.BodyPart do
       |> with_flags(:body_part_flags, record.data.flags)
       |> with_flags(:flags, record.flags)
     end)
-    |> separate_for_import(Resdayn.Codex.Characters.BodyPart)
+    |> separate_for_import(Resdayn.Codex.Characters.BodyPart, opts)
   end
 end

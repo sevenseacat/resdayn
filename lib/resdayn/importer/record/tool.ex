@@ -1,7 +1,7 @@
 defmodule Resdayn.Importer.Record.Tool do
   use Resdayn.Importer.Record
 
-  def process(records, _opts) do
+  def process(records, opts) do
     records
     |> of_type([
       Resdayn.Parser.Record.RepairItem,
@@ -31,6 +31,6 @@ defmodule Resdayn.Importer.Record.Tool do
       |> Map.put(:type, tool_type)
       |> with_flags(:flags, record.flags)
     end)
-    |> separate_for_import(Resdayn.Codex.Items.Tool)
+    |> separate_for_import(Resdayn.Codex.Items.Tool, opts)
   end
 end

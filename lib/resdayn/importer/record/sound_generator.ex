@@ -1,7 +1,7 @@
 defmodule Resdayn.Importer.Record.SoundGenerator do
   use Resdayn.Importer.Record
 
-  def process(records, _opts) do
+  def process(records, opts) do
     records
     |> of_type(Resdayn.Parser.Record.SoundGenerator)
     |> Enum.map(fn record ->
@@ -10,6 +10,6 @@ defmodule Resdayn.Importer.Record.SoundGenerator do
         val || "BM_horker_0002"
       end)
     end)
-    |> separate_for_import(Resdayn.Codex.Assets.SoundGenerator)
+    |> separate_for_import(Resdayn.Codex.Assets.SoundGenerator, opts)
   end
 end
