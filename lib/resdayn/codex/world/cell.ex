@@ -36,7 +36,7 @@ defmodule Resdayn.Codex.World.Cell do
     attribute :grid_position, {:array, :integer}, constraints: [min: 2, max: 2]
     attribute :water_height, :float
     attribute :light, __MODULE__.Light
-    attribute :map_color, :color
+    attribute :map_color, Resdayn.Codex.Types.Color
 
     attribute :cell_flags, {:array, __MODULE__.Flag}, default: []
 

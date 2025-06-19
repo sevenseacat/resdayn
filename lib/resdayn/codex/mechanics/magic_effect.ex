@@ -19,7 +19,7 @@ defmodule Resdayn.Codex.Mechanics.MagicEffect do
 
     attribute :description, :string, allow_nil?: true
     attribute :size, :float, allow_nil?: false
-    attribute :color, :color, allow_nil?: false
+    attribute :color, Resdayn.Codex.Types.Color, allow_nil?: false
     attribute :speed, :float, allow_nil?: false
     attribute :base_cost, :float, allow_nil?: false
     attribute :size_cap, :float, allow_nil?: false

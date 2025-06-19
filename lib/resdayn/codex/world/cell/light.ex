@@ -3,9 +3,9 @@ defmodule Resdayn.Codex.World.Cell.Light do
     subtype_of: :map,
     constraints: [
       fields: [
-        ambient: [type: :color],
-        sunlight: [type: :color],
-        fog: [type: :color],
+        ambient: [type: Resdayn.Codex.Types.Color],
+        sunlight: [type: Resdayn.Codex.Types.Color],
+        fog: [type: Resdayn.Codex.Types.Color],
         fog_density: [type: :float]
       ]
     ]

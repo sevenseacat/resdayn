@@ -5,7 +5,12 @@ defmodule Resdayn.Codex.Mechanics.Spell.Effect do
 
   attributes do
     attribute :duration, :integer, allow_nil?: false, public?: true
-    attribute :magnitude, :range, allow_nil?: false, public?: true, constraints: [validate?: false]
+
+    attribute :magnitude, Resdayn.Codex.Types.Range,
+      allow_nil?: false,
+      public?: true,
+      constraints: [validate?: false]
+
     attribute :range, Resdayn.Codex.MagicRange, allow_nil?: false, public?: true
     attribute :area, :integer, allow_nil?: false, public?: true
   end

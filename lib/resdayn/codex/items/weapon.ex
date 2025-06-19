@@ -29,15 +29,15 @@ defmodule Resdayn.Codex.Items.Weapon do
     attribute :speed, :float, allow_nil?: false, constraints: [min: 0]
     attribute :reach, :float, allow_nil?: false, constraints: [min: 0]
 
-    attribute :chop_magnitude, :range,
+    attribute :chop_magnitude, Resdayn.Codex.Types.Range,
       allow_nil?: false,
       public?: true
 
-    attribute :slash_magnitude, :range,
+    attribute :slash_magnitude, Resdayn.Codex.Types.Range,
       allow_nil?: false,
       public?: true
 
-    attribute :thrust_magnitude, :range,
+    attribute :thrust_magnitude, Resdayn.Codex.Types.Range,
       allow_nil?: false,
       public?: true
 

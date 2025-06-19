@@ -19,6 +19,9 @@ defmodule Resdayn.Codex.Assets.Sound do
 
     attribute :filename, :string, allow_nil?: true
     attribute :volume, :integer, allow_nil?: false, constraints: [min: 0, max: 255]
-    attribute :range, :range, allow_nil?: false, constraints: [validate?: false]
+
+    attribute :range, Resdayn.Codex.Types.Range,
+      allow_nil?: false,
+      constraints: [validate?: false]
   end
 end

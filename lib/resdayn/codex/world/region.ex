@@ -18,7 +18,7 @@ defmodule Resdayn.Codex.World.Region do
     attribute :id, :string, primary_key?: true, allow_nil?: false
     attribute :name, :string, allow_nil?: true
     attribute :weather, __MODULE__.Weather, allow_nil?: false
-    attribute :map_color, :color, allow_nil?: true
+    attribute :map_color, Resdayn.Codex.Types.Color, allow_nil?: true
 
     attribute :sounds, {:array, __MODULE__.RegionSound},
       allow_nil?: false,

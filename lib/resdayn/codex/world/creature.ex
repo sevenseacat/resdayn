@@ -47,7 +47,9 @@ defmodule Resdayn.Codex.World.Creature do
     attribute :magic, :integer, constraints: [min: 0]
     attribute :stealth, :integer, constraints: [min: 0]
 
-    attribute :attacks, {:array, :range}, allow_nil?: false, constraints: [length: 3]
+    attribute :attacks, {:array, Resdayn.Codex.Types.Range},
+      allow_nil?: false,
+      constraints: [length: 3]
 
     attribute :attributes, {:array, Resdayn.Codex.Characters.AttributeValue},
       allow_nil?: false,

@@ -23,7 +23,7 @@ defmodule Resdayn.Codex.Assets.Light do
     attribute :value, :integer
     attribute :time, :integer
     attribute :radius, :integer
-    attribute :color, :color
+    attribute :color, Resdayn.Codex.Types.Color
 
     attribute :light_flags, {:array, Resdayn.Codex.Assets.LightFlag},
       allow_nil?: false,

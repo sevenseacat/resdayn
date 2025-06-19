@@ -5,7 +5,7 @@ defmodule Resdayn.Codex.World.TransportDestination do
       fields: [
         # TODO: This *should* be a reference to a real cell but not imported yet...
         cell_name: [type: :string],
-        coordinates: [type: :coordinates]
+        coordinates: [type: Resdayn.Codex.Types.Coordinates]
       ]
     ]
 

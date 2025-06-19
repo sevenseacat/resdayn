@@ -7,7 +7,7 @@ defmodule Resdayn.Codex.Mechanics.Enchantment.Effect do
   attributes do
     attribute :duration, :integer, allow_nil?: false, public?: true
 
-    attribute :magnitude, :range,
+    attribute :magnitude, Resdayn.Codex.Types.Range,
       allow_nil?: false,
       public?: true,
       constraints: [validate?: false]

@@ -84,7 +84,7 @@ defmodule Resdayn.Parser.Record.Creature do
   end
 
   def process({"DODT", value}, data) do
-    record_list_of_maps_key(data, :transport, :coordinates, coordinates(value))
+    record_list_of_maps_key(data, :transport, Resdayn.Codex.Types.Coordinates, coordinates(value))
   end
 
   def process({"DNAM" = v, value}, data) do

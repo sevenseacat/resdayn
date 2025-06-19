@@ -43,10 +43,10 @@ defmodule Resdayn.Codex.World.Cell.CellReference do
     attribute :id, :integer, primary_key?: true, allow_nil?: false
     attribute :count, :integer, constraints: [min: 1]
     attribute :scale, :float, default: 1.0
-    attribute :coordinates, :coordinates, allow_nil?: false
+    attribute :coordinates, Resdayn.Codex.Types.Coordinates, allow_nil?: false
 
     attribute :transport_to, Resdayn.Codex.World.TransportDestination
-    attribute :usage_remaining, :number
+    attribute :usage_remaining, Resdayn.Codex.Types.Number
     attribute :lock_difficulty, :integer, constraints: [min: 0]
     attribute :required_faction_rank, :integer, constraints: [min: 0]
     attribute :enchantment_charge, :float, constraints: [min: 0.0]
