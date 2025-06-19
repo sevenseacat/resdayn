@@ -21,6 +21,7 @@ defmodule Resdayn.Codex.Items.Armor do
     attribute :type, __MODULE__.Type, allow_nil?: false
     attribute :value, :integer, allow_nil?: false, constraints: [min: 0]
     attribute :weight, :decimal, allow_nil?: false, constraints: [min: 0]
+    attribute :class, __MODULE__.Class, allow_nil?: false
     attribute :nif_model_filename, :string, allow_nil?: false
     attribute :icon_filename, :string, allow_nil?: false
     attribute :enchantment_points, :integer, allow_nil?: false, constraints: [min: 0]
