@@ -8,7 +8,7 @@ defmodule Resdayn.Codex.Characters.SkillValue do
   end
 
   relationships do
-    belongs_to :skill, Resdayn.Codex.Mechanics.Skill,
+    belongs_to :skill, Resdayn.Codex.Characters.Skill,
       attribute_type: :integer,
       allow_nil?: false,
       public?: true
