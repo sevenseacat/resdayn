@@ -1,20 +1,20 @@
 defmodule Resdayn.Codex.Characters.BodyPart.Type do
   use Ash.Type.Enum,
     values: [
-      :head,
-      :hair,
-      :neck,
-      :chest,
-      :groin,
-      :hand,
-      :wrist,
-      :forearm,
-      :upper_arm,
-      :foot,
-      :ankle,
-      :knee,
-      :upper_leg,
-      :clavicle,
-      :tail
+      head: "Head",
+      hair: "Hair",
+      neck: "Neck",
+      chest: "Chest",
+      groin: "Groin",
+      hand: "Hand",
+      wrist: "Wrist",
+      forearm: "Forearm",
+      upper_arm: "Upper Arm",
+      foot: "Foot",
+      ankle: "Ankle",
+      knee: "Knee",
+      upper_leg: "Upper Leg",
+      clavicle: "Clavicle",
+      tail: "Tail"
     ]
 end

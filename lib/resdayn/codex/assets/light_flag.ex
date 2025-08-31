@@ -1,14 +1,14 @@
 defmodule Resdayn.Codex.Assets.LightFlag do
   use Ash.Type.Enum,
     values: [
-      :dynamic,
-      :can_carry,
-      :negative,
-      :flicker,
-      :fire,
-      :off_by_default,
-      :flicker_slow,
-      :pulse,
-      :pulse_slow
+      dynamic: "Dynamic",
+      can_carry: "Can be carried",
+      negative: "Negative",
+      flicker: "Flicker",
+      fire: "Fire",
+      off_by_default: "Off by default",
+      flicker_slow: "Slow flicker",
+      pulse: "Pulse",
+      pulse_slow: "Slow pulse"
     ]
 end

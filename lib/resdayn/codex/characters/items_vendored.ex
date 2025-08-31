@@ -1,19 +1,19 @@
 defmodule Resdayn.Codex.Characters.ItemsVendored do
   use Ash.Type.Enum,
     values: [
-      :weapons,
-      :armor,
-      :clothing,
-      :books,
-      :ingredients,
-      :picks,
-      :probes,
-      :lights,
-      :apparatus,
-      :repair_items,
-      :misc,
-      :spells,
-      :magic_items,
-      :potions
+      weapons: "Weapons",
+      armor: "Armor",
+      clothing: "Clothing",
+      books: "Books",
+      ingredients: "Ingredients",
+      picks: "Lockpicks",
+      probes: "Probes",
+      lights: "Lights",
+      apparatus: "Alchemy apparatus",
+      repair_items: "Repair items",
+      misc: "Miscellaneous items",
+      spells: "Spells",
+      magic_items: "Magic items",
+      potions: "Potions"
     ]
 end
