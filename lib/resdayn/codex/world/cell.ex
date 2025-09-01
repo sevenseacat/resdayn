@@ -15,7 +15,6 @@ defmodule Resdayn.Codex.World.Cell do
 
     update :import_relationships do
       require_atomic? false
-      accept [:source_file_ids]
       argument :new_references, {:array, :map}, allow_nil?: false
       argument :deleted_references, {:array, :map}, allow_nil?: false
 

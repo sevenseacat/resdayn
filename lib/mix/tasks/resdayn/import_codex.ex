@@ -128,17 +128,6 @@ defmodule Mix.Tasks.Resdayn.ImportCodex do
 
   defp import_records(importer, records, opts) do
     name = String.split(Atom.to_string(importer), ".") |> List.last()
-    filename = Keyword.fetch!(opts, :filename)
-
-    # Special handling for DataFile importer - it doesn't use source tracking
-    if importer == Record.DataFile do
-      import_records_without_tracking(importer, records, opts, name)
-    else
-      import_records_with_tracking(importer, records, opts, name, filename)
-    end
-  end
-
-  defp import_records_without_tracking(importer, records, opts, name) do
     to_perform = apply(importer, :process, [records, opts])
 
     create = Map.get(to_perform, :create, [])
@@ -150,43 +139,6 @@ defmodule Mix.Tasks.Resdayn.ImportCodex do
     )
 
     update = Map.get(to_perform, :update, [])
-    update_length = length(update)
-
-    Enum.each(update, fn changeset ->
-      case Ash.update(changeset) do
-        {:ok, _} ->
-          :ok
-
-        {:error, error} ->
-          dbg(changeset)
-          dbg(error)
-          exit(1)
-      end
-    end)
-
-    if create_length > 0 || update_length > 0 do
-      Owl.IO.puts("#{name}: #{create_length} records inserted, #{update_length} records updated")
-    end
-  end
-
-  defp import_records_with_tracking(importer, records, opts, name, filename) do
-    # Add source file ID to opts for the importer to use
-    opts_with_source = Keyword.put(opts, :source_file_id, filename)
-
-    # Process records with source tracking support
-    to_performed = apply(importer, :process, [records, opts_with_source])
-
-    create = Map.get(to_performed, :create, [])
-    create_length = length(create)
-
-    if create_length > 0 do
-      Ash.bulk_create!(create, to_performed.resource, :import_create,
-        return_errors?: true,
-        stop_on_error?: true
-      )
-    end
-
-    update = Map.get(to_performed, :update, [])
     update_length = length(update)
 
     Enum.each(update, fn changeset ->

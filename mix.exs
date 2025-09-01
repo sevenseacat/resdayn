@@ -28,7 +28,6 @@ defmodule Resdayn.MixProject do
       {:sourceror, "~> 1.7", only: [:dev, :test]},
       {:ash_postgres, "~> 2.0"},
       {:ash, "~> 3.0"},
-      {:ash_events, "~> 0.1"},
       {:igniter, "~> 0.5", only: [:dev]}
     ]
   end

@@ -1,8 +1,6 @@
 defmodule Resdayn.Importer.Record do
   require Ash.Query
 
-  alias Resdayn.Importer.SourceTracker
-
   def of_type(records, types) when is_list(types) do
     Enum.filter(records, &(&1.type in types))
   end
@@ -34,30 +32,17 @@ defmodule Resdayn.Importer.Record do
   end
 
   def separate_for_import(records, resource, opts \\ []) do
-    source_file_id = Keyword.get(opts, :source_file_id)
+    existing = find_existing(resource, records)
+    update_action = Keyword.get(opts, :action, :import_update)
 
-    # If source tracking is enabled and resource supports it, use SourceTracker
-    if source_file_id && has_importable_extension?(resource) do
-      SourceTracker.process_with_tracking(records, resource, source_file_id, opts)
-    else
-      # Legacy path for resources without source tracking
-      existing = find_existing(resource, records)
-      update_action = Keyword.get(opts, :action, :import_update)
-
-      Enum.reduce(records, %{resource: resource, create: [], update: []}, fn record, acc ->
-        if match = Map.get(existing, record.id) do
-          changeset = Ash.Changeset.for_update(match, update_action, Map.drop(record, [:id]))
-          Map.update!(acc, :update, &[changeset | &1])
-        else
-          Map.update!(acc, :create, &[record | &1])
-        end
-      end)
-    end
-  end
-
-  defp has_importable_extension?(resource) do
-    extensions = Spark.extensions(resource)
-    Resdayn.Codex.Importable in extensions
+    Enum.reduce(records, %{resource: resource, create: [], update: []}, fn record, acc ->
+      if match = Map.get(existing, record.id) do
+        changeset = Ash.Changeset.for_update(match, update_action, Map.drop(record, [:id]))
+        Map.update!(acc, :update, &[changeset | &1])
+      else
+        Map.update!(acc, :create, &[record | &1])
+      end
+    end)
   end
 
   def process_inventory_items(records, parser_type, codex_type, opts \\ []) do

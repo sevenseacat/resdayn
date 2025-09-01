@@ -16,8 +16,6 @@ defmodule Resdayn.Codex.Characters.Race do
     update :import_relationships do
       require_atomic? false
 
-      accept [:source_file_ids]
-
       argument :skill_bonuses, {:array, :map}, allow_nil?: false
 
       change Resdayn.Codex.Characters.Changes.SaveRaceSkills

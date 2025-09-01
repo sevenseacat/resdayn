@@ -14,7 +14,7 @@ defmodule Resdayn.Codex.Dialogue.Quest do
 
     update :import_relationships do
       require_atomic? false
-      accept [:name, :source_file_ids]
+      accept [:name]
 
       argument :entries, {:array, :map}, allow_nil?: false, default: []
 
