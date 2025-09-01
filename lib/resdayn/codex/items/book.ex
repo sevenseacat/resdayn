@@ -17,15 +17,15 @@ defmodule Resdayn.Codex.Items.Book do
   attributes do
     attribute :id, :string, primary_key?: true, allow_nil?: false
 
-    attribute :name, :string, allow_nil?: false
-    attribute :value, :integer, allow_nil?: false, constraints: [min: 0]
-    attribute :weight, :decimal, allow_nil?: false, constraints: [min: 0]
+    attribute :name, :string, allow_nil?: false, public?: true
+    attribute :value, :integer, allow_nil?: false, constraints: [min: 0], public?: true
+    attribute :weight, :decimal, allow_nil?: false, constraints: [min: 0], public?: true
 
     attribute :nif_model_filename, :string, allow_nil?: false
     attribute :icon_filename, :string
 
     attribute :enchantment_points, :integer, allow_nil?: false, constraints: [min: 0]
-    attribute :scroll, :boolean, default: false
+    attribute :scroll, :boolean, default: false, public?: true
 
     attribute :text, :string
   end

@@ -25,6 +25,14 @@ defmodule Resdayn.Codex.World.ReferencableObject do
   relationships do
     has_many :inventory_items, Resdayn.Codex.World.InventoryItem,
       destination_attribute: :object_ref_id
+
+    has_many :cell_references, Resdayn.Codex.World.Cell.CellReference,
+      destination_attribute: :reference_id
+  end
+
+  aggregates do
+    count :cell_references_count, :cell_references
+    count :inventory_items_count, :inventory_items
   end
 
   identities do

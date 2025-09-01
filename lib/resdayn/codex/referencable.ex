@@ -24,6 +24,16 @@ defmodule Resdayn.Codex.Referencable do
         destination_attribute: :id,
         define_attribute?: false
       )
+      |> Ash.Resource.Builder.add_calculation(
+        :cell_references_count,
+        :integer,
+        {Resdayn.Codex.Calculations.ReferenceCounts, field: :cell_references_count}
+      )
+      |> Ash.Resource.Builder.add_calculation(
+        :inventory_items_count,
+        :integer,
+        {Resdayn.Codex.Calculations.ReferenceCounts, field: :inventory_items_count}
+      )
       |> Ash.Resource.Builder.add_change(
         {Resdayn.Codex.Changes.CreateReferencableObject, object_type: object_type},
         on: [:create]
