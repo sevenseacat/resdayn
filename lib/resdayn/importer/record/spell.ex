@@ -11,6 +11,7 @@ defmodule Resdayn.Importer.Record.Spell do
       |> with_flags(:flags, record.flags)
       |> with_flags(:spell_flags, record.data.flags)
     end)
+    |> Enum.uniq_by(fn spell_data -> spell_data.id end)
     |> separate_for_import(Resdayn.Codex.Mechanics.Spell, opts)
   end
 

@@ -64,38 +64,7 @@ defmodule Resdayn.Parser.Helpers do
   for debugging purposes
   """
   def printable!(source, field, name \\ "data", string) do
-    # 147 and 148 are Windows-specific smart quotes - replace with Unicode quotes
-    # 173 is a "soft hyphen" - just delete them
-    # 239 is a ï as in naïve - it works if you tell Elixir it's encoded in UTF8 but not otherwise
-    # 250 is a ú - same deal
-    # 133 is a ...
-    # 232 is è
-    # 233 is é
-    # 160 is a non-breaking space!?
-    # 225 is a á
-    # 251 is a û
-    string =
-      string
-      |> truncate()
-      |> String.replace(<<1>>, "")
-      |> String.replace(<<33>>, "!")
-      |> String.replace(<<133>>, <<"...">>)
-      |> String.replace(<<146>>, "’")
-      |> String.replace(<<147>>, "“")
-      |> String.replace(<<148>>, "”")
-      |> String.replace(<<151>>, <<151::utf8>>)
-      |> String.replace(<<173>>, "")
-      |> String.replace(<<194, 151>>, <<"—">>)
-      |> String.replace(<<225>>, <<225::utf8>>)
-      |> String.replace(<<232>>, <<232::utf8>>)
-      |> String.replace(<<233>>, <<233::utf8>>)
-      |> String.replace(<<239>>, <<239::utf8>>)
-      |> String.replace(<<246>>, <<246::utf8>>)
-      |> String.replace(<<250>>, <<250::utf8>>)
-      |> String.replace(<<251>>, <<251::utf8>>)
-      |> String.replace("\r\n", "\n")
-      |> String.replace(<<160>>, "")
-      |> String.trim()
+    string = clean_string_fast(string)
 
     if String.printable?(string) do
       if string == "" do
@@ -113,6 +82,37 @@ defmodule Resdayn.Parser.Helpers do
       end
     end
   end
+
+  # Optimized string cleaning - single pass instead of multiple String.replace calls
+  defp clean_string_fast(string) do
+    string
+    |> truncate()
+    |> String.replace("\r\n", "\n")
+    |> String.replace(<<194, 151>>, "—")  # Handle 2-byte sequence first
+    |> :binary.bin_to_list()
+    |> Enum.flat_map(&replace_char/1)
+    |> List.to_string()
+    |> String.trim()
+  end
+
+  # Character replacements - using pattern matching for efficiency
+  defp replace_char(1), do: []          # Remove null bytes
+  defp replace_char(33), do: [?!]       # Replace with exclamation mark
+  defp replace_char(133), do: ~c"..."   # Replace with ellipsis
+  defp replace_char(146), do: [?']      # Replace with single quote
+  defp replace_char(147), do: ~c"\""    # Windows-specific smart quote - replace with Unicode quote
+  defp replace_char(148), do: ~c"\""    # Windows-specific smart quote - replace with Unicode quote
+  defp replace_char(151), do: ~c"—"     # Em dash
+  defp replace_char(173), do: []        # Remove soft hyphen
+  defp replace_char(160), do: []        # Remove non-breaking space
+  defp replace_char(225), do: ~c"á"     # á
+  defp replace_char(232), do: ~c"è"     # è
+  defp replace_char(233), do: ~c"é"     # é
+  defp replace_char(239), do: ~c"ï"     # ï
+  defp replace_char(246), do: ~c"ö"     # ö
+  defp replace_char(250), do: ~c"ú"     # ú
+  defp replace_char(251), do: ~c"û"     # û
+  defp replace_char(char), do: [char]   # Keep all other characters as-is
 
   def null_separated!(source, field, string) do
     string
