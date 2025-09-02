@@ -15,7 +15,8 @@ defmodule Resdayn.Codex.Mechanics.DataFile do
   end
 
   attributes do
-    attribute :filename, :string, primary_key?: true, allow_nil?: false
+    attribute :id, :string, primary_key?: true, allow_nil?: false
+    attribute :filename, :string, allow_nil?: false
 
     attribute :description, :string
     attribute :version, :decimal, allow_nil?: false

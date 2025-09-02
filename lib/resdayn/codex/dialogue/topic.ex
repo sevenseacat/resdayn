@@ -49,6 +49,7 @@ defmodule Resdayn.Codex.Dialogue.Topic do
 
     update :import_relationships do
       require_atomic? false
+      accept [:source_file_ids]
       argument :responses, {:array, :map}, allow_nil?: false, default: []
 
       change {Resdayn.Codex.Changes.OptimizedRelationshipImport,

@@ -139,6 +139,12 @@ defmodule Resdayn.Codex.Changes.OptimizedRelationshipImport do
     id_field = opts[:id_field]
     on_missing = opts[:on_missing]
 
+    # Get the current import file (last source file ID from parent)
+    source_file_id = case Ash.Changeset.get_attribute(changeset, :source_file_ids) do
+      source_files when is_list(source_files) -> List.last(source_files)
+      [] -> nil
+    end
+
     parent_id = Ash.Changeset.get_attribute(changeset, :id)
     new_records = Ash.Changeset.get_argument(changeset, argument_name)
 
@@ -166,7 +172,8 @@ defmodule Resdayn.Codex.Changes.OptimizedRelationshipImport do
           parent_key,
           compare_fields,
           id_field,
-          on_missing
+          on_missing,
+          source_file_id
         )
 
       # Store import statistics in changeset context for reporting
@@ -182,7 +189,8 @@ defmodule Resdayn.Codex.Changes.OptimizedRelationshipImport do
          parent_key,
          compare_fields,
          id_field,
-         on_missing
+         on_missing,
+         source_file_id
        ) do
     # Get existing records for this parent
     existing_records =
@@ -213,13 +221,14 @@ defmodule Resdayn.Codex.Changes.OptimizedRelationshipImport do
         end)
       end)
 
-    # Add parent key to all new records
+    # Add parent key and optionally source file ID to all new records
     creates_with_parent =
       creates
       |> Enum.reject(& &1[:deleted])
       |> Enum.map(fn record ->
         record
         |> Map.put(parent_key, parent_id)
+        |> Map.put(:source_file_ids, [source_file_id])
         |> Map.delete(:deleted)
       end)
 
@@ -232,7 +241,7 @@ defmodule Resdayn.Codex.Changes.OptimizedRelationshipImport do
       Ash.bulk_create!(
         creates_with_parent,
         related_resource,
-        :create,
+        :import_create,
         return_errors?: true
       )
     end
@@ -242,7 +251,17 @@ defmodule Resdayn.Codex.Changes.OptimizedRelationshipImport do
       existing_record = existing_records[Map.get(record, id_field)]
       update_data = Map.take(record, compare_fields) |> Map.delete(:deleted)
 
-      Ash.update!(existing_record, update_data, authorize?: false)
+      # Merge source file IDs for relationship records
+      existing_source_ids = existing_record.source_file_ids || []
+      merged_source_ids = if source_file_id in existing_source_ids do
+        existing_source_ids
+      else
+        existing_source_ids ++ [source_file_id]
+      end
+      update_data_with_source = Map.put(update_data, :source_file_ids, merged_source_ids)
+
+      changeset = Ash.Changeset.for_update(existing_record, :import_update, update_data_with_source)
+      Ash.update!(changeset)
     end)
 
     # Handle explicit deletes

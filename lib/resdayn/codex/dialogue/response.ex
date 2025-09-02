@@ -1,7 +1,8 @@
 defmodule Resdayn.Codex.Dialogue.Response do
   use Ash.Resource,
     domain: Resdayn.Codex.Dialogue,
-    data_layer: AshPostgres.DataLayer
+    data_layer: AshPostgres.DataLayer,
+    extensions: [Resdayn.Codex.Importable]
 
   postgres do
     table "dialogue_responses"

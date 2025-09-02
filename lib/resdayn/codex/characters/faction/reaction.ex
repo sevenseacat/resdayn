@@ -2,7 +2,8 @@ defmodule Resdayn.Codex.Characters.Faction.Reaction do
   use Ash.Resource,
     otp_app: :resdayn,
     domain: Resdayn.Codex.Characters,
-    data_layer: AshPostgres.DataLayer
+    data_layer: AshPostgres.DataLayer,
+    extensions: [Resdayn.Codex.Importable]
 
   postgres do
     table "faction_reactions"

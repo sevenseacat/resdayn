@@ -15,6 +15,7 @@ defmodule Resdayn.Codex.Characters.Class do
 
     update :import_relationships do
       require_atomic? false
+      accept [:source_file_ids]
 
       argument :major_skills, {:array, :map}, allow_nil?: false, default: []
       argument :minor_skills, {:array, :map}, allow_nil?: false, default: []

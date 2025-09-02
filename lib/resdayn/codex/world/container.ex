@@ -15,6 +15,7 @@ defmodule Resdayn.Codex.World.Container do
 
     update :import_relationships do
       require_atomic? false
+      accept [:source_file_ids]
       argument :inventory, {:array, :map}, allow_nil?: false, default: []
 
       change {Resdayn.Codex.Changes.OptimizedRelationshipImport,

@@ -26,11 +26,16 @@ defmodule Resdayn.Codex.Importable do
         allow_nil?: false,
         default: []
       )
+      |> Ash.Resource.Builder.add_attribute(:source_file_ids, {:array, :string},
+        allow_nil?: false,
+        default: [],
+        description: "List of data files that contributed to this record"
+      )
       |> Ash.Resource.Builder.add_new_action(:create, :import_create,
-        accept: attribute_names ++ belongs_to_ids ++ [:flags]
+        accept: attribute_names ++ belongs_to_ids ++ [:flags, :source_file_ids]
       )
       |> Ash.Resource.Builder.add_new_action(:update, :import_update,
-        accept: attribute_names ++ belongs_to_ids ++ [:flags],
+        accept: attribute_names ++ belongs_to_ids ++ [:flags, :source_file_ids],
         require_atomic?: false
       )
     end
