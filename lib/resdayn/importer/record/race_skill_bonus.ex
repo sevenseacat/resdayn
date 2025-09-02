@@ -5,8 +5,16 @@ defmodule Resdayn.Importer.Record.RaceSkillBonus do
     records
     |> of_type(Resdayn.Parser.Record.Race)
     |> Enum.map(fn record ->
-      record.data
-      |> Map.take([:id, :skill_bonuses])
+      skill_bonuses =
+        (record.data.skill_bonuses || [])
+        |> Enum.map(fn %{skill_id: skill_id, bonus: bonus} ->
+          %{skill_id: skill_id, bonus: bonus}
+        end)
+
+      %{
+        id: record.data.id,
+        skill_bonuses: skill_bonuses
+      }
     end)
     |> separate_for_import(
       Resdayn.Codex.Characters.Race,

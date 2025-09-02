@@ -157,16 +157,20 @@ defmodule Resdayn.Codex.Changes.OptimizedRelationshipImport do
             []
         end
 
-      perform_optimized_import(
-        changeset,
-        parent_id,
-        new_records,
-        related_resource,
-        parent_key,
-        compare_fields,
-        id_field,
-        on_missing
-      )
+      {result_changeset, import_stats} =
+        perform_optimized_import(
+          changeset,
+          parent_id,
+          new_records,
+          related_resource,
+          parent_key,
+          compare_fields,
+          id_field,
+          on_missing
+        )
+
+      # Store import statistics in changeset context for reporting
+      Ash.Changeset.put_context(result_changeset, :import_stats, import_stats)
     end
   end
 
@@ -219,6 +223,10 @@ defmodule Resdayn.Codex.Changes.OptimizedRelationshipImport do
         |> Map.delete(:deleted)
       end)
 
+    # Track counts for reporting
+    created_count = length(creates_with_parent)
+    updated_count = length(actual_updates)
+
     # Perform bulk create for new records
     if not Enum.empty?(creates_with_parent) do
       Ash.bulk_create!(
@@ -237,25 +245,46 @@ defmodule Resdayn.Codex.Changes.OptimizedRelationshipImport do
       Ash.update!(existing_record, update_data, authorize?: false)
     end)
 
-    potential_updates
-    |> Enum.filter(& &1[:deleted])
-    |> Enum.map(&existing_records[Map.get(&1, id_field)])
-    |> Ash.bulk_destroy!(:destroy, %{}, return_records?: true)
+    # Handle explicit deletes
+    deleted_records =
+      potential_updates
+      |> Enum.filter(& &1[:deleted])
+      |> Enum.map(&existing_records[Map.get(&1, id_field)])
+      |> Enum.reject(&is_nil/1)
 
-    # Handle missing records based on on_missing option
-    if on_missing == :destroy do
-      missing_ids = MapSet.difference(existing_ids, incoming_ids)
+    deleted_count = length(deleted_records)
 
-      records_to_delete =
-        Enum.filter(Map.values(existing_records), fn record ->
-          Map.get(record, id_field) in missing_ids
-        end)
-
-      Enum.each(records_to_delete, fn record ->
-        Ash.destroy!(record, authorize?: false)
-      end)
+    if not Enum.empty?(deleted_records) do
+      Ash.bulk_destroy!(deleted_records, :destroy, %{}, return_records?: true)
     end
 
-    changeset
+    # Handle missing records based on on_missing option
+    missing_deleted_count =
+      if on_missing == :destroy do
+        missing_ids = MapSet.difference(existing_ids, incoming_ids)
+
+        records_to_delete =
+          Enum.filter(Map.values(existing_records), fn record ->
+            Map.get(record, id_field) in missing_ids
+          end)
+
+        Enum.each(records_to_delete, fn record ->
+          Ash.destroy!(record, authorize?: false)
+        end)
+
+        length(records_to_delete)
+      else
+        0
+      end
+
+    total_deleted = deleted_count + missing_deleted_count
+
+    import_stats = %{
+      created: created_count,
+      updated: updated_count,
+      deleted: total_deleted
+    }
+
+    {changeset, import_stats}
   end
 end

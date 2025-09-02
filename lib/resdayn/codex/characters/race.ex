@@ -16,9 +16,15 @@ defmodule Resdayn.Codex.Characters.Race do
     update :import_relationships do
       require_atomic? false
 
-      argument :skill_bonuses, {:array, :map}, allow_nil?: false
+      argument :skill_bonuses, {:array, :map}, allow_nil?: false, default: []
 
-      change Resdayn.Codex.Characters.Changes.SaveRaceSkills
+      change {Resdayn.Codex.Changes.OptimizedRelationshipImport,
+              argument: :skill_bonuses,
+              relationship: :skill_bonuses,
+              related_resource: __MODULE__.SkillBonus,
+              parent_key: :race_id,
+              id_field: :skill_id,
+              on_missing: :destroy}
     end
   end
 

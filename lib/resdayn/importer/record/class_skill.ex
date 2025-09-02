@@ -8,7 +8,19 @@ defmodule Resdayn.Importer.Record.ClassSkill do
     records
     |> of_type(Resdayn.Parser.Record.Class)
     |> Enum.map(fn record ->
-      Map.take(record.data, [:id, :major_skill_ids, :minor_skill_ids])
+      major_skills =
+        (record.data.major_skill_ids || [])
+        |> Enum.map(fn skill_id -> %{skill_id: skill_id, category: :major} end)
+
+      minor_skills =
+        (record.data.minor_skill_ids || [])
+        |> Enum.map(fn skill_id -> %{skill_id: skill_id, category: :minor} end)
+
+      %{
+        id: record.data.id,
+        major_skills: major_skills,
+        minor_skills: minor_skills
+      }
     end)
     |> separate_for_import(
       Resdayn.Codex.Characters.Class,

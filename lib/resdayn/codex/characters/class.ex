@@ -16,11 +16,24 @@ defmodule Resdayn.Codex.Characters.Class do
     update :import_relationships do
       require_atomic? false
 
-      argument :major_skill_ids, {:array, :integer}, allow_nil?: false
-      argument :minor_skill_ids, {:array, :integer}, allow_nil?: false
+      argument :major_skills, {:array, :map}, allow_nil?: false, default: []
+      argument :minor_skills, {:array, :map}, allow_nil?: false, default: []
 
-      change {Resdayn.Codex.Characters.Changes.SaveRelatedSkills, type: :minor}
-      change {Resdayn.Codex.Characters.Changes.SaveRelatedSkills, type: :major}
+      change {Resdayn.Codex.Changes.OptimizedRelationshipImport,
+              argument: :major_skills,
+              relationship: :major_skill_relationships,
+              related_resource: __MODULE__.Skill,
+              parent_key: :class_id,
+              id_field: :skill_id,
+              on_missing: :destroy}
+
+      change {Resdayn.Codex.Changes.OptimizedRelationshipImport,
+              argument: :minor_skills,
+              relationship: :minor_skill_relationships,
+              related_resource: __MODULE__.Skill,
+              parent_key: :class_id,
+              id_field: :skill_id,
+              on_missing: :destroy}
     end
   end
 

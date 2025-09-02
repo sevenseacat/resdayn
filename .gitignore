@@ -27,3 +27,6 @@ resdayn-*.tar
 
 # Silly macOS files
 .DS_Store
+
+CLAUDE.md
+notes/

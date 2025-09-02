@@ -128,33 +128,62 @@ defmodule Mix.Tasks.Resdayn.ImportCodex do
 
   defp import_records(importer, records, opts) do
     name = String.split(Atom.to_string(importer), ".") |> List.last()
-    to_perform = apply(importer, :process, [records, opts])
+    to_import = apply(importer, :process, [records, opts])
 
-    create = Map.get(to_perform, :create, [])
+    create = Map.get(to_import, :create, [])
     create_length = length(create)
 
-    Ash.bulk_create!(create, to_perform.resource, :import_create,
-      return_errors?: true,
-      stop_on_error?: true
-    )
+    if create_length > 0 do
+      Ash.bulk_create!(create, to_import.resource, :import_create,
+        return_errors?: true,
+        stop_on_error?: true
+      )
+    end
 
-    update = Map.get(to_perform, :update, [])
+    update = Map.get(to_import, :update, [])
     update_length = length(update)
 
-    Enum.each(update, fn changeset ->
-      case Ash.update(changeset) do
-        {:ok, _} ->
-          :ok
+    # Track relationship counts from OptimizedRelationshipImport
+    total_relationship_stats = %{created: 0, updated: 0, deleted: 0}
 
-        {:error, error} ->
-          dbg(changeset)
-          dbg(error)
-          exit(1)
+    relationship_stats =
+      Enum.reduce(update, total_relationship_stats, fn changeset, acc ->
+        case Ash.update(changeset) do
+          {:ok, _result} ->
+            # Check if this update used OptimizedRelationshipImport
+            case changeset.context[:import_stats] do
+              nil -> acc
+              stats ->
+                %{
+                  created: acc.created + stats.created,
+                  updated: acc.updated + stats.updated,
+                  deleted: acc.deleted + stats.deleted
+                }
+            end
+
+          {:error, error} ->
+            dbg(changeset)
+            dbg(error)
+            exit(1)
+        end
+      end)
+
+    # Report counts appropriately
+    if relationship_stats.created > 0 || relationship_stats.updated > 0 || relationship_stats.deleted > 0 do
+      # This importer used OptimizedRelationshipImport - report relationship counts
+      created_msg = if relationship_stats.created > 0, do: "#{relationship_stats.created} relationships created", else: nil
+      updated_msg = if relationship_stats.updated > 0, do: "#{relationship_stats.updated} relationships updated", else: nil
+      deleted_msg = if relationship_stats.deleted > 0, do: "#{relationship_stats.deleted} relationships deleted", else: nil
+
+      messages = [created_msg, updated_msg, deleted_msg] |> Enum.reject(&is_nil/1)
+      if not Enum.empty?(messages) do
+        Owl.IO.puts("#{name}: #{Enum.join(messages, ", ")}")
       end
-    end)
-
-    if create_length > 0 || update_length > 0 do
-      Owl.IO.puts("#{name}: #{create_length} records inserted, #{update_length} records updated")
+    else
+      # This importer used individual record processing - report record counts
+      if create_length > 0 || update_length > 0 do
+        Owl.IO.puts("#{name}: #{create_length} records inserted, #{update_length} records updated")
+      end
     end
   end
 end
