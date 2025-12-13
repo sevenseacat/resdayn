@@ -1,16 +1,16 @@
 defmodule Resdayn.Codex.Items.Armor.Type do
   use Ash.Type.Enum,
     values: [
-      helmet: "Helmet",
-      cuirass: "Cuirass",
-      left_pauldron: "Left Pauldron",
-      right_pauldron: "Right Pauldron",
-      greaves: "Greaves",
-      boots: "Boots",
-      left_gauntlet: "Left Gauntlet",
-      right_gauntlet: "Right Gauntlet",
-      shield: "Shield",
-      left_bracer: "Left Bracer",
-      right_bracer: "Right Bracer"
+      helmet: [label: "Helmet"],
+      cuirass: [label: "Cuirass"],
+      left_pauldron: [label: "Left Pauldron"],
+      right_pauldron: [label: "Right Pauldron"],
+      greaves: [label: "Greaves"],
+      boots: [label: "Boots"],
+      left_gauntlet: [label: "Left Gauntlet"],
+      right_gauntlet: [label: "Right Gauntlet"],
+      shield: [label: "Shield"],
+      left_bracer: [label: "Left Bracer"],
+      right_bracer: [label: "Right Bracer"]
     ]
 end

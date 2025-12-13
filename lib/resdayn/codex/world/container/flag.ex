@@ -1,3 +1,7 @@
 defmodule Resdayn.Codex.World.Container.Flag do
-  use Ash.Type.Enum, values: [organic: "Organic", respawns: "Respawns"]
+  use Ash.Type.Enum,
+    values: [
+      organic: [label: "Organic"],
+      respawns: [label: "Respawns"]
+    ]
 end

@@ -1,11 +1,11 @@
 defmodule Resdayn.Codex.Mechanics.Spell.Type do
   use Ash.Type.Enum,
     values: [
-      spell: "Spell",
-      ability: "Ability",
-      blight: "Blight",
-      disease: "Disease",
-      curse: "Curse",
-      power: "Power"
+      spell: [label: "Spell"],
+      ability: [label: "Ability"],
+      blight: [label: "Blight"],
+      disease: [label: "Disease"],
+      curse: [label: "Curse"],
+      power: [label: "Power"]
     ]
 end

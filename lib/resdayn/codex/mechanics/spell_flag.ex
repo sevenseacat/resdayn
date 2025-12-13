@@ -1,8 +1,8 @@
 defmodule Resdayn.Codex.Mechanics.SpellFlag do
   use Ash.Type.Enum,
     values: [
-      autocalc: "Auto-calculated stats",
-      starting_spell: "Starting spell",
-      always_succeeds: "Always succeeds"
+      autocalc: [label: "Auto-calculated stats"],
+      starting_spell: [label: "Starting spell"],
+      always_succeeds: [label: "Always succeeds"]
     ]
 end

@@ -1,3 +1,8 @@
 defmodule Resdayn.Codex.Items.Armor.Class do
-  use Ash.Type.Enum, values: [light: "Light Armor", medium: "Medium Armor", heavy: "Heavy Armor"]
+  use Ash.Type.Enum,
+    values: [
+      light: [label: "Light"],
+      medium: [label: "Medium"],
+      heavy: [label: "Heavy"]
+    ]
 end
