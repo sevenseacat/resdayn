@@ -140,10 +140,11 @@ defmodule Resdayn.Codex.Changes.OptimizedRelationshipImport do
     on_missing = opts[:on_missing]
 
     # Get the current import file (last source file ID from parent)
-    source_file_id = case Ash.Changeset.get_attribute(changeset, :source_file_ids) do
-      source_files when is_list(source_files) -> List.last(source_files)
-      [] -> nil
-    end
+    source_file_id =
+      case Ash.Changeset.get_attribute(changeset, :source_file_ids) do
+        source_files when is_list(source_files) -> List.last(source_files)
+        _ -> nil
+      end
 
     parent_id = Ash.Changeset.get_attribute(changeset, :id)
     new_records = Ash.Changeset.get_argument(changeset, argument_name)
@@ -253,14 +254,19 @@ defmodule Resdayn.Codex.Changes.OptimizedRelationshipImport do
 
       # Merge source file IDs for relationship records
       existing_source_ids = existing_record.source_file_ids || []
-      merged_source_ids = if source_file_id in existing_source_ids do
-        existing_source_ids
-      else
-        existing_source_ids ++ [source_file_id]
-      end
+
+      merged_source_ids =
+        if source_file_id in existing_source_ids do
+          existing_source_ids
+        else
+          existing_source_ids ++ [source_file_id]
+        end
+
       update_data_with_source = Map.put(update_data, :source_file_ids, merged_source_ids)
 
-      changeset = Ash.Changeset.for_update(existing_record, :import_update, update_data_with_source)
+      changeset =
+        Ash.Changeset.for_update(existing_record, :import_update, update_data_with_source)
+
       Ash.update!(changeset)
     end)
 
