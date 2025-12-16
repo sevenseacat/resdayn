@@ -26,16 +26,27 @@ defmodule Resdayn.Codex.Dialogue.Topic do
       filter expr(id == ^arg(:id))
 
       prepare fn query, _context ->
+        response_loads = [
+          :speaker_npc,
+          :speaker_creature,
+          :speaker_class,
+          :speaker_race,
+          :speaker_faction,
+          :player_faction
+        ]
+
         case Ash.Query.get_argument(query, :npc_id) do
           nil ->
-            Ash.Query.load(query, :ordered_responses)
+            Ash.Query.load(query, ordered_responses: response_loads)
 
           npc_id ->
             Ash.Query.after_action(query, fn _query, results ->
               filtered_results =
                 Enum.map(results, fn topic ->
                   topic
-                  |> Ash.load!(ordered_responses: [valid_for_npc?: [npc_id: npc_id]])
+                  |> Ash.load!(
+                    ordered_responses: response_loads ++ [valid_for_npc?: [npc_id: npc_id]]
+                  )
                   |> Map.update!(:ordered_responses, fn responses ->
                     Enum.filter(responses, & &1.valid_for_npc?)
                   end)
@@ -72,6 +83,18 @@ defmodule Resdayn.Codex.Dialogue.Topic do
 
     has_many :ordered_responses, Resdayn.Codex.Dialogue.Response do
       manual Resdayn.Codex.Dialogue.OrderedResponseRelationship
+    end
+  end
+
+  aggregates do
+    count :response_count, :responses
+  end
+
+  calculations do
+    calculate :filtered_response_count,
+              :integer,
+              Resdayn.Codex.Dialogue.Calculations.NPCResponseCount do
+      argument :npc_id, :string, allow_nil?: true
     end
   end
 end
