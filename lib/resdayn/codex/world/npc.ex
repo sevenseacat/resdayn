@@ -88,4 +88,13 @@ defmodule Resdayn.Codex.World.NPC do
     has_many :cell_references, Resdayn.Codex.World.Cell.CellReference,
       destination_attribute: :reference_id
   end
+
+  calculations do
+    calculate :gender, :atom, expr(if :female in npc_flags, do: :female, else: :male)
+    calculate :essential?, :boolean, expr(:essential in npc_flags)
+  end
+
+  aggregates do
+    first :cell_name, [:cell_references, :cell], :name
+  end
 end
