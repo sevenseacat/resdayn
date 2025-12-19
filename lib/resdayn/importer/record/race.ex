@@ -1,18 +1,25 @@
 defmodule Resdayn.Importer.Record.Race do
   use Resdayn.Importer.Record
 
-  def process(records, opts) do
-    records
-    |> of_type(Resdayn.Parser.Record.Race)
-    |> Enum.map(fn record ->
-      record.data
-      |> Map.take([:id, :name, :description, :playable, :beast])
-      |> Map.put(:male_stats, transform_stats(record.data.male_attributes))
-      |> Map.put(:female_stats, transform_stats(record.data.female_attributes))
-      |> Map.put(:special_spells, transform_special_spells(record.data.special_ids || []))
-      |> with_flags(:flags, record.flags)
-    end)
-    |> separate_for_import(Resdayn.Codex.Characters.Race, opts)
+  def process(records, _opts) do
+    processed_records =
+      records
+      |> of_type(Resdayn.Parser.Record.Race)
+      |> Enum.map(fn record ->
+        record.data
+        |> Map.take([:id, :name, :description, :playable, :beast])
+        |> Map.put(:male_stats, transform_stats(record.data.male_attributes))
+        |> Map.put(:female_stats, transform_stats(record.data.female_attributes))
+        |> Map.put(:special_spells, transform_special_spells(record.data.special_ids || []))
+        |> with_flags(:flags, record.flags)
+      end)
+
+    %{
+      type: :fast_bulk,
+      resource: Resdayn.Codex.Characters.Race,
+      records: processed_records,
+      conflict_keys: [:id]
+    }
   end
 
   defp transform_stats(attrs) do

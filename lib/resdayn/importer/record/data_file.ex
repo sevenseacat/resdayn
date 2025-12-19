@@ -1,14 +1,11 @@
 defmodule Resdayn.Importer.Record.DataFile do
   use Resdayn.Importer.Record
-  require Ash.Query
-
-  @resource Resdayn.Codex.Mechanics.DataFile
 
   def process(records, opts) do
     filename = Keyword.fetch!(opts, :filename)
     [record] = of_type(records, Resdayn.Parser.Record.MainHeader)
 
-    data =
+    processed_records = [
       record.data.header
       |> Map.take([:version, :company, :description])
       |> Map.merge(%{
@@ -18,8 +15,13 @@ defmodule Resdayn.Importer.Record.DataFile do
         dependencies: Enum.reverse(record.data[:dependencies] || [])
       })
       |> with_flags(:flags, record.flags)
+    ]
 
-    [data]
-    |> separate_for_import(@resource, opts)
+    %{
+      type: :fast_bulk,
+      resource: Resdayn.Codex.Mechanics.DataFile,
+      records: processed_records,
+      conflict_keys: [:id]
+    }
   end
 end

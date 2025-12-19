@@ -12,17 +12,6 @@ defmodule Resdayn.Codex.Characters.Faction do
 
   actions do
     defaults [:read]
-
-    update :import_relationships do
-      require_atomic? false
-      accept [:source_file_ids]
-
-      argument :skill_ids, {:array, :integer}, default: [], allow_nil?: false
-      argument :reactions, {:array, :map}, default: [], allow_nil?: false
-
-      change manage_relationship(:skill_ids, :favored_skills, type: :append_and_remove)
-      change manage_relationship(:reactions, type: :direct_control)
-    end
   end
 
   attributes do

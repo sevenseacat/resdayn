@@ -32,4 +32,20 @@ defmodule Resdayn.DataCase do
     on_exit(fn -> Ecto.Adapters.SQL.Sandbox.stop_owner(pid) end)
     :ok
   end
+
+  def truncate_all_tables do
+    # Get all table names from public schema
+    %{rows: rows} =
+      Resdayn.Repo.query!("""
+        SELECT tablename FROM pg_tables
+        WHERE schemaname = 'public'
+        AND tablename != 'schema_migrations'
+      """)
+
+    tables = rows |> List.flatten() |> Enum.join(", ")
+
+    if tables != "" do
+      Resdayn.Repo.query!("TRUNCATE #{tables} CASCADE")
+    end
+  end
 end

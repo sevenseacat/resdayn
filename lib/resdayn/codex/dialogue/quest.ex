@@ -11,21 +11,6 @@ defmodule Resdayn.Codex.Dialogue.Quest do
 
   actions do
     defaults [:read]
-
-    update :import_relationships do
-      require_atomic? false
-      accept [:name, :source_file_ids]
-
-      argument :entries, {:array, :map}, allow_nil?: false, default: []
-
-      change {Resdayn.Codex.Changes.OptimizedRelationshipImport,
-              argument: :entries,
-              relationship: :journal_entries,
-              related_resource: Resdayn.Codex.Dialogue.JournalEntry,
-              parent_key: :quest_id,
-              id_field: :id,
-              on_missing: :ignore}
-    end
   end
 
   attributes do

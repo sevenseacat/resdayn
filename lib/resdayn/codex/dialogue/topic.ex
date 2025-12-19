@@ -57,20 +57,6 @@ defmodule Resdayn.Codex.Dialogue.Topic do
         end
       end
     end
-
-    update :import_relationships do
-      require_atomic? false
-      accept [:source_file_ids]
-      argument :responses, {:array, :map}, allow_nil?: false, default: []
-
-      change {Resdayn.Codex.Changes.OptimizedRelationshipImport,
-              argument: :responses,
-              relationship: :responses,
-              related_resource: Resdayn.Codex.Dialogue.Response,
-              parent_key: :topic_id,
-              id_field: :id,
-              on_missing: :ignore}
-    end
   end
 
   attributes do

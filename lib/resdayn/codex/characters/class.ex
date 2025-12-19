@@ -12,30 +12,6 @@ defmodule Resdayn.Codex.Characters.Class do
 
   actions do
     defaults [:read]
-
-    update :import_relationships do
-      require_atomic? false
-      accept [:source_file_ids]
-
-      argument :major_skills, {:array, :map}, allow_nil?: false, default: []
-      argument :minor_skills, {:array, :map}, allow_nil?: false, default: []
-
-      change {Resdayn.Codex.Changes.OptimizedRelationshipImport,
-              argument: :major_skills,
-              relationship: :major_skill_relationships,
-              related_resource: __MODULE__.Skill,
-              parent_key: :class_id,
-              id_field: :skill_id,
-              on_missing: :destroy}
-
-      change {Resdayn.Codex.Changes.OptimizedRelationshipImport,
-              argument: :minor_skills,
-              relationship: :minor_skill_relationships,
-              related_resource: __MODULE__.Skill,
-              parent_key: :class_id,
-              id_field: :skill_id,
-              on_missing: :destroy}
-    end
   end
 
   attributes do

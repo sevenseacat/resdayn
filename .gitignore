@@ -30,3 +30,6 @@ resdayn-*.tar
 
 CLAUDE.md
 notes/
+
+# The raw ESM files for integration tests
+priv/data/

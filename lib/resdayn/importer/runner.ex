@@ -1,71 +1,83 @@
 defmodule Resdayn.Importer.Runner do
   @moduledoc """
-  Run a full import for a given fil.
+  Run a full import for a given file.
 
   `filename` should be the base filename for an ESM/ESP file in `priv/data`, eg. "Morrowind.esm"
   """
 
   require Logger
   alias Resdayn.Importer.Record
+  alias Resdayn.Importer.FastBulkImport
+  alias Resdayn.Codex.Changes.BulkRelationshipImport
 
   def run(filename) do
     Logger.configure(level: :info)
 
-    Logger.notice("Importing #{filename}...")
+    Logger.info("\n\nStarting import for #{filename}...")
 
     records =
       Path.join([:code.priv_dir(:resdayn), "data", filename])
       |> parse_records()
 
+    # Resources are listed in dependency order.
+    # Order matters: resources must be imported after their dependencies.
     [
       Record.DataFile,
+      # === Phase 1: No dependencies ===
       Record.GameSetting,
       Record.Attribute,
       Record.GlobalVariable,
       Record.Skill,
+      Record.Script,
+      # === Phase 2: Depends on Phase 1 ===
+      Record.Sound,
+      # === Phase 3: Depends on Phase 1-2 ===
+      Record.MagicEffect,
       Record.Class,
       Record.ClassSkill,
-      Record.Sound,
-      Record.Script,
-      Record.MagicEffect,
+      Record.Birthsign,
       Record.Spell,
-      Record.Race,
-      Record.RaceSkillBonus,
       Record.Enchantment,
-      Record.Ingredient,
+      Record.Race,
       Record.Faction,
-      Record.FactionReaction,
-      Record.MiscellaneousItem,
-      Record.Tool,
-      Record.AlchemyApparatus,
-      Record.Potion,
+      # === Phase 4: Depends on Race ===
+      Record.BodyPart,
+      # === Phase 5: Referencable resources (depends on Phase 1-4) ===
       Record.StaticObject,
       Record.Activator,
       Record.Light,
-      Record.Birthsign,
-      Record.BodyPart,
-      Record.Book,
-      Record.Clothing,
       Record.Door,
+      Record.Book,
       Record.Weapon,
+      Record.MiscellaneousItem,
       Record.Armor,
-      Record.NPC,
-      Record.ItemLevelledList,
-      Record.ItemLevelledListItem,
-      Record.InventoryItem,
-      Record.Container,
-      Record.ContainerItem,
+      Record.Clothing,
+      Record.Ingredient,
+      Record.Potion,
+      Record.Tool,
+      Record.AlchemyApparatus,
       Record.SoundGenerator,
-      Record.Creature,
-      Record.CreatureInventoryItem,
+      Record.Container,
+      Record.ItemLevelledList,
       Record.CreatureLevelledList,
+      Record.Creature,
+      Record.NPC,
+      # === Phase 6: Depends on CreatureLevelledList ===
       Record.Region,
+      # === Phase 7: Cells and references ===
       Record.Cell,
       Record.CellReference,
-      Record.Quest,
-      Record.JournalEntry,
+      # === Phase 8: Relationship importers ===
+      Record.RaceSkillBonus,
+      Record.FactionReaction,
+      Record.InventoryItem,
+      Record.ContainerItem,
+      Record.CreatureInventoryItem,
+      # === Phase 9: Dialogue ===
       Record.DialogueTopic,
-      Record.DialogueResponse
+      Record.DialogueResponse,
+      Record.Quest,
+      Record.JournalEntry
     ]
     |> Enum.each(fn record_type ->
       import_record_type(record_type, records, filename: filename)
@@ -84,93 +96,77 @@ defmodule Resdayn.Importer.Runner do
   defp import_record_type(record_type, records, opts) do
     name = String.split(Atom.to_string(record_type), ".") |> List.last()
 
-    {time, {create_length, update_length, relationship_stats}} =
+    {time, result} =
       :timer.tc(
         fn ->
-          to_import = apply(record_type, :process, [records, opts])
+          case apply(record_type, :process, [records, opts]) do
+            %{type: :bulk_relationship} = config ->
+              import_bulk_relationships(config, opts)
 
-          create = Map.get(to_import, :create, [])
-          create_length = length(create)
-
-          if create_length > 0 do
-            Ash.bulk_create!(create, to_import.resource, :import_create,
-              return_errors?: true,
-              stop_on_error?: true
-            )
+            %{type: :fast_bulk} = config ->
+              import_fast_bulk(config, opts)
           end
-
-          update = Map.get(to_import, :update, [])
-          update_length = length(update)
-
-          # Track relationship counts from OptimizedRelationshipImport
-          total_relationship_stats = %{created: 0, updated: 0, deleted: 0}
-
-          relationship_stats =
-            update
-            |> Task.async_stream(fn changeset ->
-              {Ash.update(changeset), changeset.context[:import_stats]}
-            end)
-            |> Enum.reduce(total_relationship_stats, fn {:ok, {changeset, import_stats}}, acc ->
-              case changeset do
-                {:ok, _result} ->
-                  # Check if this update used OptimizedRelationshipImport
-                  case import_stats do
-                    nil ->
-                      acc
-
-                    stats ->
-                      %{
-                        created: acc.created + stats.created,
-                        updated: acc.updated + stats.updated,
-                        deleted: acc.deleted + stats.deleted
-                      }
-                  end
-
-                {:error, error} ->
-                  dbg(changeset)
-                  dbg(error)
-                  exit(1)
-              end
-            end)
-
-          {create_length, update_length, relationship_stats}
         end,
         :millisecond
       )
 
-    # Report counts appropriately
-    if relationship_stats.created > 0 || relationship_stats.updated > 0 ||
-         relationship_stats.deleted > 0 do
-      # This record type uses OptimizedRelationshipImport - report relationship counts
-      created_msg =
-        if relationship_stats.created > 0,
-          do: "#{relationship_stats.created} relationships created",
-          else: nil
+    log_import_result(name, result, time)
+  end
 
-      updated_msg =
-        if relationship_stats.updated > 0,
-          do: "#{relationship_stats.updated} relationships updated",
-          else: nil
+  defp import_bulk_relationships(config, opts) do
+    source_file_id = Keyword.get(opts, :filename)
 
-      deleted_msg =
-        if relationship_stats.deleted > 0,
-          do: "#{relationship_stats.deleted} relationships deleted",
-          else: nil
+    {:ok, stats} =
+      BulkRelationshipImport.import(
+        config.records,
+        parent_resource: config.parent_resource,
+        related_resource: config.related_resource,
+        parent_key: config.parent_key,
+        id_field: config.id_field,
+        relationship_key: config.relationship_key,
+        deleted_key: config[:deleted_key],
+        on_missing: config.on_missing,
+        source_file_id: source_file_id
+      )
 
-      messages = [created_msg, updated_msg, deleted_msg] |> Enum.reject(&is_nil/1)
+    {:bulk_relationship, stats}
+  end
 
-      if not Enum.empty?(messages) do
-        Logger.info(
-          "#{name}: #{Enum.join(messages, ", ")} in #{Float.round(time / 1000, 2)} seconds."
-        )
-      end
-    else
-      # This record type uses individual record processing - report record counts
-      if create_length > 0 || update_length > 0 do
-        Logger.info(
-          "#{name}: #{create_length} records inserted, #{update_length} records updated in #{Float.round(time / 1000, 2)} seconds."
-        )
-      end
+  defp import_fast_bulk(config, opts) do
+    source_file_id = Keyword.get(opts, :filename)
+
+    {:ok, stats} =
+      FastBulkImport.import(
+        config.records,
+        config.resource,
+        source_file_id: source_file_id,
+        conflict_keys: config[:conflict_keys] || [:id]
+      )
+
+    {:fast_bulk, stats}
+  end
+
+  defp log_import_result(name, result, time) do
+    time_str = Float.round(time / 1000, 2)
+
+    case result do
+      {:bulk_relationship, stats} ->
+        messages =
+          [
+            if(stats.created > 0, do: "#{stats.created} relationships created"),
+            if(stats.updated > 0, do: "#{stats.updated} relationships updated"),
+            if(stats.deleted > 0, do: "#{stats.deleted} relationships deleted")
+          ]
+          |> Enum.reject(&is_nil/1)
+
+        if not Enum.empty?(messages) do
+          Logger.info("#{name}: #{Enum.join(messages, ", ")} in #{time_str} seconds.")
+        end
+
+      {:fast_bulk, stats} ->
+        if stats.total > 0 do
+          Logger.info("#{name}: #{stats.total} records upserted in #{time_str} seconds.")
+        end
     end
   end
 end

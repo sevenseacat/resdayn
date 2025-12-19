@@ -1,18 +1,25 @@
 defmodule Resdayn.Importer.Record.Spell do
   use Resdayn.Importer.Record
 
-  def process(records, opts) do
-    records
-    |> of_type(Resdayn.Parser.Record.Spell)
-    |> Enum.map(fn record ->
-      record.data
-      |> Map.take([:id, :name, :type, :cost])
-      |> Map.put(:effects, transform_effects(record.data.enchantments))
-      |> with_flags(:flags, record.flags)
-      |> with_flags(:spell_flags, record.data.flags)
-    end)
-    |> Enum.uniq_by(fn spell_data -> spell_data.id end)
-    |> separate_for_import(Resdayn.Codex.Mechanics.Spell, opts)
+  def process(records, _opts) do
+    processed_records =
+      records
+      |> of_type(Resdayn.Parser.Record.Spell)
+      |> Enum.map(fn record ->
+        record.data
+        |> Map.take([:id, :name, :type, :cost])
+        |> Map.put(:effects, transform_effects(record.data.enchantments))
+        |> with_flags(:flags, record.flags)
+        |> with_flags(:spell_flags, record.data.flags)
+      end)
+      |> Enum.uniq_by(fn spell_data -> spell_data.id end)
+
+    %{
+      type: :fast_bulk,
+      resource: Resdayn.Codex.Mechanics.Spell,
+      records: processed_records,
+      conflict_keys: [:id]
+    }
   end
 
   defp transform_effects(enchantments) do
