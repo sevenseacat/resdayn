@@ -83,7 +83,7 @@ defmodule Resdayn.Parser.Record.NPC do
     record_list_of_maps_key(
       data,
       :transport_options,
-      Resdayn.Codex.Types.Coordinates,
+      :coordinates,
       coordinates(value)
     )
   end
@@ -92,7 +92,7 @@ defmodule Resdayn.Parser.Record.NPC do
     record_list_of_maps_value(
       data,
       :transport_options,
-      :cell_name,
+      :cell_id,
       printable!(__MODULE__, v, value)
     )
   end

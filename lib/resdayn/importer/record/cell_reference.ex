@@ -1,5 +1,6 @@
 defmodule Resdayn.Importer.Record.CellReference do
   use Resdayn.Importer.Record
+  alias Resdayn.Importer.Helpers
 
   def process(records, _opts) do
     # TR has a lot of dodgy body parts and other non-referencable things as references for some reason?
@@ -24,10 +25,14 @@ defmodule Resdayn.Importer.Record.CellReference do
           |> Enum.reject(&(&1.reference_id == "T_Aid_NPC" || &1.reference_id not in referencable))
           |> Enum.map(fn reference ->
             transport =
-              if Map.has_key?(reference, :cell_travel) do
+              if Map.has_key?(reference, :transport_coordinates) do
+                coordinates = reference.transport_coordinates
+
                 %{
-                  cell_name: Map.get(reference, :cell_travel_name),
-                  coordinates: reference.cell_travel
+                  coordinates: coordinates,
+                  cell_id:
+                    Map.get(reference, :transport_cell_id) ||
+                      Helpers.coordinates_to_cell_id(coordinates.position)
                 }
               else
                 nil

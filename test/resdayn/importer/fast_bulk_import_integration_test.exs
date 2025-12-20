@@ -49,15 +49,9 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
   @moduletag :integration
 
   setup_all do
-    IO.puts("Truncating all tables...")
     truncate_all_tables()
 
-    IO.puts("Running full Morrowind.esm import via Runner...")
-
-    {time, _} =
-      :timer.tc(fn -> Resdayn.Importer.Runner.run("Morrowind.esm") end, :millisecond)
-
-    IO.puts("Import completed in #{Float.round(time / 1000, 2)} seconds\n")
+    Resdayn.Importer.Runner.run("Morrowind.esm")
 
     # Parse records once for re-import tests.
     # We use persistent_term instead of returning from setup_all because ExUnit
@@ -1121,6 +1115,20 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
       assert ref_obj.type == :npc
     end
 
+    test "imports transport destinations correctly" do
+      # The Seyda Neen silt strider caravaner
+      npc = Ash.get!(NPC, "darvame hleran", load: [transport_options: [:cell]])
+      assert length(npc.transport_options) == 4
+
+      destination = List.last(npc.transport_options)
+
+      assert destination.coordinates.position.x == Decimal.new("-21318.73")
+      assert destination.coordinates.position.y == Decimal.new("-18232.41")
+      assert destination.coordinates.position.z == Decimal.new("1177.66")
+      assert destination.cell_id == "-3,-3"
+      assert destination.cell.name == "Balmora"
+    end
+
     test "imports all npcs with ReferencableObject entries" do
       npc_count = Ash.count!(NPC)
       ref_count = Ash.count!(ReferencableObject, query: [filter: [type: :npc]])
@@ -1191,6 +1199,22 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
       assert reference != nil
       assert reference.coordinates != nil
       assert reference.source_file_ids == ["Morrowind.esm"]
+    end
+
+    test "imports transport details correctly (eg. for doors)" do
+      require Ash.Query
+
+      reference =
+        Resdayn.Codex.World.Cell.CellReference
+        |> Ash.Query.filter(
+          cell_id == "Maar Gan, Tashpi Ashibael's Hut" and
+            reference_id == "in_redoran_hut_door_01"
+        )
+        |> Ash.Query.load(transport_to: [:cell])
+        |> Ash.read_one!()
+
+      assert reference.transport_to.cell_id == "-3,12"
+      assert reference.transport_to.cell.name == "Maar Gan"
     end
 
     test "imports total reference count" do

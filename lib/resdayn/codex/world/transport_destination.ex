@@ -1,15 +1,16 @@
 defmodule Resdayn.Codex.World.TransportDestination do
-  use Ash.Type.NewType,
-    subtype_of: :map,
-    constraints: [
-      fields: [
-        # TODO: This *should* be a reference to a real cell but not imported yet...
-        cell_name: [type: :string],
-        coordinates: [type: Resdayn.Codex.Types.Coordinates]
-      ]
-    ]
+  use Ash.Resource,
+    otp_app: :resdayn,
+    data_layer: :embedded
 
-  @impl true
-  def cast_input(nil, _), do: {:ok, nil}
-  def cast_input(val, _), do: {:ok, val}
+  attributes do
+    attribute :coordinates, Resdayn.Codex.Types.Coordinates, allow_nil?: false, public?: true
+  end
+
+  relationships do
+    belongs_to :cell, Resdayn.Codex.World.Cell,
+      attribute_type: :string,
+      allow_nil?: false,
+      public?: true
+  end
 end

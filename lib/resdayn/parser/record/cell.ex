@@ -99,14 +99,14 @@ defmodule Resdayn.Parser.Record.Cell do
   end
 
   def process({"DODT", value}, data) do
-    record_list_of_maps_value(data, :references, :cell_travel, coordinates(value))
+    record_list_of_maps_value(data, :references, :transport_coordinates, coordinates(value))
   end
 
   def process({"DNAM" = v, value}, data) do
     record_list_of_maps_value(
       data,
       :references,
-      :cell_travel_name,
+      :transport_cell_id,
       printable!(__MODULE__, v, value)
     )
   end

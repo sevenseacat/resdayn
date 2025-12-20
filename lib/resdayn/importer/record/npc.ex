@@ -1,6 +1,8 @@
 defmodule Resdayn.Importer.Record.NPC do
   use Resdayn.Importer.Record
 
+  alias Resdayn.Importer.Helpers
+
   def process(records, _opts) do
     processed_records =
       records
@@ -19,6 +21,17 @@ defmodule Resdayn.Importer.Record.NPC do
           Enum.map(record.data[:skills] || [], fn {key, value} ->
             %{skill_id: key, value: value}
           end)
+
+        # If transport is to exterior cells with only a global position, populate the actual cell ID
+        transport_options =
+          Enum.map(record.data[:transport_options] || [], fn record ->
+            Map.put_new(
+              record,
+              :cell_id,
+              Helpers.coordinates_to_cell_id(record.coordinates.position)
+            )
+          end)
+          |> Enum.reverse()
 
         record.data
         |> Map.take([
@@ -39,13 +52,13 @@ defmodule Resdayn.Importer.Record.NPC do
           :magicka,
           :fatigue,
           :blood,
-          :transport_options,
           :ai_packages
         ])
         |> Map.put(:attributes, attributes)
         |> Map.put(:skills, skills)
         |> Map.put(:alert, get_in(record.data, [:ai_data, :alert]) || %{})
         |> Map.put(:spell_links, spell_links)
+        |> Map.put(:transport_options, transport_options)
         |> with_flags(
           :items_vendored,
           get_in(record.data, [:ai_data, :items_vendored]) || %{}

@@ -221,17 +221,13 @@ defmodule Resdayn.Codex.Changes.BulkRelationshipImport do
   defp execute_upserts([], _table, _id_field, _parent_key, _source_file_id), do: 0
 
   defp execute_upserts(records, table, id_field, parent_key, source_file_id) do
-    # Get column names from first record (excluding primary keys and source_file_ids for replace)
+    # Get column names from ALL records (some may have optional fields others don't)
+    # Exclude primary keys and source_file_ids from the update clause
     replace_columns =
-      case records do
-        [first | _] ->
-          first
-          |> Map.keys()
-          |> Enum.reject(&(&1 == id_field or &1 == parent_key or &1 == :source_file_ids))
-
-        [] ->
-          []
-      end
+      records
+      |> Enum.flat_map(&Map.keys/1)
+      |> Enum.uniq()
+      |> Enum.reject(&(&1 == id_field or &1 == parent_key or &1 == :source_file_ids))
 
     # Chunk to avoid parameter limits (PostgreSQL has a limit of ~32767 parameters)
     # With ~20 columns per row, we can do ~1500 rows per batch
