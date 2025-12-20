@@ -13,82 +13,90 @@ defmodule Resdayn.Importer.Runner do
   def run(filename) do
     Logger.configure(level: :info)
 
-    Logger.info("\n\nStarting import for #{filename}...")
+    Logger.info("Starting import for #{filename}...")
 
     records =
       Path.join([:code.priv_dir(:resdayn), "data", filename])
       |> parse_records()
 
-    # Resources are listed in dependency order.
-    # Order matters: resources must be imported after their dependencies.
-    [
-      Record.DataFile,
-      # === Phase 1: No dependencies ===
-      Record.GameSetting,
-      Record.Attribute,
-      Record.GlobalVariable,
-      Record.Skill,
-      Record.Script,
-      # === Phase 2: Depends on Phase 1 ===
-      Record.Sound,
-      # === Phase 3: Depends on Phase 1-2 ===
-      Record.MagicEffect,
-      Record.Class,
-      Record.ClassSkill,
-      Record.Birthsign,
-      Record.Spell,
-      Record.Enchantment,
-      Record.Race,
-      Record.Faction,
-      # === Phase 4: Depends on Race ===
-      Record.BodyPart,
-      # === Phase 5: Referencable resources (depends on Phase 1-4) ===
-      Record.StaticObject,
-      Record.Activator,
-      Record.Light,
-      Record.Door,
-      Record.Book,
-      Record.Weapon,
-      Record.MiscellaneousItem,
-      Record.Armor,
-      Record.Clothing,
-      Record.Ingredient,
-      Record.Potion,
-      Record.Tool,
-      Record.AlchemyApparatus,
-      Record.SoundGenerator,
-      Record.Container,
-      Record.ItemLevelledList,
-      Record.CreatureLevelledList,
-      Record.Creature,
-      Record.NPC,
-      # === Phase 6: Depends on CreatureLevelledList ===
-      Record.Region,
-      # === Phase 7: Cells and references ===
-      Record.Cell,
-      Record.CellReference,
-      # === Phase 8: Relationship importers ===
-      Record.RaceSkillBonus,
-      Record.FactionReaction,
-      Record.InventoryItem,
-      Record.ContainerItem,
-      Record.CreatureInventoryItem,
-      # === Phase 9: Dialogue ===
-      Record.DialogueTopic,
-      Record.DialogueResponse,
-      Record.Quest,
-      Record.JournalEntry
-    ]
-    |> Enum.each(fn record_type ->
-      import_record_type(record_type, records, filename: filename)
-    end)
+    {time, _result} =
+      :timer.tc(
+        fn ->
+          # Resources are listed in dependency order.
+          # Order matters: resources must be imported after their dependencies.
+          [
+            Record.DataFile,
+            # === Phase 1: No dependencies ===
+            Record.GameSetting,
+            Record.Attribute,
+            Record.GlobalVariable,
+            Record.Skill,
+            Record.Script,
+            # === Phase 2: Depends on Phase 1 ===
+            Record.Sound,
+            # === Phase 3: Depends on Phase 1-2 ===
+            Record.MagicEffect,
+            Record.Class,
+            Record.ClassSkill,
+            Record.Birthsign,
+            Record.Spell,
+            Record.Enchantment,
+            Record.Race,
+            Record.Faction,
+            # === Phase 4: Depends on Race ===
+            Record.BodyPart,
+            # === Phase 5: Referencable resources (depends on Phase 1-4) ===
+            Record.StaticObject,
+            Record.Activator,
+            Record.Light,
+            Record.Door,
+            Record.Book,
+            Record.Weapon,
+            Record.MiscellaneousItem,
+            Record.Armor,
+            Record.Clothing,
+            Record.Ingredient,
+            Record.Potion,
+            Record.Tool,
+            Record.AlchemyApparatus,
+            Record.SoundGenerator,
+            Record.Container,
+            Record.ItemLevelledList,
+            Record.CreatureLevelledList,
+            Record.Creature,
+            Record.NPC,
+            # === Phase 6: Depends on CreatureLevelledList ===
+            Record.Region,
+            # === Phase 7: Cells and references ===
+            Record.Cell,
+            Record.CellReference,
+            # === Phase 8: Relationship importers ===
+            Record.RaceSkillBonus,
+            Record.FactionReaction,
+            Record.InventoryItem,
+            Record.ContainerItem,
+            Record.CreatureInventoryItem,
+            # === Phase 9: Dialogue ===
+            Record.DialogueTopic,
+            Record.DialogueResponse,
+            Record.Quest,
+            Record.JournalEntry
+          ]
+          |> Enum.each(fn record_type ->
+            import_record_type(record_type, records, filename: filename)
+          end)
+        end,
+        :millisecond
+      )
+
+    Logger.info("Completed import in #{Float.round(time / 1000, 2)} seconds.")
   end
 
   defp parse_records(filename) do
     {time, result} =
       :timer.tc(fn -> Resdayn.Parser.read(filename) |> Enum.to_list() end, :millisecond)
 
-    Logger.info("Parsed #{length(result)} records in #{Float.round(time / 1000, 2)} seconds.")
+    Logger.debug("Parsed #{length(result)} records in #{Float.round(time / 1000, 2)} seconds.")
 
     result
   end
@@ -160,12 +168,12 @@ defmodule Resdayn.Importer.Runner do
           |> Enum.reject(&is_nil/1)
 
         if not Enum.empty?(messages) do
-          Logger.info("#{name}: #{Enum.join(messages, ", ")} in #{time_str} seconds.")
+          Logger.debug("#{name}: #{Enum.join(messages, ", ")} in #{time_str} seconds.")
         end
 
       {:fast_bulk, stats} ->
         if stats.total > 0 do
-          Logger.info("#{name}: #{stats.total} records upserted in #{time_str} seconds.")
+          Logger.debug("#{name}: #{stats.total} records upserted in #{time_str} seconds.")
         end
     end
   end
