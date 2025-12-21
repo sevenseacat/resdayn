@@ -1445,5 +1445,84 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
       restored = Ash.get!(GameSetting, "sMonthMorningstar")
       assert restored.value == original_value
     end
+
+    test "BulkRelationshipImport updates optional fields even when first record omits them" do
+      # Regression test: replace_columns was computed from only the first record.
+      # If the first record omitted an optional field but later records had values,
+      # those fields wouldn't be in the ON CONFLICT UPDATE clause, so re-imports
+      # wouldn't update those fields.
+
+      require Ash.Query
+      alias Resdayn.Codex.Changes.BulkRelationshipImport
+      alias Resdayn.Codex.World.Cell.CellReference
+
+      # Find two cells with references - one without transport_to, one with
+      ref_without_transport =
+        CellReference
+        |> Ash.Query.filter(is_nil(transport_to))
+        |> Ash.Query.limit(1)
+        |> Ash.read_one!()
+
+      ref_with_transport =
+        CellReference
+        |> Ash.Query.filter(not is_nil(transport_to))
+        |> Ash.Query.limit(1)
+        |> Ash.read_one!()
+
+      # Build import records with the first record OMITTING transport_to entirely
+      # (not setting it to nil, but not including the key at all)
+      # This triggers the bug because prepare_for_insert won't add the key to the
+      # prepared map if the value is nil/missing
+      first_ref_data = %{
+        id: ref_without_transport.id,
+        reference_id: ref_without_transport.reference_id,
+        coordinates: ref_without_transport.coordinates
+        # transport_to key is intentionally OMITTED, not set to nil
+      }
+
+      records = [
+        %{
+          id: ref_without_transport.cell_id,
+          new_references: [first_ref_data]
+        },
+        %{
+          id: ref_with_transport.cell_id,
+          new_references: [
+            %{
+              id: ref_with_transport.id,
+              reference_id: ref_with_transport.reference_id,
+              coordinates: ref_with_transport.coordinates,
+              # Change the transport coordinates to verify update works
+              transport_to: %{
+                ref_with_transport.transport_to
+                | coordinates: %{
+                    position: %{x: 999.0, y: 999.0, z: 999.0},
+                    rotation: %{x: 0.0, y: 0.0, z: 0.0}
+                  }
+              }
+            }
+          ]
+        }
+      ]
+
+      {:ok, _} =
+        BulkRelationshipImport.import(
+          records,
+          parent_resource: Resdayn.Codex.World.Cell,
+          related_resource: CellReference,
+          parent_key: :cell_id,
+          id_field: :id,
+          relationship_key: :new_references,
+          on_missing: :ignore,
+          source_file_id: "Morrowind.esm"
+        )
+
+      # Verify the transport_to field was updated despite first record omitting it
+      updated_ref =
+        Ash.get!(CellReference, %{id: ref_with_transport.id, cell_id: ref_with_transport.cell_id})
+
+      assert updated_ref.transport_to.coordinates.position.x == Decimal.new("999.0"),
+             "transport_to should be updated even when first record in batch omits transport_to key"
+    end
   end
 end

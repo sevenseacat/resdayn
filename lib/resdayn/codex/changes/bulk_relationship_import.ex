@@ -243,7 +243,7 @@ defmodule Resdayn.Codex.Changes.BulkRelationshipImport do
   end
 
   defp execute_upsert_batch(batch, table, id_field, parent_key, replace_columns, source_file_id) do
-    # Get all column names from ALL records (some may have optional fields others don't)
+    # Get all column names from ALL records in the batch (some may have optional fields others don't)
     columns =
       batch
       |> Enum.flat_map(&Map.keys/1)
