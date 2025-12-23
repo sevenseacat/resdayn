@@ -15,6 +15,7 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
     GlobalVariable,
     Attribute,
     MagicEffect,
+    MagicEffectTemplate,
     Script,
     Spell,
     Enchantment
@@ -179,25 +180,61 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
     end
   end
 
+  describe "MagicEffectTemplate" do
+    test "imports all 137 magic effect templates" do
+      count = Ash.count!(MagicEffectTemplate)
+      assert count == 137, "Expected 137 magic effect templates, got #{count}"
+    end
+
+    test "imports magic effect template data correctly" do
+      template = Ash.get!(MagicEffectTemplate, 14)
+
+      assert template.game_setting_id == "sEffectFireDamage"
+      assert template.base_cost == 5
+      assert template.icon_filename == "s\\Tx_S_fire_damage.tga"
+      assert template.color == "#FD8842"
+      assert template.source_file_ids == ["Morrowind.esm"]
+
+      assert String.starts_with?(
+               template.description,
+               "This spell effect produces a manifestation of elemental fire."
+             )
+    end
+  end
+
   describe "MagicEffect" do
-    test "imports all 137 magic effects" do
+    test "imports unique magic effect combinations" do
+      # MagicEffect represents unique (template_id, skill_id, attribute_id) combinations
+      # from all sources (ingredients, potions, spells, enchantments)
       count = Ash.count!(MagicEffect)
-      assert count == 137, "Expected 137 magic effects, got #{count}"
+      assert count > 137, "Should have more unique combinations than base templates"
     end
 
     test "imports magic effect data correctly" do
-      effect = Ash.get!(MagicEffect, 14)
+      # Fire Damage has template_id 14, no skill or attribute
+      effect = Ash.get!(MagicEffect, "14::")
 
-      assert effect.game_setting_id == "sEffectFireDamage"
-      assert effect.base_cost == 5
-      assert effect.icon_filename == "s\\Tx_S_fire_damage.tga"
-      assert effect.color == "#FD8842"
-      assert effect.source_file_ids == ["Morrowind.esm"]
+      assert effect.template_id == 14
+      assert effect.skill_id == nil
+      assert effect.attribute_id == nil
+    end
 
-      assert String.starts_with?(
-               effect.description,
-               "This spell effect produces a manifestation of elemental fire."
-             )
+    test "imports skill-based magic effect correctly" do
+      # Fortify Skill (21) with Alchemy skill (15)
+      effect = Ash.get!(MagicEffect, "21:15:")
+
+      assert effect.template_id == 21
+      assert effect.skill_id == 15
+      assert effect.attribute_id == nil
+    end
+
+    test "imports attribute-based magic effect correctly" do
+      # Fortify Attribute (79) with Strength attribute (0)
+      effect = Ash.get!(MagicEffect, "79::0")
+
+      assert effect.template_id == 79
+      assert effect.skill_id == nil
+      assert effect.attribute_id == 0
     end
   end
 
@@ -667,13 +704,21 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
       assert ingredient.source_file_ids == ["Morrowind.esm"]
     end
 
-    test "imports ingredient effects embedded array correctly" do
-      ingredient = Ash.get!(Ingredient, "ingred_dreugh_wax_01")
-      assert is_list(ingredient.effects)
-      assert length(ingredient.effects) == 4
+    test "imports ingredient effects via many-to-many relationship correctly" do
+      ingredient =
+        Ingredient
+        |> Ash.get!("ingred_dreugh_wax_01", load: [:ingredient_effects, :magic_effects])
 
-      effect = hd(ingredient.effects)
-      assert Map.has_key?(effect, :magic_effect_id)
+      assert is_list(ingredient.ingredient_effects)
+      assert length(ingredient.ingredient_effects) == 4
+
+      # Check the join table records
+      effect = hd(ingredient.ingredient_effects)
+      assert effect.ingredient_id == "ingred_dreugh_wax_01"
+      assert is_binary(effect.magic_effect_id)
+
+      # Check the many-to-many relationship also works
+      assert length(ingredient.magic_effects) == 4
     end
 
     test "creates corresponding ReferencableObject" do
@@ -1120,12 +1165,13 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
       npc = Ash.get!(NPC, "darvame hleran", load: [transport_options: [:cell]])
       assert length(npc.transport_options) == 4
 
-      destination = List.last(npc.transport_options)
+      # Find destination by cell_id instead of relying on ordering
+      destination = Enum.find(npc.transport_options, &(&1.cell_id == "-3,-3"))
+      assert destination != nil
 
       assert destination.coordinates.position.x == Decimal.new("-21318.73")
       assert destination.coordinates.position.y == Decimal.new("-18232.41")
       assert destination.coordinates.position.z == Decimal.new("1177.66")
-      assert destination.cell_id == "-3,-3"
       assert destination.cell.name == "Balmora"
     end
 

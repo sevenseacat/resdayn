@@ -185,7 +185,7 @@ defmodule Resdayn.Parser.Record.MagicEffect do
       blue::uint32(), speed::float32(), size::float32(), size_cap::float32()>> = value
 
     record_unnested_value(data, %{
-      skill_id: school_to_skill_id(school),
+      magic_school_id: school_to_skill_id(school),
       base_cost: float(base_cost),
       color: color({red, green, blue}),
       speed: float(speed),

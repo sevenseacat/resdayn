@@ -7,6 +7,7 @@ defmodule Resdayn.Importer.Record.Ingredient do
       |> of_type(Resdayn.Parser.Record.Ingredient)
       |> Enum.map(fn record ->
         record.data
+        |> Map.drop([:effects])
         |> with_flags(:flags, record.flags)
       end)
 

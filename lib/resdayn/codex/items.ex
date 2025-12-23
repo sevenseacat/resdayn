@@ -7,6 +7,8 @@ defmodule Resdayn.Codex.Items do
       define :get_ingredient_by_id, action: :read, get_by: :id
     end
 
+    resource __MODULE__.Ingredient.Effect
+
     resource __MODULE__.MiscellaneousItem
 
     resource __MODULE__.Tool do

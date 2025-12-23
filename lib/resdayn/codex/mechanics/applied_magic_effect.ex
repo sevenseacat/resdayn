@@ -1,9 +1,12 @@
-defmodule Resdayn.Codex.Items.Potion.Effect do
+defmodule Resdayn.Codex.Mechanics.AppliedMagicEffect do
   use Ash.Resource,
     otp_app: :resdayn,
+    domain: Resdayn.Codex.Mechanics,
     data_layer: :embedded
 
   attributes do
+    integer_primary_key :id
+
     attribute :duration, :integer, allow_nil?: false, public?: true
 
     attribute :magnitude, Resdayn.Codex.Types.Range,
@@ -17,16 +20,8 @@ defmodule Resdayn.Codex.Items.Potion.Effect do
 
   relationships do
     belongs_to :magic_effect, Resdayn.Codex.Mechanics.MagicEffect,
-      attribute_type: :integer,
       allow_nil?: false,
-      public?: true
-
-    belongs_to :skill, Resdayn.Codex.Characters.Skill,
-      attribute_type: :integer,
-      public?: true
-
-    belongs_to :attribute, Resdayn.Codex.Mechanics.Attribute,
-      attribute_type: :integer,
-      public?: true
+      public?: true,
+      attribute_writable?: true
   end
 end

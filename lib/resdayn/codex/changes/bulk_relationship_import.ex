@@ -49,6 +49,8 @@ defmodule Resdayn.Codex.Changes.BulkRelationshipImport do
     source_file_id = Keyword.get(opts, :source_file_id)
 
     table_name = AshPostgres.DataLayer.Info.table(related_resource)
+    attributes = Ash.Resource.Info.attributes(related_resource)
+    has_source_file_ids = Enum.any?(attributes, &(&1.name == :source_file_ids))
 
     # Flatten all relationships with parent keys
     {flatten_time, {all_upserts, all_deletes}} =
@@ -65,8 +67,15 @@ defmodule Resdayn.Codex.Changes.BulkRelationshipImport do
               |> Enum.map(fn rel ->
                 rel
                 |> Map.put(parent_key, parent_id)
-                |> Map.put(:source_file_ids, [source_file_id])
-                |> Map.put(:flags, [])
+                |> then(fn r ->
+                  if has_source_file_ids do
+                    r
+                    |> Map.put(:source_file_ids, [source_file_id])
+                    |> Map.put(:flags, [])
+                  else
+                    r
+                  end
+                end)
                 |> prepare_for_insert(related_resource)
               end)
 
@@ -128,7 +137,14 @@ defmodule Resdayn.Codex.Changes.BulkRelationshipImport do
     {upsert_time, upsert_count} =
       :timer.tc(
         fn ->
-          execute_upserts(all_upserts, table_name, id_field, parent_key, source_file_id)
+          execute_upserts(
+            all_upserts,
+            table_name,
+            id_field,
+            parent_key,
+            source_file_id,
+            has_source_file_ids
+          )
         end,
         :millisecond
       )
@@ -218,9 +234,17 @@ defmodule Resdayn.Codex.Changes.BulkRelationshipImport do
     end
   end
 
-  defp execute_upserts([], _table, _id_field, _parent_key, _source_file_id), do: 0
+  defp execute_upserts([], _table, _id_field, _parent_key, _source_file_id, _has_source_file_ids),
+    do: 0
 
-  defp execute_upserts(records, table, id_field, parent_key, source_file_id) do
+  defp execute_upserts(
+         records,
+         table,
+         id_field,
+         parent_key,
+         source_file_id,
+         has_source_file_ids
+       ) do
     # Get column names from ALL records (some may have optional fields others don't)
     # Exclude primary keys and source_file_ids from the update clause
     replace_columns =
@@ -236,13 +260,29 @@ defmodule Resdayn.Codex.Changes.BulkRelationshipImport do
     |> Enum.reduce(0, fn batch, count ->
       # Use raw SQL for the upsert with proper source_file_ids merging
       {inserted, _} =
-        execute_upsert_batch(batch, table, id_field, parent_key, replace_columns, source_file_id)
+        execute_upsert_batch(
+          batch,
+          table,
+          id_field,
+          parent_key,
+          replace_columns,
+          source_file_id,
+          has_source_file_ids
+        )
 
       count + inserted
     end)
   end
 
-  defp execute_upsert_batch(batch, table, id_field, parent_key, replace_columns, source_file_id) do
+  defp execute_upsert_batch(
+         batch,
+         table,
+         id_field,
+         parent_key,
+         replace_columns,
+         source_file_id,
+         has_source_file_ids
+       ) do
     # Get all column names from ALL records in the batch (some may have optional fields others don't)
     columns =
       batch
@@ -275,31 +315,57 @@ defmodule Resdayn.Codex.Changes.BulkRelationshipImport do
         "\"#{col}\" = EXCLUDED.\"#{col}\""
       end)
 
-    # Source file merging: append if not already present
-    source_file_set =
-      """
-      "source_file_ids" = CASE
-        WHEN $#{num_rows * num_columns + 1} = ANY("#{table}"."source_file_ids")
-        THEN "#{table}"."source_file_ids"
-        ELSE "#{table}"."source_file_ids" || EXCLUDED."source_file_ids"
-      END
-      """
+    # Build final SET clauses and params based on whether resource has source_file_ids
+    {all_set_clauses, params} =
+      if has_source_file_ids do
+        # Source file merging: append if not already present
+        source_file_set =
+          """
+          "source_file_ids" = CASE
+            WHEN $#{num_rows * num_columns + 1} = ANY("#{table}"."source_file_ids")
+            THEN "#{table}"."source_file_ids"
+            ELSE "#{table}"."source_file_ids" || EXCLUDED."source_file_ids"
+          END
+          """
 
-    all_set_clauses = Enum.join(set_clauses ++ [source_file_set], ", ")
+        clauses = Enum.join(set_clauses ++ [source_file_set], ", ")
 
-    # Build the full SQL
-    sql = """
-    INSERT INTO "#{table}" (#{column_list})
-    VALUES #{placeholders}
-    ON CONFLICT ("#{id_field}", "#{parent_key}")
-    DO UPDATE SET #{all_set_clauses}
-    """
+        # Build the params list - flatten batch values in column order, then add source_file_id
+        params =
+          Enum.flat_map(batch, fn row ->
+            Enum.map(columns, fn col -> Map.get(row, col) end)
+          end) ++ [source_file_id]
 
-    # Build the params list - flatten batch values in column order, then add source_file_id
-    params =
-      Enum.flat_map(batch, fn row ->
-        Enum.map(columns, fn col -> Map.get(row, col) end)
-      end) ++ [source_file_id]
+        {clauses, params}
+      else
+        # No source_file_ids - just use regular update columns
+        clauses = Enum.join(set_clauses, ", ")
+
+        # Build the params list - flatten batch values in column order only
+        params =
+          Enum.flat_map(batch, fn row ->
+            Enum.map(columns, fn col -> Map.get(row, col) end)
+          end)
+
+        {clauses, params}
+      end
+
+    # Handle case where there's nothing to update (only conflict keys)
+    sql =
+      if all_set_clauses == "" do
+        """
+        INSERT INTO "#{table}" (#{column_list})
+        VALUES #{placeholders}
+        ON CONFLICT ("#{id_field}", "#{parent_key}") DO NOTHING
+        """
+      else
+        """
+        INSERT INTO "#{table}" (#{column_list})
+        VALUES #{placeholders}
+        ON CONFLICT ("#{id_field}", "#{parent_key}")
+        DO UPDATE SET #{all_set_clauses}
+        """
+      end
 
     Repo.query!(sql, params)
     |> then(fn result -> {result.num_rows, nil} end)

@@ -35,6 +35,7 @@ defmodule Resdayn.Importer.Runner do
             # === Phase 2: Depends on Phase 1 ===
             Record.Sound,
             # === Phase 3: Depends on Phase 1-2 ===
+            Record.MagicEffectTemplate,
             Record.MagicEffect,
             Record.Class,
             Record.ClassSkill,
@@ -71,6 +72,7 @@ defmodule Resdayn.Importer.Runner do
             Record.Cell,
             Record.CellReference,
             # === Phase 8: Relationship importers ===
+            Record.IngredientEffect,
             Record.RaceSkillBonus,
             Record.FactionReaction,
             Record.InventoryItem,

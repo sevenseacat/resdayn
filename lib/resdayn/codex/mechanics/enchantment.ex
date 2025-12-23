@@ -20,6 +20,9 @@ defmodule Resdayn.Codex.Mechanics.Enchantment do
     attribute :cost, :integer, allow_nil?: false
     attribute :charge, :integer, allow_nil?: false
     attribute :autocalc, :boolean, allow_nil?: false
-    attribute :effects, {:array, __MODULE__.Effect}, allow_nil?: false, default: []
+
+    attribute :effects, {:array, Resdayn.Codex.Mechanics.AppliedMagicEffect},
+      allow_nil?: false,
+      default: []
   end
 end

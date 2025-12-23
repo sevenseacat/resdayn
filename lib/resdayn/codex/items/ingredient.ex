@@ -23,11 +23,14 @@ defmodule Resdayn.Codex.Items.Ingredient do
 
     attribute :nif_model_filename, :string, allow_nil?: false
     attribute :icon_filename, :string, allow_nil?: false
-
-    attribute :effects, {:array, __MODULE__.Effect}, allow_nil?: false, default: []
   end
 
   relationships do
     belongs_to :script, Resdayn.Codex.Mechanics.Script
+
+    many_to_many :magic_effects, Resdayn.Codex.Mechanics.MagicEffect,
+      join_relationship: :ingredient_effects
+
+    has_many :ingredient_effects, Resdayn.Codex.Items.Ingredient.Effect
   end
 end

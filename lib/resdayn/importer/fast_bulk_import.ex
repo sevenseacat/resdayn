@@ -42,6 +42,9 @@ defmodule Resdayn.Importer.FastBulkImport do
       conflict_keys = Keyword.get(opts, :conflict_keys, [:id])
       source_file_id = Keyword.get(opts, :source_file_id)
 
+      # Check if this resource has source_file_ids attribute (uses Importable extension)
+      has_source_file_ids = Enum.any?(attributes, &(&1.name == :source_file_ids))
+
       # Check if this resource uses Referencable extension
       referencable_type = get_referencable_type(resource)
 
@@ -65,7 +68,7 @@ defmodule Resdayn.Importer.FastBulkImport do
       {upsert_time, result} =
         :timer.tc(
           fn ->
-            execute_upserts(prepared, table, conflict_keys, source_file_id)
+            execute_upserts(prepared, table, conflict_keys, source_file_id, has_source_file_ids)
           end,
           :millisecond
         )
@@ -192,7 +195,7 @@ defmodule Resdayn.Importer.FastBulkImport do
     end
   end
 
-  defp execute_upserts(records, table, conflict_keys, source_file_id) do
+  defp execute_upserts(records, table, conflict_keys, source_file_id, has_source_file_ids) do
     # Get column names from ALL records (some records may have optional fields others don't)
     columns =
       records
@@ -213,13 +216,29 @@ defmodule Resdayn.Importer.FastBulkImport do
     |> Enum.chunk_every(chunk_size)
     |> Enum.reduce(%{total: 0}, fn batch, acc ->
       count =
-        execute_upsert_batch(batch, table, columns, conflict_keys, update_columns, source_file_id)
+        execute_upsert_batch(
+          batch,
+          table,
+          columns,
+          conflict_keys,
+          update_columns,
+          source_file_id,
+          has_source_file_ids
+        )
 
       %{total: acc.total + count}
     end)
   end
 
-  defp execute_upsert_batch(batch, table, columns, conflict_keys, update_columns, source_file_id) do
+  defp execute_upsert_batch(
+         batch,
+         table,
+         columns,
+         conflict_keys,
+         update_columns,
+         source_file_id,
+         has_source_file_ids
+       ) do
     num_columns = length(columns)
     num_rows = length(batch)
 
@@ -247,31 +266,58 @@ defmodule Resdayn.Importer.FastBulkImport do
         "\"#{col}\" = EXCLUDED.\"#{col}\""
       end)
 
-    # Source file merging: append if not already present
-    # The extra parameter ($n+1) is the source_file_id for the CASE check
-    param_num = num_rows * num_columns + 1
+    # Build final SET clauses - include source_file_ids handling only if resource has it
+    {all_set_clauses, params} =
+      if has_source_file_ids do
+        # Source file merging: append if not already present
+        # The extra parameter ($n+1) is the source_file_id for the CASE check
+        param_num = num_rows * num_columns + 1
 
-    source_file_set =
-      "\"source_file_ids\" = CASE " <>
-        "WHEN $#{param_num} = ANY(\"#{table}\".\"source_file_ids\") " <>
-        "THEN \"#{table}\".\"source_file_ids\" " <>
-        "ELSE \"#{table}\".\"source_file_ids\" || EXCLUDED.\"source_file_ids\" " <>
-        "END"
+        source_file_set =
+          "\"source_file_ids\" = CASE " <>
+            "WHEN $#{param_num} = ANY(\"#{table}\".\"source_file_ids\") " <>
+            "THEN \"#{table}\".\"source_file_ids\" " <>
+            "ELSE \"#{table}\".\"source_file_ids\" || EXCLUDED.\"source_file_ids\" " <>
+            "END"
 
-    all_set_clauses = Enum.join(set_clauses ++ [source_file_set], ", ")
+        clauses = Enum.join(set_clauses ++ [source_file_set], ", ")
 
-    sql = """
-    INSERT INTO "#{table}" (#{column_list})
-    VALUES #{placeholders}
-    ON CONFLICT (#{conflict_list})
-    DO UPDATE SET #{all_set_clauses}
-    """
+        # Build params: flatten batch values in column order, then add source_file_id
+        params =
+          Enum.flat_map(batch, fn row ->
+            Enum.map(columns, fn col -> Map.get(row, col) end)
+          end) ++ [source_file_id]
 
-    # Build params: flatten batch values in column order, then add source_file_id
-    params =
-      Enum.flat_map(batch, fn row ->
-        Enum.map(columns, fn col -> Map.get(row, col) end)
-      end) ++ [source_file_id]
+        {clauses, params}
+      else
+        # No source_file_ids - just use regular update columns
+        clauses = Enum.join(set_clauses, ", ")
+
+        # Build params: flatten batch values in column order only
+        params =
+          Enum.flat_map(batch, fn row ->
+            Enum.map(columns, fn col -> Map.get(row, col) end)
+          end)
+
+        {clauses, params}
+      end
+
+    # Handle case where there's nothing to update (only conflict keys)
+    sql =
+      if all_set_clauses == "" do
+        """
+        INSERT INTO "#{table}" (#{column_list})
+        VALUES #{placeholders}
+        ON CONFLICT (#{conflict_list}) DO NOTHING
+        """
+      else
+        """
+        INSERT INTO "#{table}" (#{column_list})
+        VALUES #{placeholders}
+        ON CONFLICT (#{conflict_list})
+        DO UPDATE SET #{all_set_clauses}
+        """
+      end
 
     result = Repo.query!(sql, params)
     result.num_rows

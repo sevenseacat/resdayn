@@ -25,7 +25,7 @@ defmodule Resdayn.Codex.Mechanics.Spell do
       allow_nil?: false,
       default: []
 
-    attribute :effects, {:array, __MODULE__.Effect},
+    attribute :effects, {:array, Resdayn.Codex.Mechanics.AppliedMagicEffect},
       allow_nil?: false,
       default: []
   end

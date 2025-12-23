@@ -105,9 +105,11 @@ defmodule Resdayn.Parser.Record do
           duration::uint32(), min::uint32(), max::uint32()>> = value
 
         record_list(data, unquote(key), %{
-          magic_effect_id: effect,
-          skill_id: nil_if_negative(skill),
-          attribute_id: nil_if_negative(attribute),
+          applied_magic_effect: %{
+            magic_effect_id: effect,
+            skill_id: nil_if_negative(skill),
+            attribute_id: nil_if_negative(attribute)
+          },
           range: Map.fetch!(spell_range_mapping, range),
           area: area,
           duration: duration,

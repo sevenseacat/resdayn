@@ -22,7 +22,10 @@ defmodule Resdayn.Codex.Items.Potion do
     attribute :weight, :float
     attribute :value, :integer
     attribute :autocalc, :boolean, default: false
-    attribute :effects, {:array, __MODULE__.Effect}, allow_nil?: false, default: []
+
+    attribute :effects, {:array, Resdayn.Codex.Mechanics.AppliedMagicEffect},
+      allow_nil?: false,
+      default: []
   end
 
   relationships do
