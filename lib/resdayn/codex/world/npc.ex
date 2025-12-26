@@ -36,10 +36,6 @@ defmodule Resdayn.Codex.World.NPC do
       allow_nil?: false,
       default: []
 
-    attribute :skills, {:array, Resdayn.Codex.Characters.SkillValue},
-      allow_nil?: false,
-      default: []
-
     attribute :alert, Resdayn.Codex.World.Alert, allow_nil?: false
     attribute :blood, __MODULE__.BloodType, allow_nil?: false
 
@@ -67,6 +63,22 @@ defmodule Resdayn.Codex.World.NPC do
     belongs_to :race, Resdayn.Codex.Characters.Race, allow_nil?: false
     belongs_to :class, Resdayn.Codex.Characters.Class, allow_nil?: false
     belongs_to :faction, Resdayn.Codex.Characters.Faction
+
+    has_many :skill_values, __MODULE__.SkillValue do
+      sort :skill_id
+    end
+
+    many_to_many :skills, Resdayn.Codex.Characters.Skill, join_relationship: :skill_values
+
+    has_many :trained_skill_values, __MODULE__.SkillValue do
+      filter expr(:training in npc.services_offered)
+      sort value: :desc, skill_id: :asc
+      limit 3
+    end
+
+    many_to_many :trained_skills, Resdayn.Codex.Characters.Skill do
+      join_relationship :trained_skill_values
+    end
 
     has_many :inventory_items, Resdayn.Codex.World.InventoryItem,
       destination_attribute: :holder_ref_id

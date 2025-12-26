@@ -78,6 +78,7 @@ defmodule Resdayn.Importer.Runner do
             Record.InventoryItem,
             Record.ContainerItem,
             Record.CreatureInventoryItem,
+            Record.NpcSkillValue,
             # === Phase 9: Dialogue ===
             Record.DialogueTopic,
             Record.DialogueResponse,

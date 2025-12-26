@@ -12,6 +12,8 @@ defmodule Resdayn.Codex.World do
       define :get_npc_by_id, action: :read, get_by: :id
     end
 
+    resource __MODULE__.NPC.SkillValue
+
     resource __MODULE__.ReferencableObject
     resource __MODULE__.Container
 

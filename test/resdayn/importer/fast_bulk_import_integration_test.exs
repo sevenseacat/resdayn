@@ -1131,14 +1131,14 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
       assert attr.value == 100
     end
 
-    test "imports npc skills embedded array correctly" do
-      npc = Ash.get!(NPC, "todd")
-      assert is_list(npc.skills)
-      assert length(npc.skills) == 27
+    test "imports npc skill_values relationship correctly" do
+      npc = Ash.get!(NPC, "todd", load: [:skill_values])
+      assert is_list(npc.skill_values)
+      assert length(npc.skill_values) == 27
 
-      skill = Enum.find(npc.skills, fn s -> s.skill_id == 0 end)
-      assert skill != nil
-      assert skill.value == 86
+      skill_value = Enum.find(npc.skill_values, fn s -> s.skill_id == 0 end)
+      assert skill_value != nil
+      assert skill_value.value == 86
     end
 
     test "imports npc_flags correctly" do
@@ -1181,6 +1181,57 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
 
       assert npc_count == ref_count,
              "NPC count (#{npc_count}) should match ReferencableObject count (#{ref_count})"
+    end
+  end
+
+  describe "NpcSkillValue" do
+    test "imports correct count" do
+      # 907 NPCs have 27 skills, 1767 NPCs have 0 skills (auto-calculated)
+      # 907 * 27 = 24489
+      count = Ash.count!(NPC.SkillValue)
+      assert count == 24489, "Expected 24489 NPC skill values, got #{count}"
+    end
+
+    test "imports qorwynn (master enchanter) skill values correctly" do
+      require Ash.Query
+
+      skill_values =
+        NPC.SkillValue
+        |> Ash.Query.filter(npc_id == "qorwynn")
+        |> Ash.Query.load(:skill)
+        |> Ash.read!()
+
+      assert length(skill_values) == 27
+
+      # skill_id 9 is Enchant - qorwynn is a master trainer with value 100
+      enchant = Enum.find(skill_values, &(&1.skill_id == 9))
+      assert enchant != nil
+      assert enchant.value == 100
+      assert enchant.skill.name == "Enchant"
+
+      # Verify other notable skill values
+      assert Enum.find(skill_values, &(&1.skill_id == 10)).value == 78
+      assert Enum.find(skill_values, &(&1.skill_id == 11)).value == 72
+      assert Enum.find(skill_values, &(&1.skill_id == 13)).value == 72
+    end
+
+    test "can query master trainers (NPCs with skill value of 100)" do
+      require Ash.Query
+
+      master_trainers =
+        NPC.SkillValue
+        |> Ash.Query.filter(value == 100)
+        |> Ash.Query.load([:skill, :npc])
+        |> Ash.read!()
+
+      assert length(master_trainers) > 0
+
+      # qorwynn should be in the list as master enchanter (skill_id 9)
+      qorwynn_enchant =
+        Enum.find(master_trainers, &(&1.npc_id == "qorwynn" and &1.skill_id == 9))
+
+      assert qorwynn_enchant != nil
+      assert qorwynn_enchant.skill.name == "Enchant"
     end
   end
 

@@ -17,11 +17,6 @@ defmodule Resdayn.Importer.Record.NPC do
             %{attribute_id: key, value: value}
           end)
 
-        skills =
-          Enum.map(record.data[:skills] || [], fn {key, value} ->
-            %{skill_id: key, value: value}
-          end)
-
         # If transport is to exterior cells with only a global position, populate the actual cell ID
         transport_options =
           Enum.map(record.data[:transport_options] || [], fn record ->
@@ -55,7 +50,6 @@ defmodule Resdayn.Importer.Record.NPC do
           :ai_packages
         ])
         |> Map.put(:attributes, attributes)
-        |> Map.put(:skills, skills)
         |> Map.put(:alert, get_in(record.data, [:ai_data, :alert]) || %{})
         |> Map.put(:spell_links, spell_links)
         |> Map.put(:transport_options, transport_options)

@@ -17,7 +17,7 @@ defmodule Resdayn.Codex.Mechanics.Spell.Effect do
 
   relationships do
     belongs_to :magic_effect, Resdayn.Codex.Mechanics.MagicEffect,
-      attribute_type: :integer,
+      attribute_type: :string,
       allow_nil?: false,
       public?: true
 
