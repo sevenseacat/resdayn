@@ -11,6 +11,7 @@ defmodule Resdayn.Codex.World.Cell.CellReference do
 
     references do
       reference :cell, index?: true, on_delete: :delete
+      reference :reference, index?: true
     end
   end
 

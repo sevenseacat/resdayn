@@ -3,7 +3,10 @@ defmodule Resdayn.Codex.Characters do
     otp_app: :resdayn
 
   resources do
-    resource __MODULE__.Skill
+    resource __MODULE__.Skill do
+      define :list_skills, action: :read
+    end
+
     resource __MODULE__.Class
     resource __MODULE__.Class.Skill
     resource __MODULE__.Faction.Reaction
