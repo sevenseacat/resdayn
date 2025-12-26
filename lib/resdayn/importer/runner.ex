@@ -42,6 +42,7 @@ defmodule Resdayn.Importer.Runner do
             Record.Birthsign,
             Record.Spell,
             Record.Enchantment,
+            Record.AppliedMagicEffect,
             Record.Race,
             Record.Faction,
             # === Phase 4: Depends on Race ===

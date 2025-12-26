@@ -3,6 +3,7 @@ defmodule Resdayn.Codex.Mechanics do
     otp_app: :resdayn
 
   resources do
+    resource __MODULE__.AppliedMagicEffect
     resource __MODULE__.Attribute
     resource __MODULE__.DataFile
     resource __MODULE__.GameSetting

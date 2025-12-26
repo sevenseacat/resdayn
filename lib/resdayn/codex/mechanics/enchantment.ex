@@ -20,9 +20,13 @@ defmodule Resdayn.Codex.Mechanics.Enchantment do
     attribute :cost, :integer, allow_nil?: false
     attribute :charge, :integer, allow_nil?: false
     attribute :autocalc, :boolean, allow_nil?: false
+  end
 
-    attribute :effects, {:array, Resdayn.Codex.Mechanics.AppliedMagicEffect},
-      allow_nil?: false,
-      default: []
+  relationships do
+    has_many :effects, Resdayn.Codex.Mechanics.AppliedMagicEffect do
+      destination_attribute :parent_id
+      filter expr(parent_type == :enchantment)
+      sort index: :asc
+    end
   end
 end

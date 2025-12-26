@@ -24,9 +24,13 @@ defmodule Resdayn.Codex.Mechanics.Spell do
     attribute :spell_flags, {:array, Resdayn.Codex.Mechanics.SpellFlag},
       allow_nil?: false,
       default: []
+  end
 
-    attribute :effects, {:array, Resdayn.Codex.Mechanics.AppliedMagicEffect},
-      allow_nil?: false,
-      default: []
+  relationships do
+    has_many :effects, Resdayn.Codex.Mechanics.AppliedMagicEffect do
+      destination_attribute :parent_id
+      filter expr(parent_type == :spell)
+      sort index: :asc
+    end
   end
 end

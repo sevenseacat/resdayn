@@ -337,16 +337,16 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
       assert spell.source_file_ids == ["Morrowind.esm"]
     end
 
-    test "imports spell effects embedded array correctly" do
-      spell = Ash.get!(Spell, "fireball")
+    test "imports spell effects correctly" do
+      spell = Ash.get!(Spell, "fireball", load: [:effects])
       assert is_list(spell.effects)
       assert length(spell.effects) > 0
 
       effect = hd(spell.effects)
-      assert Map.has_key?(effect, :magic_effect_id)
-      assert Map.has_key?(effect, :range)
-      assert Map.has_key?(effect, :duration)
-      assert Map.has_key?(effect, :magnitude)
+      assert effect.magic_effect_id != nil
+      assert effect.range != nil
+      assert effect.duration != nil
+      assert effect.magnitude != nil
     end
 
     test "imports spell_flags correctly" do
@@ -370,14 +370,14 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
       assert enchantment.source_file_ids == ["Morrowind.esm"]
     end
 
-    test "imports enchantment effects embedded array correctly" do
-      enchantment = Ash.get!(Enchantment, "bonebiter")
+    test "imports enchantment effects correctly" do
+      enchantment = Ash.get!(Enchantment, "bonebiter", load: [:effects])
       assert is_list(enchantment.effects)
       assert length(enchantment.effects) > 0
 
       effect = hd(enchantment.effects)
-      assert Map.has_key?(effect, :magic_effect_id)
-      assert Map.has_key?(effect, :range)
+      assert effect.magic_effect_id != nil
+      assert effect.range != nil
     end
   end
 
@@ -748,14 +748,14 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
       assert potion.source_file_ids == ["Morrowind.esm"]
     end
 
-    test "imports potion effects embedded array correctly" do
-      potion = Ash.get!(Potion, "potion_skooma_01")
+    test "imports potion effects correctly" do
+      potion = Ash.get!(Potion, "potion_skooma_01", load: [:effects])
       assert is_list(potion.effects)
       assert length(potion.effects) == 4
 
       effect = hd(potion.effects)
-      assert Map.has_key?(effect, :magic_effect_id)
-      assert Map.has_key?(effect, :magnitude)
+      assert effect.magic_effect_id != nil
+      assert effect.magnitude != nil
     end
 
     test "creates corresponding ReferencableObject" do

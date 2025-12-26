@@ -22,13 +22,15 @@ defmodule Resdayn.Codex.Items.Potion do
     attribute :weight, :float
     attribute :value, :integer
     attribute :autocalc, :boolean, default: false
-
-    attribute :effects, {:array, Resdayn.Codex.Mechanics.AppliedMagicEffect},
-      allow_nil?: false,
-      default: []
   end
 
   relationships do
     belongs_to :script, Resdayn.Codex.Mechanics.Script
+
+    has_many :effects, Resdayn.Codex.Mechanics.AppliedMagicEffect do
+      destination_attribute :parent_id
+      filter expr(parent_type == :potion)
+      sort index: :asc
+    end
   end
 end
