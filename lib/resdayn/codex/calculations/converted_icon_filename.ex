@@ -11,11 +11,11 @@ defmodule Resdayn.Codex.Calculations.ConvertedIconFilename do
     Enum.map(records, fn record ->
       filename =
         record.template.icon_filename
-        |> String.replace("s\\", "b_")
+        |> String.replace("\\", "/b_")
         |> String.replace(".tga", ".png")
         |> String.downcase()
 
-      Path.join("/images/magic_effects/", filename)
+      Path.join("/images/icons/", filename)
     end)
   end
 end

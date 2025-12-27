@@ -85,6 +85,11 @@ defmodule Resdayn.Codex.World.NPC do
 
     has_many :cell_references, Resdayn.Codex.World.Cell.CellReference,
       destination_attribute: :reference_id
+
+    has_one :cell, Resdayn.Codex.World.Cell do
+      no_attributes? true
+      filter expr(id == parent(cell_id))
+    end
   end
 
   calculations do
@@ -93,6 +98,7 @@ defmodule Resdayn.Codex.World.NPC do
   end
 
   aggregates do
+    first :cell_id, :cell_references, :cell_id
     first :cell_name, [:cell_references, :cell], :name
   end
 end
