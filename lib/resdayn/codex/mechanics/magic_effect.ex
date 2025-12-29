@@ -31,6 +31,9 @@ defmodule Resdayn.Codex.Mechanics.MagicEffect do
 
   calculations do
     calculate :name, :string, Resdayn.Codex.Calculations.EffectName
-    calculate :icon_filename, :string, Resdayn.Codex.Calculations.ConvertedIconFilename
+  end
+
+  aggregates do
+    first :icon_filename, :template, :icon_filename
   end
 end

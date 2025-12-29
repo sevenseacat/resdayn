@@ -18,7 +18,6 @@ defmodule Resdayn.Importer.SearchIndex do
     {Resdayn.Codex.World.Creature, :creature, nil},
     {Resdayn.Codex.World.Cell, :location, nil},
     {Resdayn.Codex.Characters.Faction, :faction, nil},
-    {Resdayn.Codex.Mechanics.Spell, :spell, nil},
     {Resdayn.Codex.Characters.Class, :class, nil},
     {Resdayn.Codex.Characters.Race, :race, nil},
     {Resdayn.Codex.Characters.Birthsign, :birthsign, nil},
@@ -28,8 +27,10 @@ defmodule Resdayn.Importer.SearchIndex do
   def rebuild do
     Resdayn.Repo.query!("TRUNCATE search_index")
 
-    @searchable_resources
-    |> Enum.flat_map(&build_entries/1)
+    entries =
+      Enum.flat_map(@searchable_resources, &build_entries/1) ++ build_spell_entries()
+
+    entries
     |> Enum.chunk_every(1000)
     |> Enum.reduce(0, fn batch, acc ->
       {inserted, _} = Resdayn.Repo.insert_all("search_index", batch, on_conflict: :nothing)
@@ -50,4 +51,26 @@ defmodule Resdayn.Importer.SearchIndex do
       }
     end)
   end
+
+  defp build_spell_entries do
+    Resdayn.Codex.Mechanics.Spell
+    |> Ash.read!(load: [effects: [magic_effect: [:icon_filename]]])
+    |> Enum.filter(&(&1.name && &1.name != ""))
+    |> Enum.map(fn spell ->
+      %{
+        id: "spell:#{spell.id}",
+        name: spell.name,
+        type: "spell",
+        # Store the full calculated path - controller will pass through as-is for spells
+        icon_filename: spell_icon(spell.effects)
+      }
+    end)
+  end
+
+  # If a spell has exactly one effect, use that effect's calculated icon path
+  defp spell_icon([effect]) do
+    effect.magic_effect && effect.magic_effect.icon_filename
+  end
+
+  defp spell_icon(_effects), do: nil
 end
