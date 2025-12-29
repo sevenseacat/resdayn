@@ -3,7 +3,7 @@ defmodule Resdayn.Codex.World.CreatureLevelledList.Creature do
 
   actions do
     defaults [:create, :read, :update, :destroy]
-    default_accept [:player_level, :creature_id]
+    default_accept [:player_level, :creature_ref_id]
   end
 
   attributes do
@@ -11,6 +11,10 @@ defmodule Resdayn.Codex.World.CreatureLevelledList.Creature do
   end
 
   relationships do
-    belongs_to :creature, Resdayn.Codex.World.Creature
+    belongs_to :creature_ref, Resdayn.Codex.World.ReferencableObject
+  end
+
+  calculations do
+    calculate :creature, :struct, {Resdayn.Codex.Calculations.TypedObject, field: :creature_ref}
   end
 end

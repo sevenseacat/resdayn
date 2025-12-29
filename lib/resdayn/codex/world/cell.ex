@@ -12,6 +12,14 @@ defmodule Resdayn.Codex.World.Cell do
 
   actions do
     defaults [:read]
+
+    read :named_cells_in_region do
+      argument :region_id, :string, allow_nil?: false
+
+      filter expr(region_id == ^arg(:region_id) and not is_nil(name))
+
+      prepare build(sort: [name: :asc])
+    end
   end
 
   attributes do

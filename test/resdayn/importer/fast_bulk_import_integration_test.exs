@@ -1041,7 +1041,7 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
       assert length(list.creatures) == 4
 
       creature = hd(list.creatures)
-      assert Map.has_key?(creature, :creature_id)
+      assert Map.has_key?(creature, :creature_ref_id)
       assert Map.has_key?(creature, :player_level)
     end
 

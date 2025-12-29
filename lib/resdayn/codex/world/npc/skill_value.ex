@@ -11,6 +11,24 @@ defmodule Resdayn.Codex.World.NPC.SkillValue do
 
   actions do
     defaults [:read]
+
+    read :trainers_for_skill do
+      argument :skill_id, :integer, allow_nil?: false
+      argument :base_game_only, :boolean, default: false
+
+      filter expr(skill_id == ^arg(:skill_id) and :training in npc.services_offered)
+
+      filter expr(
+               not (^arg(:base_game_only)) or
+                 fragment(
+                   "? && ?",
+                   npc.source_file_ids,
+                   ^["Morrowind.esm", "Tribunal.esm", "Bloodmoon.esm"]
+                 )
+             )
+
+      prepare build(sort: [value: :desc], limit: 3, load: [npc: [:source_file_ids]])
+    end
   end
 
   attributes do

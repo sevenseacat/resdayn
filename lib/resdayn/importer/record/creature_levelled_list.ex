@@ -11,7 +11,7 @@ defmodule Resdayn.Importer.Record.CreatureLevelledList do
           (record.data[:creatures] || [])
           |> Enum.map(fn creature ->
             %{
-              creature_id: creature.id,
+              creature_ref_id: creature.id,
               player_level: creature.player_level
             }
           end)

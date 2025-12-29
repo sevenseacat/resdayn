@@ -9,7 +9,9 @@ defmodule Resdayn.Codex.Items do
 
     resource __MODULE__.Ingredient.Effect
 
-    resource __MODULE__.MiscellaneousItem
+    resource __MODULE__.MiscellaneousItem do
+      define :get_miscellaneous_item_by_id, action: :read, get_by: :id
+    end
 
     resource __MODULE__.Tool do
       define :get_tool_by_id, action: :read, get_by: :id
@@ -39,6 +41,8 @@ defmodule Resdayn.Codex.Items do
       define :get_armor_by_id, action: :read, get_by: :id
     end
 
-    resource __MODULE__.ItemLevelledList
+    resource __MODULE__.ItemLevelledList do
+      define :get_item_levelled_list_by_id, action: :read, get_by: :id
+    end
   end
 end
