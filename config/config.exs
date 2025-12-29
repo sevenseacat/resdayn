@@ -8,7 +8,8 @@ config :resdayn,
     Resdayn.Codex.Characters,
     Resdayn.Codex.Mechanics,
     Resdayn.Codex.World,
-    Resdayn.Codex.Dialogue
+    Resdayn.Codex.Dialogue,
+    Resdayn.Codex.Search
   ]
 
 config :ash,
