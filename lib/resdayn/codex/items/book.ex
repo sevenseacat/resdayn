@@ -15,7 +15,7 @@ defmodule Resdayn.Codex.Items.Book do
   end
 
   attributes do
-    attribute :id, :string, primary_key?: true, allow_nil?: false
+    attribute :id, :ci_string, primary_key?: true, allow_nil?: false
 
     attribute :name, :string, allow_nil?: false, public?: true
     attribute :value, :integer, allow_nil?: false, constraints: [min: 0], public?: true

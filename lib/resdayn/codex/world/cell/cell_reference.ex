@@ -57,12 +57,9 @@ defmodule Resdayn.Codex.World.Cell.CellReference do
   relationships do
     belongs_to :cell, Resdayn.Codex.World.Cell,
       allow_nil?: false,
-      attribute_type: :string,
       primary_key?: true
 
-    belongs_to :reference, Resdayn.Codex.World.ReferencableObject,
-      attribute_type: :string,
-      allow_nil?: false
+    belongs_to :reference, Resdayn.Codex.World.ReferencableObject, allow_nil?: false
 
     belongs_to :owner, Resdayn.Codex.World.NPC
     belongs_to :owner_faction, Resdayn.Codex.Characters.Faction

@@ -2,8 +2,15 @@ defmodule Resdayn.Importer.Record.DialogueResponse do
   use Resdayn.Importer.Record
 
   def process(records, _opts) do
-    npcs = Ash.read!(Resdayn.Codex.World.NPC) |> Enum.map(& &1.id) |> MapSet.new()
-    creatures = Ash.read!(Resdayn.Codex.World.Creature) |> Enum.map(& &1.id) |> MapSet.new()
+    npcs =
+      Ash.read!(Resdayn.Codex.World.NPC)
+      |> Enum.map(&String.downcase(to_string(&1.id)))
+      |> MapSet.new()
+
+    creatures =
+      Ash.read!(Resdayn.Codex.World.Creature)
+      |> Enum.map(&String.downcase(to_string(&1.id)))
+      |> MapSet.new()
 
     processed_records =
       records
@@ -16,6 +23,7 @@ defmodule Resdayn.Importer.Record.DialogueResponse do
           |> Enum.reject(&(&1.data[:actor_id] == "player"))
           |> Enum.map(fn response ->
             actor_id = response.data[:actor_id]
+            actor_id = actor_id && String.downcase(actor_id)
 
             {speaker_npc_id, speaker_creature_id} =
               cond do

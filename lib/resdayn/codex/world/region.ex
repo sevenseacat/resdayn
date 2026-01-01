@@ -15,7 +15,7 @@ defmodule Resdayn.Codex.World.Region do
   end
 
   attributes do
-    attribute :id, :string, primary_key?: true, allow_nil?: false
+    attribute :id, :ci_string, primary_key?: true, allow_nil?: false
     attribute :name, :string, allow_nil?: true
     attribute :weather, __MODULE__.Weather, allow_nil?: false
     attribute :map_color, Resdayn.Codex.Types.Color, allow_nil?: true
@@ -26,9 +26,7 @@ defmodule Resdayn.Codex.World.Region do
   end
 
   relationships do
-    belongs_to :disturb_sleep_creature, Resdayn.Codex.World.CreatureLevelledList,
-      attribute_type: :string,
-      allow_nil?: true
+    belongs_to :disturb_sleep_creature, Resdayn.Codex.World.CreatureLevelledList, allow_nil?: true
 
     has_many :cells, Resdayn.Codex.World.Cell
   end

@@ -5,7 +5,6 @@ defmodule Resdayn.Codex.Characters.SpellLink do
 
   relationships do
     belongs_to :spell, Resdayn.Codex.Mechanics.Spell,
-      attribute_type: :string,
       allow_nil?: false,
       public?: true
   end

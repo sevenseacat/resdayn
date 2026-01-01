@@ -15,7 +15,7 @@ defmodule Resdayn.Codex.Mechanics.Script do
   end
 
   attributes do
-    attribute :id, :string, primary_key?: true, allow_nil?: false
+    attribute :id, :ci_string, primary_key?: true, allow_nil?: false
 
     attribute :text, :string, allow_nil?: false
     attribute :local_variables, {:array, :string}, default: []

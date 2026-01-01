@@ -15,7 +15,7 @@ defmodule Resdayn.Codex.Assets.SoundGenerator do
   end
 
   attributes do
-    attribute :id, :string, primary_key?: true, allow_nil?: false
+    attribute :id, :ci_string, primary_key?: true, allow_nil?: false
     attribute :creature_key, :string
     attribute :sound_type, __MODULE__.SoundType, allow_nil?: false
   end

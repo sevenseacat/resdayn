@@ -23,7 +23,7 @@ defmodule Resdayn.Codex.World.Cell do
   end
 
   attributes do
-    attribute :id, :string, primary_key?: true, allow_nil?: false
+    attribute :id, :ci_string, primary_key?: true, allow_nil?: false
     attribute :name, :string
     attribute :grid_position, {:array, :integer}, constraints: [min: 2, max: 2]
     attribute :water_height, :float

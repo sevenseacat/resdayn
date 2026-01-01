@@ -53,9 +53,9 @@ defmodule Resdayn.Codex.Dialogue.Response do
   end
 
   attributes do
-    attribute :id, :string, primary_key?: true, allow_nil?: false
-    attribute :previous_response_id, :string
-    attribute :next_response_id, :string
+    attribute :id, :ci_string, primary_key?: true, allow_nil?: false
+    attribute :previous_response_id, :ci_string
+    attribute :next_response_id, :ci_string
 
     attribute :cell_name, :string
     attribute :content, :string
@@ -72,7 +72,6 @@ defmodule Resdayn.Codex.Dialogue.Response do
 
   relationships do
     belongs_to :topic, Resdayn.Codex.Dialogue.Topic,
-      attribute_type: :string,
       primary_key?: true,
       allow_nil?: false
 

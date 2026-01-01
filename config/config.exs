@@ -44,6 +44,6 @@ config :spark,
     "Ash.Domain": [section_order: [:resources, :policies, :authorization, :domain, :execution]]
   ]
 
-config :ash, default_belongs_to_type: :string
+config :ash, default_belongs_to_type: :ci_string
 
 import_config "#{config_env()}.exs"

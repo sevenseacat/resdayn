@@ -9,7 +9,6 @@ defmodule Resdayn.Codex.World.TransportDestination do
 
   relationships do
     belongs_to :cell, Resdayn.Codex.World.Cell,
-      attribute_type: :string,
       allow_nil?: false,
       public?: true
   end

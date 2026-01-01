@@ -15,7 +15,7 @@ defmodule Resdayn.Codex.Characters.Birthsign do
   end
 
   attributes do
-    attribute :id, :string, primary_key?: true, allow_nil?: false
+    attribute :id, :ci_string, primary_key?: true, allow_nil?: false
     attribute :name, :string, allow_nil?: false
     attribute :description, :string
     attribute :artwork_filename, :string
@@ -23,8 +23,5 @@ defmodule Resdayn.Codex.Characters.Birthsign do
     attribute :spells, {:array, Resdayn.Codex.Characters.SpellLink},
       allow_nil?: false,
       default: []
-  end
-
-  relationships do
   end
 end

@@ -16,12 +16,10 @@ defmodule Resdayn.Codex.Items.Ingredient.Effect do
   relationships do
     belongs_to :ingredient, Resdayn.Codex.Items.Ingredient,
       primary_key?: true,
-      allow_nil?: false,
-      attribute_type: :string
+      allow_nil?: false
 
     belongs_to :magic_effect, Resdayn.Codex.Mechanics.MagicEffect,
       primary_key?: true,
-      allow_nil?: false,
-      attribute_type: :string
+      allow_nil?: false
   end
 end

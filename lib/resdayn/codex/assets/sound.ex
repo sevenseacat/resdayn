@@ -15,7 +15,7 @@ defmodule Resdayn.Codex.Assets.Sound do
   end
 
   attributes do
-    attribute :id, :string, primary_key?: true, allow_nil?: false
+    attribute :id, :ci_string, primary_key?: true, allow_nil?: false
 
     attribute :filename, :string, allow_nil?: true
     attribute :volume, :integer, allow_nil?: false, constraints: [min: 0, max: 255]

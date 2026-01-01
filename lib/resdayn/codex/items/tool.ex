@@ -15,7 +15,7 @@ defmodule Resdayn.Codex.Items.Tool do
   end
 
   attributes do
-    attribute :id, :string, primary_key?: true, allow_nil?: false
+    attribute :id, :ci_string, primary_key?: true, allow_nil?: false
     attribute :name, :string, allow_nil?: false
     attribute :type, __MODULE__.Type, allow_nil?: false
     attribute :nif_model_filename, :string

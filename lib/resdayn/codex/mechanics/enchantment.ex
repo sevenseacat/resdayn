@@ -15,7 +15,7 @@ defmodule Resdayn.Codex.Mechanics.Enchantment do
   end
 
   attributes do
-    attribute :id, :string, primary_key?: true, allow_nil?: false
+    attribute :id, :ci_string, primary_key?: true, allow_nil?: false
     attribute :type, __MODULE__.Type, allow_nil?: false
     attribute :cost, :integer, allow_nil?: false
     attribute :charge, :integer, allow_nil?: false

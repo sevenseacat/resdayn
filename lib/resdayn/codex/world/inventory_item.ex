@@ -27,12 +27,10 @@ defmodule Resdayn.Codex.World.InventoryItem do
 
   relationships do
     belongs_to :holder_ref, Resdayn.Codex.World.ReferencableObject,
-      attribute_type: :string,
       allow_nil?: false,
       primary_key?: true
 
     belongs_to :object_ref, Resdayn.Codex.World.ReferencableObject,
-      attribute_type: :string,
       allow_nil?: false,
       primary_key?: true
   end

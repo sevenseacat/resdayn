@@ -38,9 +38,7 @@ defmodule Resdayn.Codex.Mechanics.MagicEffectTemplate do
   end
 
   relationships do
-    belongs_to :game_setting, Resdayn.Codex.Mechanics.GameSetting,
-      attribute_type: :string,
-      allow_nil?: false
+    belongs_to :game_setting, Resdayn.Codex.Mechanics.GameSetting, allow_nil?: false
 
     belongs_to :magic_school, Resdayn.Codex.Characters.Skill,
       attribute_type: :integer,

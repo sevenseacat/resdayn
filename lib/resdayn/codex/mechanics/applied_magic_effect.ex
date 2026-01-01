@@ -19,7 +19,7 @@ defmodule Resdayn.Codex.Mechanics.AppliedMagicEffect do
       primary_key?: true,
       allow_nil?: false
 
-    attribute :parent_id, :string,
+    attribute :parent_id, :ci_string,
       primary_key?: true,
       allow_nil?: false
 
@@ -41,7 +41,6 @@ defmodule Resdayn.Codex.Mechanics.AppliedMagicEffect do
   relationships do
     belongs_to :magic_effect, Resdayn.Codex.Mechanics.MagicEffect,
       allow_nil?: false,
-      public?: true,
-      attribute_type: :string
+      public?: true
   end
 end

@@ -22,13 +22,11 @@ defmodule Resdayn.Codex.Characters.Faction.Reaction do
   relationships do
     belongs_to :source, Resdayn.Codex.Characters.Faction,
       allow_nil?: false,
-      attribute_type: :string,
       primary_key?: true,
       public?: true
 
     belongs_to :target, Resdayn.Codex.Characters.Faction,
       allow_nil?: false,
-      attribute_type: :string,
       primary_key?: true,
       public?: true
   end

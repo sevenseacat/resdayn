@@ -22,8 +22,7 @@ defmodule Resdayn.Codex.Characters.Class.Skill do
   relationships do
     belongs_to :class, Resdayn.Codex.Characters.Class,
       primary_key?: true,
-      allow_nil?: false,
-      attribute_type: :string
+      allow_nil?: false
 
     belongs_to :skill, Resdayn.Codex.Characters.Skill,
       primary_key?: true,

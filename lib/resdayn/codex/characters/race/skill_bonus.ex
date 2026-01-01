@@ -27,8 +27,7 @@ defmodule Resdayn.Codex.Characters.Race.SkillBonus do
   relationships do
     belongs_to :race, Resdayn.Codex.Characters.Race,
       primary_key?: true,
-      allow_nil?: false,
-      attribute_type: :string
+      allow_nil?: false
 
     belongs_to :skill, Resdayn.Codex.Characters.Skill,
       primary_key?: true,
