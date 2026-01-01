@@ -48,7 +48,7 @@ defmodule Resdayn.Importer.Runner do
             # === Phase 4: Depends on Race ===
             Record.BodyPart,
             # === Phase 5: Referencable resources (depends on Phase 1-4) ===
-            Record.StaticObject,
+            # Record.StaticObject,
             Record.Activator,
             Record.Light,
             Record.Door,
