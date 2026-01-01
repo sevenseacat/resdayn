@@ -22,7 +22,7 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
   }
 
   alias Resdayn.Codex.Characters.{Skill, Class, Birthsign, Race, BodyPart, Faction}
-  alias Resdayn.Codex.Assets.{Sound, StaticObject, Light, SoundGenerator}
+  alias Resdayn.Codex.Assets.{Sound, Light, SoundGenerator}
 
   alias Resdayn.Codex.Items.{
     Book,
@@ -189,7 +189,7 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
     test "imports magic effect template data correctly" do
       template = Ash.get!(MagicEffectTemplate, 14)
 
-      assert template.game_setting_id == "sEffectFireDamage"
+      assert template.game_setting_id == Ash.CiString.new("sEffectFireDamage")
       assert template.base_cost == 5
       assert template.icon_filename == "s\\Tx_S_fire_damage.tga"
       assert template.color == "#FD8842"
@@ -314,7 +314,7 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
       birthsign = Ash.get!(Birthsign, "Fay")
       assert is_list(birthsign.spells)
       assert length(birthsign.spells) == 1
-      assert hd(birthsign.spells).spell_id == "fay ability"
+      assert hd(birthsign.spells).spell_id == Ash.CiString.new("fay ability")
     end
   end
 
@@ -385,32 +385,6 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
   # Phase 1b: Referencable Resources
   # =============================================================================
 
-  describe "StaticObject (Referencable)" do
-    test "imports correct count" do
-      count = Ash.count!(StaticObject)
-      assert count == 2788, "Expected 2788 static objects, got #{count}"
-    end
-
-    test "imports static object data correctly" do
-      static = Ash.get!(StaticObject, "DoorMarker")
-      assert static.nif_model_filename == "Marker_Arrow.nif"
-      assert static.source_file_ids == ["Morrowind.esm"]
-    end
-
-    test "creates corresponding ReferencableObject" do
-      ref_obj = Ash.get!(ReferencableObject, "DoorMarker")
-      assert ref_obj.type == :static_object
-    end
-
-    test "imports all static objects with ReferencableObject entries" do
-      static_count = Ash.count!(StaticObject)
-      ref_count = Ash.count!(ReferencableObject, query: [filter: [type: :static_object]])
-
-      assert static_count == ref_count,
-             "StaticObject count (#{static_count}) should match ReferencableObject count (#{ref_count})"
-    end
-  end
-
   describe "Activator (Referencable)" do
     test "imports correct count" do
       count = Ash.count!(Activator)
@@ -421,7 +395,7 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
       activator = Ash.get!(Activator, "tavern sign")
       assert activator.name == "Imperial Tavern"
       assert activator.nif_model_filename == "x\\Furn_sign_inn_01.NIF"
-      assert activator.script_id == "SignRotate"
+      assert activator.script_id == Ash.CiString.new("SignRotate")
       assert activator.source_file_ids == ["Morrowind.esm"]
     end
 
@@ -453,7 +427,7 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
       assert light.time == -1
       assert light.value == 0
       assert light.weight == 0.0
-      assert light.sound_id == "Fire 40"
+      assert light.sound_id == Ash.CiString.new("Fire 40")
       assert light.source_file_ids == ["Morrowind.esm"]
     end
 
@@ -714,8 +688,8 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
 
       # Check the join table records
       effect = hd(ingredient.ingredient_effects)
-      assert effect.ingredient_id == "ingred_dreugh_wax_01"
-      assert is_binary(effect.magic_effect_id)
+      assert effect.ingredient_id == Ash.CiString.new("ingred_dreugh_wax_01")
+      assert is_binary(to_string(effect.magic_effect_id))
 
       # Check the many-to-many relationship also works
       assert length(ingredient.magic_effects) == 4
@@ -865,7 +839,9 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
 
     test "imports body part data correctly" do
       parts = Ash.read!(BodyPart)
-      part = Enum.find(parts, fn p -> p.race_id == "Breton" and p.type == :hair end)
+
+      part =
+        Enum.find(parts, fn p -> p.race_id == Ash.CiString.new("Breton") and p.type == :hair end)
 
       assert part != nil
       assert part.equipment_type == :skin
@@ -906,7 +882,7 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
 
     test "imports sound generator data correctly" do
       sound_gen = Ash.get!(SoundGenerator, "DEFAULT0001")
-      assert sound_gen.sound_id == "FootBareRight"
+      assert sound_gen.sound_id == Ash.CiString.new("FootBareRight")
       assert sound_gen.sound_type == :right_foot
       assert sound_gen.source_file_ids == ["Morrowind.esm"]
     end
@@ -963,7 +939,7 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
       region = Ash.get!(Region, "Bitter Coast Region")
       assert region.name == "Bitter Coast Region"
       assert region.map_color == "#2227FF"
-      assert region.disturb_sleep_creature_id == "ex_bittercoast_sleep"
+      assert region.disturb_sleep_creature_id == Ash.CiString.new("ex_bittercoast_sleep")
       assert region.source_file_ids == ["Morrowind.esm"]
     end
 
@@ -1114,9 +1090,9 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
       npc = Ash.get!(NPC, "todd")
       assert npc.name == "Todd's Super Tester Guy"
       assert npc.level == 35
-      assert npc.race_id == "Dark Elf"
-      assert npc.class_id == "Guard"
-      assert npc.faction_id == "Blades"
+      assert npc.race_id == Ash.CiString.new("Dark Elf")
+      assert npc.class_id == Ash.CiString.new("Guard")
+      assert npc.faction_id == Ash.CiString.new("Blades")
       assert npc.gold == 10000
       assert npc.source_file_ids == ["Morrowind.esm"]
     end
@@ -1166,7 +1142,7 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
       assert length(npc.transport_options) == 4
 
       # Find destination by cell_id instead of relying on ordering
-      destination = Enum.find(npc.transport_options, &(&1.cell_id == "-3,-3"))
+      destination = Enum.find(npc.transport_options, &(&1.cell_id == Ash.CiString.new("-3,-3")))
       assert destination != nil
 
       assert destination.coordinates.position.x == Decimal.new("-21318.73")
@@ -1228,7 +1204,10 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
 
       # qorwynn should be in the list as master enchanter (skill_id 9)
       qorwynn_enchant =
-        Enum.find(master_trainers, &(&1.npc_id == "qorwynn" and &1.skill_id == 9))
+        Enum.find(
+          master_trainers,
+          &(&1.npc_id == Ash.CiString.new("qorwynn") and &1.skill_id == 9)
+        )
 
       assert qorwynn_enchant != nil
       assert qorwynn_enchant.skill.name == "Enchant"
@@ -1258,7 +1237,7 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
       cell = Ash.get!(Resdayn.Codex.World.Cell, "0,0")
 
       assert cell.grid_position == [0, 0]
-      assert cell.region_id == "Ashlands Region"
+      assert cell.region_id == Ash.CiString.new("Ashlands Region")
       assert cell.source_file_ids == ["Morrowind.esm"]
     end
 
@@ -1310,14 +1289,16 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
         |> Ash.Query.load(transport_to: [:cell])
         |> Ash.read_one!()
 
-      assert reference.transport_to.cell_id == "-3,12"
+      assert reference.transport_to.cell_id == Ash.CiString.new("-3,12")
       assert reference.transport_to.cell.name == "Maar Gan"
     end
 
     test "imports total reference count" do
       count = Ash.count!(Resdayn.Codex.World.Cell.CellReference)
       # Morrowind.esm has ~316k references
-      assert count == 316_116, "Expected 316,116 references, got #{count}"
+      # assert count == 316_116, "Expected 316,116 references, got #{count}"
+      # But only ~117k references excluding statics
+      assert count == 117_111, "Expected 117,111 references, got #{count}"
     end
   end
 
@@ -1571,23 +1552,23 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
       # This triggers the bug because prepare_for_insert won't add the key to the
       # prepared map if the value is nil/missing
       first_ref_data = %{
-        id: ref_without_transport.id,
-        reference_id: ref_without_transport.reference_id,
+        id: to_string(ref_without_transport.id),
+        reference_id: to_string(ref_without_transport.reference_id),
         coordinates: ref_without_transport.coordinates
         # transport_to key is intentionally OMITTED, not set to nil
       }
 
       records = [
         %{
-          id: ref_without_transport.cell_id,
+          id: to_string(ref_without_transport.cell_id),
           new_references: [first_ref_data]
         },
         %{
-          id: ref_with_transport.cell_id,
+          id: to_string(ref_with_transport.cell_id),
           new_references: [
             %{
-              id: ref_with_transport.id,
-              reference_id: ref_with_transport.reference_id,
+              id: to_string(ref_with_transport.id),
+              reference_id: to_string(ref_with_transport.reference_id),
               coordinates: ref_with_transport.coordinates,
               # Change the transport coordinates to verify update works
               transport_to: %{
