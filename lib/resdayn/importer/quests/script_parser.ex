@@ -35,14 +35,6 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
     {name, Enum.reverse(locals), lines}
   end
 
-  def extract_journal_commands(content) when is_binary(content) do
-    content
-    |> parse_input()
-    |> parse_lines()
-    |> finalize_current_block()
-    |> Map.get(:journal_commands)
-  end
-
   # ============================================================================
   # Line Parser
   # ============================================================================
@@ -123,142 +115,194 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
   end
 
   # ============================================================================
-  # Stack-Based Line Parser
+  # Recursive walker to collect journal commands
   # ============================================================================
 
-  defp parse_lines(lines) do
-    initial = %{
-      local_vars: [],
-      condition_stack: [],
-      # Stack of {block_effects, block_journals} for each nesting level
-      block_stack: [],
-      # Current block's effects and journals
-      current_block_effects: [],
-      current_block_journals: [],
-      # Final output
-      journal_commands: []
+  def extract_journal_commands(content, script_map \\ %{}, opts \\ [])
+
+  def extract_journal_commands(content, script_map, opts) when is_binary(content) do
+    extract_journal_commands(parse(content), script_map, opts)
+  end
+
+  def extract_journal_commands(ast, script_map, opts) do
+    state = %{
+      conditions: [],
+      inherited_effects: [],
+      journals: [],
+      script_map: script_map,
+      follow_scripts: Keyword.get(opts, :follow_scripts, false),
+      visited: MapSet.new()
     }
 
-    Enum.reduce(lines, initial, &parse_line/2)
-  end
+    result = walk_body(ast.body, state)
 
-  defp parse_line(line, state) do
-    cond do
-      # New local variable
-      String.starts_with?(line, "short") || String.starts_with?(line, "float") ->
-        [_, name] = Regex.split(~r/\s+/, line)
-        Map.update!(state, :local_vars, &[name | &1])
-
-      # Start of a new block
-      String.starts_with?(line, "if") and String.contains?(line, "(") ->
-        case parse_condition(line, state.local_vars) do
-          nil -> state
-          condition -> push_block(state, condition)
-        end
-
-      # End of a block
-      String.starts_with?(line, "elseif") ->
-        case parse_condition(line) do
-          nil -> pop_condition(state)
-          condition -> state |> pop_condition() |> push_condition(condition)
-        end
-
-      # End of a block
-      String.starts_with?(line, "endif") ->
-        state
-        |> finalize_current_block()
-        |> pop_block()
-
-      # Journal command - the bit we care about most
-      String.starts_with?(line, "journal") ->
-        handle_journal_command(state, line)
-
-      # Effect commands
-      true ->
-        case parse_effect(line) do
-          nil -> state
-          effect -> add_block_effects(state, [effect])
-        end
-    end
-  end
-
-  defp handle_journal_command(state, line) do
-    case parse_journal_command(line) do
-      nil ->
-        raise "Expected to get a journal command in line '#{inspect(line)}' but did not??"
-
-      {quest_id, index} ->
-        journal = %{
-          quest_id: quest_id,
-          index: index,
-          conditions: state.condition_stack
-        }
-
-        %{state | current_block_journals: state.current_block_journals ++ [journal]}
-    end
-  end
-
-  defp add_block_effects(state, effects) do
-    %{state | current_block_effects: state.current_block_effects ++ effects}
-  end
-
-  # Attach all block effects to all block journals and move to final output
-  defp finalize_current_block(state) do
-    if state.current_block_journals == [] do
-      %{state | current_block_effects: []}
-    else
-      # Attach effects to all journals in this block
-      finalized_journals =
-        Enum.map(state.current_block_journals, fn journal ->
-          Map.put(journal, :effects, state.current_block_effects)
+    # This still has the start_script/stop_script commands in it
+    # Strip them out as we don't need them
+    result.journals
+    |> Enum.map(fn entry ->
+      Map.update!(entry, :effects, fn effects ->
+        Enum.reject(effects, fn effect ->
+          effect.type in [:start_script, :stop_script]
         end)
-
-      %{
-        state
-        | journal_commands: state.journal_commands ++ finalized_journals,
-          current_block_effects: [],
-          current_block_journals: []
-      }
-    end
+      end)
+    end)
   end
 
-  defp push_block(state, condition) do
-    %{
-      state
-      | condition_stack: state.condition_stack ++ [condition],
-        block_stack:
-          state.block_stack ++ [{state.current_block_effects, state.current_block_journals}],
-        current_block_effects: state.current_block_effects,
-        current_block_journals: []
-    }
+  # Walk a list of AST nodes (a block body)
+  #
+  # Two-pass approach:
+  # 1. First pass: collect ALL effects at this level (including from StartScript)
+  # 2. Second pass: create journal entries and recurse into nested blocks
+  #
+  # This is done in two passes because nested blocks should only get the effects
+  # that appear before the block, but effects after the nested block should get
+  # all the effects from the same level
+  defp walk_body(nodes, state) do
+    # Pass 1: Collect all effects at this level
+    {level_effects, state} = collect_effects(nodes, state)
+
+    # All effects for journals at this level = inherited + this level's
+    all_effects = state.inherited_effects ++ level_effects
+
+    # Pass 2: Process journals and recurse into nested blocks
+    # For nested blocks, we pass cumulative effects up to that point
+    {final_state, _cumulative} =
+      Enum.reduce(nodes, {state, state.inherited_effects}, fn node, {s, cumulative} ->
+        case node do
+          %Script.Journal{} = journal ->
+            entry = %{
+              quest_id: journal.quest_id,
+              index: journal.index,
+              conditions: s.conditions,
+              effects: all_effects
+            }
+
+            {%{s | journals: s.journals ++ [entry]}, cumulative}
+
+          %Script.IfBlock{} = block ->
+            # Nested block inherits effects accumulated SO FAR (not all level effects)
+            s = walk_if_block(block, %{s | inherited_effects: cumulative})
+            {s, cumulative}
+
+          %Script.Effect{} = effect ->
+            # Add to cumulative for future nested blocks
+            effect_data = Map.put(effect.data, :type, effect.type)
+            {s, cumulative ++ [effect_data]}
+
+          _ ->
+            {s, cumulative}
+        end
+      end)
+
+    final_state
   end
 
-  defp pop_block(%{block_stack: stack} = state) do
-    case List.last(stack) do
-      # Accounting for the *66* buggy scripts in the Morrowind game data
-      # that have extra endif statements... what the hell?
+  # Collect all effects at this level, following StartScript if enabled
+  defp collect_effects(nodes, state) do
+    Enum.reduce(nodes, {[], state}, fn node, {effects, s} ->
+      case node do
+        %Script.Effect{} = effect ->
+          effect_data = Map.put(effect.data, :type, effect.type)
+
+          # Follow StartScript and collect its top-level effects
+          {followed_effects, s} =
+            if effect.type == :start_script and s.follow_scripts do
+              collect_from_start_script(effect.data.script_id, s)
+            else
+              {[], s}
+            end
+
+          {effects ++ [effect_data] ++ followed_effects, s}
+
+        _ ->
+          {effects, s}
+      end
+    end)
+  end
+
+  defp walk_if_block(%Script.IfBlock{} = block, state) do
+    # Process the "if" branch
+    state = process_branch(block.condition, block.body, state)
+
+    # Process else clause if present
+    case block.else_clause do
       nil ->
         state
 
-      {prev_effects, prev_journals} ->
-        %{
-          state
-          | condition_stack: Enum.drop(state.condition_stack, -1),
-            block_stack: Enum.drop(stack, -1),
-            current_block_effects: prev_effects,
-            current_block_journals: prev_journals
-        }
+      %Script.IfBlock{} = elseif_block ->
+        walk_if_block(elseif_block, state)
+
+      else_body when is_list(else_body) ->
+        process_branch(nil, else_body, state)
     end
   end
 
-  defp pop_condition(%{condition_stack: []} = state), do: state
+  # Process a branch (if body, elseif body, or else body)
+  defp process_branch(condition, body, state) do
+    child_conditions =
+      if condition do
+        state.conditions ++ [condition]
+      else
+        state.conditions
+      end
 
-  defp pop_condition(%{condition_stack: stack} = state) do
-    %{state | condition_stack: Enum.drop(stack, -1)}
+    child_state = %{
+      state
+      | conditions: child_conditions,
+        journals: []
+    }
+
+    result = walk_body(body, child_state)
+
+    # Merge child's journals into parent (effects don't leak back up)
+    %{state | journals: state.journals ++ result.journals}
   end
 
-  defp push_condition(state, condition) do
-    %{state | condition_stack: state.condition_stack ++ [condition]}
+  # Follow a StartScript and collect its top-level effects only
+  defp collect_from_start_script(script_id, state) do
+    script_key = String.downcase(script_id)
+
+    if MapSet.member?(state.visited, script_key) do
+      {[], state}
+    else
+      case Map.get(state.script_map, script_key) do
+        nil ->
+          {[], state}
+
+        script_text when is_binary(script_text) ->
+          ast = parse(script_text)
+          collect_top_level_effects(ast.body, state, script_key)
+
+        %{body: body} ->
+          collect_top_level_effects(body, state, script_key)
+      end
+    end
+  end
+
+  # Collect only TOP-LEVEL effects from a script body (don't recurse into if blocks)
+  defp collect_top_level_effects(body, state, script_key) do
+    state = %{state | visited: MapSet.put(state.visited, script_key)}
+
+    Enum.reduce(body, {[], state}, fn node, {effects, s} ->
+      case node do
+        %Script.Effect{} = effect ->
+          effect_data = Map.put(effect.data, :type, effect.type)
+
+          # Recursively follow nested StartScripts
+          {followed, s} =
+            if effect.type == :start_script and s.follow_scripts do
+              collect_from_start_script(effect.data.script_id, s)
+            else
+              {[], s}
+            end
+
+          {effects ++ [effect_data] ++ followed, s}
+
+        # Ignore IfBlocks and Journals in called scripts
+        _ ->
+          {effects, s}
+      end
+    end)
   end
 
   # ============================================================================

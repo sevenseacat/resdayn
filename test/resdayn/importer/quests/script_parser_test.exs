@@ -847,6 +847,45 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
                  }
                ])
     end
+
+    test "secondary scripts started with StartScript are followed" do
+      main_script = """
+      Journal "TG_LootAldruhnMG" 10
+      StartScript "TG_LootMG"
+      """
+
+      helper_script = """
+      Begin TG_LootMG
+
+      "Erranil"->Disable
+      "Movis Darys"->Disable
+      "Edwinna Elbert"->Disable
+
+      stopScript TG_LootMG
+
+      End
+      """
+
+      expected =
+        ScriptParser.extract_journal_commands(
+          main_script,
+          %{"tg_lootmg" => helper_script},
+          follow_scripts: true
+        )
+
+      assert expected == [
+               %{
+                 index: 10,
+                 quest_id: "tg_lootaldruhnmg",
+                 conditions: [],
+                 effects: [
+                   %{type: :disable, subject: "erranil"},
+                   %{type: :disable, subject: "movis darys"},
+                   %{type: :disable, subject: "edwinna elbert"}
+                 ]
+               }
+             ]
+    end
   end
 
   describe "parse_journal_command" do
