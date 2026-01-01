@@ -6,7 +6,10 @@ defmodule Resdayn.Codex.Mechanics do
     resource __MODULE__.AppliedMagicEffect
     resource __MODULE__.Attribute
     resource __MODULE__.DataFile
-    resource __MODULE__.GameSetting
+
+    resource __MODULE__.GameSetting do
+      define :get_game_setting_by_id, action: :read, get_by: :id
+    end
 
     resource __MODULE__.MagicEffect do
       define :list_magic_effects, action: :read
