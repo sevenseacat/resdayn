@@ -1,18 +1,545 @@
 defmodule Resdayn.Importer.Quests.ScriptParserTest do
   use Resdayn.DataCase, async: true
 
-  alias Resdayn.Importer.Quests.ScriptParser
+  alias Resdayn.Importer.Quests.{Script, ScriptParser}
+
+  @script_simple """
+  Journal "MV_DeadTaxman" 100
+  RemoveItem "Gold_001" 500
+  Player->AddItem "Gold_001" 500
+  Goodbye
+  """
+
+  @script_single_condition """
+  if ( GetJournalIndex "MV_SlaveMule" <= 100 )
+    Journal "MV_SlaveMule" 101
+  endif
+  """
+
+  @script_else """
+  if ( GetJournalIndex "Quest" == 10 )
+    Journal "Quest" 20
+  else
+    Journal "Quest" 30
+  endif
+  """
+
+  @script_elseif """
+  if ( GetJournalIndex "MV_SlaveMule" <= 100 )
+    Journal "MV_SlaveMule" 101
+  elseif ( GetJournalIndex "MV_SlaveMule" == 102 )
+    Journal "MV_SlaveMule" 103
+  endif
+  """
+
+  @script_nested_conditions """
+  if ( GetJournalIndex B5_RedoranHort >= 50 )
+    if ( GetJournalIndex B6_HlaaluHort >= 50 )
+      if ( GetJournalIndex B7_TelvanniHort >= 50 )
+        Journal B8_All_Hortator 50
+      endif
+    endif
+  endif
+  """
+
+  @script_death_condition """
+  if ( GetDeadCount "Ahnia" > 0 )
+    if ( GetJournalIndex "MS_ScrollSales" > 0 )
+      if ( GetJournalIndex "MS_ScrollSales" < 40 )
+        Journal MS_ScrollSales 40
+      endif
+    endif
+  endif
+  """
+
+  @script_multiple_quests """
+  if ( GetJournalIndex C3_DestroyDagoth == 20 )
+    Journal C3_DestroyDagoth 50
+    Journal A1_SleepersAwake 50
+  endif
+  """
+
+  @script_effects_before_journal """
+  if ( GetJournalIndex "MV_SlaveMule" <= 100 )
+    AddItem "Ingred_Moon_Sugar_01" 20
+    Journal "MV_SlaveMule" 101
+  endif
+  """
+
+  @script_effects_before_and_after """
+  if ( GetJournalIndex "MV_SlaveMule" <= 100 )
+    AddItem "Ingred_Moon_Sugar_01" 20
+    Journal "MV_SlaveMule" 101
+    ModDisposition 15
+  endif
+  """
+
+  @script_shared_effects """
+  if ( GetJournalIndex C3_DestroyDagoth == 20 )
+    "ring of azura"->Enable
+    Journal C3_DestroyDagoth 50
+    Journal A1_SleepersAwake 50
+    ModReputation 10
+  endif
+  """
+
+  @script_different_blocks """
+  if ( GetJournalIndex Quest < 50 )
+    AddItem "reward1" 1
+    Journal Quest 50
+  endif
+
+  if ( GetJournalIndex Quest >= 50 )
+    AddItem "reward2" 1
+    Journal Quest 100
+  endif
+  """
+
+  @script_pc_cell_condition """
+  begin ScriptPcCellCondition
+
+  short currentCell
+  long longtimeago
+
+  if ( GetPCCell "Ebonheart, Argonian Mission" == 1 )
+    Journal MV_SlaveMule 114
+  endif
+
+  end
+  """
+
+  @script_on_death_condition """
+  if ( OnDeath == 1 )
+    Journal "SomeQuest" 50
+  endif
+  """
+
+  @script_hierarchical_levels """
+  if ( GetJournalIndex MainQuest >= 10 )
+    AddTopic "rumors"
+    if ( GetDeadCount "villain" >= 1 )
+      Player->AddItem "gold_001" 500
+      Journal MainQuest 20
+      if ( GetItemCount "secret_note" >= 1 )
+        Journal SideQuest 10
+        AddTopic "secret"
+      endif
+      ModPCFacRep 5 "Fighters Guild"
+      Journal MainQuest 30
+    endif
+    Journal MainQuest 15
+  endif
+  """
+
+  @script_with_start_script """
+  Journal "Quest" 20
+  StartScript "OtherScript"
+  """
+
+  describe "parse" do
+    test "simple scripts" do
+      expected = %Script.Ast{
+        name: nil,
+        locals: [],
+        body: [
+          %Script.Journal{quest_id: "mv_deadtaxman", index: 100},
+          %Script.Effect{
+            type: :remove_item,
+            data: %{subject: :self, item_id: "gold_001", count: 500}
+          },
+          %Script.Effect{
+            type: :add_item,
+            data: %{subject: :player, item_id: "gold_001", count: 500}
+          },
+          %Script.Effect{type: :goodbye, data: %{}}
+        ]
+      }
+
+      assert ScriptParser.parse(@script_simple) == expected
+    end
+
+    test "script with single condition" do
+      expected = %Script.Ast{
+        name: nil,
+        locals: [],
+        body: [
+          %Script.IfBlock{
+            condition: %{type: :journal_index, target: "mv_slavemule", operator: :<=, value: 100},
+            body: [
+              %Script.Journal{quest_id: "mv_slavemule", index: 101}
+            ],
+            else_clause: nil
+          }
+        ]
+      }
+
+      assert ScriptParser.parse(@script_single_condition) == expected
+    end
+
+    test "script with else" do
+      expected = %Script.Ast{
+        name: nil,
+        locals: [],
+        body: [
+          %Script.IfBlock{
+            condition: %{type: :journal_index, target: "quest", operator: :==, value: 10},
+            body: [
+              %Script.Journal{quest_id: "quest", index: 20}
+            ],
+            else_clause: [
+              %Script.Journal{quest_id: "quest", index: 30}
+            ]
+          }
+        ]
+      }
+
+      assert ScriptParser.parse(@script_else) == expected
+    end
+
+    test "script with elseif" do
+      expected = %Script.Ast{
+        name: nil,
+        locals: [],
+        body: [
+          %Script.IfBlock{
+            condition: %{type: :journal_index, target: "mv_slavemule", operator: :<=, value: 100},
+            body: [
+              %Script.Journal{quest_id: "mv_slavemule", index: 101}
+            ],
+            else_clause: %Script.IfBlock{
+              condition: %{
+                type: :journal_index,
+                target: "mv_slavemule",
+                operator: :==,
+                value: 102
+              },
+              body: [
+                %Script.Journal{quest_id: "mv_slavemule", index: 103}
+              ],
+              else_clause: nil
+            }
+          }
+        ]
+      }
+
+      assert ScriptParser.parse(@script_elseif) == expected
+    end
+
+    test "script with nested conditions" do
+      expected = %Script.Ast{
+        name: nil,
+        locals: [],
+        body: [
+          %Script.IfBlock{
+            condition: %{type: :journal_index, target: "b5_redoranhort", operator: :>=, value: 50},
+            body: [
+              %Script.IfBlock{
+                condition: %{
+                  type: :journal_index,
+                  target: "b6_hlaaluhort",
+                  operator: :>=,
+                  value: 50
+                },
+                body: [
+                  %Script.IfBlock{
+                    condition: %{
+                      type: :journal_index,
+                      target: "b7_telvannihort",
+                      operator: :>=,
+                      value: 50
+                    },
+                    body: [
+                      %Script.Journal{quest_id: "b8_all_hortator", index: 50}
+                    ],
+                    else_clause: nil
+                  }
+                ],
+                else_clause: nil
+              }
+            ],
+            else_clause: nil
+          }
+        ]
+      }
+
+      assert ScriptParser.parse(@script_nested_conditions) == expected
+    end
+
+    test "script with death condition" do
+      expected = %Script.Ast{
+        name: nil,
+        locals: [],
+        body: [
+          %Script.IfBlock{
+            condition: %{type: :dead_count, target: "ahnia", operator: :>, value: 0},
+            body: [
+              %Script.IfBlock{
+                condition: %{
+                  type: :journal_index,
+                  target: "ms_scrollsales",
+                  operator: :>,
+                  value: 0
+                },
+                body: [
+                  %Script.IfBlock{
+                    condition: %{
+                      type: :journal_index,
+                      target: "ms_scrollsales",
+                      operator: :<,
+                      value: 40
+                    },
+                    body: [
+                      %Script.Journal{quest_id: "ms_scrollsales", index: 40}
+                    ],
+                    else_clause: nil
+                  }
+                ],
+                else_clause: nil
+              }
+            ],
+            else_clause: nil
+          }
+        ]
+      }
+
+      assert ScriptParser.parse(@script_death_condition) == expected
+    end
+
+    test "script with multiple quests" do
+      expected = %Script.Ast{
+        name: nil,
+        locals: [],
+        body: [
+          %Script.IfBlock{
+            condition: %{
+              type: :journal_index,
+              target: "c3_destroydagoth",
+              operator: :==,
+              value: 20
+            },
+            body: [
+              %Script.Journal{quest_id: "c3_destroydagoth", index: 50},
+              %Script.Journal{quest_id: "a1_sleepersawake", index: 50}
+            ],
+            else_clause: nil
+          }
+        ]
+      }
+
+      assert ScriptParser.parse(@script_multiple_quests) == expected
+    end
+
+    test "script with effects before journal" do
+      expected = %Script.Ast{
+        name: nil,
+        locals: [],
+        body: [
+          %Script.IfBlock{
+            condition: %{type: :journal_index, target: "mv_slavemule", operator: :<=, value: 100},
+            body: [
+              %Script.Effect{
+                type: :add_item,
+                data: %{subject: :self, item_id: "ingred_moon_sugar_01", count: 20}
+              },
+              %Script.Journal{quest_id: "mv_slavemule", index: 101}
+            ],
+            else_clause: nil
+          }
+        ]
+      }
+
+      assert ScriptParser.parse(@script_effects_before_journal) == expected
+    end
+
+    test "script with effects before and after journal" do
+      expected = %Script.Ast{
+        name: nil,
+        locals: [],
+        body: [
+          %Script.IfBlock{
+            condition: %{type: :journal_index, target: "mv_slavemule", operator: :<=, value: 100},
+            body: [
+              %Script.Effect{
+                type: :add_item,
+                data: %{subject: :self, item_id: "ingred_moon_sugar_01", count: 20}
+              },
+              %Script.Journal{quest_id: "mv_slavemule", index: 101},
+              %Script.Effect{type: :mod_disposition, data: %{subject: :self, value: 15}}
+            ],
+            else_clause: nil
+          }
+        ]
+      }
+
+      assert ScriptParser.parse(@script_effects_before_and_after) == expected
+    end
+
+    test "script with shared effects" do
+      expected = %Script.Ast{
+        name: nil,
+        locals: [],
+        body: [
+          %Script.IfBlock{
+            condition: %{
+              type: :journal_index,
+              target: "c3_destroydagoth",
+              operator: :==,
+              value: 20
+            },
+            body: [
+              %Script.Effect{type: :enable, data: %{subject: "ring of azura"}},
+              %Script.Journal{quest_id: "c3_destroydagoth", index: 50},
+              %Script.Journal{quest_id: "a1_sleepersawake", index: 50},
+              %Script.Effect{type: :mod_reputation, data: %{subject: :self, value: 10}}
+            ],
+            else_clause: nil
+          }
+        ]
+      }
+
+      assert ScriptParser.parse(@script_shared_effects) == expected
+    end
+
+    test "script with different blocks" do
+      expected = %Script.Ast{
+        name: nil,
+        locals: [],
+        body: [
+          %Script.IfBlock{
+            condition: %{type: :journal_index, target: "quest", operator: :<, value: 50},
+            body: [
+              %Script.Effect{
+                type: :add_item,
+                data: %{subject: :self, item_id: "reward1", count: 1}
+              },
+              %Script.Journal{quest_id: "quest", index: 50}
+            ],
+            else_clause: nil
+          },
+          %Script.IfBlock{
+            condition: %{type: :journal_index, target: "quest", operator: :>=, value: 50},
+            body: [
+              %Script.Effect{
+                type: :add_item,
+                data: %{subject: :self, item_id: "reward2", count: 1}
+              },
+              %Script.Journal{quest_id: "quest", index: 100}
+            ],
+            else_clause: nil
+          }
+        ]
+      }
+
+      assert ScriptParser.parse(@script_different_blocks) == expected
+    end
+
+    test "script with PCCell condition (and supports)" do
+      expected = %Script.Ast{
+        name: "scriptpccellcondition",
+        locals: ["currentcell", "longtimeago"],
+        body: [
+          %Script.IfBlock{
+            condition: %{
+              type: :pc_cell,
+              target: "ebonheart, argonian mission",
+              operator: :==,
+              value: 1
+            },
+            body: [
+              %Script.Journal{quest_id: "mv_slavemule", index: 114}
+            ],
+            else_clause: nil
+          }
+        ]
+      }
+
+      assert ScriptParser.parse(@script_pc_cell_condition) == expected
+    end
+
+    test "script with OnDeath condition" do
+      expected = %Script.Ast{
+        name: nil,
+        locals: [],
+        body: [
+          %Script.IfBlock{
+            condition: %{type: :on_death, subject: :self, operator: :==, value: 1},
+            body: [
+              %Script.Journal{quest_id: "somequest", index: 50}
+            ],
+            else_clause: nil
+          }
+        ]
+      }
+
+      assert ScriptParser.parse(@script_on_death_condition) == expected
+    end
+
+    test "script with hierarchical conditions" do
+      expected = %Script.Ast{
+        name: nil,
+        locals: [],
+        body: [
+          %Script.IfBlock{
+            condition: %{type: :journal_index, target: "mainquest", operator: :>=, value: 10},
+            body: [
+              %Script.Effect{type: :add_topic, data: %{topic_id: "rumors"}},
+              %Script.IfBlock{
+                condition: %{type: :dead_count, target: "villain", operator: :>=, value: 1},
+                body: [
+                  %Script.Effect{
+                    type: :add_item,
+                    data: %{subject: :player, item_id: "gold_001", count: 500}
+                  },
+                  %Script.Journal{quest_id: "mainquest", index: 20},
+                  %Script.IfBlock{
+                    condition: %{
+                      type: :item_count,
+                      subject: :self,
+                      target: "secret_note",
+                      operator: :>=,
+                      value: 1
+                    },
+                    body: [
+                      %Script.Journal{quest_id: "sidequest", index: 10},
+                      %Script.Effect{type: :add_topic, data: %{topic_id: "secret"}}
+                    ],
+                    else_clause: nil
+                  },
+                  %Script.Effect{
+                    type: :mod_faction_reputation,
+                    data: %{faction_id: "fighters guild", value: 5}
+                  },
+                  %Script.Journal{quest_id: "mainquest", index: 30}
+                ],
+                else_clause: nil
+              },
+              %Script.Journal{quest_id: "mainquest", index: 15}
+            ],
+            else_clause: nil
+          }
+        ]
+      }
+
+      assert ScriptParser.parse(@script_hierarchical_levels) == expected
+    end
+
+    test "script with start script" do
+      expected = %Script.Ast{
+        name: nil,
+        locals: [],
+        body: [
+          %Script.Journal{quest_id: "quest", index: 20},
+          %Script.Effect{type: :start_script, data: %{script_id: "otherscript"}}
+        ]
+      }
+
+      assert ScriptParser.parse(@script_with_start_script) == expected
+    end
+  end
 
   describe "extract_journal_commands" do
     test "simple scripts" do
-      script = """
-      Journal "MV_DeadTaxman" 100
-      RemoveItem "Gold_001" 500
-      Player->AddItem "Gold_001" 500
-      Goodbye
-      """
-
-      actual = ScriptParser.extract_journal_commands(script)
+      actual = ScriptParser.extract_journal_commands(@script_simple)
 
       assert actual == [
                %{
@@ -29,13 +556,7 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
     end
 
     test "script with single condition" do
-      script = """
-      if ( GetJournalIndex "MV_SlaveMule" <= 100 )
-        Journal "MV_SlaveMule" 101
-      endif
-      """
-
-      actual = ScriptParser.extract_journal_commands(script)
+      actual = ScriptParser.extract_journal_commands(@script_single_condition)
 
       assert actual == [
                %{
@@ -55,15 +576,7 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
     end
 
     test "script with elseif pops previous condition" do
-      script = """
-      if ( GetJournalIndex "MV_SlaveMule" <= 100 )
-        Journal "MV_SlaveMule" 101
-      elseif ( GetJournalIndex "MV_SlaveMule" == 102 )
-        Journal "MV_SlaveMule" 103
-      endif
-      """
-
-      actual = ScriptParser.extract_journal_commands(script)
+      actual = ScriptParser.extract_journal_commands(@script_elseif)
 
       assert actual == [
                %{
@@ -91,17 +604,7 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
     end
 
     test "script with nested conditions" do
-      script = """
-      if ( GetJournalIndex B5_RedoranHort >= 50 )
-        if ( GetJournalIndex B6_HlaaluHort >= 50 )
-          if ( GetJournalIndex B7_TelvanniHort >= 50 )
-            Journal B8_All_Hortator 50
-          endif
-        endif
-      endif
-      """
-
-      actual = ScriptParser.extract_journal_commands(script)
+      actual = ScriptParser.extract_journal_commands(@script_nested_conditions)
 
       assert actual == [
                %{
@@ -118,17 +621,7 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
     end
 
     test "script with death condition" do
-      script = """
-      if ( GetDeadCount "Ahnia" > 0 )
-        if ( GetJournalIndex "MS_ScrollSales" > 0 )
-          if ( GetJournalIndex "MS_ScrollSales" < 40 )
-            Journal MS_ScrollSales 40
-          endif
-        endif
-      endif
-      """
-
-      actual = ScriptParser.extract_journal_commands(script)
+      actual = ScriptParser.extract_journal_commands(@script_death_condition)
 
       assert actual == [
                %{
@@ -145,14 +638,7 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
     end
 
     test "script sets multiple quests" do
-      script = """
-      if ( GetJournalIndex C3_DestroyDagoth == 20 )
-        Journal C3_DestroyDagoth 50
-        Journal A1_SleepersAwake 50
-      endif
-      """
-
-      actual = ScriptParser.extract_journal_commands(script)
+      actual = ScriptParser.extract_journal_commands(@script_multiple_quests)
 
       # Both journals share the same (empty) effects from the block
       assert actual == [
@@ -176,14 +662,7 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
     end
 
     test "script with effects before journal command" do
-      script = """
-      if ( GetJournalIndex "MV_SlaveMule" <= 100 )
-        AddItem "Ingred_Moon_Sugar_01" 20
-        Journal "MV_SlaveMule" 101
-      endif
-      """
-
-      actual = ScriptParser.extract_journal_commands(script)
+      actual = ScriptParser.extract_journal_commands(@script_effects_before_journal)
 
       assert [
                %{
@@ -200,15 +679,7 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
     end
 
     test "script with effects before and after journal command" do
-      script = """
-      if ( GetJournalIndex "MV_SlaveMule" <= 100 )
-        AddItem "Ingred_Moon_Sugar_01" 20
-        Journal "MV_SlaveMule" 101
-        ModDisposition 15
-      endif
-      """
-
-      actual = ScriptParser.extract_journal_commands(script)
+      actual = ScriptParser.extract_journal_commands(@script_effects_before_and_after)
 
       assert [
                %{
@@ -226,16 +697,7 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
     end
 
     test "script with multiple quests shares block effects" do
-      script = """
-      if ( GetJournalIndex C3_DestroyDagoth == 20 )
-        "ring of azura"->Enable
-        Journal C3_DestroyDagoth 50
-        Journal A1_SleepersAwake 50
-        ModReputation 10
-      endif
-      """
-
-      actual = ScriptParser.extract_journal_commands(script)
+      actual = ScriptParser.extract_journal_commands(@script_shared_effects)
 
       # Both journals get all effects from the block
       assert [
@@ -265,19 +727,7 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
     end
 
     test "different blocks have different effects" do
-      script = """
-      if ( GetJournalIndex Quest < 50 )
-        AddItem "reward1" 1
-        Journal Quest 50
-      endif
-
-      if ( GetJournalIndex Quest >= 50 )
-        AddItem "reward2" 1
-        Journal Quest 100
-      endif
-      """
-
-      actual = ScriptParser.extract_journal_commands(script)
+      actual = ScriptParser.extract_journal_commands(@script_different_blocks)
 
       assert [
                %{
@@ -298,13 +748,7 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
     end
 
     test "script with GetPCCell condition" do
-      script = """
-      if ( GetPCCell "Ebonheart, Argonian Mission" == 1 )
-        Journal MV_SlaveMule 114
-      endif
-      """
-
-      actual = ScriptParser.extract_journal_commands(script)
+      actual = ScriptParser.extract_journal_commands(@script_pc_cell_condition)
 
       assert actual == [
                %{
@@ -324,13 +768,7 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
     end
 
     test "script with OnDeath condition" do
-      script = """
-      if ( OnDeath == 1 )
-        Journal "SomeQuest" 50
-      endif
-      """
-
-      actual = ScriptParser.extract_journal_commands(script)
+      actual = ScriptParser.extract_journal_commands(@script_on_death_condition)
 
       assert actual == [
                %{
@@ -343,24 +781,7 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
     end
 
     test "journal updates at different hierarchical levels with shared effects" do
-      script = """
-      if ( GetJournalIndex MainQuest >= 10 )
-        AddTopic "rumors"
-        if ( GetDeadCount "villain" >= 1 )
-          Player->AddItem "gold_001" 500
-          Journal MainQuest 20
-          if ( GetItemCount "secret_note" >= 1 )
-            Journal SideQuest 10
-            AddTopic "secret"
-          endif
-          ModPCFacRep 5 "Fighters Guild"
-          Journal MainQuest 30
-        endif
-        Journal MainQuest 15
-      endif
-      """
-
-      actual = ScriptParser.extract_journal_commands(script)
+      actual = ScriptParser.extract_journal_commands(@script_hierarchical_levels)
 
       assert Enum.sort(actual) ==
                Enum.sort([
@@ -449,480 +870,476 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
     end
   end
 
-  describe "parse_effects" do
+  describe "parse_effect" do
     test "AddItem - explicit player subject" do
-      assert [%{count: 200, type: :add_item, subject: :player, item_id: "gold_001"}] =
-               ScriptParser.parse_effects("player->additem \"gold_001\" 200")
+      assert %{count: 200, type: :add_item, subject: :player, item_id: "gold_001"} =
+               ScriptParser.parse_effect("player->additem \"gold_001\" 200")
 
-      assert [%{count: 22, type: :add_item, subject: :player, item_id: "bk_froofroo"}] =
-               ScriptParser.parse_effects("player->additem bk_froofroo 22")
+      assert %{count: 22, type: :add_item, subject: :player, item_id: "bk_froofroo"} =
+               ScriptParser.parse_effect("player->additem bk_froofroo 22")
 
-      assert [%{count: 1, type: :add_item, subject: :player, item_id: "the_thing"}] =
-               ScriptParser.parse_effects("player->additem \"the_thing\"")
+      assert %{count: 1, type: :add_item, subject: :player, item_id: "the_thing"} =
+               ScriptParser.parse_effect("player->additem \"the_thing\"")
     end
 
     test "AddItem - implicit self subject" do
-      assert [%{count: 200, type: :add_item, subject: :self, item_id: "gold_001"}] =
-               ScriptParser.parse_effects("additem \"gold_001\" 200")
+      assert %{count: 200, type: :add_item, subject: :self, item_id: "gold_001"} =
+               ScriptParser.parse_effect("additem \"gold_001\" 200")
 
-      assert [%{count: 22, type: :add_item, subject: :self, item_id: "bk_froofroo"}] =
-               ScriptParser.parse_effects("additem bk_froofroo 22")
+      assert %{count: 22, type: :add_item, subject: :self, item_id: "bk_froofroo"} =
+               ScriptParser.parse_effect("additem bk_froofroo 22")
 
-      assert [%{count: 1, type: :add_item, subject: :self, item_id: "the_thing"}] =
-               ScriptParser.parse_effects("additem \"the_thing\"")
+      assert %{count: 1, type: :add_item, subject: :self, item_id: "the_thing"} =
+               ScriptParser.parse_effect("additem \"the_thing\"")
     end
 
     test "AddItem - explicit NPC subject" do
-      assert [%{count: 200, type: :add_item, subject: "fargoth", item_id: "gold_001"}] =
-               ScriptParser.parse_effects("fargoth->additem \"gold_001\" 200")
+      assert %{count: 200, type: :add_item, subject: "fargoth", item_id: "gold_001"} =
+               ScriptParser.parse_effect("fargoth->additem \"gold_001\" 200")
 
-      assert [%{count: 22, type: :add_item, subject: "arrille", item_id: "bk_froofroo"}] =
-               ScriptParser.parse_effects("\"arrille\"->additem bk_froofroo 22")
+      assert %{count: 22, type: :add_item, subject: "arrille", item_id: "bk_froofroo"} =
+               ScriptParser.parse_effect("\"arrille\"->additem bk_froofroo 22")
 
-      assert [%{count: 1, type: :add_item, subject: "chargen class", item_id: "the_thing"}] =
-               ScriptParser.parse_effects("\"chargen class\"->additem \"the_thing\"")
+      assert %{count: 1, type: :add_item, subject: "chargen class", item_id: "the_thing"} =
+               ScriptParser.parse_effect("\"chargen class\"->additem \"the_thing\"")
     end
 
     test "RemoveItem - explicit player subject" do
-      assert [%{count: 200, type: :remove_item, subject: :player, item_id: "gold_001"}] =
-               ScriptParser.parse_effects("player->removeitem \"gold_001\" 200")
+      assert %{count: 200, type: :remove_item, subject: :player, item_id: "gold_001"} =
+               ScriptParser.parse_effect("player->removeitem \"gold_001\" 200")
 
-      assert [%{count: 22, type: :remove_item, subject: :player, item_id: "bk_froofroo"}] =
-               ScriptParser.parse_effects("player->removeitem bk_froofroo 22")
+      assert %{count: 22, type: :remove_item, subject: :player, item_id: "bk_froofroo"} =
+               ScriptParser.parse_effect("player->removeitem bk_froofroo 22")
 
-      assert [%{count: 1, type: :remove_item, subject: :player, item_id: "the_thing"}] =
-               ScriptParser.parse_effects("player->removeitem \"the_thing\"")
+      assert %{count: 1, type: :remove_item, subject: :player, item_id: "the_thing"} =
+               ScriptParser.parse_effect("player->removeitem \"the_thing\"")
     end
 
     test "RemoveItem - implicit self subject" do
-      assert [%{count: 200, type: :remove_item, subject: :self, item_id: "gold_001"}] =
-               ScriptParser.parse_effects("removeitem \"gold_001\" 200")
+      assert %{count: 200, type: :remove_item, subject: :self, item_id: "gold_001"} =
+               ScriptParser.parse_effect("removeitem \"gold_001\" 200")
 
-      assert [%{count: 22, type: :remove_item, subject: :self, item_id: "bk_froofroo"}] =
-               ScriptParser.parse_effects("removeitem bk_froofroo 22")
+      assert %{count: 22, type: :remove_item, subject: :self, item_id: "bk_froofroo"} =
+               ScriptParser.parse_effect("removeitem bk_froofroo 22")
 
-      assert [%{count: 1, type: :remove_item, subject: :self, item_id: "the_thing"}] =
-               ScriptParser.parse_effects("removeitem \"the_thing\"")
+      assert %{count: 1, type: :remove_item, subject: :self, item_id: "the_thing"} =
+               ScriptParser.parse_effect("removeitem \"the_thing\"")
     end
 
     test "RemoveItem - explicit NPC subject" do
-      assert [%{count: 200, type: :remove_item, subject: "fargoth", item_id: "gold_001"}] =
-               ScriptParser.parse_effects("\"fargoth\"->removeitem \"gold_001\" 200")
+      assert %{count: 200, type: :remove_item, subject: "fargoth", item_id: "gold_001"} =
+               ScriptParser.parse_effect("\"fargoth\"->removeitem \"gold_001\" 200")
 
-      assert [%{count: 22, type: :remove_item, subject: "arrille", item_id: "bk_froofroo"}] =
-               ScriptParser.parse_effects("\"arrille\"->removeitem bk_froofroo 22")
+      assert %{count: 22, type: :remove_item, subject: "arrille", item_id: "bk_froofroo"} =
+               ScriptParser.parse_effect("\"arrille\"->removeitem bk_froofroo 22")
 
-      assert [%{count: 1, type: :remove_item, subject: "chargen class", item_id: "the_thing"}] =
-               ScriptParser.parse_effects("\"chargen class\"->removeitem \"the_thing\"")
+      assert %{count: 1, type: :remove_item, subject: "chargen class", item_id: "the_thing"} =
+               ScriptParser.parse_effect("\"chargen class\"->removeitem \"the_thing\"")
     end
 
     test "Drop - implicit self subject" do
-      assert [%{type: :drop_item, subject: :self, item_id: "slave_bracer_left", count: 1}] =
-               ScriptParser.parse_effects("drop slave_bracer_left 1")
+      assert %{type: :drop_item, subject: :self, item_id: "slave_bracer_left", count: 1} =
+               ScriptParser.parse_effect("drop slave_bracer_left 1")
     end
 
     test "Drop - quoted item id" do
-      assert [%{type: :drop_item, subject: :self, item_id: "slave_bracer_right", count: 1}] =
-               ScriptParser.parse_effects("drop \"slave_bracer_right\" 1")
+      assert %{type: :drop_item, subject: :self, item_id: "slave_bracer_right", count: 1} =
+               ScriptParser.parse_effect("drop \"slave_bracer_right\" 1")
     end
 
     test "ModPCFacRep - positive value" do
-      assert [%{value: 10, type: :mod_faction_reputation, faction_id: "imperial legion"}] =
-               ScriptParser.parse_effects("modpcfacrep 10 \"imperial legion\"")
+      assert %{value: 10, type: :mod_faction_reputation, faction_id: "imperial legion"} =
+               ScriptParser.parse_effect("modpcfacrep 10 \"imperial legion\"")
     end
 
     test "ModPCFacRep - negative value" do
-      assert [%{value: -5, type: :mod_faction_reputation, faction_id: "twin lamps"}] =
-               ScriptParser.parse_effects("modpcfacrep -5 \"twin lamps\"")
+      assert %{value: -5, type: :mod_faction_reputation, faction_id: "twin lamps"} =
+               ScriptParser.parse_effect("modpcfacrep -5 \"twin lamps\"")
     end
 
     test "ModPCFacRep - unquoted faction" do
-      assert [%{value: 5, type: :mod_faction_reputation, faction_id: "temple"}] =
-               ScriptParser.parse_effects("modpcfacrep 5 temple")
+      assert %{value: 5, type: :mod_faction_reputation, faction_id: "temple"} =
+               ScriptParser.parse_effect("modpcfacrep 5 temple")
     end
 
     test "PCRaiseRank - quoted faction" do
-      assert [%{subject: :player, type: :raise_rank, value: "mages guild"}] =
-               ScriptParser.parse_effects("pcraiserank \"mages guild\"")
+      assert %{subject: :player, type: :raise_rank, value: "mages guild"} =
+               ScriptParser.parse_effect("pcraiserank \"mages guild\"")
     end
 
     test "PCRaiseRank - unquoted faction" do
-      assert [%{subject: :player, type: :raise_rank, value: "temple"}] =
-               ScriptParser.parse_effects("pcraiserank temple")
+      assert %{subject: :player, type: :raise_rank, value: "temple"} =
+               ScriptParser.parse_effect("pcraiserank temple")
     end
 
     test "PCRaiseRank - no faction specified" do
-      assert [%{subject: :player, type: :raise_rank, value: nil}] =
-               ScriptParser.parse_effects("pcraiserank")
+      assert %{subject: :player, type: :raise_rank, value: nil} =
+               ScriptParser.parse_effect("pcraiserank")
     end
 
     test "PCJoinFaction - quoted faction" do
-      assert [%{subject: :player, type: :join_faction, value: "morag tong"}] =
-               ScriptParser.parse_effects("pcjoinfaction \"morag tong\"")
+      assert %{subject: :player, type: :join_faction, value: "morag tong"} =
+               ScriptParser.parse_effect("pcjoinfaction \"morag tong\"")
     end
 
     test "PCJoinFaction - unquoted faction" do
-      assert [%{subject: :player, type: :join_faction, value: "ashlanders"}] =
-               ScriptParser.parse_effects("pcjoinfaction ashlanders")
+      assert %{subject: :player, type: :join_faction, value: "ashlanders"} =
+               ScriptParser.parse_effect("pcjoinfaction ashlanders")
     end
 
     test "ModReputation - with player subject" do
-      assert [%{type: :mod_reputation, value: 3}] =
-               ScriptParser.parse_effects("player->modreputation 3")
+      assert %{type: :mod_reputation, value: 3} =
+               ScriptParser.parse_effect("player->modreputation 3")
     end
 
     test "ModDisposition - positive value" do
-      assert [%{subject: :self, type: :mod_disposition, value: 15}] =
-               ScriptParser.parse_effects("moddisposition 15")
+      assert %{subject: :self, type: :mod_disposition, value: 15} =
+               ScriptParser.parse_effect("moddisposition 15")
     end
 
     test "ModDisposition - negative value" do
-      assert [%{subject: :self, type: :mod_disposition, value: -10}] =
-               ScriptParser.parse_effects("moddisposition -10")
+      assert %{subject: :self, type: :mod_disposition, value: -10} =
+               ScriptParser.parse_effect("moddisposition -10")
     end
 
     # Dialogue response ID 234315643133312879 - weird!
     test "ModDisposition - negative value with space" do
-      assert [%{subject: :self, type: :mod_disposition, value: -30}] =
-               ScriptParser.parse_effects("moddisposition - 30")
+      assert %{subject: :self, type: :mod_disposition, value: -30} =
+               ScriptParser.parse_effect("moddisposition - 30")
     end
 
     test "ModDisposition - with explicit subject" do
-      assert [%{subject: "arrille", type: :mod_disposition, value: 40}] =
-               ScriptParser.parse_effects("\"arrille\"->moddisposition 40")
+      assert %{subject: "arrille", type: :mod_disposition, value: 40} =
+               ScriptParser.parse_effect("\"arrille\"->moddisposition 40")
     end
 
     test "ModDisposition - with explicit unquoted subject" do
-      assert [%{subject: "fargoth", type: :mod_disposition, value: 40}] =
-               ScriptParser.parse_effects("fargoth->moddisposition 40")
+      assert %{subject: "fargoth", type: :mod_disposition, value: 40} =
+               ScriptParser.parse_effect("fargoth->moddisposition 40")
     end
 
     test "SetDisposition - without subject" do
-      assert [%{subject: :self, type: :set_disposition, value: 50}] =
-               ScriptParser.parse_effects("setdisposition 50")
+      assert %{subject: :self, type: :set_disposition, value: 50} =
+               ScriptParser.parse_effect("setdisposition 50")
     end
 
     test "SetDisposition - with explicit subject" do
-      assert [%{subject: "bolvyn venim", type: :set_disposition, value: 10}] =
-               ScriptParser.parse_effects("\"bolvyn venim\"->setdisposition 10")
+      assert %{subject: "bolvyn venim", type: :set_disposition, value: 10} =
+               ScriptParser.parse_effect("\"bolvyn venim\"->setdisposition 10")
     end
 
     test "AddTopic - quoted topic" do
-      assert [%{type: :add_topic, topic_id: "murder of processus vitellius"}] =
-               ScriptParser.parse_effects("addtopic \"murder of processus vitellius\"")
+      assert %{type: :add_topic, topic_id: "murder of processus vitellius"} =
+               ScriptParser.parse_effect("addtopic \"murder of processus vitellius\"")
     end
 
     test "AddTopic - with player subject" do
-      assert [%{type: :add_topic, topic_id: "sculptor"}] =
-               ScriptParser.parse_effects("player->addtopic \"sculptor\"")
+      assert %{type: :add_topic, topic_id: "sculptor"} =
+               ScriptParser.parse_effect("player->addtopic \"sculptor\"")
     end
 
     test "AddTopic - extra space after command" do
-      assert [%{type: :add_topic, topic_id: "the star is the key"}] =
-               ScriptParser.parse_effects("addtopic  \"the star is the key\"")
+      assert %{type: :add_topic, topic_id: "the star is the key"} =
+               ScriptParser.parse_effect("addtopic  \"the star is the key\"")
     end
 
     test "Enable - quoted subject" do
-      assert [%{type: :enable, subject: "npc name"}] =
-               ScriptParser.parse_effects("\"npc name\"->enable")
+      assert %{type: :enable, subject: "npc name"} =
+               ScriptParser.parse_effect("\"npc name\"->enable")
     end
 
     test "Enable - unquoted subject" do
-      assert [%{type: :enable, subject: "netch_bull_dead"}] =
-               ScriptParser.parse_effects("netch_bull_dead->enable")
+      assert %{type: :enable, subject: "netch_bull_dead"} =
+               ScriptParser.parse_effect("netch_bull_dead->enable")
     end
 
     test "Disable - quoted subject" do
-      assert [%{type: :disable, subject: "caius cosades"}] =
-               ScriptParser.parse_effects("\"caius cosades\"->disable")
+      assert %{type: :disable, subject: "caius cosades"} =
+               ScriptParser.parse_effect("\"caius cosades\"->disable")
     end
 
     test "Disable - unquoted subject" do
-      assert [%{type: :disable, subject: "ennbjof"}] =
-               ScriptParser.parse_effects("ennbjof->disable")
+      assert %{type: :disable, subject: "ennbjof"} =
+               ScriptParser.parse_effect("ennbjof->disable")
     end
 
     test "AddSpell - without subject" do
-      assert [%{type: :add_spell, subject: :self, value: "corprus"}] =
-               ScriptParser.parse_effects("addspell \"corprus\"")
+      assert %{type: :add_spell, subject: :self, value: "corprus"} =
+               ScriptParser.parse_effect("addspell \"corprus\"")
     end
 
     test "AddSpell - with player subject" do
-      assert [%{type: :add_spell, subject: :player, value: "blight disease immunity"}] =
-               ScriptParser.parse_effects("player->addspell \"blight disease immunity\"")
+      assert %{type: :add_spell, subject: :player, value: "blight disease immunity"} =
+               ScriptParser.parse_effect("player->addspell \"blight disease immunity\"")
     end
 
     test "RemoveSpell - without subject" do
-      assert [%{type: :remove_spell, subject: :self, value: "ash-chancre"}] =
-               ScriptParser.parse_effects("removespell \"ash-chancre\"")
+      assert %{type: :remove_spell, subject: :self, value: "ash-chancre"} =
+               ScriptParser.parse_effect("removespell \"ash-chancre\"")
     end
 
     test "RemoveSpell - with player subject" do
-      assert [%{type: :remove_spell, subject: :player, value: "werewolf blood"}] =
-               ScriptParser.parse_effects("player->removespell \"werewolf blood\"")
+      assert %{type: :remove_spell, subject: :player, value: "werewolf blood"} =
+               ScriptParser.parse_effect("player->removespell \"werewolf blood\"")
     end
 
     test "RemoveSpell - unquoted spell" do
-      assert [%{type: :remove_spell, subject: :player, value: "corprus"}] =
-               ScriptParser.parse_effects("player->removespell corprus")
+      assert %{type: :remove_spell, subject: :player, value: "corprus"} =
+               ScriptParser.parse_effect("player->removespell corprus")
     end
 
     test "ForceGreeting - without subject" do
-      assert [%{type: :force_greeting, subject: :self}] =
-               ScriptParser.parse_effects("forcegreeting")
+      assert %{type: :force_greeting, subject: :self} =
+               ScriptParser.parse_effect("forcegreeting")
     end
 
     test "ForceGreeting - with explicit subject" do
-      assert [%{type: :force_greeting, subject: "ahnia"}] =
-               ScriptParser.parse_effects("\"ahnia\"->forcegreeting")
+      assert %{type: :force_greeting, subject: "ahnia"} =
+               ScriptParser.parse_effect("\"ahnia\"->forcegreeting")
     end
 
     test "Goodbye - ends dialogue" do
-      assert [%{type: :goodbye}] = ScriptParser.parse_effects("goodbye")
+      assert %{type: :goodbye} = ScriptParser.parse_effect("goodbye")
     end
 
     test "SetFight - without subject" do
-      assert [%{type: :set_fight, subject: :self, value: 100}] =
-               ScriptParser.parse_effects("setfight 100")
+      assert %{type: :set_fight, subject: :self, value: 100} =
+               ScriptParser.parse_effect("setfight 100")
     end
 
     test "SetFight - with explicit subject" do
-      assert [%{type: :set_fight, subject: "bolvyn venim", value: 100}] =
-               ScriptParser.parse_effects("\"bolvyn venim\"->setfight 100")
+      assert %{type: :set_fight, subject: "bolvyn venim", value: 100} =
+               ScriptParser.parse_effect("\"bolvyn venim\"->setfight 100")
     end
 
     test "SetFlee - without subject" do
-      assert [%{type: :set_flee, subject: :self, value: 20}] =
-               ScriptParser.parse_effects("setflee 20")
+      assert %{type: :set_flee, subject: :self, value: 20} =
+               ScriptParser.parse_effect("setflee 20")
     end
 
     test "SetAlarm - without subject" do
-      assert [%{type: :set_alarm, subject: :self, value: 100}] =
-               ScriptParser.parse_effects("setalarm 100")
+      assert %{type: :set_alarm, subject: :self, value: 100} =
+               ScriptParser.parse_effect("setalarm 100")
     end
 
     test "SetHello - without subject" do
-      assert [%{type: :set_hello, subject: :self, value: 0}] =
-               ScriptParser.parse_effects("sethello 0")
+      assert %{type: :set_hello, subject: :self, value: 0} =
+               ScriptParser.parse_effect("sethello 0")
     end
 
     test "SetHello - with explicit subject" do
-      assert [%{type: :set_hello, subject: "rolf long-tooth", value: 10}] =
-               ScriptParser.parse_effects("\"rolf long-tooth\"->sethello 10")
+      assert %{type: :set_hello, subject: "rolf long-tooth", value: 10} =
+               ScriptParser.parse_effect("\"rolf long-tooth\"->sethello 10")
     end
 
     test "StartScript - unquoted script id" do
-      assert [%{type: :start_script, script_id: "all_nerevarine"}] =
-               ScriptParser.parse_effects("startscript all_nerevarine")
+      assert %{type: :start_script, script_id: "all_nerevarine"} =
+               ScriptParser.parse_effect("startscript all_nerevarine")
     end
 
     test "StartScript - quoted script id" do
-      assert [%{type: :start_script, script_id: "vampire_cure_pc"}] =
-               ScriptParser.parse_effects("startscript \"vampire_cure_pc\"")
+      assert %{type: :start_script, script_id: "vampire_cure_pc"} =
+               ScriptParser.parse_effect("startscript \"vampire_cure_pc\"")
     end
 
     test "StopScript - unquoted script id" do
-      assert [%{type: :stop_script, script_id: "all_hortator"}] =
-               ScriptParser.parse_effects("stopscript all_hortator")
+      assert %{type: :stop_script, script_id: "all_hortator"} =
+               ScriptParser.parse_effect("stopscript all_hortator")
     end
 
     test "StopScript - quoted script id" do
-      assert [%{type: :stop_script, script_id: "vampire_cure_pc"}] =
-               ScriptParser.parse_effects("stopscript \"vampire_cure_pc\"")
+      assert %{type: :stop_script, script_id: "vampire_cure_pc"} =
+               ScriptParser.parse_effect("stopscript \"vampire_cure_pc\"")
     end
 
     test "StartCombat - against player without attacker" do
-      assert [%{type: :start_combat, subject: :self, value: "player"}] =
-               ScriptParser.parse_effects("startcombat player")
+      assert %{type: :start_combat, subject: :self, value: "player"} =
+               ScriptParser.parse_effect("startcombat player")
     end
 
     test "StartCombat - NPC against player" do
-      assert [%{type: :start_combat, subject: "bolvyn venim", value: "player"}] =
-               ScriptParser.parse_effects("\"bolvyn venim\"->startcombat player")
+      assert %{type: :start_combat, subject: "bolvyn venim", value: "player"} =
+               ScriptParser.parse_effect("\"bolvyn venim\"->startcombat player")
     end
 
     test "StartCombat - NPC against NPC" do
-      assert [%{type: :start_combat, subject: "afer flaccus_guard", value: "baslod"}] =
-               ScriptParser.parse_effects("\"afer flaccus_guard\"->startcombat \"baslod\"")
+      assert %{type: :start_combat, subject: "afer flaccus_guard", value: "baslod"} =
+               ScriptParser.parse_effect("\"afer flaccus_guard\"->startcombat \"baslod\"")
     end
 
     test "StopCombat - without subject" do
-      assert [%{type: :stop_combat, subject: :self}] =
-               ScriptParser.parse_effects("stopcombat")
+      assert %{type: :stop_combat, subject: :self} =
+               ScriptParser.parse_effect("stopcombat")
     end
 
     test "StopCombat - with explicit NPC" do
-      assert [%{type: :stop_combat, subject: "guard"}] =
-               ScriptParser.parse_effects("\"guard\"->stopcombat")
+      assert %{type: :stop_combat, subject: "guard"} =
+               ScriptParser.parse_effect("\"guard\"->stopcombat")
     end
 
     test "AIFollow - follow player" do
-      assert [%{type: :ai_follow, subject: :self, target: :player}] =
-               ScriptParser.parse_effects("aifollow player 0 0 0 0")
+      assert %{type: :ai_follow, subject: :self, target: :player} =
+               ScriptParser.parse_effect("aifollow player 0 0 0 0")
     end
 
     test "AIFollow - NPC follows player" do
-      assert [%{type: :ai_follow, subject: "rolf long-tooth", target: :player}] =
-               ScriptParser.parse_effects("\"rolf long-tooth\"->aifollow player 0 0 0 0 0 0")
+      assert %{type: :ai_follow, subject: "rolf long-tooth", target: :player} =
+               ScriptParser.parse_effect("\"rolf long-tooth\"->aifollow player 0 0 0 0 0 0")
     end
 
     test "AIFollow - NPC follows another NPC" do
-      assert [%{type: :ai_follow, subject: "rabinna", target: "im_kilaya"}] =
-               ScriptParser.parse_effects("rabinna->aifollow im_kilaya 128 0 0 0 0 0 0")
+      assert %{type: :ai_follow, subject: "rabinna", target: "im_kilaya"} =
+               ScriptParser.parse_effect("rabinna->aifollow im_kilaya 128 0 0 0 0 0 0")
     end
 
     test "AIFollow - quoted follow subject" do
-      assert [%{type: :ai_follow, subject: :self, target: "galyn arvel"}] =
-               ScriptParser.parse_effects("aifollow \"galyn arvel\" 0 0 0 0 0")
+      assert %{type: :ai_follow, subject: :self, target: "galyn arvel"} =
+               ScriptParser.parse_effect("aifollow \"galyn arvel\" 0 0 0 0 0")
     end
 
     test "AITravel - without subject" do
-      assert [%{type: :ai_travel, subject: :self, target: %{x: 100, y: 200, z: 300}}] =
-               ScriptParser.parse_effects("aitravel 100 200 300")
+      assert %{type: :ai_travel, subject: :self, target: %{x: 100, y: 200, z: 300}} =
+               ScriptParser.parse_effect("aitravel 100 200 300")
     end
 
     test "AITravel - with explicit subject" do
-      assert [%{type: :ai_travel, subject: "fargoth", target: %{x: 100, y: 200, z: 300}}] =
-               ScriptParser.parse_effects("\"fargoth\"->aitravel 100 200 300")
+      assert %{type: :ai_travel, subject: "fargoth", target: %{x: 100, y: 200, z: 300}} =
+               ScriptParser.parse_effect("\"fargoth\"->aitravel 100 200 300")
     end
 
     test "AIWander - without subject" do
-      assert [%{type: :ai_wander, subject: :self, range: 256}] =
-               ScriptParser.parse_effects("aiwander 256 0 0 0 0 0 0 0 0 0 0 0")
+      assert %{type: :ai_wander, subject: :self, range: 256} =
+               ScriptParser.parse_effect("aiwander 256 0 0 0 0 0 0 0 0 0 0 0")
     end
 
     test "AIWander - with explicit subject" do
-      assert [%{type: :ai_wander, subject: "fargoth", range: 512}] =
-               ScriptParser.parse_effects("\"fargoth\"->aiwander 512 0 0 0 0 0 0 0 0 0 0 0")
+      assert %{type: :ai_wander, subject: "fargoth", range: 512} =
+               ScriptParser.parse_effect("\"fargoth\"->aiwander 512 0 0 0 0 0 0 0 0 0 0 0")
     end
 
     test "AIEscort - escort player" do
-      assert [
-               %{
-                 type: :ai_escort,
-                 subject: :self,
-                 target: :player,
-                 duration: 0,
-                 destination: %{x: 70685, y: 126_106, z: 835}
-               }
-             ] =
-               ScriptParser.parse_effects("aiescort player 0 70685 126106 835 0")
+      assert %{
+               type: :ai_escort,
+               subject: :self,
+               target: :player,
+               duration: 0,
+               destination: %{x: 70685, y: 126_106, z: 835}
+             } =
+               ScriptParser.parse_effect("aiescort player 0 70685 126106 835 0")
     end
 
     test "AIEscort - NPC escorts player" do
-      assert [
-               %{
-                 type: :ai_escort,
-                 subject: "guard",
-                 target: :player,
-                 duration: 0,
-                 destination: %{x: 100, y: 200, z: 300}
-               }
-             ] =
-               ScriptParser.parse_effects("\"guard\"->aiescort player 0 100 200 300 0")
+      assert %{
+               type: :ai_escort,
+               subject: "guard",
+               target: :player,
+               duration: 0,
+               destination: %{x: 100, y: 200, z: 300}
+             } =
+               ScriptParser.parse_effect("\"guard\"->aiescort player 0 100 200 300 0")
     end
 
     test "Lock - without subject" do
-      assert [%{type: :lock, subject: :self, value: 100}] =
-               ScriptParser.parse_effects("lock 100")
+      assert %{type: :lock, subject: :self, value: 100} =
+               ScriptParser.parse_effect("lock 100")
     end
 
     test "Lock - with explicit subject" do
-      assert [%{type: :lock, subject: "in_mh_door_01_velas", value: 100}] =
-               ScriptParser.parse_effects("in_mh_door_01_velas->lock 100")
+      assert %{type: :lock, subject: "in_mh_door_01_velas", value: 100} =
+               ScriptParser.parse_effect("in_mh_door_01_velas->lock 100")
     end
 
     test "Lock - with quoted subject" do
-      assert [%{type: :lock, subject: "ex_mh_door_02_ignatius", value: 40}] =
-               ScriptParser.parse_effects("\"ex_mh_door_02_ignatius\"->lock 40")
+      assert %{type: :lock, subject: "ex_mh_door_02_ignatius", value: 40} =
+               ScriptParser.parse_effect("\"ex_mh_door_02_ignatius\"->lock 40")
     end
 
     test "Unlock - without subject" do
-      assert [%{type: :unlock, subject: :self}] =
-               ScriptParser.parse_effects("unlock")
+      assert %{type: :unlock, subject: :self} =
+               ScriptParser.parse_effect("unlock")
     end
 
     test "Unlock - with explicit subject" do
-      assert [%{type: :unlock, subject: "in_mh_door_01_velas"}] =
-               ScriptParser.parse_effects("in_mh_door_01_velas->unlock")
+      assert %{type: :unlock, subject: "in_mh_door_01_velas"} =
+               ScriptParser.parse_effect("in_mh_door_01_velas->unlock")
     end
 
     test "PlaceAtPC - basic" do
-      assert [%{type: :place_at_pc, value: "skeleton"}] =
-               ScriptParser.parse_effects("placeatpc \"skeleton\" 1 50 1")
+      assert %{type: :place_at_pc, value: "skeleton"} =
+               ScriptParser.parse_effect("placeatpc \"skeleton\" 1 50 1")
     end
 
     test "PlaceAtPC - unquoted object" do
-      assert [%{type: :place_at_pc, value: "skeleton_weak"}] =
-               ScriptParser.parse_effects("placeatpc skeleton_weak 1 50 1")
+      assert %{type: :place_at_pc, value: "skeleton_weak"} =
+               ScriptParser.parse_effect("placeatpc skeleton_weak 1 50 1")
     end
 
     test "PositionCell - basic" do
-      assert [%{type: :position_cell, subject: :self, value: "balmora"}] =
-               ScriptParser.parse_effects("positioncell 100 200 300 0 \"balmora\"")
+      assert %{type: :position_cell, subject: :self, value: "balmora"} =
+               ScriptParser.parse_effect("positioncell 100 200 300 0 \"balmora\"")
     end
 
     test "PositionCell - with subject" do
-      assert [%{type: :position_cell, subject: :player, value: "vivec"}] =
-               ScriptParser.parse_effects("player->positioncell 100 200 300 0 \"vivec\"")
+      assert %{type: :position_cell, subject: :player, value: "vivec"} =
+               ScriptParser.parse_effect("player->positioncell 100 200 300 0 \"vivec\"")
     end
 
     test "Mod Stats - modstrength" do
-      assert [%{type: :mod_strength, subject: :self, value: 10}] =
-               ScriptParser.parse_effects("modstrength 10")
+      assert %{type: :mod_strength, subject: :self, value: 10} =
+               ScriptParser.parse_effect("modstrength 10")
     end
 
     test "Mod Stats - modintelligence" do
-      assert [%{type: :mod_intelligence, subject: :self, value: 5}] =
-               ScriptParser.parse_effects("modintelligence 5")
+      assert %{type: :mod_intelligence, subject: :self, value: 5} =
+               ScriptParser.parse_effect("modintelligence 5")
     end
 
     test "Mod Stats - modwillpower" do
-      assert [%{type: :mod_willpower, subject: :self, value: 5}] =
-               ScriptParser.parse_effects("modwillpower 5")
+      assert %{type: :mod_willpower, subject: :self, value: 5} =
+               ScriptParser.parse_effect("modwillpower 5")
     end
 
     test "Mod Stats - modagility" do
-      assert [%{type: :mod_agility, subject: :self, value: 5}] =
-               ScriptParser.parse_effects("modagility 5")
+      assert %{type: :mod_agility, subject: :self, value: 5} =
+               ScriptParser.parse_effect("modagility 5")
     end
 
     test "Mod Stats - modspeed" do
-      assert [%{type: :mod_speed, subject: "dagoth ur", value: 5}] =
-               ScriptParser.parse_effects("\"dagoth ur\"->modspeed 5")
+      assert %{type: :mod_speed, subject: "dagoth ur", value: 5} =
+               ScriptParser.parse_effect("\"dagoth ur\"->modspeed 5")
     end
 
     test "Mod Stats - modendurance" do
-      assert [%{type: :mod_endurance, subject: :player, value: 5}] =
-               ScriptParser.parse_effects("player->modendurance 5")
+      assert %{type: :mod_endurance, subject: :player, value: 5} =
+               ScriptParser.parse_effect("player->modendurance 5")
     end
 
     test "Mod Stats - modpersonality" do
-      assert [%{type: :mod_personality, subject: :self, value: 5}] =
-               ScriptParser.parse_effects("modpersonality 5")
+      assert %{type: :mod_personality, subject: :self, value: 5} =
+               ScriptParser.parse_effect("modpersonality 5")
     end
 
     test "Mod Stats - modluck" do
-      assert [%{type: :mod_luck, subject: :self, value: 5}] =
-               ScriptParser.parse_effects("modluck 5")
+      assert %{type: :mod_luck, subject: :self, value: 5} =
+               ScriptParser.parse_effect("modluck 5")
     end
 
     test "Mod Stats - negative value" do
-      assert [%{type: :mod_strength, subject: :self, value: -5}] =
-               ScriptParser.parse_effects("modstrength -5")
+      assert %{type: :mod_strength, subject: :self, value: -5} =
+               ScriptParser.parse_effect("modstrength -5")
     end
 
     test "comments" do
-      assert [] = ScriptParser.parse_effects(";this is a comment")
+      assert nil == ScriptParser.parse_effect(";this is a comment")
     end
 
     test "control flow" do
-      assert [] = ScriptParser.parse_effects("endif")
-      assert [] = ScriptParser.parse_effects("else")
+      assert nil == ScriptParser.parse_effect("endif")
+      assert nil == ScriptParser.parse_effect("else")
     end
 
     test "random text" do
-      assert [] = ScriptParser.parse_effects("return")
+      assert nil == ScriptParser.parse_effect("return")
     end
   end
 

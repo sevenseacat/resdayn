@@ -1,10 +1,125 @@
 defmodule Resdayn.Importer.Quests.ScriptParser do
+  @moduledoc """
+  Parse raw script content into its AST form, ready for analysis.
+  """
+
+  alias Resdayn.Importer.Quests.Script
+
+  def parse(content) when is_binary(content) do
+    lines = parse_input(content)
+
+    {name, locals, _lines} = parse_header(lines)
+
+    %Script.Ast{
+      name: name,
+      locals: locals,
+      body: parse_body(lines, locals)
+    }
+  end
+
+  defp parse_header(lines, data \\ {nil, [], []})
+
+  defp parse_header(["begin " <> name | lines], {nil, [], []}) do
+    parse_header(lines, {name, [], []})
+  end
+
+  defp parse_header(["short " <> short | lines], {name, locals, []}) do
+    parse_header(lines, {name, [short | locals], []})
+  end
+
+  defp parse_header(["long " <> long | lines], {name, locals, []}) do
+    parse_header(lines, {name, [long | locals], []})
+  end
+
+  defp parse_header(lines, {name, locals, []}) do
+    {name, Enum.reverse(locals), lines}
+  end
+
   def extract_journal_commands(content) when is_binary(content) do
     content
     |> parse_input()
     |> parse_lines()
     |> finalize_current_block()
     |> Map.get(:journal_commands)
+  end
+
+  # ============================================================================
+  # Line Parser
+  # ============================================================================
+
+  defp parse_body(lines, locals) do
+    parse_body(lines, locals, [])
+  end
+
+  defp parse_body([], _locals, acc), do: Enum.reverse(acc)
+
+  defp parse_body([line | lines], locals, acc) do
+    if String.starts_with?(line, "if") do
+      {block, rest} = parse_if_block(line, lines, locals)
+      parse_body(rest, locals, [block | acc])
+    else
+      item = parse_single_line(line)
+      parse_body(lines, locals, maybe_cons(item, acc))
+    end
+  end
+
+  defp parse_if_block(line, lines, locals) do
+    condition = parse_condition(line, locals)
+    {body, else_clause, rest} = parse_block_body(lines, locals, [])
+
+    block = %Script.IfBlock{
+      condition: condition,
+      body: body,
+      else_clause: else_clause
+    }
+
+    {block, rest}
+  end
+
+  defp parse_block_body([], _locals, acc) do
+    # Unbalanced - return what we have
+    {Enum.reverse(acc), nil, []}
+  end
+
+  defp parse_block_body([line | lines], locals, acc) do
+    cond do
+      String.starts_with?(line, "endif") ->
+        {Enum.reverse(acc), nil, lines}
+
+      String.starts_with?(line, "elseif") ->
+        {block, rest} = parse_if_block(line, lines, locals)
+        {Enum.reverse(acc), block, rest}
+
+      String.starts_with?(line, "else") ->
+        {else_body, _, rest} = parse_block_body(lines, locals, [])
+        {Enum.reverse(acc), else_body, rest}
+
+      String.starts_with?(line, "if") ->
+        {block, rest} = parse_if_block(line, lines, locals)
+        parse_block_body(rest, locals, [block | acc])
+
+      true ->
+        # No keywords - a journal, effect, etc.
+        item = parse_single_line(line)
+        parse_block_body(lines, locals, maybe_cons(item, acc))
+    end
+  end
+
+  defp parse_single_line(line) do
+    cond do
+      String.starts_with?(line, "journal ") ->
+        {quest_id, index} = parse_journal_command(line)
+        %Script.Journal{quest_id: quest_id, index: index}
+
+      true ->
+        case parse_effect(line) do
+          nil ->
+            nil
+
+          effect ->
+            %Script.Effect{type: effect.type, data: Map.drop(effect, [:type])}
+        end
+    end
   end
 
   # ============================================================================
@@ -60,9 +175,9 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
 
       # Effect commands
       true ->
-        case parse_effects(line) do
-          [] -> state
-          effects -> add_block_effects(state, effects)
+        case parse_effect(line) do
+          nil -> state
+          effect -> add_block_effects(state, [effect])
         end
     end
   end
@@ -414,7 +529,7 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
   # Effect Parsing
   # ============================================================================
 
-  def parse_effects(line) do
+  def parse_effect(line) do
     []
     |> maybe_add_effect(parse_inventory_change(line, "additem", :add_item))
     |> maybe_add_effect(parse_inventory_change(line, "removeitem", :remove_item))
@@ -456,6 +571,7 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
     |> maybe_add_effect(parse_command_with_number(line, "modagility", :mod_agility))
     |> maybe_add_effect(parse_command_with_number(line, "modluck", :mod_luck))
     |> maybe_add_effect(parse_command_with_number(line, "modpersonality", :mod_personality))
+    |> List.first()
   end
 
   defp maybe_add_effect(effects, nil), do: effects
@@ -731,4 +847,8 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
   defp normalize_value(nil), do: nil
   defp normalize_value(""), do: nil
   defp normalize_value(other), do: String.replace(other, "\"", "")
+
+  defp maybe_cons(nil, acc), do: acc
+  defp maybe_cons(list, acc) when is_list(list), do: Enum.reverse(list) ++ acc
+  defp maybe_cons(item, acc), do: [item | acc]
 end
