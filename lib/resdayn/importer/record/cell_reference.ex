@@ -6,7 +6,7 @@ defmodule Resdayn.Importer.Record.CellReference do
     # TR has a lot of dodgy body parts and other non-referencable things as references for some reason?
     referencable =
       Ash.read!(Resdayn.Codex.World.ReferencableObject)
-      |> Enum.map(& &1.id)
+      |> Enum.map(&to_string(&1.id))
       |> MapSet.new()
 
     processed_records =
