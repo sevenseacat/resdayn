@@ -7,7 +7,9 @@ defmodule Resdayn.Codex.Dialogue.OrderedResponseRelationship do
 
   @impl true
   def load(topics, _opts, _context) do
-    Enum.reduce(topics, {:ok, %{}}, fn %{id: topic_id}, {:ok, results} ->
+    Enum.reduce(topics, {:ok, %{}}, fn topic, {:ok, results} ->
+      topic_id = to_string(topic.id)
+
       head_responses =
         Response
         |> where([r], r.topic_id == ^topic_id and is_nil(r.previous_response_id))
@@ -27,7 +29,7 @@ defmodule Resdayn.Codex.Dialogue.OrderedResponseRelationship do
         |> with_cte("ordered_responses", as: ^ordered_query)
         |> Resdayn.Repo.all()
 
-      {:ok, Map.put(results, topic_id, ordered_list)}
+      {:ok, Map.put(results, topic, ordered_list)}
     end)
   end
 end

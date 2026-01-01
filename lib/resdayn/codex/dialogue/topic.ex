@@ -20,8 +20,8 @@ defmodule Resdayn.Codex.Dialogue.Topic do
     read :get_with_responses do
       get? true
 
-      argument :id, :string, allow_nil?: false
-      argument :npc_id, :string
+      argument :id, :ci_string, allow_nil?: false
+      argument :npc_id, :ci_string
 
       filter expr(id == ^arg(:id))
 
