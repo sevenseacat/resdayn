@@ -1082,6 +1082,11 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
                ScriptParser.parse_effect("addtopic  \"the star is the key\"")
     end
 
+    test "AddTopic - quote inside quotes" do
+      assert %{type: :add_topic, topic_id: "processus' ring"} =
+               ScriptParser.parse_effect("addtopic \"processus' ring\"")
+    end
+
     test "Enable - quoted subject" do
       assert %{type: :enable, subject: "npc name"} =
                ScriptParser.parse_effect("\"npc name\"->enable")

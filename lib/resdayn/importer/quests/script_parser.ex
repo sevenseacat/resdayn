@@ -517,8 +517,8 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
   end
 
   defp parse_comparison(line, subject, key) do
-    case Regex.run(~r/^\s*["']?([^"']+)["']?\s+([<>=!]+)\s*(-?\d+|\w+)/i, line) ||
-           Regex.run(~r/^\s*["']?([^"']+)["']?/i, line) do
+    case Regex.run(~r/^\s*["]?([^"]+)["]?\s+([<>=!]+)\s*(-?\d+|\w+)/i, line) ||
+           Regex.run(~r/^\s*["]?([^"]+)["]?/i, line) do
       [_, target, op, value] ->
         value =
           case Integer.parse(value) do
@@ -642,7 +642,7 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
   end
 
   defp parse_mod_fac_rep(line) do
-    case Regex.run(~r/modpcfacrep\s+([+-]?\d+)\s+["']?([^"'\n]+)["']?/i, line) do
+    case Regex.run(~r/modpcfacrep\s+([+-]?\d+)\s+["]?([^"\n]+)["]?/i, line) do
       [_, amount, faction] ->
         %{
           type: :mod_faction_reputation,
@@ -687,7 +687,7 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
   end
 
   defp parse_add_topic(line) do
-    case Regex.run(~r/addtopic\s+["']?([^"'\n]+)["']?/i, line) do
+    case Regex.run(~r/addtopic\s+["]?([^"\n]+)["]?/i, line) do
       [_, topic] -> %{type: :add_topic, topic_id: String.trim(topic)}
       nil -> nil
     end
@@ -736,14 +736,14 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
   end
 
   defp parse_start_script(line) do
-    case Regex.run(~r/startscript\s+["']?([^"'\s\n]+)["']?/i, line) do
+    case Regex.run(~r/startscript\s+["]?([^"\s\n]+)["]?/i, line) do
       [_, script_id] -> %{type: :start_script, script_id: normalize_value(script_id)}
       nil -> nil
     end
   end
 
   defp parse_stop_script(line) do
-    case Regex.run(~r/stopscript\s+["']?([^"'\s\n]+)["']?/i, line) do
+    case Regex.run(~r/stopscript\s+["]?([^"\s\n]+)["]?/i, line) do
       [_, script_id] -> %{type: :stop_script, script_id: normalize_value(script_id)}
       nil -> nil
     end
@@ -752,8 +752,8 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
   defp parse_ai_follow(line) do
     {subject, line} = parse_subject(line)
 
-    case Regex.run(~r/aifollow ["']([^"']+)["']/i, line) ||
-           Regex.run(~r/aifollow ([^"'\s]+)/i, line) do
+    case Regex.run(~r/aifollow ["]([^"]+)["]/i, line) ||
+           Regex.run(~r/aifollow ([^"\s]+)/i, line) do
       [_, target] ->
         %{
           type: :ai_follow,
@@ -823,8 +823,8 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
   defp parse_place_at_pc(line) do
     {subject, line} = parse_subject(line)
 
-    case Regex.run(~r/placeatpc ["']([^"']+)["']/i, line) ||
-           Regex.run(~r/placeatpc ([^"'\s]+)/i, line) do
+    case Regex.run(~r/placeatpc ["]([^"]+)["]/i, line) ||
+           Regex.run(~r/placeatpc ([^"\s]+)/i, line) do
       [_, value] ->
         %{
           type: :place_at_pc,
