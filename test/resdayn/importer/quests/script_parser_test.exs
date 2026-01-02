@@ -1421,6 +1421,17 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
                )
     end
 
+    test "GetItemCount - with nested parens" do
+      assert %{
+               type: :item_count,
+               subject: :player,
+               target: "gold_001",
+               operator: :>=,
+               value: 1500
+             } =
+               ScriptParser.parse_condition("if ( ( player->getitemcount \"gold_001\" ) >= 1500 ")
+    end
+
     test "GetPCCell - quoted cell name" do
       assert %{type: :pc_cell, target: "Ebonheart, Argonian Mission", operator: :==, value: 1} =
                ScriptParser.parse_condition(
@@ -1840,6 +1851,11 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
                ScriptParser.parse_condition("if ( random 100 > 50 )")
     end
 
+    test "Random - nested parens" do
+      assert %{type: :random, target: 100, operator: :<, value: 90} =
+               ScriptParser.parse_condition("if ( ( random 100 ) < 90 )")
+    end
+
     # SayDone
     test "SayDone - basic" do
       assert %{type: :say_done, subject: :self, operator: :==, value: 1} =
@@ -1886,6 +1902,26 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
     test "Local variable - overlapping name" do
       assert %{type: :local_var, target: "randomized", operator: :==, value: 0} =
                ScriptParser.parse_condition("if ( randomized == 0 )", ["randomized"])
+    end
+
+    test "Local variable - with arithmetic and nested parens" do
+      assert %{
+               type: :local_var,
+               target: "moneyExpected * 2",
+               operator: :<,
+               value: "TR_m4_TT_And_GoldCounter"
+             } =
+               ScriptParser.parse_condition(
+                 "if ( ( moneyExpected * 2 ) < TR_m4_TT_And_GoldCounter )",
+                 ["moneyExpected"]
+               )
+    end
+
+    test "something crazy" do
+      assert %{type: :unknown, content: "player->getshortblade > player->getbluntweapon"} =
+               ScriptParser.parse_condition(
+                 "if ( player->getshortblade > player->getbluntweapon )"
+               )
     end
 
     test "returns nil for non-condition" do

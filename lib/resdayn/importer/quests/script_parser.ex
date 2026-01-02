@@ -324,192 +324,195 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
   # ============================================================================
 
   def parse_condition(line, locals \\ []) do
-    # Strip the outer conditional parts
-    case Regex.split(~r/[\(|\)]/, line, parts: 3) do
-      [_, line, _] -> do_parse_condition(String.trim(line), locals)
-      [_] -> nil
-    end
+    line = Regex.replace(~r/(if|elseif|while|\(|\))/i, line, "")
+
+    Regex.replace(~r/\s+/, line, " ")
+    |> String.trim()
+    |> do_parse_condition(locals)
   end
 
   defp do_parse_condition(line, locals) do
-    {subject, line} = parse_subject(line)
+    case parse_subject(line) do
+      {subject, line} ->
+        case String.trim(line) do
+          <<"getjournalindex"::binary, line::binary>> ->
+            parse_comparison(line, subject, :journal_index)
+            |> Map.delete(:subject)
 
-    case String.trim(line) do
-      <<"getjournalindex"::binary, line::binary>> ->
-        parse_comparison(line, subject, :journal_index)
-        |> Map.delete(:subject)
+          <<"getdeadcount"::binary, line::binary>> ->
+            parse_comparison(line, subject, :dead_count)
+            |> Map.delete(:subject)
 
-      <<"getdeadcount"::binary, line::binary>> ->
-        parse_comparison(line, subject, :dead_count)
-        |> Map.delete(:subject)
+          <<"getitemcount"::binary, line::binary>> ->
+            parse_comparison(line, subject, :item_count)
 
-      <<"getitemcount"::binary, line::binary>> ->
-        parse_comparison(line, subject, :item_count)
+          <<"getinterior"::binary, line::binary>> ->
+            parse_rhs(line, subject, :interior)
 
-      <<"getinterior"::binary, line::binary>> ->
-        parse_rhs(line, subject, :interior)
+          <<"getpccell"::binary, line::binary>> ->
+            parse_comparison(line, subject, :pc_cell)
+            |> Map.delete(:subject)
 
-      <<"getpccell"::binary, line::binary>> ->
-        parse_comparison(line, subject, :pc_cell)
-        |> Map.delete(:subject)
+          <<"ondeath"::binary, line::binary>> ->
+            parse_rhs(line, subject, :on_death)
 
-      <<"ondeath"::binary, line::binary>> ->
-        parse_rhs(line, subject, :on_death)
+          <<"onactivate"::binary, line::binary>> ->
+            parse_rhs(line, subject, :on_activate)
 
-      <<"onactivate"::binary, line::binary>> ->
-        parse_rhs(line, subject, :on_activate)
+          <<"getdisabled"::binary, line::binary>> ->
+            parse_rhs(line, subject, :disabled)
 
-      <<"getdisabled"::binary, line::binary>> ->
-        parse_rhs(line, subject, :disabled)
+          <<"getdistance"::binary, line::binary>> ->
+            parse_comparison(line, subject, :distance)
 
-      <<"getdistance"::binary, line::binary>> ->
-        parse_comparison(line, subject, :distance)
+          <<"gethealth"::binary, line::binary>> ->
+            parse_rhs(line, subject, :health)
 
-      <<"gethealth"::binary, line::binary>> ->
-        parse_rhs(line, subject, :health)
+          <<"getpcrank"::binary, line::binary>> ->
+            parse_comparison(line, subject, :pc_rank)
 
-      <<"getpcrank"::binary, line::binary>> ->
-        parse_comparison(line, subject, :pc_rank)
+          <<"getspell"::binary, line::binary>> ->
+            parse_comparison(line, subject, :knows_spell)
 
-      <<"getspell"::binary, line::binary>> ->
-        parse_comparison(line, subject, :knows_spell)
+          <<"getblightdisease"::binary, line::binary>> ->
+            parse_rhs(line, subject, :blight_disease)
 
-      <<"getblightdisease"::binary, line::binary>> ->
-        parse_rhs(line, subject, :blight_disease)
+          <<"getcommondisease"::binary, line::binary>> ->
+            parse_rhs(line, subject, :common_disease)
 
-      <<"getcommondisease"::binary, line::binary>> ->
-        parse_rhs(line, subject, :common_disease)
+          <<"getcurrentaipackage"::binary, line::binary>> ->
+            parse_rhs(line, subject, :current_ai_package)
 
-      <<"getcurrentaipackage"::binary, line::binary>> ->
-        parse_rhs(line, subject, :current_ai_package)
+          <<"menumode"::binary, line::binary>> ->
+            parse_rhs(line, subject, :menu_mode)
 
-      <<"menumode"::binary, line::binary>> ->
-        parse_rhs(line, subject, :menu_mode)
+          <<"cellchanged"::binary, line::binary>> ->
+            parse_rhs(line, subject, :cell_changed)
 
-      <<"cellchanged"::binary, line::binary>> ->
-        parse_rhs(line, subject, :cell_changed)
+          <<"iswerewolf"::binary, line::binary>> ->
+            parse_rhs(line, subject, :is_werewolf)
 
-      <<"iswerewolf"::binary, line::binary>> ->
-        parse_rhs(line, subject, :is_werewolf)
+          <<"getrace"::binary, line::binary>> ->
+            parse_comparison(line, subject, :race)
 
-      <<"getrace"::binary, line::binary>> ->
-        parse_comparison(line, subject, :race)
+          <<"hassoulgem"::binary, line::binary>> ->
+            parse_comparison(line, subject, :has_soul_gem)
 
-      <<"hassoulgem"::binary, line::binary>> ->
-        parse_comparison(line, subject, :has_soul_gem)
+          <<"getlocked"::binary, line::binary>> ->
+            parse_rhs(line, subject, :locked)
 
-      <<"getlocked"::binary, line::binary>> ->
-        parse_rhs(line, subject, :locked)
+          <<"scriptrunning"::binary, line::binary>> ->
+            parse_comparison(line, subject, :script_running)
 
-      <<"scriptrunning"::binary, line::binary>> ->
-        parse_comparison(line, subject, :script_running)
+          <<"pcexpelled"::binary, line::binary>> ->
+            parse_comparison(line, subject, :expelled)
 
-      <<"pcexpelled"::binary, line::binary>> ->
-        parse_comparison(line, subject, :expelled)
+          <<"getattacked"::binary, line::binary>> ->
+            parse_rhs(line, subject, :attacked)
 
-      <<"getattacked"::binary, line::binary>> ->
-        parse_comparison(line, subject, :attacked)
+          <<"geteffect"::binary, line::binary>> ->
+            parse_comparison(line, subject, :effect)
 
-      <<"geteffect"::binary, line::binary>> ->
-        parse_comparison(line, subject, :effect)
+          <<"gamehour"::binary, line::binary>> ->
+            parse_rhs(line, subject, :game_hour)
 
-      <<"gamehour"::binary, line::binary>> ->
-        parse_rhs(line, subject, :game_hour)
+          <<"getmagicka"::binary, line::binary>> ->
+            parse_rhs(line, subject, :magicka)
 
-      <<"getmagicka"::binary, line::binary>> ->
-        parse_rhs(line, subject, :magicka)
+          <<"onmurder"::binary, line::binary>> ->
+            parse_rhs(line, subject, :on_murder)
 
-      <<"onmurder"::binary, line::binary>> ->
-        parse_rhs(line, subject, :on_murder)
+          <<"getfatigue"::binary, line::binary>> ->
+            parse_rhs(line, subject, :fatigue)
 
-      <<"getfatigue"::binary, line::binary>> ->
-        parse_rhs(line, subject, :fatigue)
+          <<"onpchitme"::binary, line::binary>> ->
+            parse_rhs(line, subject, :on_pc_hit_me)
 
-      <<"onpchitme"::binary, line::binary>> ->
-        parse_comparison(line, subject, :on_pc_hit_me)
+          <<"getcollidingactor"::binary, line::binary>> ->
+            parse_rhs(line, subject, :colliding_actor)
 
-      <<"getcollidingactor"::binary, line::binary>> ->
-        parse_rhs(line, subject, :colliding_actor)
+          <<"getlevel"::binary, line::binary>> ->
+            parse_rhs(line, subject, :level)
 
-      <<"getlevel"::binary, line::binary>> ->
-        parse_rhs(line, subject, :level)
+          <<"getaipackagedone"::binary, line::binary>> ->
+            parse_rhs(line, subject, :ai_package_done)
 
-      <<"getaipackagedone"::binary, line::binary>> ->
-        parse_rhs(line, subject, :ai_package_done)
+          <<"onpcequip"::binary, line::binary>> ->
+            parse_rhs(line, subject, :on_pc_equip)
 
-      <<"onpcequip"::binary, line::binary>> ->
-        parse_rhs(line, subject, :on_pc_equip)
+          <<"random "::binary, line::binary>> ->
+            parse_comparison(line, subject, :random)
+            |> Map.update!(:target, &String.to_integer/1)
 
-      <<"random "::binary, line::binary>> ->
-        parse_comparison(line, subject, :random)
-        |> Map.update!(:target, &String.to_integer/1)
+          <<"getcurrentweather"::binary, line::binary>> ->
+            parse_rhs(line, subject, :current_weather)
 
-      <<"getcurrentweather"::binary, line::binary>> ->
-        parse_rhs(line, subject, :current_weather)
+          <<"getbuttonpressed"::binary, line::binary>> ->
+            parse_rhs(line, subject, :button_pressed)
 
-      <<"getbuttonpressed"::binary, line::binary>> ->
-        parse_rhs(line, subject, :button_pressed)
+          <<"getlos"::binary, line::binary>> ->
+            parse_comparison(line, subject, :line_of_sight)
 
-      <<"getlos"::binary, line::binary>> ->
-        parse_comparison(line, subject, :line_of_sight)
+          <<"getweapondrawn"::binary, line::binary>> ->
+            parse_rhs(line, subject, :weapon_drawn)
 
-      <<"getweapondrawn"::binary, line::binary>> ->
-        parse_rhs(line, subject, :weapon_drawn)
+          <<"getsoundplaying"::binary, line::binary>> ->
+            parse_comparison(line, subject, :sound_playing)
 
-      <<"getsoundplaying"::binary, line::binary>> ->
-        parse_comparison(line, subject, :sound_playing)
+          <<"dayspassed"::binary, line::binary>> ->
+            parse_rhs(line, subject, :days_passed)
 
-      <<"dayspassed"::binary, line::binary>> ->
-        parse_rhs(line, subject, :days_passed)
+          <<"getcollidingpc"::binary, line::binary>> ->
+            parse_rhs(line, subject, :colliding_pc)
 
-      <<"getcollidingpc"::binary, line::binary>> ->
-        parse_rhs(line, subject, :colliding_pc)
+          <<"getstandingactor"::binary, line::binary>> ->
+            parse_rhs(line, subject, :standing_actor)
 
-      <<"getstandingactor"::binary, line::binary>> ->
-        parse_rhs(line, subject, :standing_actor)
+          <<"saydone"::binary, line::binary>> ->
+            parse_rhs(line, subject, :say_done)
 
-      <<"saydone"::binary, line::binary>> ->
-        parse_rhs(line, subject, :say_done)
+          <<"getdetected"::binary, line::binary>> ->
+            parse_comparison(line, subject, :detected)
 
-      <<"getdetected"::binary, line::binary>> ->
-        parse_comparison(line, subject, :detected)
+          <<"getdisposition"::binary, line::binary>> ->
+            parse_rhs(line, subject, :disposition)
 
-      <<"getdisposition"::binary, line::binary>> ->
-        parse_rhs(line, subject, :disposition)
+          <<"getwaterlevel"::binary, line::binary>> ->
+            parse_rhs(line, subject, :water_level)
 
-      <<"getwaterlevel"::binary, line::binary>> ->
-        parse_rhs(line, subject, :water_level)
+          <<"getpos"::binary, line::binary>> ->
+            parse_comparison(line, subject, :position)
 
-      <<"getpos"::binary, line::binary>> ->
-        parse_comparison(line, subject, :position)
+          <<"getwerewolfkills"::binary, line::binary>> ->
+            parse_rhs(line, subject, :werewolf_kills)
 
-      <<"getwerewolfkills"::binary, line::binary>> ->
-        parse_rhs(line, subject, :werewolf_kills)
+          <<"gettarget"::binary, line::binary>> ->
+            parse_comparison(line, subject, :target)
 
-      <<"gettarget"::binary, line::binary>> ->
-        parse_comparison(line, subject, :target)
+          <<"onknockout"::binary, line::binary>> ->
+            parse_rhs(line, subject, :on_knockout)
 
-      <<"onknockout"::binary, line::binary>> ->
-        parse_rhs(line, subject, :on_knockout)
+          <<"getstandingpc"::binary, line::binary>> ->
+            parse_rhs(line, subject, :standing_pc)
 
-      <<"getstandingpc"::binary, line::binary>> ->
-        parse_rhs(line, subject, :standing_pc)
+          <<"hasitemequipped"::binary, line::binary>> ->
+            parse_comparison(line, subject, :has_item_equipped)
 
-      <<"hasitemequipped"::binary, line::binary>> ->
-        parse_comparison(line, subject, :has_item_equipped)
+          _ ->
+            result = parse_comparison(line, subject, :local_var)
 
-      _ ->
-        # Might be a local or a global var
-        result = parse_comparison(line, subject, :local_var)
+            # the target could also be an arithmetic expression - check if it uses locals
+            variables = Regex.run(~r/\w+/, result.target)
 
-        if result.target in locals do
-          result
-        else
-          case Resdayn.Codex.Mechanics.get_game_setting_by_id(result.target) do
-            {:ok, _global} -> %{result | type: :global_var}
-            _ -> nil
-          end
+            if Enum.all?(variables, &(&1 in locals)) do
+              result
+            else
+              nil
+            end
         end
+
+      line ->
+        %{type: :unknown, content: line}
     end
   end
 
@@ -539,6 +542,13 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
           target: target,
           operator: :==,
           value: 1
+        }
+
+      # Something that can't be parsed
+      _ ->
+        %{
+          type: :unknown,
+          content: String.trim(line)
         }
     end
   end
@@ -654,6 +664,10 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
       # Implicit subject - self
       [rest] ->
         {nil, rest}
+
+      _ ->
+        # Something else - multiple subjects?
+        line
     end
   end
 

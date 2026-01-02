@@ -74,8 +74,8 @@ defmodule Resdayn.Importer.Helpers do
   def filter_magic_effect_values(template_id, skill_id, attribute_id, template_lookup) do
     game_setting_id = Map.get(template_lookup, template_id, "")
 
-    uses_skill = String.ends_with?(game_setting_id, "Skill")
-    uses_attribute = String.ends_with?(game_setting_id, "Attribute")
+    uses_skill = String.ends_with?(to_string(game_setting_id), "Skill")
+    uses_attribute = String.ends_with?(to_string(game_setting_id), "Attribute")
 
     filtered_skill_id = if uses_skill, do: skill_id, else: nil
     filtered_attribute_id = if uses_attribute, do: attribute_id, else: nil
