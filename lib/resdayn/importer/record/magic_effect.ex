@@ -12,7 +12,7 @@ defmodule Resdayn.Importer.Record.MagicEffect do
   alias Resdayn.Importer.Helpers
 
   def process(records, _opts) do
-    template_lookup = Helpers.build_magic_effect_template_lookup(records)
+    template_lookup = Helpers.build_magic_effect_template_lookup()
 
     # Collect effects from all sources
     effects =

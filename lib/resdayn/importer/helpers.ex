@@ -31,30 +31,8 @@ defmodule Resdayn.Importer.Helpers do
   Build a lookup map of template_id -> game_setting_id from parsed MagicEffect records.
 
   This is used to determine whether effects use skills or attributes.
-
-  First builds lookup from parsed records in the current import batch, then
-  falls back to loading from the database for templates not in the batch
-  (e.g., when importing a mod that depends on Morrowind.esm's templates).
   """
-  def build_magic_effect_template_lookup(records) do
-    # First, build lookup from parsed records in this batch
-    from_records =
-      records
-      |> Enum.filter(&match?(%{type: Resdayn.Parser.Record.MagicEffect}, &1))
-      |> Map.new(fn record ->
-        {record.data.id, record.data.game_setting_id}
-      end)
-
-    # If we found templates in the batch, use them
-    # Otherwise, load from database (for mods depending on base game templates)
-    if map_size(from_records) > 0 do
-      from_records
-    else
-      load_templates_from_database()
-    end
-  end
-
-  defp load_templates_from_database do
+  def build_magic_effect_template_lookup do
     Resdayn.Codex.Mechanics.MagicEffectTemplate
     |> Ash.Query.select([:id, :game_setting_id])
     |> Ash.read!()

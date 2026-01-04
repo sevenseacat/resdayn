@@ -8,7 +8,7 @@ defmodule Resdayn.Importer.Record.IngredientEffect do
   alias Resdayn.Importer.Helpers
 
   def process(records, _opts) do
-    template_lookup = Helpers.build_magic_effect_template_lookup(records)
+    template_lookup = Helpers.build_magic_effect_template_lookup()
 
     processed_records =
       records
