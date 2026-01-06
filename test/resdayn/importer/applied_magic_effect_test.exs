@@ -1,5 +1,5 @@
 defmodule Resdayn.Importer.AppliedMagicEffectTest do
-  use Resdayn.DataCase, async: true
+  use Resdayn.IntegrationCase
 
   alias Resdayn.Importer.Record.AppliedMagicEffect, as: AppliedMagicEffectImporter
 

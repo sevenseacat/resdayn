@@ -5,7 +5,7 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
   These tests run the actual Resdayn.Importer.Runner to import Morrowind.esm,
   then verify data integrity for resources that have been converted to FastBulkImport.
   """
-  use Resdayn.DataCase, async: true
+  use Resdayn.IntegrationCase
 
   alias Resdayn.Importer.FastBulkImport
 
@@ -47,30 +47,14 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
     ReferencableObject
   }
 
-  @moduletag :integration
+  # Note: @moduletag :integration is set automatically by IntegrationCase
+  # The import is also handled automatically - we just need to cache parsed records
+  # for re-import tests.
 
   setup_all do
-    truncate_all_tables()
-
-    Resdayn.Importer.Runner.run("Morrowind.esm")
-
-    # Parse records once for re-import tests.
-    # We use persistent_term instead of returning from setup_all because ExUnit
-    # copies the setup_all return value to each test process. With ~48k parsed
-    # records, this copying added ~27 seconds to the test suite.
-    # persistent_term stores data in shared memory that all processes can read
-    # without copying.
-    path = Path.join([:code.priv_dir(:resdayn), "data", "Morrowind.esm"])
-    records = Resdayn.Parser.read(path) |> Enum.to_list()
-    :persistent_term.put(:test_morrowind_records, records)
-
-    on_exit(fn -> :persistent_term.erase(:test_morrowind_records) end)
-
+    # Ensure parsed records are cached for re-import tests
+    _ = get_morrowind_records()
     :ok
-  end
-
-  defp get_morrowind_records do
-    :persistent_term.get(:test_morrowind_records)
   end
 
   # =============================================================================

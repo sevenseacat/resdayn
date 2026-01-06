@@ -1,5 +1,5 @@
 defmodule Resdayn.Codex.NPCTest do
-  use ExUnit.Case, async: false
+  use Resdayn.IntegrationCase
 
   require Ash.Query
 
