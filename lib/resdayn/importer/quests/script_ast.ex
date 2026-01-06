@@ -18,10 +18,10 @@ defmodule Resdayn.Importer.Quests.Script do
   end
 
   defmodule Effect do
-    defstruct [:type, :data]
+    defstruct [:function, :data]
   end
 
   defmodule Condition do
-    defstruct [:type, :data]
+    defstruct [:function, :data]
   end
 end

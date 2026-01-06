@@ -144,14 +144,14 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
         body: [
           %Script.Journal{quest_id: "mv_deadtaxman", index: 100},
           %Script.Effect{
-            type: :remove_item,
+            function: :remove_item,
             data: %{subject: :self, item_id: "gold_001", count: 500}
           },
           %Script.Effect{
-            type: :add_item,
+            function: :add_item,
             data: %{subject: :player, item_id: "gold_001", count: 500}
           },
-          %Script.Effect{type: :goodbye, data: %{}}
+          %Script.Effect{function: :goodbye, data: %{}}
         ]
       }
 
@@ -164,7 +164,12 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
         locals: [],
         body: [
           %Script.IfBlock{
-            condition: %{type: :journal_index, target: "mv_slavemule", operator: :<=, value: 100},
+            condition: %{
+              function: :journal_index,
+              target: "mv_slavemule",
+              operator: :<=,
+              value: 100
+            },
             body: [
               %Script.Journal{quest_id: "mv_slavemule", index: 101}
             ],
@@ -182,7 +187,7 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
         locals: [],
         body: [
           %Script.IfBlock{
-            condition: %{type: :journal_index, target: "quest", operator: :==, value: 10},
+            condition: %{function: :journal_index, target: "quest", operator: :==, value: 10},
             body: [
               %Script.Journal{quest_id: "quest", index: 20}
             ],
@@ -202,13 +207,18 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
         locals: [],
         body: [
           %Script.IfBlock{
-            condition: %{type: :journal_index, target: "mv_slavemule", operator: :<=, value: 100},
+            condition: %{
+              function: :journal_index,
+              target: "mv_slavemule",
+              operator: :<=,
+              value: 100
+            },
             body: [
               %Script.Journal{quest_id: "mv_slavemule", index: 101}
             ],
             else_clause: %Script.IfBlock{
               condition: %{
-                type: :journal_index,
+                function: :journal_index,
                 target: "mv_slavemule",
                 operator: :==,
                 value: 102
@@ -231,11 +241,16 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
         locals: [],
         body: [
           %Script.IfBlock{
-            condition: %{type: :journal_index, target: "b5_redoranhort", operator: :>=, value: 50},
+            condition: %{
+              function: :journal_index,
+              target: "b5_redoranhort",
+              operator: :>=,
+              value: 50
+            },
             body: [
               %Script.IfBlock{
                 condition: %{
-                  type: :journal_index,
+                  function: :journal_index,
                   target: "b6_hlaaluhort",
                   operator: :>=,
                   value: 50
@@ -243,7 +258,7 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
                 body: [
                   %Script.IfBlock{
                     condition: %{
-                      type: :journal_index,
+                      function: :journal_index,
                       target: "b7_telvannihort",
                       operator: :>=,
                       value: 50
@@ -271,11 +286,11 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
         locals: [],
         body: [
           %Script.IfBlock{
-            condition: %{type: :dead_count, target: "ahnia", operator: :>, value: 0},
+            condition: %{function: :dead_count, target: "ahnia", operator: :>, value: 0},
             body: [
               %Script.IfBlock{
                 condition: %{
-                  type: :journal_index,
+                  function: :journal_index,
                   target: "ms_scrollsales",
                   operator: :>,
                   value: 0
@@ -283,7 +298,7 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
                 body: [
                   %Script.IfBlock{
                     condition: %{
-                      type: :journal_index,
+                      function: :journal_index,
                       target: "ms_scrollsales",
                       operator: :<,
                       value: 40
@@ -312,7 +327,7 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
         body: [
           %Script.IfBlock{
             condition: %{
-              type: :journal_index,
+              function: :journal_index,
               target: "c3_destroydagoth",
               operator: :==,
               value: 20
@@ -335,10 +350,15 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
         locals: [],
         body: [
           %Script.IfBlock{
-            condition: %{type: :journal_index, target: "mv_slavemule", operator: :<=, value: 100},
+            condition: %{
+              function: :journal_index,
+              target: "mv_slavemule",
+              operator: :<=,
+              value: 100
+            },
             body: [
               %Script.Effect{
-                type: :add_item,
+                function: :add_item,
                 data: %{subject: :self, item_id: "ingred_moon_sugar_01", count: 20}
               },
               %Script.Journal{quest_id: "mv_slavemule", index: 101}
@@ -357,14 +377,19 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
         locals: [],
         body: [
           %Script.IfBlock{
-            condition: %{type: :journal_index, target: "mv_slavemule", operator: :<=, value: 100},
+            condition: %{
+              function: :journal_index,
+              target: "mv_slavemule",
+              operator: :<=,
+              value: 100
+            },
             body: [
               %Script.Effect{
-                type: :add_item,
+                function: :add_item,
                 data: %{subject: :self, item_id: "ingred_moon_sugar_01", count: 20}
               },
               %Script.Journal{quest_id: "mv_slavemule", index: 101},
-              %Script.Effect{type: :mod_disposition, data: %{subject: :self, value: 15}}
+              %Script.Effect{function: :mod_disposition, data: %{subject: :self, value: 15}}
             ],
             else_clause: nil
           }
@@ -381,16 +406,16 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
         body: [
           %Script.IfBlock{
             condition: %{
-              type: :journal_index,
+              function: :journal_index,
               target: "c3_destroydagoth",
               operator: :==,
               value: 20
             },
             body: [
-              %Script.Effect{type: :enable, data: %{subject: "ring of azura"}},
+              %Script.Effect{function: :enable, data: %{subject: "ring of azura"}},
               %Script.Journal{quest_id: "c3_destroydagoth", index: 50},
               %Script.Journal{quest_id: "a1_sleepersawake", index: 50},
-              %Script.Effect{type: :mod_reputation, data: %{subject: :self, value: 10}}
+              %Script.Effect{function: :mod_reputation, data: %{subject: :self, value: 10}}
             ],
             else_clause: nil
           }
@@ -406,10 +431,10 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
         locals: [],
         body: [
           %Script.IfBlock{
-            condition: %{type: :journal_index, target: "quest", operator: :<, value: 50},
+            condition: %{function: :journal_index, target: "quest", operator: :<, value: 50},
             body: [
               %Script.Effect{
-                type: :add_item,
+                function: :add_item,
                 data: %{subject: :self, item_id: "reward1", count: 1}
               },
               %Script.Journal{quest_id: "quest", index: 50}
@@ -417,10 +442,10 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
             else_clause: nil
           },
           %Script.IfBlock{
-            condition: %{type: :journal_index, target: "quest", operator: :>=, value: 50},
+            condition: %{function: :journal_index, target: "quest", operator: :>=, value: 50},
             body: [
               %Script.Effect{
-                type: :add_item,
+                function: :add_item,
                 data: %{subject: :self, item_id: "reward2", count: 1}
               },
               %Script.Journal{quest_id: "quest", index: 100}
@@ -440,7 +465,7 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
         body: [
           %Script.IfBlock{
             condition: %{
-              type: :pc_cell,
+              function: :pc_cell,
               target: "ebonheart, argonian mission",
               operator: :==,
               value: 1
@@ -462,7 +487,7 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
         locals: [],
         body: [
           %Script.IfBlock{
-            condition: %{type: :on_death, subject: :self, operator: :==, value: 1},
+            condition: %{function: :on_death, subject: :self, operator: :==, value: 1},
             body: [
               %Script.Journal{quest_id: "somequest", index: 50}
             ],
@@ -480,20 +505,20 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
         locals: [],
         body: [
           %Script.IfBlock{
-            condition: %{type: :journal_index, target: "mainquest", operator: :>=, value: 10},
+            condition: %{function: :journal_index, target: "mainquest", operator: :>=, value: 10},
             body: [
-              %Script.Effect{type: :add_topic, data: %{topic_id: "rumors"}},
+              %Script.Effect{function: :add_topic, data: %{topic_id: "rumors"}},
               %Script.IfBlock{
-                condition: %{type: :dead_count, target: "villain", operator: :>=, value: 1},
+                condition: %{function: :dead_count, target: "villain", operator: :>=, value: 1},
                 body: [
                   %Script.Effect{
-                    type: :add_item,
+                    function: :add_item,
                     data: %{subject: :player, item_id: "gold_001", count: 500}
                   },
                   %Script.Journal{quest_id: "mainquest", index: 20},
                   %Script.IfBlock{
                     condition: %{
-                      type: :item_count,
+                      function: :item_count,
                       subject: :self,
                       target: "secret_note",
                       operator: :>=,
@@ -501,12 +526,12 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
                     },
                     body: [
                       %Script.Journal{quest_id: "sidequest", index: 10},
-                      %Script.Effect{type: :add_topic, data: %{topic_id: "secret"}}
+                      %Script.Effect{function: :add_topic, data: %{topic_id: "secret"}}
                     ],
                     else_clause: nil
                   },
                   %Script.Effect{
-                    type: :mod_faction_reputation,
+                    function: :mod_faction_reputation,
                     data: %{faction_id: "fighters guild", value: 5}
                   },
                   %Script.Journal{quest_id: "mainquest", index: 30}
@@ -529,7 +554,7 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
         locals: [],
         body: [
           %Script.Journal{quest_id: "quest", index: 20},
-          %Script.Effect{type: :start_script, data: %{script_id: "otherscript"}}
+          %Script.Effect{function: :start_script, data: %{script_id: "otherscript"}}
         ]
       }
 
@@ -546,9 +571,9 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
                  quest_id: "mv_deadtaxman",
                  index: 100,
                  effects: [
-                   %{type: :remove_item, subject: :self, item_id: "gold_001", count: 500},
-                   %{type: :add_item, subject: :player, item_id: "gold_001", count: 500},
-                   %{type: :goodbye}
+                   %{function: :remove_item, subject: :self, item_id: "gold_001", count: 500},
+                   %{function: :add_item, subject: :player, item_id: "gold_001", count: 500},
+                   %{function: :goodbye}
                  ],
                  conditions: []
                }
@@ -565,7 +590,7 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
                  effects: [],
                  conditions: [
                    %{
-                     type: :journal_index,
+                     function: :journal_index,
                      target: "mv_slavemule",
                      operator: :<=,
                      value: 100
@@ -585,7 +610,7 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
                  effects: [],
                  conditions: [
                    %{
-                     type: :journal_index,
+                     function: :journal_index,
                      target: "mv_slavemule",
                      operator: :<=,
                      value: 100
@@ -597,7 +622,7 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
                  index: 103,
                  effects: [],
                  conditions: [
-                   %{type: :journal_index, target: "mv_slavemule", operator: :==, value: 102}
+                   %{function: :journal_index, target: "mv_slavemule", operator: :==, value: 102}
                  ]
                }
              ]
@@ -612,9 +637,19 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
                  index: 50,
                  effects: [],
                  conditions: [
-                   %{type: :journal_index, target: "b5_redoranhort", operator: :>=, value: 50},
-                   %{type: :journal_index, target: "b6_hlaaluhort", operator: :>=, value: 50},
-                   %{type: :journal_index, target: "b7_telvannihort", operator: :>=, value: 50}
+                   %{
+                     function: :journal_index,
+                     target: "b5_redoranhort",
+                     operator: :>=,
+                     value: 50
+                   },
+                   %{function: :journal_index, target: "b6_hlaaluhort", operator: :>=, value: 50},
+                   %{
+                     function: :journal_index,
+                     target: "b7_telvannihort",
+                     operator: :>=,
+                     value: 50
+                   }
                  ]
                }
              ]
@@ -629,9 +664,9 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
                  index: 40,
                  effects: [],
                  conditions: [
-                   %{type: :dead_count, target: "ahnia", operator: :>, value: 0},
-                   %{type: :journal_index, target: "ms_scrollsales", operator: :>, value: 0},
-                   %{type: :journal_index, target: "ms_scrollsales", operator: :<, value: 40}
+                   %{function: :dead_count, target: "ahnia", operator: :>, value: 0},
+                   %{function: :journal_index, target: "ms_scrollsales", operator: :>, value: 0},
+                   %{function: :journal_index, target: "ms_scrollsales", operator: :<, value: 40}
                  ]
                }
              ]
@@ -647,7 +682,12 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
                  index: 50,
                  effects: [],
                  conditions: [
-                   %{type: :journal_index, target: "c3_destroydagoth", operator: :==, value: 20}
+                   %{
+                     function: :journal_index,
+                     target: "c3_destroydagoth",
+                     operator: :==,
+                     value: 20
+                   }
                  ]
                },
                %{
@@ -655,7 +695,12 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
                  index: 50,
                  effects: [],
                  conditions: [
-                   %{type: :journal_index, target: "c3_destroydagoth", operator: :==, value: 20}
+                   %{
+                     function: :journal_index,
+                     target: "c3_destroydagoth",
+                     operator: :==,
+                     value: 20
+                   }
                  ]
                }
              ]
@@ -669,10 +714,15 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
                  quest_id: "mv_slavemule",
                  index: 101,
                  effects: [
-                   %{type: :add_item, subject: :self, item_id: "ingred_moon_sugar_01", count: 20}
+                   %{
+                     function: :add_item,
+                     subject: :self,
+                     item_id: "ingred_moon_sugar_01",
+                     count: 20
+                   }
                  ],
                  conditions: [
-                   %{type: :journal_index, target: "mv_slavemule", operator: :<=, value: 100}
+                   %{function: :journal_index, target: "mv_slavemule", operator: :<=, value: 100}
                  ]
                }
              ] = actual
@@ -686,11 +736,16 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
                  quest_id: "mv_slavemule",
                  index: 101,
                  effects: [
-                   %{type: :add_item, subject: :self, item_id: "ingred_moon_sugar_01", count: 20},
-                   %{type: :mod_disposition, subject: :self, value: 15}
+                   %{
+                     function: :add_item,
+                     subject: :self,
+                     item_id: "ingred_moon_sugar_01",
+                     count: 20
+                   },
+                   %{function: :mod_disposition, subject: :self, value: 15}
                  ],
                  conditions: [
-                   %{type: :journal_index, target: "mv_slavemule", operator: :<=, value: 100}
+                   %{function: :journal_index, target: "mv_slavemule", operator: :<=, value: 100}
                  ]
                }
              ] = actual
@@ -705,22 +760,32 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
                  quest_id: "c3_destroydagoth",
                  index: 50,
                  effects: [
-                   %{type: :enable, subject: "ring of azura"},
-                   %{type: :mod_reputation, value: 10}
+                   %{function: :enable, subject: "ring of azura"},
+                   %{function: :mod_reputation, value: 10}
                  ],
                  conditions: [
-                   %{type: :journal_index, target: "c3_destroydagoth", operator: :==, value: 20}
+                   %{
+                     function: :journal_index,
+                     target: "c3_destroydagoth",
+                     operator: :==,
+                     value: 20
+                   }
                  ]
                },
                %{
                  quest_id: "a1_sleepersawake",
                  index: 50,
                  effects: [
-                   %{type: :enable, subject: "ring of azura"},
-                   %{type: :mod_reputation, value: 10}
+                   %{function: :enable, subject: "ring of azura"},
+                   %{function: :mod_reputation, value: 10}
                  ],
                  conditions: [
-                   %{type: :journal_index, target: "c3_destroydagoth", operator: :==, value: 20}
+                   %{
+                     function: :journal_index,
+                     target: "c3_destroydagoth",
+                     operator: :==,
+                     value: 20
+                   }
                  ]
                }
              ] = actual
@@ -733,15 +798,17 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
                %{
                  quest_id: "quest",
                  index: 50,
-                 effects: [%{type: :add_item, subject: :self, item_id: "reward1", count: 1}],
-                 conditions: [%{type: :journal_index, target: "quest", operator: :<, value: 50}]
+                 effects: [%{function: :add_item, subject: :self, item_id: "reward1", count: 1}],
+                 conditions: [
+                   %{function: :journal_index, target: "quest", operator: :<, value: 50}
+                 ]
                },
                %{
                  quest_id: "quest",
                  index: 100,
-                 effects: [%{type: :add_item, subject: :self, item_id: "reward2", count: 1}],
+                 effects: [%{function: :add_item, subject: :self, item_id: "reward2", count: 1}],
                  conditions: [
-                   %{type: :journal_index, target: "quest", operator: :>=, value: 50}
+                   %{function: :journal_index, target: "quest", operator: :>=, value: 50}
                  ]
                }
              ] = actual
@@ -757,7 +824,7 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
                  effects: [],
                  conditions: [
                    %{
-                     type: :pc_cell,
+                     function: :pc_cell,
                      target: "ebonheart, argonian mission",
                      operator: :==,
                      value: 1
@@ -775,7 +842,7 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
                  quest_id: "somequest",
                  index: 50,
                  effects: [],
-                 conditions: [%{type: :on_death, subject: :self, operator: :==, value: 1}]
+                 conditions: [%{function: :on_death, subject: :self, operator: :==, value: 1}]
                }
              ]
     end
@@ -790,13 +857,13 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
                    quest_id: "mainquest",
                    index: 20,
                    conditions: [
-                     %{type: :journal_index, target: "mainquest", operator: :>=, value: 10},
-                     %{type: :dead_count, target: "villain", operator: :>=, value: 1}
+                     %{function: :journal_index, target: "mainquest", operator: :>=, value: 10},
+                     %{function: :dead_count, target: "villain", operator: :>=, value: 1}
                    ],
                    effects: [
-                     %{type: :add_topic, topic_id: "rumors"},
-                     %{type: :add_item, subject: :player, item_id: "gold_001", count: 500},
-                     %{type: :mod_faction_reputation, faction_id: "fighters guild", value: 5}
+                     %{function: :add_topic, topic_id: "rumors"},
+                     %{function: :add_item, subject: :player, item_id: "gold_001", count: 500},
+                     %{function: :mod_faction_reputation, faction_id: "fighters guild", value: 5}
                    ]
                  },
                  # SideQuest 10: gets all effects from outer blocks plus its own
@@ -804,10 +871,10 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
                    quest_id: "sidequest",
                    index: 10,
                    conditions: [
-                     %{type: :journal_index, target: "mainquest", operator: :>=, value: 10},
-                     %{type: :dead_count, target: "villain", operator: :>=, value: 1},
+                     %{function: :journal_index, target: "mainquest", operator: :>=, value: 10},
+                     %{function: :dead_count, target: "villain", operator: :>=, value: 1},
                      %{
-                       type: :item_count,
+                       function: :item_count,
                        subject: :self,
                        target: "secret_note",
                        operator: :>=,
@@ -815,9 +882,9 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
                      }
                    ],
                    effects: [
-                     %{type: :add_topic, topic_id: "rumors"},
-                     %{type: :add_item, subject: :player, item_id: "gold_001", count: 500},
-                     %{type: :add_topic, topic_id: "secret"}
+                     %{function: :add_topic, topic_id: "rumors"},
+                     %{function: :add_item, subject: :player, item_id: "gold_001", count: 500},
+                     %{function: :add_topic, topic_id: "secret"}
                    ]
                  },
                  # MainQuest 30: gets effects from its block level
@@ -825,13 +892,13 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
                    quest_id: "mainquest",
                    index: 30,
                    conditions: [
-                     %{type: :journal_index, target: "mainquest", operator: :>=, value: 10},
-                     %{type: :dead_count, target: "villain", operator: :>=, value: 1}
+                     %{function: :journal_index, target: "mainquest", operator: :>=, value: 10},
+                     %{function: :dead_count, target: "villain", operator: :>=, value: 1}
                    ],
                    effects: [
-                     %{type: :add_topic, topic_id: "rumors"},
-                     %{type: :add_item, subject: :player, item_id: "gold_001", count: 500},
-                     %{type: :mod_faction_reputation, faction_id: "fighters guild", value: 5}
+                     %{function: :add_topic, topic_id: "rumors"},
+                     %{function: :add_item, subject: :player, item_id: "gold_001", count: 500},
+                     %{function: :mod_faction_reputation, faction_id: "fighters guild", value: 5}
                    ]
                  },
                  # MainQuest 15: only outer block condition and effects
@@ -839,10 +906,10 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
                    quest_id: "mainquest",
                    index: 15,
                    conditions: [
-                     %{type: :journal_index, target: "mainquest", operator: :>=, value: 10}
+                     %{function: :journal_index, target: "mainquest", operator: :>=, value: 10}
                    ],
                    effects: [
-                     %{type: :add_topic, topic_id: "rumors"}
+                     %{function: :add_topic, topic_id: "rumors"}
                    ]
                  }
                ])
@@ -879,9 +946,9 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
                  quest_id: "tg_lootaldruhnmg",
                  conditions: [],
                  effects: [
-                   %{type: :disable, subject: "erranil"},
-                   %{type: :disable, subject: "movis darys"},
-                   %{type: :disable, subject: "edwinna elbert"}
+                   %{function: :disable, subject: "erranil"},
+                   %{function: :disable, subject: "movis darys"},
+                   %{function: :disable, subject: "edwinna elbert"}
                  ]
                }
              ]
@@ -911,359 +978,359 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
 
   describe "parse_effect" do
     test "AddItem - explicit player subject" do
-      assert %{count: 200, type: :add_item, subject: :player, item_id: "gold_001"} =
+      assert %{count: 200, function: :add_item, subject: :player, item_id: "gold_001"} =
                ScriptParser.parse_effect("player->additem \"gold_001\" 200")
 
-      assert %{count: 22, type: :add_item, subject: :player, item_id: "bk_froofroo"} =
+      assert %{count: 22, function: :add_item, subject: :player, item_id: "bk_froofroo"} =
                ScriptParser.parse_effect("player->additem bk_froofroo 22")
 
-      assert %{count: 1, type: :add_item, subject: :player, item_id: "the_thing"} =
+      assert %{count: 1, function: :add_item, subject: :player, item_id: "the_thing"} =
                ScriptParser.parse_effect("player->additem \"the_thing\"")
     end
 
     test "AddItem - implicit self subject" do
-      assert %{count: 200, type: :add_item, subject: :self, item_id: "gold_001"} =
+      assert %{count: 200, function: :add_item, subject: :self, item_id: "gold_001"} =
                ScriptParser.parse_effect("additem \"gold_001\" 200")
 
-      assert %{count: 22, type: :add_item, subject: :self, item_id: "bk_froofroo"} =
+      assert %{count: 22, function: :add_item, subject: :self, item_id: "bk_froofroo"} =
                ScriptParser.parse_effect("additem bk_froofroo 22")
 
-      assert %{count: 1, type: :add_item, subject: :self, item_id: "the_thing"} =
+      assert %{count: 1, function: :add_item, subject: :self, item_id: "the_thing"} =
                ScriptParser.parse_effect("additem \"the_thing\"")
     end
 
     test "AddItem - explicit NPC subject" do
-      assert %{count: 200, type: :add_item, subject: "fargoth", item_id: "gold_001"} =
+      assert %{count: 200, function: :add_item, subject: "fargoth", item_id: "gold_001"} =
                ScriptParser.parse_effect("fargoth->additem \"gold_001\" 200")
 
-      assert %{count: 22, type: :add_item, subject: "arrille", item_id: "bk_froofroo"} =
+      assert %{count: 22, function: :add_item, subject: "arrille", item_id: "bk_froofroo"} =
                ScriptParser.parse_effect("\"arrille\"->additem bk_froofroo 22")
 
-      assert %{count: 1, type: :add_item, subject: "chargen class", item_id: "the_thing"} =
+      assert %{count: 1, function: :add_item, subject: "chargen class", item_id: "the_thing"} =
                ScriptParser.parse_effect("\"chargen class\"->additem \"the_thing\"")
     end
 
     test "RemoveItem - explicit player subject" do
-      assert %{count: 200, type: :remove_item, subject: :player, item_id: "gold_001"} =
+      assert %{count: 200, function: :remove_item, subject: :player, item_id: "gold_001"} =
                ScriptParser.parse_effect("player->removeitem \"gold_001\" 200")
 
-      assert %{count: 22, type: :remove_item, subject: :player, item_id: "bk_froofroo"} =
+      assert %{count: 22, function: :remove_item, subject: :player, item_id: "bk_froofroo"} =
                ScriptParser.parse_effect("player->removeitem bk_froofroo 22")
 
-      assert %{count: 1, type: :remove_item, subject: :player, item_id: "the_thing"} =
+      assert %{count: 1, function: :remove_item, subject: :player, item_id: "the_thing"} =
                ScriptParser.parse_effect("player->removeitem \"the_thing\"")
     end
 
     test "RemoveItem - implicit self subject" do
-      assert %{count: 200, type: :remove_item, subject: :self, item_id: "gold_001"} =
+      assert %{count: 200, function: :remove_item, subject: :self, item_id: "gold_001"} =
                ScriptParser.parse_effect("removeitem \"gold_001\" 200")
 
-      assert %{count: 22, type: :remove_item, subject: :self, item_id: "bk_froofroo"} =
+      assert %{count: 22, function: :remove_item, subject: :self, item_id: "bk_froofroo"} =
                ScriptParser.parse_effect("removeitem bk_froofroo 22")
 
-      assert %{count: 1, type: :remove_item, subject: :self, item_id: "the_thing"} =
+      assert %{count: 1, function: :remove_item, subject: :self, item_id: "the_thing"} =
                ScriptParser.parse_effect("removeitem \"the_thing\"")
     end
 
     test "RemoveItem - explicit NPC subject" do
-      assert %{count: 200, type: :remove_item, subject: "fargoth", item_id: "gold_001"} =
+      assert %{count: 200, function: :remove_item, subject: "fargoth", item_id: "gold_001"} =
                ScriptParser.parse_effect("\"fargoth\"->removeitem \"gold_001\" 200")
 
-      assert %{count: 22, type: :remove_item, subject: "arrille", item_id: "bk_froofroo"} =
+      assert %{count: 22, function: :remove_item, subject: "arrille", item_id: "bk_froofroo"} =
                ScriptParser.parse_effect("\"arrille\"->removeitem bk_froofroo 22")
 
-      assert %{count: 1, type: :remove_item, subject: "chargen class", item_id: "the_thing"} =
+      assert %{count: 1, function: :remove_item, subject: "chargen class", item_id: "the_thing"} =
                ScriptParser.parse_effect("\"chargen class\"->removeitem \"the_thing\"")
     end
 
     test "Drop - implicit self subject" do
-      assert %{type: :drop_item, subject: :self, item_id: "slave_bracer_left", count: 1} =
+      assert %{function: :drop_item, subject: :self, item_id: "slave_bracer_left", count: 1} =
                ScriptParser.parse_effect("drop slave_bracer_left 1")
     end
 
     test "Drop - quoted item id" do
-      assert %{type: :drop_item, subject: :self, item_id: "slave_bracer_right", count: 1} =
+      assert %{function: :drop_item, subject: :self, item_id: "slave_bracer_right", count: 1} =
                ScriptParser.parse_effect("drop \"slave_bracer_right\" 1")
     end
 
     test "ModPCFacRep - positive value" do
-      assert %{value: 10, type: :mod_faction_reputation, faction_id: "imperial legion"} =
+      assert %{value: 10, function: :mod_faction_reputation, faction_id: "imperial legion"} =
                ScriptParser.parse_effect("modpcfacrep 10 \"imperial legion\"")
     end
 
     test "ModPCFacRep - negative value" do
-      assert %{value: -5, type: :mod_faction_reputation, faction_id: "twin lamps"} =
+      assert %{value: -5, function: :mod_faction_reputation, faction_id: "twin lamps"} =
                ScriptParser.parse_effect("modpcfacrep -5 \"twin lamps\"")
     end
 
     test "ModPCFacRep - unquoted faction" do
-      assert %{value: 5, type: :mod_faction_reputation, faction_id: "temple"} =
+      assert %{value: 5, function: :mod_faction_reputation, faction_id: "temple"} =
                ScriptParser.parse_effect("modpcfacrep 5 temple")
     end
 
     test "PCRaiseRank - quoted faction" do
-      assert %{subject: :player, type: :raise_rank, value: "mages guild"} =
+      assert %{subject: :player, function: :raise_rank, value: "mages guild"} =
                ScriptParser.parse_effect("pcraiserank \"mages guild\"")
     end
 
     test "PCRaiseRank - unquoted faction" do
-      assert %{subject: :player, type: :raise_rank, value: "temple"} =
+      assert %{subject: :player, function: :raise_rank, value: "temple"} =
                ScriptParser.parse_effect("pcraiserank temple")
     end
 
     test "PCRaiseRank - no faction specified" do
-      assert %{subject: :player, type: :raise_rank, value: nil} =
+      assert %{subject: :player, function: :raise_rank, value: nil} =
                ScriptParser.parse_effect("pcraiserank")
     end
 
     test "PCJoinFaction - quoted faction" do
-      assert %{subject: :player, type: :join_faction, value: "morag tong"} =
+      assert %{subject: :player, function: :join_faction, value: "morag tong"} =
                ScriptParser.parse_effect("pcjoinfaction \"morag tong\"")
     end
 
     test "PCJoinFaction - unquoted faction" do
-      assert %{subject: :player, type: :join_faction, value: "ashlanders"} =
+      assert %{subject: :player, function: :join_faction, value: "ashlanders"} =
                ScriptParser.parse_effect("pcjoinfaction ashlanders")
     end
 
     test "ModReputation - with player subject" do
-      assert %{type: :mod_reputation, value: 3} =
+      assert %{function: :mod_reputation, value: 3} =
                ScriptParser.parse_effect("player->modreputation 3")
     end
 
     test "ModDisposition - positive value" do
-      assert %{subject: :self, type: :mod_disposition, value: 15} =
+      assert %{subject: :self, function: :mod_disposition, value: 15} =
                ScriptParser.parse_effect("moddisposition 15")
     end
 
     test "ModDisposition - negative value" do
-      assert %{subject: :self, type: :mod_disposition, value: -10} =
+      assert %{subject: :self, function: :mod_disposition, value: -10} =
                ScriptParser.parse_effect("moddisposition -10")
     end
 
     # Dialogue response ID 234315643133312879 - weird!
     test "ModDisposition - negative value with space" do
-      assert %{subject: :self, type: :mod_disposition, value: -30} =
+      assert %{subject: :self, function: :mod_disposition, value: -30} =
                ScriptParser.parse_effect("moddisposition - 30")
     end
 
     test "ModDisposition - with explicit subject" do
-      assert %{subject: "arrille", type: :mod_disposition, value: 40} =
+      assert %{subject: "arrille", function: :mod_disposition, value: 40} =
                ScriptParser.parse_effect("\"arrille\"->moddisposition 40")
     end
 
     test "ModDisposition - with explicit unquoted subject" do
-      assert %{subject: "fargoth", type: :mod_disposition, value: 40} =
+      assert %{subject: "fargoth", function: :mod_disposition, value: 40} =
                ScriptParser.parse_effect("fargoth->moddisposition 40")
     end
 
     test "SetDisposition - without subject" do
-      assert %{subject: :self, type: :set_disposition, value: 50} =
+      assert %{subject: :self, function: :set_disposition, value: 50} =
                ScriptParser.parse_effect("setdisposition 50")
     end
 
     test "SetDisposition - with explicit subject" do
-      assert %{subject: "bolvyn venim", type: :set_disposition, value: 10} =
+      assert %{subject: "bolvyn venim", function: :set_disposition, value: 10} =
                ScriptParser.parse_effect("\"bolvyn venim\"->setdisposition 10")
     end
 
     test "AddTopic - quoted topic" do
-      assert %{type: :add_topic, topic_id: "murder of processus vitellius"} =
+      assert %{function: :add_topic, topic_id: "murder of processus vitellius"} =
                ScriptParser.parse_effect("addtopic \"murder of processus vitellius\"")
     end
 
     test "AddTopic - with player subject" do
-      assert %{type: :add_topic, topic_id: "sculptor"} =
+      assert %{function: :add_topic, topic_id: "sculptor"} =
                ScriptParser.parse_effect("player->addtopic \"sculptor\"")
     end
 
     test "AddTopic - extra space after command" do
-      assert %{type: :add_topic, topic_id: "the star is the key"} =
+      assert %{function: :add_topic, topic_id: "the star is the key"} =
                ScriptParser.parse_effect("addtopic  \"the star is the key\"")
     end
 
     test "AddTopic - quote inside quotes" do
-      assert %{type: :add_topic, topic_id: "processus' ring"} =
+      assert %{function: :add_topic, topic_id: "processus' ring"} =
                ScriptParser.parse_effect("addtopic \"processus' ring\"")
     end
 
     test "Enable - quoted subject" do
-      assert %{type: :enable, subject: "npc name"} =
+      assert %{function: :enable, subject: "npc name"} =
                ScriptParser.parse_effect("\"npc name\"->enable")
     end
 
     test "Enable - unquoted subject" do
-      assert %{type: :enable, subject: "netch_bull_dead"} =
+      assert %{function: :enable, subject: "netch_bull_dead"} =
                ScriptParser.parse_effect("netch_bull_dead->enable")
     end
 
     test "Disable - quoted subject" do
-      assert %{type: :disable, subject: "caius cosades"} =
+      assert %{function: :disable, subject: "caius cosades"} =
                ScriptParser.parse_effect("\"caius cosades\"->disable")
     end
 
     test "Disable - unquoted subject" do
-      assert %{type: :disable, subject: "ennbjof"} =
+      assert %{function: :disable, subject: "ennbjof"} =
                ScriptParser.parse_effect("ennbjof->disable")
     end
 
     test "AddSpell - without subject" do
-      assert %{type: :add_spell, subject: :self, value: "corprus"} =
+      assert %{function: :add_spell, subject: :self, value: "corprus"} =
                ScriptParser.parse_effect("addspell \"corprus\"")
     end
 
     test "AddSpell - with player subject" do
-      assert %{type: :add_spell, subject: :player, value: "blight disease immunity"} =
+      assert %{function: :add_spell, subject: :player, value: "blight disease immunity"} =
                ScriptParser.parse_effect("player->addspell \"blight disease immunity\"")
     end
 
     test "RemoveSpell - without subject" do
-      assert %{type: :remove_spell, subject: :self, value: "ash-chancre"} =
+      assert %{function: :remove_spell, subject: :self, value: "ash-chancre"} =
                ScriptParser.parse_effect("removespell \"ash-chancre\"")
     end
 
     test "RemoveSpell - with player subject" do
-      assert %{type: :remove_spell, subject: :player, value: "werewolf blood"} =
+      assert %{function: :remove_spell, subject: :player, value: "werewolf blood"} =
                ScriptParser.parse_effect("player->removespell \"werewolf blood\"")
     end
 
     test "RemoveSpell - unquoted spell" do
-      assert %{type: :remove_spell, subject: :player, value: "corprus"} =
+      assert %{function: :remove_spell, subject: :player, value: "corprus"} =
                ScriptParser.parse_effect("player->removespell corprus")
     end
 
     test "ForceGreeting - without subject" do
-      assert %{type: :force_greeting, subject: :self} =
+      assert %{function: :force_greeting, subject: :self} =
                ScriptParser.parse_effect("forcegreeting")
     end
 
     test "ForceGreeting - with explicit subject" do
-      assert %{type: :force_greeting, subject: "ahnia"} =
+      assert %{function: :force_greeting, subject: "ahnia"} =
                ScriptParser.parse_effect("\"ahnia\"->forcegreeting")
     end
 
     test "Goodbye - ends dialogue" do
-      assert %{type: :goodbye} = ScriptParser.parse_effect("goodbye")
+      assert %{function: :goodbye} = ScriptParser.parse_effect("goodbye")
     end
 
     test "SetFight - without subject" do
-      assert %{type: :set_fight, subject: :self, value: 100} =
+      assert %{function: :set_fight, subject: :self, value: 100} =
                ScriptParser.parse_effect("setfight 100")
     end
 
     test "SetFight - with explicit subject" do
-      assert %{type: :set_fight, subject: "bolvyn venim", value: 100} =
+      assert %{function: :set_fight, subject: "bolvyn venim", value: 100} =
                ScriptParser.parse_effect("\"bolvyn venim\"->setfight 100")
     end
 
     test "SetFlee - without subject" do
-      assert %{type: :set_flee, subject: :self, value: 20} =
+      assert %{function: :set_flee, subject: :self, value: 20} =
                ScriptParser.parse_effect("setflee 20")
     end
 
     test "SetAlarm - without subject" do
-      assert %{type: :set_alarm, subject: :self, value: 100} =
+      assert %{function: :set_alarm, subject: :self, value: 100} =
                ScriptParser.parse_effect("setalarm 100")
     end
 
     test "SetHello - without subject" do
-      assert %{type: :set_hello, subject: :self, value: 0} =
+      assert %{function: :set_hello, subject: :self, value: 0} =
                ScriptParser.parse_effect("sethello 0")
     end
 
     test "SetHello - with explicit subject" do
-      assert %{type: :set_hello, subject: "rolf long-tooth", value: 10} =
+      assert %{function: :set_hello, subject: "rolf long-tooth", value: 10} =
                ScriptParser.parse_effect("\"rolf long-tooth\"->sethello 10")
     end
 
     test "StartScript - unquoted script id" do
-      assert %{type: :start_script, script_id: "all_nerevarine"} =
+      assert %{function: :start_script, script_id: "all_nerevarine"} =
                ScriptParser.parse_effect("startscript all_nerevarine")
     end
 
     test "StartScript - quoted script id" do
-      assert %{type: :start_script, script_id: "vampire_cure_pc"} =
+      assert %{function: :start_script, script_id: "vampire_cure_pc"} =
                ScriptParser.parse_effect("startscript \"vampire_cure_pc\"")
     end
 
     test "StopScript - unquoted script id" do
-      assert %{type: :stop_script, script_id: "all_hortator"} =
+      assert %{function: :stop_script, script_id: "all_hortator"} =
                ScriptParser.parse_effect("stopscript all_hortator")
     end
 
     test "StopScript - quoted script id" do
-      assert %{type: :stop_script, script_id: "vampire_cure_pc"} =
+      assert %{function: :stop_script, script_id: "vampire_cure_pc"} =
                ScriptParser.parse_effect("stopscript \"vampire_cure_pc\"")
     end
 
     test "StartCombat - against player without attacker" do
-      assert %{type: :start_combat, subject: :self, value: "player"} =
+      assert %{function: :start_combat, subject: :self, value: "player"} =
                ScriptParser.parse_effect("startcombat player")
     end
 
     test "StartCombat - NPC against player" do
-      assert %{type: :start_combat, subject: "bolvyn venim", value: "player"} =
+      assert %{function: :start_combat, subject: "bolvyn venim", value: "player"} =
                ScriptParser.parse_effect("\"bolvyn venim\"->startcombat player")
     end
 
     test "StartCombat - NPC against NPC" do
-      assert %{type: :start_combat, subject: "afer flaccus_guard", value: "baslod"} =
+      assert %{function: :start_combat, subject: "afer flaccus_guard", value: "baslod"} =
                ScriptParser.parse_effect("\"afer flaccus_guard\"->startcombat \"baslod\"")
     end
 
     test "StopCombat - without subject" do
-      assert %{type: :stop_combat, subject: :self} =
+      assert %{function: :stop_combat, subject: :self} =
                ScriptParser.parse_effect("stopcombat")
     end
 
     test "StopCombat - with explicit NPC" do
-      assert %{type: :stop_combat, subject: "guard"} =
+      assert %{function: :stop_combat, subject: "guard"} =
                ScriptParser.parse_effect("\"guard\"->stopcombat")
     end
 
     test "AIFollow - follow player" do
-      assert %{type: :ai_follow, subject: :self, target: :player} =
+      assert %{function: :ai_follow, subject: :self, target: :player} =
                ScriptParser.parse_effect("aifollow player 0 0 0 0")
     end
 
     test "AIFollow - NPC follows player" do
-      assert %{type: :ai_follow, subject: "rolf long-tooth", target: :player} =
+      assert %{function: :ai_follow, subject: "rolf long-tooth", target: :player} =
                ScriptParser.parse_effect("\"rolf long-tooth\"->aifollow player 0 0 0 0 0 0")
     end
 
     test "AIFollow - NPC follows another NPC" do
-      assert %{type: :ai_follow, subject: "rabinna", target: "im_kilaya"} =
+      assert %{function: :ai_follow, subject: "rabinna", target: "im_kilaya"} =
                ScriptParser.parse_effect("rabinna->aifollow im_kilaya 128 0 0 0 0 0 0")
     end
 
     test "AIFollow - quoted follow subject" do
-      assert %{type: :ai_follow, subject: :self, target: "galyn arvel"} =
+      assert %{function: :ai_follow, subject: :self, target: "galyn arvel"} =
                ScriptParser.parse_effect("aifollow \"galyn arvel\" 0 0 0 0 0")
     end
 
     test "AITravel - without subject" do
-      assert %{type: :ai_travel, subject: :self, target: %{x: 100, y: 200, z: 300}} =
+      assert %{function: :ai_travel, subject: :self, target: %{x: 100, y: 200, z: 300}} =
                ScriptParser.parse_effect("aitravel 100 200 300")
     end
 
     test "AITravel - with explicit subject" do
-      assert %{type: :ai_travel, subject: "fargoth", target: %{x: 100, y: 200, z: 300}} =
+      assert %{function: :ai_travel, subject: "fargoth", target: %{x: 100, y: 200, z: 300}} =
                ScriptParser.parse_effect("\"fargoth\"->aitravel 100 200 300")
     end
 
     test "AIWander - without subject" do
-      assert %{type: :ai_wander, subject: :self, range: 256} =
+      assert %{function: :ai_wander, subject: :self, range: 256} =
                ScriptParser.parse_effect("aiwander 256 0 0 0 0 0 0 0 0 0 0 0")
     end
 
     test "AIWander - with explicit subject" do
-      assert %{type: :ai_wander, subject: "fargoth", range: 512} =
+      assert %{function: :ai_wander, subject: "fargoth", range: 512} =
                ScriptParser.parse_effect("\"fargoth\"->aiwander 512 0 0 0 0 0 0 0 0 0 0 0")
     end
 
     test "AIEscort - escort player" do
       assert %{
-               type: :ai_escort,
+               function: :ai_escort,
                subject: :self,
                target: :player,
                duration: 0,
@@ -1274,7 +1341,7 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
 
     test "AIEscort - NPC escorts player" do
       assert %{
-               type: :ai_escort,
+               function: :ai_escort,
                subject: "guard",
                target: :player,
                duration: 0,
@@ -1284,92 +1351,92 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
     end
 
     test "Lock - without subject" do
-      assert %{type: :lock, subject: :self, value: 100} =
+      assert %{function: :lock, subject: :self, value: 100} =
                ScriptParser.parse_effect("lock 100")
     end
 
     test "Lock - with explicit subject" do
-      assert %{type: :lock, subject: "in_mh_door_01_velas", value: 100} =
+      assert %{function: :lock, subject: "in_mh_door_01_velas", value: 100} =
                ScriptParser.parse_effect("in_mh_door_01_velas->lock 100")
     end
 
     test "Lock - with quoted subject" do
-      assert %{type: :lock, subject: "ex_mh_door_02_ignatius", value: 40} =
+      assert %{function: :lock, subject: "ex_mh_door_02_ignatius", value: 40} =
                ScriptParser.parse_effect("\"ex_mh_door_02_ignatius\"->lock 40")
     end
 
     test "Unlock - without subject" do
-      assert %{type: :unlock, subject: :self} =
+      assert %{function: :unlock, subject: :self} =
                ScriptParser.parse_effect("unlock")
     end
 
     test "Unlock - with explicit subject" do
-      assert %{type: :unlock, subject: "in_mh_door_01_velas"} =
+      assert %{function: :unlock, subject: "in_mh_door_01_velas"} =
                ScriptParser.parse_effect("in_mh_door_01_velas->unlock")
     end
 
     test "PlaceAtPC - basic" do
-      assert %{type: :place_at_pc, value: "skeleton"} =
+      assert %{function: :place_at_pc, value: "skeleton"} =
                ScriptParser.parse_effect("placeatpc \"skeleton\" 1 50 1")
     end
 
     test "PlaceAtPC - unquoted object" do
-      assert %{type: :place_at_pc, value: "skeleton_weak"} =
+      assert %{function: :place_at_pc, value: "skeleton_weak"} =
                ScriptParser.parse_effect("placeatpc skeleton_weak 1 50 1")
     end
 
     test "PositionCell - basic" do
-      assert %{type: :position_cell, subject: :self, value: "balmora"} =
+      assert %{function: :position_cell, subject: :self, value: "balmora"} =
                ScriptParser.parse_effect("positioncell 100 200 300 0 \"balmora\"")
     end
 
     test "PositionCell - with subject" do
-      assert %{type: :position_cell, subject: :player, value: "vivec"} =
+      assert %{function: :position_cell, subject: :player, value: "vivec"} =
                ScriptParser.parse_effect("player->positioncell 100 200 300 0 \"vivec\"")
     end
 
     test "Mod Stats - modstrength" do
-      assert %{type: :mod_strength, subject: :self, value: 10} =
+      assert %{function: :mod_strength, subject: :self, value: 10} =
                ScriptParser.parse_effect("modstrength 10")
     end
 
     test "Mod Stats - modintelligence" do
-      assert %{type: :mod_intelligence, subject: :self, value: 5} =
+      assert %{function: :mod_intelligence, subject: :self, value: 5} =
                ScriptParser.parse_effect("modintelligence 5")
     end
 
     test "Mod Stats - modwillpower" do
-      assert %{type: :mod_willpower, subject: :self, value: 5} =
+      assert %{function: :mod_willpower, subject: :self, value: 5} =
                ScriptParser.parse_effect("modwillpower 5")
     end
 
     test "Mod Stats - modagility" do
-      assert %{type: :mod_agility, subject: :self, value: 5} =
+      assert %{function: :mod_agility, subject: :self, value: 5} =
                ScriptParser.parse_effect("modagility 5")
     end
 
     test "Mod Stats - modspeed" do
-      assert %{type: :mod_speed, subject: "dagoth ur", value: 5} =
+      assert %{function: :mod_speed, subject: "dagoth ur", value: 5} =
                ScriptParser.parse_effect("\"dagoth ur\"->modspeed 5")
     end
 
     test "Mod Stats - modendurance" do
-      assert %{type: :mod_endurance, subject: :player, value: 5} =
+      assert %{function: :mod_endurance, subject: :player, value: 5} =
                ScriptParser.parse_effect("player->modendurance 5")
     end
 
     test "Mod Stats - modpersonality" do
-      assert %{type: :mod_personality, subject: :self, value: 5} =
+      assert %{function: :mod_personality, subject: :self, value: 5} =
                ScriptParser.parse_effect("modpersonality 5")
     end
 
     test "Mod Stats - modluck" do
-      assert %{type: :mod_luck, subject: :self, value: 5} =
+      assert %{function: :mod_luck, subject: :self, value: 5} =
                ScriptParser.parse_effect("modluck 5")
     end
 
     test "Mod Stats - negative value" do
-      assert %{type: :mod_strength, subject: :self, value: -5} =
+      assert %{function: :mod_strength, subject: :self, value: -5} =
                ScriptParser.parse_effect("modstrength -5")
     end
 
@@ -1389,33 +1456,33 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
 
   describe "parse_condition" do
     test "GetJournalIndex - basic" do
-      assert %{type: :journal_index, target: "MV_SlaveMule", operator: :<=, value: 100} =
+      assert %{function: :journal_index, target: "MV_SlaveMule", operator: :<=, value: 100} =
                ScriptParser.parse_condition("if ( getjournalindex \"MV_SlaveMule\" <= 100 )")
     end
 
     test "GetJournalIndex - unquoted quest id" do
-      assert %{type: :journal_index, target: "B5_RedoranHort", operator: :>=, value: 50} =
+      assert %{function: :journal_index, target: "B5_RedoranHort", operator: :>=, value: 50} =
                ScriptParser.parse_condition("if ( getjournalindex B5_RedoranHort >= 50 )")
     end
 
     test "GetJournalIndex - equals" do
-      assert %{type: :journal_index, target: "romance_ahnassi", operator: :==, value: 33} =
+      assert %{function: :journal_index, target: "romance_ahnassi", operator: :==, value: 33} =
                ScriptParser.parse_condition("if ( getjournalindex romance_ahnassi == 33 )")
     end
 
     test "GetDeadCount - basic" do
-      assert %{type: :dead_count, target: "Ahnia", operator: :>, value: 0} =
+      assert %{function: :dead_count, target: "Ahnia", operator: :>, value: 0} =
                ScriptParser.parse_condition("if ( getdeadcount \"Ahnia\" > 0 )")
     end
 
     test "GetItemCount - basic" do
-      assert %{type: :item_count, target: "slave_bracer_left", operator: :>, value: 0} =
+      assert %{function: :item_count, target: "slave_bracer_left", operator: :>, value: 0} =
                ScriptParser.parse_condition("if ( getitemcount slave_bracer_left > 0 )")
     end
 
     test "GetItemCount - with subject" do
       assert %{
-               type: :item_count,
+               function: :item_count,
                subject: :player,
                target: "katana_goldbrand_unique",
                operator: :==,
@@ -1428,7 +1495,7 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
 
     test "GetItemCount - with nested parens" do
       assert %{
-               type: :item_count,
+               function: :item_count,
                subject: :player,
                target: "gold_001",
                operator: :>=,
@@ -1438,50 +1505,50 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
     end
 
     test "GetPCCell - quoted cell name" do
-      assert %{type: :pc_cell, target: "Ebonheart, Argonian Mission", operator: :==, value: 1} =
+      assert %{function: :pc_cell, target: "Ebonheart, Argonian Mission", operator: :==, value: 1} =
                ScriptParser.parse_condition(
                  "if ( getpccell \"Ebonheart, Argonian Mission\" == 1 )"
                )
     end
 
     test "GetPCCell - without == 1" do
-      assert %{type: :pc_cell, target: "vivec, arena", operator: :==, value: 1} =
+      assert %{function: :pc_cell, target: "vivec, arena", operator: :==, value: 1} =
                ScriptParser.parse_condition("if ( getpccell \"vivec, arena\" )")
     end
 
     test "OnDeath - basic" do
-      assert %{type: :on_death, subject: :self} =
+      assert %{function: :on_death, subject: :self} =
                ScriptParser.parse_condition("if ( ondeath == 1 )")
     end
 
     test "OnDeath - with subject" do
-      assert %{type: :on_death, subject: "netch_giant_unique"} =
+      assert %{function: :on_death, subject: "netch_giant_unique"} =
                ScriptParser.parse_condition("if ( \"netch_giant_unique\"->ondeath == 1 )")
     end
 
     test "OnActivate - basic" do
-      assert %{type: :on_activate, subject: :self, operator: :==, value: 1} =
+      assert %{function: :on_activate, subject: :self, operator: :==, value: 1} =
                ScriptParser.parse_condition("if ( onactivate == 1 )")
     end
 
     test "GetDisabled - basic" do
-      assert %{type: :disabled, subject: :self, operator: :==, value: 1} =
+      assert %{function: :disabled, subject: :self, operator: :==, value: 1} =
                ScriptParser.parse_condition("if ( getdisabled == 1 )")
     end
 
     test "GetDisabled - with subject" do
-      assert %{type: :disabled, subject: "itermerel", operator: :==, value: 0} =
+      assert %{function: :disabled, subject: "itermerel", operator: :==, value: 0} =
                ScriptParser.parse_condition("if ( \"itermerel\"->getdisabled == 0 )")
     end
 
     test "GetDistance - basic" do
-      assert %{type: :distance, subject: :self, target: "player", operator: :<=, value: 256} =
+      assert %{function: :distance, subject: :self, target: "player", operator: :<=, value: 256} =
                ScriptParser.parse_condition("if ( getdistance player <= 256 )")
     end
 
     test "GetDistance - with quoted target" do
       assert %{
-               type: :distance,
+               function: :distance,
                subject: :self,
                target: "guar_white_unique",
                operator: :<=,
@@ -1492,38 +1559,38 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
 
     test "GetDistance - with <==" do
       # plantScript wtf
-      assert %{type: :distance, subject: :self, target: "player", operator: :<=, value: 512} =
+      assert %{function: :distance, subject: :self, target: "player", operator: :<=, value: 512} =
                ScriptParser.parse_condition("if ( getdistance player <== 512 )")
     end
 
     test "GetHealth - basic" do
-      assert %{type: :health, subject: :self, operator: :>, value: 0} =
+      assert %{function: :health, subject: :self, operator: :>, value: 0} =
                ScriptParser.parse_condition("if ( gethealth > 0 )")
     end
 
     test "GetHealth - less than or equal" do
-      assert %{type: :health, subject: :self, operator: :<=, value: 0} =
+      assert %{function: :health, subject: :self, operator: :<=, value: 0} =
                ScriptParser.parse_condition("if ( gethealth <= 0 )")
     end
 
     test "GetHealth - variable" do
-      assert %{type: :health, subject: :player, operator: :<=, value: "halfhealth"} =
+      assert %{function: :health, subject: :player, operator: :<=, value: "halfhealth"} =
                ScriptParser.parse_condition("if ( player->gethealth <= halfhealth )")
     end
 
     test "GetHealth - no spaces" do
-      assert %{type: :health, subject: "Black Dart Malar", operator: :<, value: 1} =
+      assert %{function: :health, subject: "Black Dart Malar", operator: :<, value: 1} =
                ScriptParser.parse_condition("if ( \"Black Dart Malar\"->gethealth<1 )")
     end
 
     test "GetPCRank - basic" do
-      assert %{type: :pc_rank, target: "redoran", operator: :==, value: -1} =
+      assert %{function: :pc_rank, target: "redoran", operator: :==, value: -1} =
                ScriptParser.parse_condition("if ( getpcrank \"redoran\" == -1 )")
     end
 
     test "GetSpell - basic" do
       assert %{
-               type: :knows_spell,
+               function: :knows_spell,
                subject: :player,
                target: "levitate",
                operator: :==,
@@ -1533,30 +1600,30 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
     end
 
     test "GetBlightDisease - basic" do
-      assert %{type: :blight_disease, subject: :self, operator: :==, value: 0} =
+      assert %{function: :blight_disease, subject: :self, operator: :==, value: 0} =
                ScriptParser.parse_condition("if ( getblightdisease == 0 )")
     end
 
     test "GetBlightDisease - with subject" do
-      assert %{type: :blight_disease, subject: "kwama queen_abaesen", operator: :==, value: 1} =
+      assert %{function: :blight_disease, subject: "kwama queen_abaesen", operator: :==, value: 1} =
                ScriptParser.parse_condition(
                  "if ( \"kwama queen_abaesen\"->getblightdisease == 1 )"
                )
     end
 
     test "GetCommonDisease - basic" do
-      assert %{type: :common_disease, subject: :self, operator: :==, value: 0} =
+      assert %{function: :common_disease, subject: :self, operator: :==, value: 0} =
                ScriptParser.parse_condition("if ( getcommondisease == 0 )")
     end
 
     test "GetCurrentAIPackage - basic" do
-      assert %{type: :current_ai_package, subject: :self, operator: :==, value: 3} =
+      assert %{function: :current_ai_package, subject: :self, operator: :==, value: 3} =
                ScriptParser.parse_condition("if ( getcurrentaipackage == 3 )")
     end
 
     test "GetCurrentAIPackage - with subject" do
       assert %{
-               type: :current_ai_package,
+               function: :current_ai_package,
                subject: "guar_llovyn_unique",
                operator: :==,
                value: 3
@@ -1567,33 +1634,33 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
     end
 
     test "MenuMode - basic" do
-      assert %{type: :menu_mode, operator: :==, value: 1} =
+      assert %{function: :menu_mode, operator: :==, value: 1} =
                ScriptParser.parse_condition("if ( menumode == 1 )")
     end
 
     test "CellChanged - basic" do
-      assert %{type: :cell_changed, subject: :self, operator: :==, value: 0} =
+      assert %{function: :cell_changed, subject: :self, operator: :==, value: 0} =
                ScriptParser.parse_condition("if ( cellchanged == 0 )")
     end
 
     test "CellChanged - no comparison" do
-      assert %{type: :cell_changed, subject: :self} =
+      assert %{function: :cell_changed, subject: :self} =
                ScriptParser.parse_condition("if ( cellchanged )")
     end
 
     test "IsWerewolf - basic" do
-      assert %{type: :is_werewolf, subject: :self} =
+      assert %{function: :is_werewolf, subject: :self} =
                ScriptParser.parse_condition("if ( iswerewolf == 1 )")
     end
 
     test "GetRace - basic" do
-      assert %{type: :race, subject: :player, target: "dark elf", operator: :==, value: 1} =
+      assert %{function: :race, subject: :player, target: "dark elf", operator: :==, value: 1} =
                ScriptParser.parse_condition("if ( player->getrace \"dark elf\" == 1 )")
     end
 
     test "HasSoulGem - basic" do
       assert %{
-               type: :has_soul_gem,
+               function: :has_soul_gem,
                subject: :player,
                target: "golden saint",
                operator: :>,
@@ -1603,111 +1670,111 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
     end
 
     test "GetLocked - basic" do
-      assert %{type: :locked, subject: :self} =
+      assert %{function: :locked, subject: :self} =
                ScriptParser.parse_condition("if ( getlocked == 1 )")
     end
 
     test "ScriptRunning - basic" do
-      assert %{type: :script_running, target: "myquest", operator: :==, value: 1} =
+      assert %{function: :script_running, target: "myquest", operator: :==, value: 1} =
                ScriptParser.parse_condition("if ( scriptrunning myquest )")
     end
 
     test "PCExpelled - basic" do
-      assert %{type: :expelled, target: "mages guild"} =
+      assert %{function: :expelled, target: "mages guild"} =
                ScriptParser.parse_condition("if ( pcexpelled \"mages guild\" )")
     end
 
     test "GetAttacked - basic" do
-      assert %{type: :attacked, subject: :self} =
+      assert %{function: :attacked, subject: :self} =
                ScriptParser.parse_condition("if ( getattacked == 1 )")
     end
 
     test "GetAttacked - with subject" do
-      assert %{type: :attacked, subject: "yagrum bagarn"} =
+      assert %{function: :attacked, subject: "yagrum bagarn"} =
                ScriptParser.parse_condition("if ( \"yagrum bagarn\"->getattacked == 1 )")
     end
 
     # DaysPassed and GameHour
     test "DaysPassed - basic" do
-      assert %{type: :days_passed, operator: :>, value: 10} =
+      assert %{function: :days_passed, operator: :>, value: 10} =
                ScriptParser.parse_condition("if ( dayspassed > 10 )")
     end
 
     test "DaysPassed - equals" do
-      assert %{type: :days_passed, operator: :==, value: 0} =
+      assert %{function: :days_passed, operator: :==, value: 0} =
                ScriptParser.parse_condition("if ( dayspassed == 0 )")
     end
 
     test "GameHour - greater than or equal" do
-      assert %{type: :game_hour, operator: :>=, value: 9} =
+      assert %{function: :game_hour, operator: :>=, value: 9} =
                ScriptParser.parse_condition("if ( gamehour >= 9 )")
     end
 
     test "GameHour - less than" do
-      assert %{type: :game_hour, operator: :<, value: 22} =
+      assert %{function: :game_hour, operator: :<, value: 22} =
                ScriptParser.parse_condition("if ( gamehour < 22 )")
     end
 
     # GetAIPackageDone
     test "GetAIPackageDone - basic" do
-      assert %{type: :ai_package_done, subject: :self, operator: :==, value: 1} =
+      assert %{function: :ai_package_done, subject: :self, operator: :==, value: 1} =
                ScriptParser.parse_condition("if ( getaipackagedone == 1 )")
     end
 
     test "GetAIPackageDone - with subject" do
-      assert %{type: :ai_package_done, subject: "fargoth", operator: :==, value: 1} =
+      assert %{function: :ai_package_done, subject: "fargoth", operator: :==, value: 1} =
                ScriptParser.parse_condition("if ( fargoth->getaipackagedone == 1 )")
     end
 
     # GetButtonPressed
     test "GetButtonPressed - basic" do
-      assert %{type: :button_pressed, operator: :!=, value: -1} =
+      assert %{function: :button_pressed, operator: :!=, value: -1} =
                ScriptParser.parse_condition("if ( getbuttonpressed != -1 )")
     end
 
     # GetCollidingPC / GetCollidingActor
     test "GetCollidingPC - basic" do
-      assert %{type: :colliding_pc, subject: :self} =
+      assert %{function: :colliding_pc, subject: :self} =
                ScriptParser.parse_condition("if ( getcollidingpc == 1 )")
     end
 
     test "GetCollidingPC - no comparison" do
-      assert %{type: :colliding_pc, subject: :self} =
+      assert %{function: :colliding_pc, subject: :self} =
                ScriptParser.parse_condition("if ( getcollidingpc )")
     end
 
     test "GetCollidingActor - no comparison" do
-      assert %{type: :colliding_actor, subject: :self} =
+      assert %{function: :colliding_actor, subject: :self} =
                ScriptParser.parse_condition("if ( getcollidingactor )")
     end
 
     # GetCurrentWeather
     test "GetCurrentWeather - basic" do
-      assert %{type: :current_weather, operator: :>=, value: 5} =
+      assert %{function: :current_weather, operator: :>=, value: 5} =
                ScriptParser.parse_condition("if ( getcurrentweather >= 5 )")
     end
 
     # GetDetected
     test "GetDetected - basic" do
-      assert %{type: :detected, subject: :self, target: "player", operator: :==, value: 1} =
+      assert %{function: :detected, subject: :self, target: "player", operator: :==, value: 1} =
                ScriptParser.parse_condition("if ( getdetected player == 1 )")
     end
 
     test "GetDetected - with subject and quoted target" do
-      assert %{type: :detected, subject: "jeanne", target: "player", operator: :==, value: 1} =
+      assert %{function: :detected, subject: "jeanne", target: "player", operator: :==, value: 1} =
                ScriptParser.parse_condition("if ( jeanne->getdetected player == 1 )")
     end
 
     # GetDisposition
     test "GetDisposition - with subject" do
-      assert %{type: :disposition, subject: "huleeya", operator: :>, value: 50} =
+      assert %{function: :disposition, subject: "huleeya", operator: :>, value: 50} =
                ScriptParser.parse_condition("if ( huleeya->getdisposition > 50 )")
     end
 
     # GetEffect
     test "GetEffect - basic" do
       assert %{
-               type: :effect,
+               function: :effect,
                subject: :self,
                target: "seffectinvisibility",
                operator: :==,
@@ -1717,42 +1784,54 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
     end
 
     test "GetEffect - with subject" do
-      assert %{type: :effect, subject: :player, target: "seffectpoison", operator: :==, value: 1} =
+      assert %{
+               function: :effect,
+               subject: :player,
+               target: "seffectpoison",
+               operator: :==,
+               value: 1
+             } =
                ScriptParser.parse_condition("if ( player->geteffect seffectpoison == 1 )")
     end
 
     # GetFatigue / GetMagicka
     test "GetFatigue - basic" do
-      assert %{type: :fatigue, subject: :self, operator: :<, value: 1} =
+      assert %{function: :fatigue, subject: :self, operator: :<, value: 1} =
                ScriptParser.parse_condition("if ( getfatigue < 1 )")
     end
 
     test "GetMagicka - basic" do
-      assert %{type: :magicka, subject: :self, operator: :>, value: 0} =
+      assert %{function: :magicka, subject: :self, operator: :>, value: 0} =
                ScriptParser.parse_condition("if ( getmagicka > 0 )")
     end
 
     # GetLevel
     test "GetLevel - basic" do
-      assert %{type: :level, subject: :player, operator: :>=, value: 30} =
+      assert %{function: :level, subject: :player, operator: :>=, value: 30} =
                ScriptParser.parse_condition("if ( player->getlevel >= 30 )")
     end
 
     # GetLOS (line of sight)
     test "GetLOS - basic" do
-      assert %{type: :line_of_sight, subject: :self, target: "player", operator: :==, value: 1} =
+      assert %{
+               function: :line_of_sight,
+               subject: :self,
+               target: "player",
+               operator: :==,
+               value: 1
+             } =
                ScriptParser.parse_condition("if ( getlos player == 1 )")
     end
 
     # GetPos
     test "GetPos - basic" do
-      assert %{type: :position, subject: :self, target: "y", operator: :>, value: 1730} =
+      assert %{function: :position, subject: :self, target: "y", operator: :>, value: 1730} =
                ScriptParser.parse_condition("if ( getpos y > 1730 )")
     end
 
     test "GetPos - with subject" do
       assert %{
-               type: :position,
+               function: :position,
                subject: "sharn gra-muzgob",
                target: "z",
                operator: :<,
@@ -1763,54 +1842,60 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
 
     # GetSoundPlaying
     test "GetSoundPlaying - basic" do
-      assert %{type: :sound_playing, subject: :self, target: "sound_id", operator: :==, value: 1} =
+      assert %{
+               function: :sound_playing,
+               subject: :self,
+               target: "sound_id",
+               operator: :==,
+               value: 1
+             } =
                ScriptParser.parse_condition("if ( getsoundplaying \"sound_id\" == 1 )")
     end
 
     # GetStandingPC / GetStandingActor
     test "GetStandingPC - basic" do
-      assert %{type: :standing_pc, subject: :self, operator: :==, value: 1} =
+      assert %{function: :standing_pc, subject: :self, operator: :==, value: 1} =
                ScriptParser.parse_condition("if ( getstandingpc == 1 )")
     end
 
     test "GetStandingActor - basic" do
-      assert %{type: :standing_actor, subject: :self, operator: :==, value: 1} =
+      assert %{function: :standing_actor, subject: :self, operator: :==, value: 1} =
                ScriptParser.parse_condition("if ( getstandingactor == 1 )")
     end
 
     # GetTarget
     test "GetTarget - basic" do
-      assert %{type: :target, subject: :self, target: "player", operator: :==, value: 1} =
+      assert %{function: :target, subject: :self, target: "player", operator: :==, value: 1} =
                ScriptParser.parse_condition("if ( gettarget player == 1 )")
     end
 
     test "GetTarget - with subject" do
-      assert %{type: :target, subject: "someone", target: "player", operator: :==, value: 1} =
+      assert %{function: :target, subject: "someone", target: "player", operator: :==, value: 1} =
                ScriptParser.parse_condition("if ( \"someone\"->gettarget player == 1 )")
     end
 
     # GetWaterLevel
     test "GetWaterLevel - basic" do
-      assert %{type: :water_level, subject: :self, operator: :!=, value: -875} =
+      assert %{function: :water_level, subject: :self, operator: :!=, value: -875} =
                ScriptParser.parse_condition("if ( getwaterlevel != -875 )")
     end
 
     # GetWeaponDrawn
     test "GetWeaponDrawn - basic" do
-      assert %{type: :weapon_drawn, subject: :player, operator: :==, value: 0} =
+      assert %{function: :weapon_drawn, subject: :player, operator: :==, value: 0} =
                ScriptParser.parse_condition("if ( player->getweapondrawn == 0 )")
     end
 
     # GetWerewolfKills
     test "GetWerewolfKills - basic" do
-      assert %{type: :werewolf_kills, operator: :==, value: 0} =
+      assert %{function: :werewolf_kills, operator: :==, value: 0} =
                ScriptParser.parse_condition("if ( getwerewolfkills == 0 )")
     end
 
     # HasItemEquipped
     test "HasItemEquipped - basic" do
       assert %{
-               type: :has_item_equipped,
+               function: :has_item_equipped,
                subject: :player,
                target: "steel saber_elberoth",
                operator: :==,
@@ -1823,95 +1908,95 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
 
     # OnKnockout
     test "OnKnockout - basic" do
-      assert %{type: :on_knockout, subject: :self} =
+      assert %{function: :on_knockout, subject: :self} =
                ScriptParser.parse_condition("if ( onknockout == 1 )")
     end
 
     # OnMurder
     test "OnMurder - basic" do
-      assert %{type: :on_murder, subject: :self} =
+      assert %{function: :on_murder, subject: :self} =
                ScriptParser.parse_condition("if ( onmurder == 1 )")
     end
 
     # OnPCEquip
     test "OnPCEquip - basic" do
-      assert %{type: :on_pc_equip, subject: :self, operator: :==, value: 1} =
+      assert %{function: :on_pc_equip, subject: :self, operator: :==, value: 1} =
                ScriptParser.parse_condition("if ( onpcequip == 1 )")
     end
 
     test "OnPCEquip - not equal" do
-      assert %{type: :on_pc_equip, subject: :self, operator: :!=, value: 1} =
+      assert %{function: :on_pc_equip, subject: :self, operator: :!=, value: 1} =
                ScriptParser.parse_condition("if ( onpcequip != 1 )")
     end
 
     # OnPCHitMe
     test "OnPCHitMe - basic" do
-      assert %{type: :on_pc_hit_me, subject: :self} =
+      assert %{function: :on_pc_hit_me, subject: :self} =
                ScriptParser.parse_condition("if ( onpchitme == 1 )")
     end
 
     # Random
     test "Random - basic" do
-      assert %{type: :random, target: 100, operator: :>, value: 50} =
+      assert %{function: :random, target: 100, operator: :>, value: 50} =
                ScriptParser.parse_condition("if ( random 100 > 50 )")
     end
 
     test "Random - nested parens" do
-      assert %{type: :random, target: 100, operator: :<, value: 90} =
+      assert %{function: :random, target: 100, operator: :<, value: 90} =
                ScriptParser.parse_condition("if ( ( random 100 ) < 90 )")
     end
 
     # SayDone
     test "SayDone - basic" do
-      assert %{type: :say_done, subject: :self, operator: :==, value: 1} =
+      assert %{function: :say_done, subject: :self, operator: :==, value: 1} =
                ScriptParser.parse_condition("if ( saydone == 1 )")
     end
 
     test "SayDone - with subject" do
-      assert %{type: :say_done, subject: :player, operator: :==, value: 1} =
+      assert %{function: :say_done, subject: :player, operator: :==, value: 1} =
                ScriptParser.parse_condition("if ( player->saydone == 1 )")
     end
 
     # GetInterior
     test "GetInterior - no comparison" do
-      assert %{type: :interior, subject: :self} =
+      assert %{function: :interior, subject: :self} =
                ScriptParser.parse_condition("if ( getinterior )")
     end
 
     # Format variations
     test "Subject with space before arrow" do
-      assert %{type: :disabled, subject: "duma gro-lag2", operator: :==, value: 1} =
+      assert %{function: :disabled, subject: "duma gro-lag2", operator: :==, value: 1} =
                ScriptParser.parse_condition("if ( \"duma gro-lag2\"-> getdisabled == 1 )")
     end
 
     test "No spaces around operator" do
-      assert %{type: :level, subject: :player, operator: :>=, value: 20} =
+      assert %{function: :level, subject: :player, operator: :>=, value: 20} =
                ScriptParser.parse_condition("if ( player->getlevel >=20 )")
     end
 
     test "GetPCCell - not in cell" do
-      assert %{type: :pc_cell, target: "abernanit", operator: :==, value: 0} =
+      assert %{function: :pc_cell, target: "abernanit", operator: :==, value: 0} =
                ScriptParser.parse_condition("if ( getpccell \"abernanit\" == 0 )")
     end
 
     test "Local variable - basic" do
-      assert %{type: :local_var, target: "doonce", operator: :==, value: 0} =
+      assert %{function: :local_var, target: "doonce", operator: :==, value: 0} =
                ScriptParser.parse_condition("if ( doonce == 0 )", ["doonce"])
     end
 
     test "Local variable - greater than" do
-      assert %{type: :local_var, target: "state", operator: :>, value: 1} =
+      assert %{function: :local_var, target: "state", operator: :>, value: 1} =
                ScriptParser.parse_condition("if ( state > 1 )", ["state"])
     end
 
     test "Local variable - overlapping name" do
-      assert %{type: :local_var, target: "randomized", operator: :==, value: 0} =
+      assert %{function: :local_var, target: "randomized", operator: :==, value: 0} =
                ScriptParser.parse_condition("if ( randomized == 0 )", ["randomized"])
     end
 
     test "Local variable - with arithmetic and nested parens" do
       assert %{
-               type: :local_var,
+               function: :local_var,
                target: "moneyExpected * 2",
                operator: :<,
                value: "TR_m4_TT_And_GoldCounter"
@@ -1923,7 +2008,7 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
     end
 
     test "something crazy" do
-      assert %{type: :unknown, content: "player->getshortblade > player->getbluntweapon"} =
+      assert %{function: :unknown, content: "player->getshortblade > player->getbluntweapon"} =
                ScriptParser.parse_condition(
                  "if ( player->getshortblade > player->getbluntweapon )"
                )

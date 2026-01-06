@@ -109,7 +109,7 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
             nil
 
           effect ->
-            %Script.Effect{type: effect.type, data: Map.drop(effect, [:type])}
+            %Script.Effect{function: effect.function, data: Map.drop(effect, [:function])}
         end
     end
   end
@@ -142,7 +142,7 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
     |> Enum.map(fn entry ->
       Map.update!(entry, :effects, fn effects ->
         Enum.reject(effects, fn effect ->
-          effect.type in [:start_script, :stop_script]
+          effect.function in [:start_script, :stop_script]
         end)
       end)
     end)
@@ -186,7 +186,7 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
 
           %Script.Effect{} = effect ->
             # Add to cumulative for future nested blocks
-            effect_data = Map.put(effect.data, :type, effect.type)
+            effect_data = Map.put(effect.data, :function, effect.function)
             {s, cumulative ++ [effect_data]}
 
           _ ->
@@ -202,11 +202,11 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
     Enum.reduce(nodes, {[], state}, fn node, {effects, s} ->
       case node do
         %Script.Effect{} = effect ->
-          effect_data = Map.put(effect.data, :type, effect.type)
+          effect_data = Map.put(effect.data, :function, effect.function)
 
           # Follow StartScript and collect its top-level effects
           {followed_effects, s} =
-            if effect.type == :start_script and s.follow_scripts do
+            if effect.function == :start_script and s.follow_scripts do
               collect_from_start_script(effect.data.script_id, s)
             else
               {[], s}
@@ -286,11 +286,11 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
     Enum.reduce(body, {[], state}, fn node, {effects, s} ->
       case node do
         %Script.Effect{} = effect ->
-          effect_data = Map.put(effect.data, :type, effect.type)
+          effect_data = Map.put(effect.data, :function, effect.function)
 
           # Recursively follow nested StartScripts
           {followed, s} =
-            if effect.type == :start_script and s.follow_scripts do
+            if effect.function == :start_script and s.follow_scripts do
               collect_from_start_script(effect.data.script_id, s)
             else
               {[], s}
@@ -512,7 +512,7 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
         end
 
       line ->
-        %{type: :unknown, content: line}
+        %{function: :unknown, content: line}
     end
   end
 
@@ -528,7 +528,7 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
 
         %{
           subject: normalize_subject(subject),
-          type: key,
+          function: key,
           target: target,
           operator: parse_operator(op),
           value: value
@@ -538,7 +538,7 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
       [_, target] ->
         %{
           subject: normalize_subject(subject),
-          type: key,
+          function: key,
           target: target,
           operator: :==,
           value: 1
@@ -547,7 +547,7 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
       # Something that can't be parsed
       _ ->
         %{
-          type: :unknown,
+          function: :unknown,
           content: String.trim(line)
         }
     end
@@ -564,7 +564,7 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
 
         %{
           subject: normalize_subject(subject),
-          type: key,
+          function: key,
           operator: parse_operator(operator),
           value: value
         }
@@ -572,7 +572,7 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
       nil ->
         %{
           subject: normalize_subject(subject),
-          type: key,
+          function: key,
           operator: :==,
           value: 1
         }
@@ -635,7 +635,7 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
     if String.contains?(line, check) do
       {subject, rest} = parse_subject(line)
       {item, count} = parse_item_and_count(rest, check)
-      %{count: count, type: key, subject: normalize_subject(subject), item_id: item}
+      %{count: count, function: key, subject: normalize_subject(subject), item_id: item}
     else
       nil
     end
@@ -645,7 +645,7 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
     case Regex.run(~r/modpcfacrep\s+([+-]?\d+)\s+["]?([^"\n]+)["]?/i, line) do
       [_, amount, faction] ->
         %{
-          type: :mod_faction_reputation,
+          function: :mod_faction_reputation,
           faction_id: faction,
           value: String.to_integer(amount)
         }
@@ -688,12 +688,12 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
 
   defp parse_add_topic(line) do
     case Regex.run(~r/addtopic\s+["]?([^"\n]+)["]?/i, line) do
-      [_, topic] -> %{type: :add_topic, topic_id: String.trim(topic)}
+      [_, topic] -> %{function: :add_topic, topic_id: String.trim(topic)}
       nil -> nil
     end
   end
 
-  defp parse_goodbye("goodbye"), do: %{type: :goodbye}
+  defp parse_goodbye("goodbye"), do: %{function: :goodbye}
   defp parse_goodbye(_), do: nil
 
   defp parse_command_with_number(line, check, key) do
@@ -702,7 +702,7 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
     case Regex.run(~r/#{check}\s+([+-]?\s?\d+)/i, rest) do
       [_, value] ->
         value = String.replace(value, " ", "")
-        %{subject: normalize_subject(subject), type: key, value: String.to_integer(value)}
+        %{subject: normalize_subject(subject), function: key, value: String.to_integer(value)}
 
       nil ->
         nil
@@ -717,7 +717,7 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
 
       %{
         subject: normalize_subject(subject_override || subject),
-        type: key,
+        function: key,
         value: normalize_value(value)
       }
     else
@@ -729,7 +729,7 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
     {subject, rest} = parse_subject(line)
 
     if rest == check do
-      %{subject: normalize_subject(subject), type: key}
+      %{subject: normalize_subject(subject), function: key}
     else
       nil
     end
@@ -737,14 +737,14 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
 
   defp parse_start_script(line) do
     case Regex.run(~r/startscript\s+["]?([^"\s\n]+)["]?/i, line) do
-      [_, script_id] -> %{type: :start_script, script_id: normalize_value(script_id)}
+      [_, script_id] -> %{function: :start_script, script_id: normalize_value(script_id)}
       nil -> nil
     end
   end
 
   defp parse_stop_script(line) do
     case Regex.run(~r/stopscript\s+["]?([^"\s\n]+)["]?/i, line) do
-      [_, script_id] -> %{type: :stop_script, script_id: normalize_value(script_id)}
+      [_, script_id] -> %{function: :stop_script, script_id: normalize_value(script_id)}
       nil -> nil
     end
   end
@@ -756,7 +756,7 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
            Regex.run(~r/aifollow ([^"\s]+)/i, line) do
       [_, target] ->
         %{
-          type: :ai_follow,
+          function: :ai_follow,
           subject: normalize_subject(subject),
           target: normalize_subject(target)
         }
@@ -772,7 +772,7 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
     case Regex.run(~r/aitravel (-?\d+) (-?\d+) (-?\d+)/i, line) do
       [_, x, y, z] ->
         %{
-          type: :ai_travel,
+          function: :ai_travel,
           subject: normalize_subject(subject),
           target: %{x: String.to_integer(x), y: String.to_integer(y), z: String.to_integer(z)}
         }
@@ -788,7 +788,7 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
     case Regex.run(~r/aiwander (\d+)/i, line) do
       [_, range] ->
         %{
-          type: :ai_wander,
+          function: :ai_wander,
           subject: normalize_subject(subject),
           range: String.to_integer(range)
         }
@@ -804,7 +804,7 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
     case Regex.run(~r/aiescort player (-?\d+) (-?\d+) (-?\d+) (-?\d+)/i, line) do
       [_, duration, x, y, z] ->
         %{
-          type: :ai_escort,
+          function: :ai_escort,
           subject: normalize_subject(subject),
           target: :player,
           duration: String.to_integer(duration),
@@ -827,7 +827,7 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
            Regex.run(~r/placeatpc ([^"\s]+)/i, line) do
       [_, value] ->
         %{
-          type: :place_at_pc,
+          function: :place_at_pc,
           subject: normalize_subject(subject),
           value: normalize_value(value)
         }
@@ -843,7 +843,7 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
     case Regex.run(~r/positioncell .* ["']([^"']+)["']/i, line) do
       [_, value] ->
         %{
-          type: :position_cell,
+          function: :position_cell,
           subject: normalize_subject(subject),
           value: normalize_value(value)
         }
