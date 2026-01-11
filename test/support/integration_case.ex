@@ -33,7 +33,7 @@ defmodule Resdayn.IntegrationCase do
     :ok
   end
 
-  setup tags do
+  setup_all tags do
     # Integration tests must not be async - they share the imported data
     if tags[:async] do
       raise "Integration tests cannot be async: true because they share imported data"
@@ -77,7 +77,9 @@ defmodule Resdayn.IntegrationCase do
     truncate_all_tables()
 
     # Run the import
+    # Include Tribunal to get quest updates (named/finish/restart)
     Resdayn.Importer.Runner.run("Morrowind.esm")
+    Resdayn.Importer.Runner.run("Tribunal.esm")
   end
 
   @doc """

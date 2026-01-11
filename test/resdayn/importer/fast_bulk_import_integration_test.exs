@@ -2,8 +2,9 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
   @moduledoc """
   Integration tests for FastBulkImport.
 
-  These tests run the actual Resdayn.Importer.Runner to import Morrowind.esm,
-  then verify data integrity for resources that have been converted to FastBulkImport.
+  These tests run the actual Resdayn.Importer.Runner to import Morrowind.esm
+  and Tribunal.esm, then verify data integrity for resources that have been
+  converted to FastBulkImport.
   """
   use Resdayn.IntegrationCase
 
@@ -47,10 +48,6 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
     ReferencableObject
   }
 
-  # Note: @moduletag :integration is set automatically by IntegrationCase
-  # The import is also handled automatically - we just need to cache parsed records
-  # for re-import tests.
-
   setup_all do
     # Ensure parsed records are cached for re-import tests
     _ = get_morrowind_records()
@@ -64,7 +61,7 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
   describe "GameSetting" do
     test "imports correct count" do
       count = Ash.count!(GameSetting)
-      assert count == 1449, "Expected 1449 game settings, got #{count}"
+      assert count == 1521
     end
 
     test "imports string values correctly" do
@@ -87,7 +84,7 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
   describe "Attribute" do
     test "imports all 8 attributes" do
       count = Ash.count!(Attribute)
-      assert count == 8, "Expected 8 attributes, got #{count}"
+      assert count == 8
     end
 
     test "imports attribute names correctly" do
@@ -116,7 +113,7 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
   describe "GlobalVariable" do
     test "imports correct count" do
       count = Ash.count!(GlobalVariable)
-      assert count == 73, "Expected 73 global variables, got #{count}"
+      assert count == 106
     end
 
     test "imports integer values correctly" do
@@ -134,7 +131,7 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
   describe "Skill" do
     test "imports all 27 skills" do
       count = Ash.count!(Skill)
-      assert count == 27, "Expected 27 skills, got #{count}"
+      assert count == 27
     end
 
     test "imports skill data correctly" do
@@ -152,7 +149,7 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
   describe "Script" do
     test "imports correct count" do
       count = Ash.count!(Script)
-      assert count == 632, "Expected 632 scripts, got #{count}"
+      assert count == 883
     end
 
     test "imports script data correctly" do
@@ -165,9 +162,9 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
   end
 
   describe "MagicEffectTemplate" do
-    test "imports all 137 magic effect templates" do
+    test "imports all magic effect templates" do
       count = Ash.count!(MagicEffectTemplate)
-      assert count == 137, "Expected 137 magic effect templates, got #{count}"
+      assert count == 138
     end
 
     test "imports magic effect template data correctly" do
@@ -191,7 +188,7 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
       # MagicEffect represents unique (template_id, skill_id, attribute_id) combinations
       # from all sources (ingredients, potions, spells, enchantments)
       count = Ash.count!(MagicEffect)
-      assert count > 137, "Should have more unique combinations than base templates"
+      assert count > 138, "Should have more unique combinations than base templates"
     end
 
     test "imports magic effect data correctly" do
@@ -225,7 +222,7 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
   describe "Class" do
     test "imports correct count" do
       count = Ash.count!(Class)
-      assert count == 77, "Expected 77 classes, got #{count}"
+      assert count == 82
     end
 
     test "imports class data correctly" do
@@ -257,8 +254,8 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
   describe "ClassSkill" do
     test "imports correct count" do
       count = Ash.count!(Resdayn.Codex.Characters.Class.Skill)
-      # 77 classes * 10 skills each (5 major + 5 minor) = 770
-      assert count == 770, "Expected 770 class skills, got #{count}"
+      # 82 classes * 10 skills each (5 major + 5 minor) = 820
+      assert count == 820
     end
 
     test "imports class skill data correctly" do
@@ -283,7 +280,7 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
   describe "Birthsign" do
     test "imports correct count" do
       count = Ash.count!(Birthsign)
-      assert count == 13, "Expected 13 birthsigns, got #{count}"
+      assert count == 13
     end
 
     test "imports birthsign data correctly" do
@@ -309,8 +306,8 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
   describe "Spell" do
     test "imports correct count" do
       count = Ash.count!(Spell)
-      # 990 in file, minus 1 duplicate that gets filtered
-      assert count == 989, "Expected 989 spells, got #{count}"
+      # 1032 in file, minus 1 duplicate that gets filtered
+      assert count == 1031
     end
 
     test "imports spell data correctly" do
@@ -343,7 +340,7 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
   describe "Enchantment" do
     test "imports correct count" do
       count = Ash.count!(Enchantment)
-      assert count == 708, "Expected 708 enchantments, got #{count}"
+      assert count == 753
     end
 
     test "imports enchantment data correctly" do
@@ -372,7 +369,7 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
   describe "Activator (Referencable)" do
     test "imports correct count" do
       count = Ash.count!(Activator)
-      assert count == 697, "Expected 697 activators, got #{count}"
+      assert count == 872
     end
 
     test "imports activator data correctly" do
@@ -400,7 +397,7 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
   describe "Light (Referencable)" do
     test "imports correct count" do
       count = Ash.count!(Light)
-      assert count == 574, "Expected 574 lights, got #{count}"
+      assert count == 614
     end
 
     test "imports light data correctly" do
@@ -440,7 +437,7 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
   describe "Door (Referencable)" do
     test "imports correct count" do
       count = Ash.count!(Door)
-      assert count == 140, "Expected 140 doors, got #{count}"
+      assert count == 189
     end
 
     test "imports door data correctly" do
@@ -466,7 +463,7 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
   describe "Sound (Referencable)" do
     test "imports correct count" do
       count = Ash.count!(Sound)
-      assert count == 430, "Expected 430 sounds, got #{count}"
+      assert count == 502
     end
 
     test "imports sound data correctly" do
@@ -495,7 +492,7 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
   describe "Book (Referencable)" do
     test "imports correct count" do
       count = Ash.count!(Book)
-      assert count == 574, "Expected 574 books, got #{count}"
+      assert count == 599
     end
 
     test "imports book data correctly" do
@@ -525,7 +522,7 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
   describe "Weapon (Referencable)" do
     test "imports correct count" do
       count = Ash.count!(Weapon)
-      assert count == 485, "Expected 485 weapons, got #{count}"
+      assert count == 548
     end
 
     test "imports weapon data correctly" do
@@ -561,7 +558,7 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
   describe "MiscellaneousItem (Referencable)" do
     test "imports correct count" do
       count = Ash.count!(MiscellaneousItem)
-      assert count == 536, "Expected 536 miscellaneous items, got #{count}"
+      assert count == 565
     end
 
     test "imports miscellaneous item data correctly" do
@@ -589,7 +586,7 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
   describe "Armor (Referencable)" do
     test "imports correct count" do
       count = Ash.count!(Armor)
-      assert count == 280, "Expected 280 armor, got #{count}"
+      assert count == 340
     end
 
     test "imports armor data correctly" do
@@ -599,7 +596,7 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
       assert armor.value == 45
       assert armor.armor_rating == 10
       assert armor.health == 300
-      assert armor.source_file_ids == ["Morrowind.esm"]
+      assert armor.source_file_ids == ["Morrowind.esm", "Tribunal.esm"]
     end
 
     test "imports armor class correctly" do
@@ -624,7 +621,7 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
   describe "Clothing (Referencable)" do
     test "imports correct count" do
       count = Ash.count!(Clothing)
-      assert count == 510, "Expected 510 clothing, got #{count}"
+      assert count == 540
     end
 
     test "imports clothing data correctly" do
@@ -652,7 +649,7 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
   describe "Ingredient (Referencable)" do
     test "imports correct count" do
       count = Ash.count!(Ingredient)
-      assert count == 95, "Expected 95 ingredients, got #{count}"
+      assert count == 106
     end
 
     test "imports ingredient data correctly" do
@@ -696,7 +693,7 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
   describe "Potion (Referencable)" do
     test "imports correct count" do
       count = Ash.count!(Potion)
-      assert count == 258, "Expected 258 potions, got #{count}"
+      assert count == 263
     end
 
     test "imports potion data correctly" do
@@ -734,7 +731,7 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
     test "imports correct count" do
       count = Ash.count!(Tool)
       # 6 repair items + 6 lockpicks + 6 probes = 18 total
-      assert count == 18, "Expected 18 tools, got #{count}"
+      assert count == 18
     end
 
     test "imports tool data correctly" do
@@ -758,7 +755,7 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
   describe "AlchemyApparatus (Referencable)" do
     test "imports correct count" do
       count = Ash.count!(Resdayn.Codex.Items.AlchemyApparatus)
-      assert count == 22, "Expected 22 alchemy apparatus, got #{count}"
+      assert count == 22
     end
 
     test "imports alchemy apparatus data correctly" do
@@ -782,7 +779,7 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
   describe "Race" do
     test "imports correct count" do
       count = Ash.count!(Race)
-      assert count == 10, "Expected 10 races, got #{count}"
+      assert count == 10
     end
 
     test "imports race data correctly" do
@@ -818,7 +815,7 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
   describe "BodyPart" do
     test "imports correct count" do
       count = Ash.count!(BodyPart)
-      assert count == 1125, "Expected 1125 body parts, got #{count}"
+      assert count == 1219
     end
 
     test "imports body part data correctly" do
@@ -836,7 +833,7 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
   describe "Faction" do
     test "imports correct count" do
       count = Ash.count!(Faction)
-      assert count == 22, "Expected 22 factions, got #{count}"
+      assert count == 25
     end
 
     test "imports faction data correctly" do
@@ -861,7 +858,7 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
   describe "SoundGenerator (Referencable)" do
     test "imports correct count" do
       count = Ash.count!(SoundGenerator)
-      assert count == 168, "Expected 168 sound generators, got #{count}"
+      assert count == 231
     end
 
     test "imports sound generator data correctly" do
@@ -888,7 +885,7 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
   describe "Container (Referencable)" do
     test "imports correct count" do
       count = Ash.count!(Container)
-      assert count == 890, "Expected 890 containers, got #{count}"
+      assert count == 945
     end
 
     test "imports container data correctly" do
@@ -916,7 +913,7 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
   describe "Region" do
     test "imports correct count" do
       count = Ash.count!(Region)
-      assert count == 9, "Expected 9 regions, got #{count}"
+      assert count == 10
     end
 
     test "imports region data correctly" do
@@ -948,7 +945,7 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
   describe "ItemLevelledList (Referencable)" do
     test "imports correct count" do
       count = Ash.count!(ItemLevelledList)
-      assert count == 227, "Expected 227 item levelled lists, got #{count}"
+      assert count == 239
     end
 
     test "imports item levelled list data correctly" do
@@ -985,7 +982,7 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
   describe "CreatureLevelledList (Referencable)" do
     test "imports correct count" do
       count = Ash.count!(CreatureLevelledList)
-      assert count == 116, "Expected 116 creature levelled lists, got #{count}"
+      assert count == 121
     end
 
     test "imports creature levelled list data correctly" do
@@ -1022,7 +1019,7 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
   describe "Creature (Referencable)" do
     test "imports correct count" do
       count = Ash.count!(Creature)
-      assert count == 260, "Expected 260 creatures, got #{count}"
+      assert count == 323
     end
 
     test "imports creature data correctly" do
@@ -1066,8 +1063,8 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
   describe "NPC (Referencable)" do
     test "imports correct count" do
       count = Ash.count!(NPC)
-      # 2675 total minus 1 for "player" which is filtered out
-      assert count == 2674, "Expected 2674 NPCs, got #{count}"
+      # 2826 total minus 1 for "player" which is filtered out
+      assert count == 2825
     end
 
     test "imports npc data correctly" do
@@ -1146,10 +1143,10 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
 
   describe "NpcSkillValue" do
     test "imports correct count" do
-      # 907 NPCs have 27 skills, 1767 NPCs have 0 skills (auto-calculated)
-      # 907 * 27 = 24489
+      # 974 NPCs have 27 skills, rest have auto-calculated skills
+      # 974 * 27 = 26298
       count = Ash.count!(NPC.SkillValue)
-      assert count == 24489, "Expected 24489 NPC skill values, got #{count}"
+      assert count == 26298
     end
 
     test "imports qorwynn (master enchanter) skill values correctly" do
@@ -1205,7 +1202,7 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
   describe "Cell" do
     test "imports correct count" do
       count = Ash.count!(Resdayn.Codex.World.Cell)
-      assert count == 2538, "Expected 2538 cells, got #{count}"
+      assert count == 2634
     end
 
     test "imports interior cell data correctly" do
@@ -1279,10 +1276,10 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
 
     test "imports total reference count" do
       count = Ash.count!(Resdayn.Codex.World.Cell.CellReference)
-      # Morrowind.esm has ~316k references
-      # assert count == 316_116, "Expected 316,116 references, got #{count}"
-      # But only ~117k references excluding statics
-      assert count == 117_111, "Expected 117,111 references, got #{count}"
+      # Morrowind.esm has 331,219 references
+      # assert count == 331_219
+      # But only 123,981 references excluding statics
+      assert count == 123_981
     end
   end
 
@@ -1294,7 +1291,7 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
     test "imports correct count" do
       count = Ash.count!(Resdayn.Codex.Characters.Race.SkillBonus)
       # 10 races with varying skill bonuses
-      assert count == 62, "Expected 62 race skill bonuses, got #{count}"
+      assert count == 62
     end
 
     test "imports race skill bonus data correctly" do
@@ -1314,7 +1311,7 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
   describe "FactionReaction" do
     test "imports faction reactions" do
       count = Ash.count!(Resdayn.Codex.Characters.Faction.Reaction)
-      assert count > 0, "Expected faction reactions to be imported"
+      assert count > 0
     end
 
     test "imports faction reaction data correctly" do
@@ -1366,20 +1363,20 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
   describe "DialogueTopic" do
     test "imports correct count" do
       count = Ash.count!(Resdayn.Codex.Dialogue.Topic)
-      assert count == 1726, "Expected 1726 dialogue topics, got #{count}"
+      assert count == 1943
     end
 
     test "imports dialogue topic data correctly" do
       topic = Ash.get!(Resdayn.Codex.Dialogue.Topic, "Background")
       assert topic != nil
-      assert topic.source_file_ids == ["Morrowind.esm"]
+      assert topic.source_file_ids == ["Morrowind.esm", "Tribunal.esm"]
     end
   end
 
   describe "DialogueResponse" do
     test "imports dialogue responses" do
       count = Ash.count!(Resdayn.Codex.Dialogue.Response)
-      assert count == 21204, "Expected 21204 dialogue responses, got #{count}"
+      assert count == 24466
     end
 
     test "imports dialogue response data correctly" do
@@ -1399,21 +1396,21 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
   describe "Quest" do
     test "imports quests" do
       count = Ash.count!(Resdayn.Codex.Dialogue.Quest)
-      assert count == 632, "Expected 632 quests, got #{count}"
+      assert count == 691
     end
 
     test "imports quest data correctly" do
       quest = Ash.get!(Resdayn.Codex.Dialogue.Quest, "A1_1_FindSpymaster")
       assert quest != nil
       assert quest.name != nil
-      assert quest.source_file_ids == ["Morrowind.esm"]
+      assert quest.source_file_ids == ["Morrowind.esm", "Tribunal.esm"]
     end
   end
 
   describe "JournalEntry" do
     test "imports journal entries" do
       count = Ash.count!(Resdayn.Codex.Dialogue.JournalEntry)
-      assert count == 2489, "Expected 2489 journal entries, got #{count}"
+      assert count == 2860
     end
 
     test "imports journal entry data correctly" do
