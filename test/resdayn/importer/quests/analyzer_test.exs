@@ -66,8 +66,11 @@ defmodule Resdayn.Importer.Quests.AnalyzerTest do
   end
 
   describe "key items" do
-    test "?? 1", %{"MV_DeadTaxman" => taxman} do
+    test "items referenced in dialogue conditions", %{"MV_DeadTaxman" => taxman} do
       assert Ash.CiString.new("bk_seydaneentaxrecord") in taxman.key_items
+    end
+
+    test "items transferred in dialogue script effects", %{"MV_DeadTaxman" => taxman} do
       assert Ash.CiString.new("exquisite_ring_processus") in taxman.key_items
     end
   end
