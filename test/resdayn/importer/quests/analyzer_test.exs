@@ -23,9 +23,7 @@ defmodule Resdayn.Importer.Quests.AnalyzerTest do
 
   describe "transitions" do
     test "script updates", %{"MV_DeadTaxman" => taxman} do
-      transition = Enum.find(taxman.transitions, &(&1.index == 10))
-
-      refute is_nil(transition)
+      transition = find_transition(taxman, 10)
 
       assert transition.from_max == 9
       assert transition.trigger_type == :script
@@ -33,9 +31,7 @@ defmodule Resdayn.Importer.Quests.AnalyzerTest do
     end
 
     test "dialogue updates", %{"MV_DeadTaxman" => taxman} do
-      transition = Enum.find(taxman.transitions, &(&1.index == 90))
-
-      refute is_nil(transition)
+      transition = find_transition(taxman, 90)
 
       assert transition.trigger_type == :dialogue_response
       assert transition.trigger_id == Ash.CiString.new("132381979266658957")
@@ -43,9 +39,7 @@ defmodule Resdayn.Importer.Quests.AnalyzerTest do
     end
 
     test "from_min/from_max from journal conditions", %{"MV_DeadTaxman" => taxman} do
-      transition = Enum.find(taxman.transitions, &(&1.index == 100))
-
-      refute is_nil(transition)
+      transition = find_transition(taxman, 100)
 
       assert transition.from_min == 70
       assert transition.from_max == 99
@@ -92,5 +86,12 @@ defmodule Resdayn.Importer.Quests.AnalyzerTest do
     test "items transferred in dialogue script effects", %{"MV_DeadTaxman" => taxman} do
       assert Ash.CiString.new("exquisite_ring_processus") in taxman.key_items
     end
+  end
+
+  def find_transition(%Resdayn.Codex.QuestAnalysis.Analysis{} = analysis, index) do
+    transition = Enum.find(analysis.transitions, &(&1.index == index))
+    refute is_nil(transition)
+
+    transition
   end
 end
