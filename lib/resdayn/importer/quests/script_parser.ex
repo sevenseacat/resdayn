@@ -907,6 +907,5 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
   defp normalize_value(other), do: String.replace(other, "\"", "")
 
   defp maybe_cons(nil, acc), do: acc
-  defp maybe_cons(list, acc) when is_list(list), do: Enum.reverse(list) ++ acc
   defp maybe_cons(item, acc), do: [item | acc]
 end

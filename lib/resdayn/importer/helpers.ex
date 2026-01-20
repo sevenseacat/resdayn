@@ -3,8 +3,6 @@ defmodule Resdayn.Importer.Helpers do
   Shared helper functions for importer record modules.
   """
 
-  require Ash.Query
-
   @cell_size 8192
 
   @doc """

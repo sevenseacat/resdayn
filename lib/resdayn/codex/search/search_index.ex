@@ -4,8 +4,6 @@ defmodule Resdayn.Codex.Search.SearchIndex do
     domain: Resdayn.Codex.Search,
     data_layer: AshPostgres.DataLayer
 
-  require Ash.Query
-
   postgres do
     table "search_index"
     repo Resdayn.Repo

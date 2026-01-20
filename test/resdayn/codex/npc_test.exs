@@ -1,8 +1,6 @@
 defmodule Resdayn.Codex.NPCTest do
   use Resdayn.IntegrationCase
 
-  require Ash.Query
-
   describe "many_to_many with join_relationship limit (lateral join path)" do
     test "trained_skills inherits limit from trained_skill_values join_relationship" do
       # Qorwynn is a trainer with many skills, but trained_skill_values has limit: 3
