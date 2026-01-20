@@ -31,6 +31,25 @@ defmodule Resdayn.Importer.Quests.AnalyzerTest do
       assert transition.trigger_type == :script
       assert transition.trigger_id == Ash.CiString.new("processusScript")
     end
+
+    test "dialogue updates", %{"MV_DeadTaxman" => taxman} do
+      transition = Enum.find(taxman.transitions, &(&1.index == 90))
+
+      refute is_nil(transition)
+
+      assert transition.trigger_type == :dialogue_response
+      assert transition.trigger_id == Ash.CiString.new("132381979266658957")
+      assert transition.trigger_topic_id == Ash.CiString.new("Processus' Ring")
+    end
+
+    test "from_min/from_max from journal conditions", %{"MV_DeadTaxman" => taxman} do
+      transition = Enum.find(taxman.transitions, &(&1.index == 100))
+
+      refute is_nil(transition)
+
+      assert transition.from_min == 70
+      assert transition.from_max == 99
+    end
   end
 
   describe "key NPCs" do

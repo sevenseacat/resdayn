@@ -42,6 +42,29 @@ defmodule Resdayn.Importer.Quests.Analyzer do
           Map.has_key?(dialogue.script_content, downcase(quest.id))
         end)
 
+      # Build dialogue transitions
+      dialogue_transitions =
+        dialogue_updates
+        |> Enum.flat_map(fn response ->
+          quest_commands = Map.get(response.script_content, downcase(quest.id), [])
+
+          quest_commands
+          |> Enum.map(fn cmd ->
+            {from_min, from_max} = extract_journal_bounds(response.conditions, quest.id)
+
+            %Resdayn.Codex.QuestAnalysis.Transition{
+              index: cmd.index,
+              from_min: from_min,
+              from_max: from_max,
+              trigger_type: :dialogue_response,
+              trigger_id: Ash.CiString.new(to_string(response.id)),
+              trigger_topic_id: response.topic_id
+            }
+          end)
+        end)
+
+      all_transitions = script_updates ++ dialogue_transitions
+
       # NPCs from dialogue + NPCs with quest scripts
       dialogue_npc_ids =
         Enum.map(dialogue_updates, & &1.speaker_npc_id)
@@ -72,7 +95,7 @@ defmodule Resdayn.Importer.Quests.Analyzer do
       {to_string(quest.id),
        %Resdayn.Codex.QuestAnalysis.Analysis{
          quest_id: to_string(quest.id),
-         transitions: script_updates,
+         transitions: all_transitions,
          journal_entries: format_journal_entries(quest.journal_entries),
          key_npcs: all_npc_ids,
          key_locations: locations,
@@ -185,6 +208,36 @@ defmodule Resdayn.Importer.Quests.Analyzer do
         restart?: entry.restarts_quest
       }
     end)
+  end
+
+  defp extract_journal_bounds(conditions, quest_id) do
+    quest_id_lower = downcase(quest_id)
+
+    journal_conditions =
+      (conditions || [])
+      |> Enum.filter(fn c ->
+        c.function == :journal && downcase(c.name) == quest_id_lower
+      end)
+
+    from_min =
+      journal_conditions
+      |> Enum.filter(fn c -> c.operator in [:>=, :>, :=] end)
+      |> Enum.map(fn c ->
+        value = c.value.value
+        if c.operator == :>, do: value + 1, else: value
+      end)
+      |> Enum.max(fn -> nil end)
+
+    from_max =
+      journal_conditions
+      |> Enum.filter(fn c -> c.operator in [:<=, :<, :=] end)
+      |> Enum.map(fn c ->
+        value = c.value.value
+        if c.operator == :<, do: value - 1, else: value
+      end)
+      |> Enum.min(fn -> nil end)
+
+    {from_min, from_max}
   end
 
   defp downcase(%Ash.CiString{} = value), do: String.downcase(to_string(value))
