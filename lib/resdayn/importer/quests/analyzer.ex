@@ -1,12 +1,17 @@
 defmodule Resdayn.Importer.Quests.Analyzer do
   require Ash.Query
 
+  alias Resdayn.Importer.Quests.TopicAvailability
+
   def analyze(quest_ids \\ []) do
     quests = load_quests(quest_ids)
 
     dialogue_with_scripts = load_dialogue_with_scripts()
     script_journals_by_quest_id = load_scripts()
     all_npcs = load_all_npcs()
+
+    # Build topic availability index for inferring from_min bounds
+    topic_availability = build_topic_availability()
 
     Map.new(quests, fn quest ->
       IO.puts("Analyzing #{quest.id}...")
@@ -51,6 +56,9 @@ defmodule Resdayn.Importer.Quests.Analyzer do
           quest_commands
           |> Enum.map(fn cmd ->
             {from_min, from_max} = extract_journal_bounds(response.conditions, quest.id)
+
+            # If from_min is nil, check if topic availability constrains it
+            from_min = apply_topic_availability_bounds(from_min, response.topic_id, quest.id, topic_availability)
 
             %Resdayn.Codex.QuestAnalysis.Transition{
               index: cmd.index,
@@ -238,6 +246,41 @@ defmodule Resdayn.Importer.Quests.Analyzer do
       |> Enum.min(fn -> nil end)
 
     {from_min, from_max}
+  end
+
+  defp build_topic_availability do
+    # Load all topic IDs for implicit topic detection
+    all_topic_ids =
+      Resdayn.Codex.Dialogue.Topic
+      |> Ash.Query.for_read(:read)
+      |> Ash.read!()
+      |> Enum.map(&to_string(&1.id))
+
+    # Load all dialogue responses (not just those with scripts)
+    all_responses =
+      Resdayn.Codex.Dialogue.Response
+      |> Ash.Query.for_read(:read)
+      |> Ash.read!()
+
+    TopicAvailability.build(all_responses, all_topic_ids, parallel: true)
+  end
+
+  defp apply_topic_availability_bounds(from_min, topic_id, quest_id, topic_availability) do
+    {topic_from_min, _topic_from_max} = TopicAvailability.get_bounds(topic_availability, topic_id, quest_id)
+
+    case {from_min, topic_from_min} do
+      # If we already have a from_min, take the max of the two
+      {existing, topic_min} when not is_nil(existing) and not is_nil(topic_min) ->
+        max(existing, topic_min)
+
+      # If only topic has a min, use it
+      {nil, topic_min} when not is_nil(topic_min) ->
+        topic_min
+
+      # Otherwise keep what we have (which may be nil)
+      {existing, _} ->
+        existing
+    end
   end
 
   defp downcase(%Ash.CiString{} = value), do: String.downcase(to_string(value))

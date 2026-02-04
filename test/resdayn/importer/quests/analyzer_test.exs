@@ -44,6 +44,17 @@ defmodule Resdayn.Importer.Quests.AnalyzerTest do
       assert transition.from_min == 70
       assert transition.from_max == 99
     end
+
+    test "from_min inferred from topic availability", %{"MV_DeadTaxman" => taxman} do
+      # The topic "seen him get angry" is first mentioned in dialogue when
+      # MV_DeadTaxman is between 48-50. The transition to index 60 uses this
+      # topic, so from_min should be at least 48 even though the response
+      # itself has no lower bound condition.
+      transition = find_transition(taxman, 60)
+
+      assert transition.trigger_topic_id == Ash.CiString.new("seen him get angry")
+      assert transition.from_min == 48
+    end
   end
 
   describe "key NPCs" do
