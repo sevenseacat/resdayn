@@ -22,15 +22,14 @@ defmodule Resdayn.Codex.Dialogue.OrderedResponseRelationship do
       Map.new(by_topic, fn {k, v} -> {String.downcase(k), v} end)
 
     results =
-      Map.new(topics, fn topic ->
+      Enum.map(topics, fn topic ->
         topic_id = to_string(topic.id)
 
         responses =
           Map.get(by_topic, topic_id) ||
             Map.get(by_topic_downcased, String.downcase(topic_id), [])
 
-        ordered = order_by_linked_list(responses)
-        {topic, ordered}
+        order_by_linked_list(responses)
       end)
 
     {:ok, results}
