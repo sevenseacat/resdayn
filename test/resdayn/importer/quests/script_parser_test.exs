@@ -1452,6 +1452,69 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
     test "random text" do
       assert nil == ScriptParser.parse_effect("return")
     end
+
+    test "Choice - two options" do
+      assert %{
+               function: :choice,
+               choices: [
+                 {"Yes, I found 200 septims on his body.", 1},
+                 {"No, he didn't have anything on him.", 2}
+               ]
+             } =
+               ScriptParser.parse_effect(
+                 "choice \"Yes, I found 200 septims on his body.\" 1 \"No, he didn't have anything on him.\" 2"
+               )
+    end
+
+    test "Choice - three options" do
+      assert %{
+               function: :choice,
+               choices: [
+                 {"Yes, I found 200 septims.", 1},
+                 {"No, nothing.", 2},
+                 {"I spent it.", 3}
+               ]
+             } =
+               ScriptParser.parse_effect(
+                 "choice \"Yes, I found 200 septims.\" 1 \"No, nothing.\" 2 \"I spent it.\" 3"
+               )
+    end
+
+    test "Choice - with apostrophe in text" do
+      assert %{
+               function: :choice,
+               choices: [
+                 {"I don't believe you.", 5},
+                 {"I understand.", 6}
+               ]
+             } =
+               ScriptParser.parse_effect("choice \"I don't believe you.\" 5 \"I understand.\" 6")
+    end
+
+    test "Choice - with colon prefix" do
+      assert %{
+               function: :choice,
+               choices: [
+                 {"sell the item.", 1},
+                 {"keep the item.", 2},
+                 {"donate the item.", 3}
+               ]
+             } =
+               ScriptParser.parse_effect(
+                 "choice: \"sell the item.\" 1 \"keep the item.\" 2 \"donate the item.\" 3"
+               )
+    end
+
+    test "Choice - with comma separators" do
+      assert %{
+               function: :choice,
+               choices: [
+                 {"yes", 3},
+                 {"no", 4}
+               ]
+             } =
+               ScriptParser.parse_effect("choice, \"yes\", 3, \"no\", 4")
+    end
   end
 
   describe "parse_condition" do

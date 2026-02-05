@@ -1,6 +1,7 @@
 defmodule Resdayn.Importer.Quests.Analyzer do
   require Ash.Query
 
+  alias Resdayn.Importer.Quests.ChoiceChain
   alias Resdayn.Importer.Quests.TopicAvailability
 
   def analyze(quest_ids \\ []) do
@@ -12,6 +13,9 @@ defmodule Resdayn.Importer.Quests.Analyzer do
 
     # Build topic availability index for inferring from_min bounds
     topic_availability = build_topic_availability()
+
+    # Build choice presenter index for linking choice-conditioned responses to their parents
+    choice_presenters = ChoiceChain.build_index(dialogue_with_scripts)
 
     Map.new(quests, fn quest ->
       IO.puts("Analyzing #{quest.id}...")
@@ -57,7 +61,10 @@ defmodule Resdayn.Importer.Quests.Analyzer do
           |> Enum.map(fn cmd ->
             {from_min, from_max} = extract_journal_bounds(response.conditions, quest.id)
 
-            # If from_min is nil, check if topic availability constrains it
+            # If from_min is nil, check if this is a choice-conditioned response
+            from_min = from_min || ChoiceChain.get_from_min(choice_presenters, response, quest.id)
+
+            # If from_min is still nil, check if topic availability constrains it
             from_min = apply_topic_availability_bounds(from_min, response.topic_id, quest.id, topic_availability)
 
             %Resdayn.Codex.QuestAnalysis.Transition{

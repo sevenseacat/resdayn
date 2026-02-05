@@ -55,6 +55,38 @@ defmodule Resdayn.Importer.Quests.AnalyzerTest do
       assert transition.trigger_topic_id == Ash.CiString.new("seen him get angry")
       assert transition.from_min == 48
     end
+
+    test "from_min inferred from choice chain parent", %{"MV_DeadTaxman" => taxman} do
+      # Choice-conditioned responses don't have journal conditions - they have
+      # "choice == N" conditions instead. The from_min should be inferred from
+      # the parent response that presented the choice AND set the journal.
+      #
+      # For MV_DeadTaxman:
+      # - A response sets journal to 20 and presents choices 1, 2, 3
+      # - Choice handlers (indices 30, 40, 45) should have from_min = 20
+      # - A response sets journal to 70 and presents choices 5, 6
+      # - Choice handlers (indices 80, 85) should have from_min = 70
+
+      # Choice 1 -> journal 30 (honest about gold)
+      transition_30 = find_transition(taxman, 30)
+      assert transition_30.from_min == 20
+
+      # Choice 2 -> journal 40 (lied about gold)
+      transition_40 = find_transition(taxman, 40)
+      assert transition_40.from_min == 20
+
+      # Choice 3 -> journal 45 (spent the gold)
+      transition_45 = find_transition(taxman, 45)
+      assert transition_45.from_min == 20
+
+      # Choice 5 -> journal 80 (believe Gilnith)
+      transition_80 = find_transition(taxman, 80)
+      assert transition_80.from_min == 70
+
+      # Choice 6 -> journal 85 (don't believe, Gilnith attacks)
+      transition_85 = find_transition(taxman, 85)
+      assert transition_85.from_min == 70
+    end
   end
 
   describe "key NPCs" do

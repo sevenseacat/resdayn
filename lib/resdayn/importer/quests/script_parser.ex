@@ -625,6 +625,7 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
     |> maybe_add_effect(parse_command_with_number(line, "modagility", :mod_agility))
     |> maybe_add_effect(parse_command_with_number(line, "modluck", :mod_luck))
     |> maybe_add_effect(parse_command_with_number(line, "modpersonality", :mod_personality))
+    |> maybe_add_effect(parse_choice(line))
     |> List.first()
   end
 
@@ -850,6 +851,43 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
 
       nil ->
         nil
+    end
+  end
+
+  # Parse Choice command - handles "choice", "choice:", and "choice," variants
+  # Format: Choice "text1" N "text2" M ... or Choice, "text1", N, "text2", M ...
+  defp parse_choice(line) do
+    # Strip the "choice" prefix with optional colon or comma
+    case Regex.run(~r/^choice[:,]?\s*/i, line) do
+      nil ->
+        nil
+
+      [prefix] ->
+        rest = String.slice(line, String.length(prefix)..-1//1)
+        # Remove commas outside quotes for uniform parsing
+        normalized = strip_commas_outside_quotes(rest)
+        choices = extract_choices(normalized, [])
+
+        if choices == [] do
+          nil
+        else
+          %{function: :choice, choices: choices}
+        end
+    end
+  end
+
+  # Extract choice pairs: "text" N "text" M ...
+  defp extract_choices("", acc), do: Enum.reverse(acc)
+
+  defp extract_choices(str, acc) do
+    str = String.trim(str)
+
+    case Regex.run(~r/^"([^"]+)"\s+(\d+)\s*(.*)$/s, str) do
+      [_, text, num, rest] ->
+        extract_choices(rest, [{text, String.to_integer(num)} | acc])
+
+      nil ->
+        Enum.reverse(acc)
     end
   end
 
