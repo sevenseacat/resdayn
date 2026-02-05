@@ -1078,6 +1078,11 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
                ScriptParser.parse_effect("modpcfacrep 5 temple")
     end
 
+    test "ModPCFacRep - comma separated" do
+      assert %{value: 10, function: :mod_faction_reputation, faction_id: "imperial cult"} =
+               ScriptParser.parse_effect("modpcfacrep, 10, \"imperial cult\"")
+    end
+
     test "PCRaiseRank - quoted faction" do
       assert %{subject: :player, function: :raise_rank, value: "mages guild"} =
                ScriptParser.parse_effect("pcraiserank \"mages guild\"")
@@ -1231,6 +1236,21 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
     test "SetFight - with explicit subject" do
       assert %{function: :set_fight, subject: "bolvyn venim", value: 100} =
                ScriptParser.parse_effect("\"bolvyn venim\"->setfight 100")
+    end
+
+    test "ModFight - without subject" do
+      assert %{function: :mod_fight, subject: :self, value: 10} =
+               ScriptParser.parse_effect("modfight 10")
+    end
+
+    test "ModFight - with explicit subject" do
+      assert %{function: :mod_fight, subject: "fargoth", value: 30} =
+               ScriptParser.parse_effect("fargoth->modfight 30")
+    end
+
+    test "ModFlee - without subject" do
+      assert %{function: :mod_flee, subject: :self, value: 100} =
+               ScriptParser.parse_effect("modflee 100")
     end
 
     test "SetFlee - without subject" do
@@ -1448,6 +1468,26 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
     test "Mod Stats - negative value" do
       assert %{function: :mod_strength, subject: :self, value: -5} =
                ScriptParser.parse_effect("modstrength -5")
+    end
+
+    test "ShowMap - unquoted location" do
+      assert %{function: :show_map, location: "holamayan"} =
+               ScriptParser.parse_effect("showmap holamayan")
+    end
+
+    test "ShowMap - quoted location" do
+      assert %{function: :show_map, location: "wolverine hall"} =
+               ScriptParser.parse_effect("showmap \"wolverine hall\"")
+    end
+
+    test "Set - variable assignment" do
+      assert %{function: :set_variable, variable: "ownershiphhcs", value: "1"} =
+               ScriptParser.parse_effect("set ownershiphhcs to 1")
+    end
+
+    test "Set - variable with expression" do
+      assert %{function: :set_variable, variable: "counter", value: "counter + 1"} =
+               ScriptParser.parse_effect("set counter to counter + 1")
     end
 
     test "comments" do

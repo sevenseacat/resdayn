@@ -633,6 +633,10 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
     |> maybe_add_effect(parse_command_with_number(line, "modagility", :mod_agility))
     |> maybe_add_effect(parse_command_with_number(line, "modluck", :mod_luck))
     |> maybe_add_effect(parse_command_with_number(line, "modpersonality", :mod_personality))
+    |> maybe_add_effect(parse_command_with_number(line, "modfight", :mod_fight))
+    |> maybe_add_effect(parse_command_with_number(line, "modflee", :mod_flee))
+    |> maybe_add_effect(parse_show_map(line))
+    |> maybe_add_effect(parse_set_variable(line))
     |> maybe_add_effect(parse_choice(line))
     |> List.first()
   end
@@ -651,11 +655,12 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
   end
 
   defp parse_mod_fac_rep(line) do
-    case Regex.run(~r/modpcfacrep\s+([+-]?\d+)\s+["]?([^"\n]+)["]?/i, line) do
+    # Handle both space and comma separated: "modpcfacrep 10 faction" or "modpcfacrep, 10, faction"
+    case Regex.run(~r/modpcfacrep[,\s]+([+-]?\d+)[,\s]+["]?([^"\n,]+)["]?/i, line) do
       [_, amount, faction] ->
         %{
           function: :mod_faction_reputation,
-          faction_id: faction,
+          faction_id: String.trim(faction),
           value: String.to_integer(amount)
         }
 
@@ -856,6 +861,26 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
           subject: normalize_subject(subject),
           value: normalize_value(value)
         }
+
+      nil ->
+        nil
+    end
+  end
+
+  defp parse_show_map(line) do
+    case Regex.run(~r/^showmap\s+["]?([^"\n]+)["]?/i, line) do
+      [_, location] ->
+        %{function: :show_map, location: String.trim(location)}
+
+      nil ->
+        nil
+    end
+  end
+
+  defp parse_set_variable(line) do
+    case Regex.run(~r/^set\s+(\w+)\s+to\s+(.+)$/i, line) do
+      [_, variable, value] ->
+        %{function: :set_variable, variable: variable, value: String.trim(value)}
 
       nil ->
         nil
