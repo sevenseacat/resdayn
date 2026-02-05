@@ -99,7 +99,7 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
 
   defp parse_single_line(line) do
     cond do
-      String.starts_with?(line, "journal ") ->
+      String.starts_with?(line, "journal ") or String.starts_with?(line, "journal,") ->
         {quest_id, index} = parse_journal_command(line)
         %Script.Journal{quest_id: quest_id, index: index}
 
@@ -309,15 +309,23 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
   # Journal Command Parsing
   # ============================================================================
 
-  # Quest ID may be quoted or not
+  # Quest ID may be quoted or not, and may use comma separators
+  def parse_journal_command(<<"journal, "::binary, line::binary>>) do
+    do_parse_journal_command(line)
+  end
+
   def parse_journal_command(<<"journal "::binary, line::binary>>) do
-    line = String.replace(line, "\"", "")
-    words = String.split(line, " ")
-    {index, quest_id} = List.pop_at(words, -1)
-    {Enum.join(quest_id, " "), String.to_integer(index)}
+    do_parse_journal_command(line)
   end
 
   def parse_journal_command(_), do: nil
+
+  defp do_parse_journal_command(line) do
+    line = line |> String.replace("\"", "") |> String.replace(",", "")
+    words = String.split(line, " ", trim: true)
+    {index, quest_id} = List.pop_at(words, -1)
+    {Enum.join(quest_id, " "), String.to_integer(index)}
+  end
 
   # ============================================================================
   # Condition Parsing

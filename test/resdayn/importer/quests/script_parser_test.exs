@@ -974,6 +974,16 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
     test "not a valid journal command" do
       assert nil == ScriptParser.parse_journal_command("Goodbye")
     end
+
+    test "comma-separated syntax" do
+      assert {"A1_1_FindSpymaster", 14} =
+               ScriptParser.parse_journal_command("journal, \"A1_1_FindSpymaster\", 14")
+    end
+
+    test "comma-separated with unquoted quest ID" do
+      assert {"MV_SlaveMule", 100} =
+               ScriptParser.parse_journal_command("journal, MV_SlaveMule, 100")
+    end
   end
 
   describe "parse_effect" do
