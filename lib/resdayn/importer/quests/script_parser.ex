@@ -8,12 +8,12 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
   def parse(content) when is_binary(content) do
     lines = parse_input(content)
 
-    {name, locals, _lines} = parse_header(lines)
+    {name, locals, remaining_lines} = parse_header(lines)
 
     %Script.Ast{
       name: name,
       locals: locals,
-      body: parse_body(lines, locals)
+      body: parse_body(remaining_lines, locals)
     }
   end
 
@@ -29,6 +29,10 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
 
   defp parse_header(["long " <> long | lines], {name, locals, []}) do
     parse_header(lines, {name, [long | locals], []})
+  end
+
+  defp parse_header(["float " <> float | lines], {name, locals, []}) do
+    parse_header(lines, {name, [float | locals], []})
   end
 
   defp parse_header(lines, {name, locals, []}) do
@@ -103,10 +107,19 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
         {quest_id, index} = parse_journal_command(line)
         %Script.Journal{quest_id: quest_id, index: index}
 
+      String.contains?(line, "->journal ") ->
+        [_, rest] = String.split(line, "->", parts: 2)
+        {quest_id, index} = parse_journal_command(rest)
+        %Script.Journal{quest_id: quest_id, index: index}
+
+      line in ~w(end return) or String.starts_with?(line, "end ") ->
+        nil
+
       true ->
         case parse_effect(line) do
           nil ->
-            nil
+            # Record unknown commands as generic effects
+            %Script.Effect{function: :unknown, data: %{content: line}}
 
           effect ->
             %Script.Effect{function: effect.function, data: Map.drop(effect, [:function])}
@@ -598,6 +611,7 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
     |> maybe_add_effect(parse_inventory_change(line, "drop", :drop_item))
     |> maybe_add_effect(parse_mod_fac_rep(line))
     |> maybe_add_effect(parse_command_with_string(line, "pcraiserank", :raise_rank, "player"))
+    |> maybe_add_effect(parse_command_with_string(line, "raiserank", :raise_rank))
     |> maybe_add_effect(parse_command_with_string(line, "pcjoinfaction", :join_faction, "player"))
     |> maybe_add_effect(parse_command_with_number(line, "modreputation", :mod_reputation))
     |> maybe_add_effect(parse_command_with_number(line, "moddisposition", :mod_disposition))
@@ -616,7 +630,7 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
     |> maybe_add_effect(parse_start_script(line))
     |> maybe_add_effect(parse_stop_script(line))
     |> maybe_add_effect(parse_command_with_string(line, "startcombat", :start_combat))
-    |> maybe_add_effect(parse_command(line, "stopcombat", :stop_combat))
+    |> maybe_add_effect(parse_stop_combat(line))
     |> maybe_add_effect(parse_ai_follow(line))
     |> maybe_add_effect(parse_ai_travel(line))
     |> maybe_add_effect(parse_ai_wander(line))
@@ -637,6 +651,12 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
     |> maybe_add_effect(parse_command_with_number(line, "modflee", :mod_flee))
     |> maybe_add_effect(parse_show_map(line))
     |> maybe_add_effect(parse_set_variable(line))
+    |> maybe_add_effect(parse_mod_faction_reaction(line))
+    |> maybe_add_effect(parse_set_crime_level(line))
+    |> maybe_add_effect(parse_clear_expelled(line))
+    |> maybe_add_effect(parse_expell(line))
+    |> maybe_add_effect(parse_message_box(line))
+    |> maybe_add_effect(parse_ai_follow_cell(line))
     |> maybe_add_effect(parse_choice(line))
     |> List.first()
   end
@@ -713,7 +733,7 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
   defp parse_command_with_number(line, check, key) do
     {subject, rest} = parse_subject(line)
 
-    case Regex.run(~r/#{check}\s+([+-]?\s?\d+)/i, rest) do
+    case Regex.run(~r/#{check}[,\s]+([+-]?\s?\d+)/i, rest) do
       [_, value] ->
         value = String.replace(value, " ", "")
         %{subject: normalize_subject(subject), function: key, value: String.to_integer(value)}
@@ -746,6 +766,16 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
       %{subject: normalize_subject(subject), function: key}
     else
       nil
+    end
+  end
+
+  defp parse_stop_combat(line) do
+    {subject, rest} = parse_subject(line)
+
+    case Regex.run(~r/^stopcombat\s*(.*)$/i, rest) do
+      [_, ""] -> %{function: :stop_combat, subject: normalize_subject(subject)}
+      [_, target] -> %{function: :stop_combat, subject: normalize_subject(subject), target: normalize_subject(target)}
+      nil -> nil
     end
   end
 
@@ -799,7 +829,7 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
   defp parse_ai_wander(line) do
     {subject, line} = parse_subject(line)
 
-    case Regex.run(~r/aiwander (\d+)/i, line) do
+    case Regex.run(~r/aiwander[,\s]+(\d+)/i, line) do
       [_, range] ->
         %{
           function: :ai_wander,
@@ -837,14 +867,30 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
   defp parse_place_at_pc(line) do
     {subject, line} = parse_subject(line)
 
-    case Regex.run(~r/placeatpc ["]([^"]+)["]/i, line) ||
-           Regex.run(~r/placeatpc ([^"\s]+)/i, line) do
+    case Regex.run(~r/placeatpc[,\s]+["]([^"]+)["]/i, line) ||
+           Regex.run(~r/placeatpc[,\s]+([^"\s,]+)/i, line) do
       [_, value] ->
         %{
           function: :place_at_pc,
           subject: normalize_subject(subject),
           value: normalize_value(value)
         }
+
+      nil ->
+        nil
+    end
+  end
+
+  defp parse_ai_follow_cell(line) do
+    {subject, line} = parse_subject(line)
+
+    case Regex.run(~r/aifollowcell[,\s]+(\w+)[,\s]+["]([^"]+)["]/i, line) ||
+           Regex.run(~r/aifollowcell[,\s]+["]([^"]+)["]/i, line) do
+      [_, target, cell] ->
+        %{function: :ai_follow_cell, subject: normalize_subject(subject), target: normalize_subject(target), cell: cell}
+
+      [_, cell] ->
+        %{function: :ai_follow_cell, subject: normalize_subject(subject), target: :player, cell: cell}
 
       nil ->
         nil
@@ -878,9 +924,86 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
   end
 
   defp parse_set_variable(line) do
-    case Regex.run(~r/^set\s+(\w+)\s+to\s+(.+)$/i, line) do
-      [_, variable, value] ->
-        %{function: :set_variable, variable: variable, value: String.trim(value)}
+    # Handle quoted object property syntax: set "npc name".variable to value
+    case Regex.run(~r/^set\s+"([^"]+)"\.(\w+)\s+to\s+(.+)$/i, line) do
+      [_, subject, variable, value] ->
+        %{function: :set_variable, subject: subject, variable: variable, value: String.trim(value)}
+
+      nil ->
+        # Handle unquoted object property syntax: set object.variable to value
+        case Regex.run(~r/^set\s+(\w+)\.(\w+)\s+to\s+(.+)$/i, line) do
+          [_, subject, variable, value] ->
+            %{function: :set_variable, subject: subject, variable: variable, value: String.trim(value)}
+
+          nil ->
+            # Handle simple variable: set variable to value
+            case Regex.run(~r/^set\s+(\w+)\s+to\s+(.+)$/i, line) do
+              [_, variable, value] ->
+                %{function: :set_variable, variable: variable, value: String.trim(value)}
+
+              nil ->
+                nil
+            end
+        end
+    end
+  end
+
+  defp parse_mod_faction_reaction(line) do
+    # ModFactionReaction faction1 faction2 value - faction1's reaction towards faction2
+    # Try quoted factions first (may contain spaces)
+    case Regex.run(~r/^modfactionreaction[,\s]+"([^"]+)"[,\s]+"([^"]+)"[,\s]+([+-]?\d+)/i, line) do
+      [_, faction, towards, value] ->
+        %{function: :mod_faction_reaction, faction: faction, towards: towards, value: String.to_integer(value)}
+
+      nil ->
+        # Try unquoted single-word factions
+        case Regex.run(~r/^modfactionreaction[,\s]+(\w+)[,\s]+(\w+)[,\s]+([+-]?\d+)/i, line) do
+          [_, faction, towards, value] ->
+            %{function: :mod_faction_reaction, faction: faction, towards: towards, value: String.to_integer(value)}
+
+          nil ->
+            nil
+        end
+    end
+  end
+
+  defp parse_set_crime_level(line) do
+    case Regex.run(~r/^setpccrimelevel\s+(\d+)/i, line) do
+      [_, value] ->
+        %{function: :set_crime_level, value: String.to_integer(value)}
+
+      nil ->
+        nil
+    end
+  end
+
+  defp parse_clear_expelled(line) do
+    case Regex.run(~r/^pcclearexpelled\s*["]?([^"\n]*)["]?/i, line) do
+      [_, ""] ->
+        %{function: :clear_expelled, faction: nil}
+
+      [_, faction] ->
+        %{function: :clear_expelled, faction: normalize_value(faction)}
+
+      nil ->
+        nil
+    end
+  end
+
+  defp parse_expell(line) do
+    case Regex.run(~r/^pcexpell\s+["]?([^"\n]+)["]?/i, line) do
+      [_, faction] ->
+        %{function: :expell, faction: normalize_value(faction)}
+
+      nil ->
+        nil
+    end
+  end
+
+  defp parse_message_box(line) do
+    case Regex.run(~r/^messagebox\s+"([^"]+)"/i, line) do
+      [_, message] ->
+        %{function: :message_box, message: message}
 
       nil ->
         nil
@@ -900,12 +1023,8 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
         # Remove commas outside quotes for uniform parsing
         normalized = strip_commas_outside_quotes(rest)
         choices = extract_choices(normalized, [])
-
-        if choices == [] do
-          nil
-        else
-          %{function: :choice, choices: choices}
-        end
+        # Return even if empty (some scripts have malformed Choice with no options)
+        %{function: :choice, choices: choices}
     end
   end
 
@@ -915,12 +1034,22 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
   defp extract_choices(str, acc) do
     str = String.trim(str)
 
-    case Regex.run(~r/^"([^"]+)"\s+(\d+)\s*(.*)$/s, str) do
+    # Use non-greedy matching to find text between quotes
+    # Allow optional space between closing quote and number (some scripts have typos)
+    # Also accept single quote as closing (some scripts have mismatched quotes)
+    case Regex.run(~r/^"(.+?)["']\s*(\d+)\s*(.*)$/s, str) do
       [_, text, num, rest] ->
         extract_choices(rest, [{text, String.to_integer(num)} | acc])
 
       nil ->
-        Enum.reverse(acc)
+        # Try unquoted single-word options: choice yes 1 no 2
+        case Regex.run(~r/^(\w+)\s+(\d+)\s*(.*)$/s, str) do
+          [_, text, num, rest] ->
+            extract_choices(rest, [{text, String.to_integer(num)} | acc])
+
+          nil ->
+            Enum.reverse(acc)
+        end
     end
   end
 

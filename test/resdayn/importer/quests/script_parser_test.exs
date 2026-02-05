@@ -1490,6 +1490,46 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
                ScriptParser.parse_effect("set counter to counter + 1")
     end
 
+    test "Set - object property" do
+      assert %{function: :set_variable, subject: "manilian scerius", variable: "slavestatus", value: "2"} =
+               ScriptParser.parse_effect("set \"manilian scerius\".slavestatus to 2")
+    end
+
+    test "ModFactionReaction - basic" do
+      assert %{function: :mod_faction_reaction, faction: "redoran", towards: "nerevarine", value: 4} =
+               ScriptParser.parse_effect("modfactionreaction redoran nerevarine 4")
+    end
+
+    test "ModFactionReaction - quoted factions" do
+      assert %{function: :mod_faction_reaction, faction: "fighters guild", towards: "thieves guild", value: -10} =
+               ScriptParser.parse_effect("modfactionreaction \"fighters guild\" \"thieves guild\" -10")
+    end
+
+    test "SetPCCrimeLevel - basic" do
+      assert %{function: :set_crime_level, value: 0} =
+               ScriptParser.parse_effect("setpccrimelevel 0")
+    end
+
+    test "PCClearExpelled - without faction" do
+      assert %{function: :clear_expelled, faction: nil} =
+               ScriptParser.parse_effect("pcclearexpelled")
+    end
+
+    test "PCClearExpelled - with faction" do
+      assert %{function: :clear_expelled, faction: "mages guild"} =
+               ScriptParser.parse_effect("pcclearexpelled \"mages guild\"")
+    end
+
+    test "PCExpell - with faction" do
+      assert %{function: :expell, faction: "redoran"} =
+               ScriptParser.parse_effect("pcexpell \"redoran\"")
+    end
+
+    test "MessageBox - basic" do
+      assert %{function: :message_box, message: "your mercantile skill has increased."} =
+               ScriptParser.parse_effect("messagebox \"your mercantile skill has increased.\"")
+    end
+
     test "comments" do
       assert nil == ScriptParser.parse_effect(";this is a comment")
     end
