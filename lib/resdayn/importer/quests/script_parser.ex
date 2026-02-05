@@ -604,65 +604,61 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
   # Effect Parsing
   # ============================================================================
 
+  # Uses || for short-circuit evaluation - stops at first match
   def parse_effect(line) do
-    []
-    |> maybe_add_effect(parse_inventory_change(line, "additem", :add_item))
-    |> maybe_add_effect(parse_inventory_change(line, "removeitem", :remove_item))
-    |> maybe_add_effect(parse_inventory_change(line, "drop", :drop_item))
-    |> maybe_add_effect(parse_mod_fac_rep(line))
-    |> maybe_add_effect(parse_command_with_string(line, "pcraiserank", :raise_rank, "player"))
-    |> maybe_add_effect(parse_command_with_string(line, "raiserank", :raise_rank))
-    |> maybe_add_effect(parse_command_with_string(line, "pcjoinfaction", :join_faction, "player"))
-    |> maybe_add_effect(parse_command_with_number(line, "modreputation", :mod_reputation))
-    |> maybe_add_effect(parse_command_with_number(line, "moddisposition", :mod_disposition))
-    |> maybe_add_effect(parse_command_with_number(line, "setdisposition", :set_disposition))
-    |> maybe_add_effect(parse_add_topic(line))
-    |> maybe_add_effect(parse_command(line, "enable", :enable))
-    |> maybe_add_effect(parse_command(line, "disable", :disable))
-    |> maybe_add_effect(parse_command_with_string(line, "addspell", :add_spell))
-    |> maybe_add_effect(parse_command_with_string(line, "removespell", :remove_spell))
-    |> maybe_add_effect(parse_command(line, "forcegreeting", :force_greeting))
-    |> maybe_add_effect(parse_goodbye(line))
-    |> maybe_add_effect(parse_command_with_number(line, "setfight", :set_fight))
-    |> maybe_add_effect(parse_command_with_number(line, "setflee", :set_flee))
-    |> maybe_add_effect(parse_command_with_number(line, "setalarm", :set_alarm))
-    |> maybe_add_effect(parse_command_with_number(line, "sethello", :set_hello))
-    |> maybe_add_effect(parse_start_script(line))
-    |> maybe_add_effect(parse_stop_script(line))
-    |> maybe_add_effect(parse_command_with_string(line, "startcombat", :start_combat))
-    |> maybe_add_effect(parse_stop_combat(line))
-    |> maybe_add_effect(parse_ai_follow(line))
-    |> maybe_add_effect(parse_ai_travel(line))
-    |> maybe_add_effect(parse_ai_wander(line))
-    |> maybe_add_effect(parse_ai_escort(line))
-    |> maybe_add_effect(parse_command_with_number(line, "lock", :lock))
-    |> maybe_add_effect(parse_command(line, "unlock", :unlock))
-    |> maybe_add_effect(parse_place_at_pc(line))
-    |> maybe_add_effect(parse_position_cell(line))
-    |> maybe_add_effect(parse_command_with_number(line, "modstrength", :mod_strength))
-    |> maybe_add_effect(parse_command_with_number(line, "modintelligence", :mod_intelligence))
-    |> maybe_add_effect(parse_command_with_number(line, "modwillpower", :mod_willpower))
-    |> maybe_add_effect(parse_command_with_number(line, "modendurance", :mod_endurance))
-    |> maybe_add_effect(parse_command_with_number(line, "modspeed", :mod_speed))
-    |> maybe_add_effect(parse_command_with_number(line, "modagility", :mod_agility))
-    |> maybe_add_effect(parse_command_with_number(line, "modluck", :mod_luck))
-    |> maybe_add_effect(parse_command_with_number(line, "modpersonality", :mod_personality))
-    |> maybe_add_effect(parse_command_with_number(line, "modfight", :mod_fight))
-    |> maybe_add_effect(parse_command_with_number(line, "modflee", :mod_flee))
-    |> maybe_add_effect(parse_show_map(line))
-    |> maybe_add_effect(parse_set_variable(line))
-    |> maybe_add_effect(parse_mod_faction_reaction(line))
-    |> maybe_add_effect(parse_set_crime_level(line))
-    |> maybe_add_effect(parse_clear_expelled(line))
-    |> maybe_add_effect(parse_expell(line))
-    |> maybe_add_effect(parse_message_box(line))
-    |> maybe_add_effect(parse_ai_follow_cell(line))
-    |> maybe_add_effect(parse_choice(line))
-    |> List.first()
+    parse_inventory_change(line, "additem", :add_item) ||
+      parse_inventory_change(line, "removeitem", :remove_item) ||
+      parse_inventory_change(line, "drop", :drop_item) ||
+      parse_mod_fac_rep(line) ||
+      parse_command_with_string(line, "pcraiserank", :raise_rank, "player") ||
+      parse_command_with_string(line, "raiserank", :raise_rank) ||
+      parse_command_with_string(line, "pcjoinfaction", :join_faction, "player") ||
+      parse_command_with_number(line, "modreputation", :mod_reputation) ||
+      parse_command_with_number(line, "moddisposition", :mod_disposition) ||
+      parse_command_with_number(line, "setdisposition", :set_disposition) ||
+      parse_add_topic(line) ||
+      parse_command(line, "enable", :enable) ||
+      parse_command(line, "disable", :disable) ||
+      parse_command_with_string(line, "addspell", :add_spell) ||
+      parse_command_with_string(line, "removespell", :remove_spell) ||
+      parse_command(line, "forcegreeting", :force_greeting) ||
+      parse_goodbye(line) ||
+      parse_command_with_number(line, "setfight", :set_fight) ||
+      parse_command_with_number(line, "setflee", :set_flee) ||
+      parse_command_with_number(line, "setalarm", :set_alarm) ||
+      parse_command_with_number(line, "sethello", :set_hello) ||
+      parse_start_script(line) ||
+      parse_stop_script(line) ||
+      parse_command_with_string(line, "startcombat", :start_combat) ||
+      parse_stop_combat(line) ||
+      parse_ai_follow(line) ||
+      parse_ai_travel(line) ||
+      parse_ai_wander(line) ||
+      parse_ai_escort(line) ||
+      parse_command_with_number(line, "lock", :lock) ||
+      parse_command(line, "unlock", :unlock) ||
+      parse_place_at_pc(line) ||
+      parse_position_cell(line) ||
+      parse_command_with_number(line, "modstrength", :mod_strength) ||
+      parse_command_with_number(line, "modintelligence", :mod_intelligence) ||
+      parse_command_with_number(line, "modwillpower", :mod_willpower) ||
+      parse_command_with_number(line, "modendurance", :mod_endurance) ||
+      parse_command_with_number(line, "modspeed", :mod_speed) ||
+      parse_command_with_number(line, "modagility", :mod_agility) ||
+      parse_command_with_number(line, "modluck", :mod_luck) ||
+      parse_command_with_number(line, "modpersonality", :mod_personality) ||
+      parse_command_with_number(line, "modfight", :mod_fight) ||
+      parse_command_with_number(line, "modflee", :mod_flee) ||
+      parse_show_map(line) ||
+      parse_set_variable(line) ||
+      parse_mod_faction_reaction(line) ||
+      parse_set_crime_level(line) ||
+      parse_clear_expelled(line) ||
+      parse_expell(line) ||
+      parse_message_box(line) ||
+      parse_ai_follow_cell(line) ||
+      parse_choice(line)
   end
-
-  defp maybe_add_effect(effects, nil), do: effects
-  defp maybe_add_effect(effects, effect), do: effects ++ [effect]
 
   defp parse_inventory_change(line, check, key) do
     if String.contains?(line, check) do
