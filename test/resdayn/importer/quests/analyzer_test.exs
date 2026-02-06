@@ -25,9 +25,18 @@ defmodule Resdayn.Importer.Quests.AnalyzerTest do
     test "script updates", %{"MV_DeadTaxman" => taxman} do
       transition = find_transition(taxman, 10)
 
-      assert transition.from_max == 9
       assert transition.trigger_type == :script
       assert transition.trigger_id == Ash.CiString.new("processusScript")
+    end
+
+    test "from range narrowed to 0 when no journal indices exist below from_max", %{"MV_DeadTaxman" => taxman} do
+      # Transition to index 10 has from_max: 9 (set by script).
+      # There are no journal indices in 0-9, so this must be the quest
+      # start point: from_min and from_max should both be 0.
+      transition = find_transition(taxman, 10)
+
+      assert transition.from_min == 0
+      assert transition.from_max == 0
     end
 
     test "dialogue updates", %{"MV_DeadTaxman" => taxman} do
@@ -64,6 +73,16 @@ defmodule Resdayn.Importer.Quests.AnalyzerTest do
 
       assert transition.trigger_topic_id == Ash.CiString.new("murder of Processus Vitellius")
       assert transition.from_min == 10
+    end
+
+    test "from range narrowed when only one journal index exists in range", %{"MV_DeadTaxman" => taxman} do
+      # Transition to index 20 has from_min: 10, from_max: 19 from topic
+      # availability. Since 10 is the only journal index in that range,
+      # both bounds should narrow to 10.
+      transition = find_transition(taxman, 20)
+
+      assert transition.from_min == 10
+      assert transition.from_max == 10
     end
 
     test "from_min inferred from choice chain parent", %{"MV_DeadTaxman" => taxman} do

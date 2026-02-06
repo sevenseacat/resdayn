@@ -80,7 +80,9 @@ defmodule Resdayn.Importer.Quests.Analyzer do
           end)
         end)
 
-      all_transitions = script_updates ++ dialogue_transitions
+      all_transitions =
+        (script_updates ++ dialogue_transitions)
+        |> narrow_from_ranges(quest.journal_entries)
 
       # NPCs from dialogue + NPCs with quest scripts
       dialogue_npc_ids =
@@ -297,6 +299,35 @@ defmodule Resdayn.Importer.Quests.Analyzer do
 
     TopicAvailability.add_entries(topic_availability, entries)
   end
+
+  # Narrow from ranges using known journal indices:
+  # - If a range (e.g. 10-19) contains only one journal index, pin to that index
+  # - If from_max is set but no journal indices exist in 0..from_max, this is the
+  #   quest start point (from_min: 0, from_max: 0)
+  defp narrow_from_ranges(transitions, journal_entries) do
+    known_indices = MapSet.new(journal_entries, & &1.index)
+
+    Enum.map(transitions, fn transition ->
+      narrow_from_range(transition, known_indices)
+    end)
+  end
+
+  defp narrow_from_range(%{from_max: from_max} = transition, known_indices)
+       when not is_nil(from_max) do
+    from_min = transition.from_min || 0
+
+    indices_in_range =
+      known_indices
+      |> Enum.filter(fn i -> i >= from_min and i <= from_max end)
+
+    case indices_in_range do
+      [] -> %{transition | from_min: 0, from_max: 0}
+      [single] -> %{transition | from_min: single, from_max: single}
+      _ -> transition
+    end
+  end
+
+  defp narrow_from_range(transition, _known_indices), do: transition
 
   defp apply_topic_availability_bounds(from_min, topic_id, quest_id, topic_availability) do
     {topic_from_min, _topic_from_max} = TopicAvailability.get_bounds(topic_availability, topic_id, quest_id)
