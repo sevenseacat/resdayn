@@ -25,6 +25,27 @@ defmodule Resdayn.Importer.Quests.TopicAvailabilityTest do
       assert {10, 20} == TopicAvailability.get_bounds(availability, "secret topic", "TestQuest")
     end
 
+    test "handles apostrophes in double-quoted topic names" do
+      responses = [
+        %{
+          id: "response_1",
+          topic_id: "some other topic",
+          content: "Hello there.",
+          script_content: ~s(AddTopic "Processus' Ring"),
+          conditions: [
+            %{function: :journal, name: "TestQuest", operator: :>=, value: %{value: 48}},
+            %{function: :journal, name: "TestQuest", operator: :<=, value: %{value: 50}}
+          ]
+        }
+      ]
+
+      all_topic_ids = ["some other topic", "processus' ring"]
+
+      availability = TopicAvailability.build(responses, all_topic_ids)
+
+      assert {48, 50} == TopicAvailability.get_bounds(availability, "processus' ring", "TestQuest")
+    end
+
     test "tracks implicit topic additions via mentions in content" do
       responses = [
         %{

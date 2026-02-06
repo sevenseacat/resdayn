@@ -113,7 +113,7 @@ defmodule Resdayn.Importer.Quests.TopicAvailability do
   defp extract_explicit_topics(response) do
     script_content = get_field(response, :script_content) || ""
 
-    ~r/addtopic\s+["']?([^"'\n]+)["']?/i
+    ~r/addtopic\s+["]?([^"\n]+)["]?/i
     |> Regex.scan(script_content)
     |> Enum.map(fn [_, topic_name] ->
       {from_min, from_max, quest_id} = extract_journal_bounds(response)
