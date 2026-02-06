@@ -209,6 +209,20 @@ defmodule Resdayn.Importer.Quests.TopicAvailability do
     end
   end
 
+  @doc """
+  Merge additional topic availability entries into the index.
+
+  Entries should be maps with keys: :topic_id, :quest_id, :from_min, :from_max, :source
+  """
+  def add_entries(%__MODULE__{by_topic: by_topic} = ta, entries) do
+    new_by_topic =
+      Enum.reduce(entries, by_topic, fn entry, acc ->
+        Map.update(acc, entry.topic_id, [entry], fn existing -> [entry | existing] end)
+      end)
+
+    %{ta | by_topic: new_by_topic}
+  end
+
   defp downcase(nil), do: nil
   defp downcase(%Ash.CiString{} = value), do: String.downcase(to_string(value))
   defp downcase(value) when is_binary(value), do: String.downcase(value)

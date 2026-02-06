@@ -12,7 +12,9 @@ defmodule Resdayn.Importer.Quests.Analyzer do
     all_npcs = load_all_npcs()
 
     # Build topic availability index for inferring from_min bounds
-    topic_availability = build_topic_availability()
+    topic_availability =
+      build_topic_availability()
+      |> add_script_topic_availability(script_journals_by_quest_id)
 
     # Build choice presenter index for linking choice-conditioned responses to their parents
     choice_presenters = ChoiceChain.build_index(dialogue_with_scripts)
@@ -270,6 +272,30 @@ defmodule Resdayn.Importer.Quests.Analyzer do
       |> Ash.read!()
 
     TopicAvailability.build(all_responses, all_topic_ids, parallel: true)
+  end
+
+  # When a standalone script sets a journal index AND adds a topic, we know
+  # that topic becomes available at that journal index.
+  defp add_script_topic_availability(topic_availability, script_journals_by_quest_id) do
+    entries =
+      script_journals_by_quest_id
+      |> Enum.flat_map(fn {quest_id, commands} ->
+        Enum.flat_map(commands, fn cmd ->
+          cmd.effects
+          |> Enum.filter(fn e -> e[:function] == :add_topic end)
+          |> Enum.map(fn e ->
+            %{
+              topic_id: String.downcase(e[:topic_id]),
+              quest_id: quest_id,
+              from_min: cmd.index,
+              from_max: nil,
+              source: :script
+            }
+          end)
+        end)
+      end)
+
+    TopicAvailability.add_entries(topic_availability, entries)
   end
 
   defp apply_topic_availability_bounds(from_min, topic_id, quest_id, topic_availability) do

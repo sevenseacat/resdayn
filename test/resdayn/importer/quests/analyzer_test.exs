@@ -45,7 +45,7 @@ defmodule Resdayn.Importer.Quests.AnalyzerTest do
       assert transition.from_max == 99
     end
 
-    test "from_min inferred from topic availability", %{"MV_DeadTaxman" => taxman} do
+    test "from_min inferred from topic availability (dialogue)", %{"MV_DeadTaxman" => taxman} do
       # The topic "seen him get angry" is first mentioned in dialogue when
       # MV_DeadTaxman is between 48-50. The transition to index 60 uses this
       # topic, so from_min should be at least 48 even though the response
@@ -54,6 +54,16 @@ defmodule Resdayn.Importer.Quests.AnalyzerTest do
 
       assert transition.trigger_topic_id == Ash.CiString.new("seen him get angry")
       assert transition.from_min == 48
+    end
+
+    test "from_min inferred from topic availability (script)", %{"MV_DeadTaxman" => taxman} do
+      # The topic "murder of Processus Vitellius" is added by processusScript,
+      # the same script that sets journal index 10. The transition to index 20
+      # uses this topic, so from_min should be 10.
+      transition = find_transition(taxman, 20)
+
+      assert transition.trigger_topic_id == Ash.CiString.new("murder of Processus Vitellius")
+      assert transition.from_min == 10
     end
 
     test "from_min inferred from choice chain parent", %{"MV_DeadTaxman" => taxman} do
