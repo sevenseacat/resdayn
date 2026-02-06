@@ -7,9 +7,11 @@ defmodule Resdayn.Importer.Quests.Analyzer do
   def analyze(quest_ids \\ []) do
     quests = load_quests(quest_ids)
 
-    dialogue_with_scripts = load_dialogue_with_scripts()
-    script_journals_by_quest_id = load_scripts()
+    script_map = load_script_map()
+    dialogue_with_scripts = load_dialogue_with_scripts(script_map)
+    script_journals_by_quest_id = load_scripts(script_map)
     all_npcs = load_all_npcs()
+    npc_id_set = MapSet.new(all_npcs, fn npc -> downcase(npc.id) end)
 
     # Build topic availability index for inferring from_min bounds
     topic_availability =
@@ -90,15 +92,17 @@ defmodule Resdayn.Importer.Quests.Analyzer do
         |> Enum.filter(& &1)
 
       script_npc_ids = Enum.map(npcs_with_quest_scripts, & &1.id)
-      all_npc_ids = (dialogue_npc_ids ++ script_npc_ids) |> Enum.uniq()
+
+      # NPCs referenced as subjects in effects (disable, enable, etc.)
+      effect_npc_ids = extract_npc_ids_from_effects(dialogue_updates, script_journals_by_quest_id, quest.id, npc_id_set)
+
+      all_npc_ids = (dialogue_npc_ids ++ script_npc_ids ++ effect_npc_ids) |> Enum.uniq()
 
       # Get locations from NPCs
-      dialogue_npcs =
-        dialogue_npc_ids
+      all_quest_npcs =
+        all_npc_ids
         |> Enum.map(fn npc_id -> Enum.find(all_npcs, &(downcase(&1.id) == downcase(npc_id))) end)
         |> Enum.filter(& &1)
-
-      all_quest_npcs = dialogue_npcs ++ npcs_with_quest_scripts
 
       locations =
         all_quest_npcs
@@ -143,21 +147,26 @@ defmodule Resdayn.Importer.Quests.Analyzer do
     |> Ash.read!(load: [:cell_id, :cell_name])
   end
 
-  # Read all the scripts from the database, and parse them into their journal commands
-  # Returns journal commands grouped by quest ID.
-  defp load_scripts do
+  # Build a map of downcased script_id -> text for follow_scripts support
+  defp load_script_map do
     Resdayn.Codex.Mechanics.Script
     |> Ash.Query.for_read(:read)
     |> Ash.Query.filter(not is_nil(text))
     |> Ash.read!()
-    |> Enum.flat_map(fn script ->
-      Resdayn.Importer.Quests.ScriptParser.extract_journal_commands(script.text)
-      |> Enum.map(&Map.put(&1, :script_id, script.id))
+    |> Map.new(fn script -> {downcase(script.id), script.text} end)
+  end
+
+  # Parse all scripts into their journal commands, grouped by quest ID.
+  defp load_scripts(script_map) do
+    script_map
+    |> Enum.flat_map(fn {id, text} ->
+      Resdayn.Importer.Quests.ScriptParser.extract_journal_commands(text, script_map, follow_scripts: true)
+      |> Enum.map(&Map.put(&1, :script_id, Ash.CiString.new(id)))
     end)
     |> Enum.group_by(& &1.quest_id)
   end
 
-  defp load_dialogue_with_scripts do
+  defp load_dialogue_with_scripts(script_map) do
     Resdayn.Codex.Dialogue.Response
     |> Ash.Query.for_read(:read)
     |> Ash.Query.filter(not is_nil(script_content))
@@ -168,7 +177,9 @@ defmodule Resdayn.Importer.Quests.Analyzer do
         :script_content,
         fn script_content ->
           Enum.group_by(
-            Resdayn.Importer.Quests.ScriptParser.extract_journal_commands(script_content),
+            Resdayn.Importer.Quests.ScriptParser.extract_journal_commands(
+              script_content, script_map, follow_scripts: true
+            ),
             & &1.quest_id
           )
         end
@@ -212,6 +223,25 @@ defmodule Resdayn.Importer.Quests.Analyzer do
     (condition_items ++ dialogue_script_items ++ standalone_script_items)
     |> Enum.filter(& &1)
     |> Enum.reject(fn item -> String.downcase(item) == "gold_001" end)
+    |> Enum.map(&Ash.CiString.new/1)
+    |> Enum.uniq()
+  end
+
+  defp extract_npc_ids_from_effects(dialogue_updates, script_journals_by_quest_id, quest_id, npc_id_set) do
+    dialogue_effects =
+      dialogue_updates
+      |> Enum.flat_map(fn response ->
+        Map.get(response.script_content, downcase(quest_id), [])
+        |> Enum.flat_map(& &1.effects)
+      end)
+
+    script_effects =
+      Map.get(script_journals_by_quest_id, downcase(quest_id), [])
+      |> Enum.flat_map(& &1.effects)
+
+    (dialogue_effects ++ script_effects)
+    |> Enum.map(fn e -> e[:subject] end)
+    |> Enum.filter(fn subject -> is_binary(subject) and MapSet.member?(npc_id_set, downcase(subject)) end)
     |> Enum.map(&Ash.CiString.new/1)
     |> Enum.uniq()
   end

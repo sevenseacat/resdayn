@@ -4,7 +4,7 @@ defmodule Resdayn.Importer.Quests.AnalyzerTest do
 
   setup_all do
     # Add quests here as you write new tests that need them analyzed
-    Resdayn.Importer.Quests.Analyzer.analyze(["MV_DeadTaxman", "MV_SlaveMule"])
+    Resdayn.Importer.Quests.Analyzer.analyze(["MV_DeadTaxman", "MV_SlaveMule", "TG_LootAldruhnMG"])
   end
 
   describe "journal entries" do
@@ -26,7 +26,7 @@ defmodule Resdayn.Importer.Quests.AnalyzerTest do
       transition = find_transition(taxman, 10)
 
       assert transition.trigger_type == :script
-      assert transition.trigger_id == Ash.CiString.new("processusScript")
+      assert ci_eq(transition.trigger_id, "processusScript")
     end
 
     test "from range narrowed to 0 when no journal indices exist below from_max", %{"MV_DeadTaxman" => taxman} do
@@ -128,6 +128,14 @@ defmodule Resdayn.Importer.Quests.AnalyzerTest do
     test "NPCs with related scripts attached", %{"MV_DeadTaxman" => taxman} do
       assert Ash.CiString.new("processus vitellius") in taxman.key_npcs
     end
+
+    test "NPCs referenced in followed scripts", %{"TG_LootAldruhnMG" => loot_mg} do
+      # TG_LootMG disables these NPCs, TG_LootMG2 re-enables them
+      assert Ash.CiString.new("erranil") in loot_mg.key_npcs
+      assert Ash.CiString.new("movis darys") in loot_mg.key_npcs
+      assert Ash.CiString.new("edwinna elbert") in loot_mg.key_npcs
+      assert Ash.CiString.new("anarenen") in loot_mg.key_npcs
+    end
   end
 
   describe "key dialogue topics" do
@@ -159,6 +167,8 @@ defmodule Resdayn.Importer.Quests.AnalyzerTest do
       assert Ash.CiString.new("exquisite_ring_processus") in taxman.key_items
     end
   end
+
+  def ci_eq(a, b), do: Ash.CiString.compare(Ash.CiString.new(a), Ash.CiString.new(b)) == :eq
 
   def find_transition(%Resdayn.Codex.QuestAnalysis.Analysis{} = analysis, index) do
     transition = Enum.find(analysis.transitions, &(&1.index == index))
