@@ -2,6 +2,7 @@ defmodule Resdayn.Importer.Quests.Analyzer do
   require Ash.Query
 
   alias Resdayn.Importer.Quests.ChoiceChain
+  alias Resdayn.Importer.Quests.ItemLocations
   alias Resdayn.Importer.Quests.TopicAvailability
 
   def analyze(quest_ids \\ []) do
@@ -12,6 +13,7 @@ defmodule Resdayn.Importer.Quests.Analyzer do
     script_journals_by_quest_id = load_scripts(script_map)
     all_npcs = load_all_npcs()
     npc_id_set = MapSet.new(all_npcs, fn npc -> downcase(npc.id) end)
+    item_locations = load_item_locations()
 
     # Build topic availability index for inferring from_min bounds
     topic_availability =
@@ -104,16 +106,21 @@ defmodule Resdayn.Importer.Quests.Analyzer do
         |> Enum.map(fn npc_id -> Enum.find(all_npcs, &(downcase(&1.id) == downcase(npc_id))) end)
         |> Enum.filter(& &1)
 
-      locations =
+      npc_locations =
         all_quest_npcs
         |> Enum.flat_map(fn npc -> [npc.cell_name, npc.cell_id] end)
         |> Enum.filter(& &1)
         |> Enum.map(&Ash.CiString.new/1)
-        |> Enum.uniq()
 
       topics = Enum.map(dialogue_updates, & &1.topic_id) |> Enum.uniq()
 
       items = extract_key_items(dialogue_updates, script_journals_by_quest_id, quest.id)
+
+      condition_item_ids = extract_condition_item_ids(dialogue_updates)
+      add_item_targets = collect_add_item_targets(dialogue_updates, script_journals_by_quest_id, quest.id)
+      item_locations = ItemLocations.get_locations(item_locations, condition_item_ids, add_item_targets)
+
+      locations = (npc_locations ++ item_locations) |> Enum.uniq()
 
       {to_string(quest.id),
        %Resdayn.Codex.QuestAnalysis.Analysis{
@@ -139,6 +146,37 @@ defmodule Resdayn.Importer.Quests.Analyzer do
     |> Ash.Query.for_read(:read)
     |> Ash.Query.filter(id in ^list)
     |> Ash.read!(load: [:journal_entries])
+  end
+
+  defp load_item_locations do
+    unique_placements = load_unique_placements()
+    holders = load_inventory_holders()
+    ItemLocations.build(unique_placements, holders)
+  end
+
+  # References with exactly 1 cell placement: %{downcased_ref_id => cell_id}
+  defp load_unique_placements do
+    {:ok, %{rows: rows}} =
+      Ecto.Adapters.SQL.query(Resdayn.Repo, """
+        SELECT LOWER(reference_id), MIN(cell_id)
+        FROM cell_references
+        GROUP BY LOWER(reference_id)
+        HAVING COUNT(*) = 1
+      """)
+
+    Map.new(rows, fn [ref_id, cell_id] -> {ref_id, cell_id} end)
+  end
+
+  # Inventory holders grouped by item: %{downcased_item_id => [holder_ref_id]}
+  defp load_inventory_holders do
+    {:ok, %{rows: rows}} =
+      Ecto.Adapters.SQL.query(Resdayn.Repo, """
+        SELECT LOWER(object_ref_id), array_agg(DISTINCT LOWER(holder_ref_id))
+        FROM inventory_items
+        GROUP BY LOWER(object_ref_id)
+      """)
+
+    Map.new(rows, fn [item_id, holder_ids] -> {item_id, holder_ids} end)
   end
 
   defp load_all_npcs do
@@ -225,6 +263,35 @@ defmodule Resdayn.Importer.Quests.Analyzer do
     |> Enum.reject(fn item -> String.downcase(item) == "gold_001" end)
     |> Enum.map(&Ash.CiString.new/1)
     |> Enum.uniq()
+  end
+
+  defp extract_condition_item_ids(dialogue_updates) do
+    dialogue_updates
+    |> Enum.flat_map(fn response ->
+      (response.conditions || [])
+      |> Enum.filter(fn c -> c.function == :item end)
+      |> Enum.map(fn c -> c.name end)
+    end)
+    |> Enum.reject(fn item -> String.downcase(item) == "gold_001" end)
+    |> Enum.uniq()
+  end
+
+  # Collect add_item effect targets: returns %{downcased_item_id => [target_ids]}
+  defp collect_add_item_targets(dialogue_updates, script_journals_by_quest_id, quest_id) do
+    dialogue_effects =
+      dialogue_updates
+      |> Enum.flat_map(fn response ->
+        Map.get(response.script_content, downcase(quest_id), [])
+        |> Enum.flat_map(& &1.effects)
+      end)
+
+    script_effects =
+      Map.get(script_journals_by_quest_id, downcase(quest_id), [])
+      |> Enum.flat_map(& &1.effects)
+
+    (dialogue_effects ++ script_effects)
+    |> Enum.filter(fn e -> e[:function] == :add_item and is_binary(e[:subject]) end)
+    |> Enum.group_by(fn e -> downcase(e[:item_id]) end, fn e -> e[:subject] end)
   end
 
   defp extract_npc_ids_from_effects(dialogue_updates, script_journals_by_quest_id, quest_id, npc_id_set) do

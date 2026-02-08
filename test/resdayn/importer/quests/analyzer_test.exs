@@ -4,7 +4,7 @@ defmodule Resdayn.Importer.Quests.AnalyzerTest do
 
   setup_all do
     # Add quests here as you write new tests that need them analyzed
-    Resdayn.Importer.Quests.Analyzer.analyze(["MV_DeadTaxman", "MV_SlaveMule", "TG_LootAldruhnMG"])
+    Resdayn.Importer.Quests.Analyzer.analyze(["MV_DeadTaxman", "MV_SlaveMule", "TG_LootAldruhnMG", "A1_4_MuzgobInformant"])
   end
 
   describe "journal entries" do
@@ -155,6 +155,12 @@ defmodule Resdayn.Importer.Quests.AnalyzerTest do
 
     test "NPCs with related script locations", %{"MV_DeadTaxman" => taxman} do
       assert Ash.CiString.new("-3,-9") in taxman.key_locations
+    end
+
+    test "location inferred from unique item cell reference", %{"A1_4_MuzgobInformant" => muzgob} do
+      # misc_Skull_Llevule has exactly 1 cell reference: Andrano Ancestral Tomb.
+      # It appears in an item condition, so its location should be a key location.
+      assert Ash.CiString.new("Andrano Ancestral Tomb") in muzgob.key_locations
     end
   end
 
