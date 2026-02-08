@@ -98,7 +98,7 @@ defmodule Resdayn.Importer.Quests.Analyzer do
       # NPCs referenced as subjects in effects (disable, enable, etc.)
       effect_npc_ids = extract_npc_ids_from_effects(dialogue_updates, script_journals_by_quest_id, quest.id, npc_id_set)
 
-      all_npc_ids = (dialogue_npc_ids ++ script_npc_ids ++ effect_npc_ids) |> Enum.uniq()
+      all_npc_ids = (dialogue_npc_ids ++ script_npc_ids ++ effect_npc_ids) |> ci_uniq()
 
       # Get locations from NPCs
       all_quest_npcs =
@@ -112,7 +112,7 @@ defmodule Resdayn.Importer.Quests.Analyzer do
         |> Enum.filter(& &1)
         |> Enum.map(&Ash.CiString.new/1)
 
-      topics = Enum.map(dialogue_updates, & &1.topic_id) |> Enum.uniq()
+      topics = Enum.map(dialogue_updates, & &1.topic_id) |> ci_uniq()
 
       items = extract_key_items(dialogue_updates, script_journals_by_quest_id, quest.id)
 
@@ -120,7 +120,7 @@ defmodule Resdayn.Importer.Quests.Analyzer do
       add_item_targets = collect_add_item_targets(dialogue_updates, script_journals_by_quest_id, quest.id)
       item_locations = ItemLocations.get_locations(item_locations, condition_item_ids, add_item_targets)
 
-      locations = (npc_locations ++ item_locations) |> Enum.uniq()
+      locations = (npc_locations ++ item_locations) |> ci_uniq()
 
       {to_string(quest.id),
        %Resdayn.Codex.QuestAnalysis.Analysis{
@@ -262,7 +262,7 @@ defmodule Resdayn.Importer.Quests.Analyzer do
     |> Enum.filter(& &1)
     |> Enum.reject(fn item -> String.downcase(item) == "gold_001" end)
     |> Enum.map(&Ash.CiString.new/1)
-    |> Enum.uniq()
+    |> ci_uniq()
   end
 
   defp extract_condition_item_ids(dialogue_updates) do
@@ -310,7 +310,7 @@ defmodule Resdayn.Importer.Quests.Analyzer do
     |> Enum.map(fn e -> e[:subject] end)
     |> Enum.filter(fn subject -> is_binary(subject) and MapSet.member?(npc_id_set, downcase(subject)) end)
     |> Enum.map(&Ash.CiString.new/1)
-    |> Enum.uniq()
+    |> ci_uniq()
   end
 
   defp format_journal_entries(entries) do
@@ -443,6 +443,8 @@ defmodule Resdayn.Importer.Quests.Analyzer do
         existing
     end
   end
+
+  defp ci_uniq(list), do: Enum.uniq_by(list, &downcase/1)
 
   defp downcase(%Ash.CiString{} = value), do: String.downcase(to_string(value))
   defp downcase(value) when is_binary(value), do: String.downcase(value)
