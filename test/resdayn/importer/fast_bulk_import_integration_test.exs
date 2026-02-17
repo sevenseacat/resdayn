@@ -1461,14 +1461,14 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
       config =
         Resdayn.Importer.Record.GameSetting.process(records, filename: "Morrowind.esm")
 
-      original = Ash.get!(GameSetting, "sMonthMorningstar")
+      original = Ash.get!(GameSetting, "fAlarmRadius")
       refute "TestMod.esm" in original.source_file_ids
 
       # Import with new source file
       {:ok, _} =
         FastBulkImport.import(config.records, config.resource, source_file_id: "TestMod.esm")
 
-      updated = Ash.get!(GameSetting, "sMonthMorningstar")
+      updated = Ash.get!(GameSetting, "fAlarmRadius")
       assert "Morrowind.esm" in updated.source_file_ids
       assert "TestMod.esm" in updated.source_file_ids
 
@@ -1483,13 +1483,13 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
       config =
         Resdayn.Importer.Record.GameSetting.process(records, filename: "Morrowind.esm")
 
-      original = Ash.get!(GameSetting, "sMonthMorningstar")
+      original = Ash.get!(GameSetting, "sMonthSunsdawn")
       original_value = original.value
 
       # Modify and re-import
       modified_records =
         Enum.map(config.records, fn record ->
-          if record.id == "sMonthMorningstar" do
+          if record.id == "sMonthSunsdawn" do
             %{record | value: "Test Modified Month"}
           else
             record
@@ -1499,14 +1499,14 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
       {:ok, _} =
         FastBulkImport.import(modified_records, config.resource, source_file_id: "TestUpdate.esm")
 
-      updated = Ash.get!(GameSetting, "sMonthMorningstar")
+      updated = Ash.get!(GameSetting, "sMonthSunsdawn")
       assert updated.value == %Ash.Union{type: :string, value: "Test Modified Month"}
 
       # Restore
       {:ok, _} =
         FastBulkImport.import(config.records, config.resource, source_file_id: "Morrowind.esm")
 
-      restored = Ash.get!(GameSetting, "sMonthMorningstar")
+      restored = Ash.get!(GameSetting, "sMonthSunsdawn")
       assert restored.value == original_value
     end
 
