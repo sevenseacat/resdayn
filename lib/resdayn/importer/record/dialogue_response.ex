@@ -52,6 +52,7 @@ defmodule Resdayn.Importer.Record.DialogueResponse do
               :next_response_id,
               :speaker_class_id,
               :speaker_faction_id,
+              :speaker_race_id,
               :cell_name,
               :sound_filename,
               :player_faction_id,

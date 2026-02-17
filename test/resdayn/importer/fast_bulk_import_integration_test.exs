@@ -1391,6 +1391,11 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
       response = hd(responses)
       assert response.source_file_ids == ["Morrowind.esm"]
     end
+
+    test "imports speaker race ID condition" do
+      response = Ash.get!(Resdayn.Codex.Dialogue.Response, %{topic_id: "Abolitionists", id: "184722846711832269"})
+      assert response.speaker_race_id == Ash.CiString.new("Dark Elf")
+    end
   end
 
   describe "Quest" do
