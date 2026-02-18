@@ -9,7 +9,14 @@ defmodule Resdayn.Parser do
   alias Resdayn.Parser.Record
 
   @doc """
-  Return a list of records as read from the ESM file.
+  Parse all records from a binary.
+  """
+  def read_binary(binary) do
+    parse_all_records(binary, [])
+  end
+
+  @doc """
+  Return a stream of records as read from the ESM file.
   """
   def read(filename) do
     Stream.resource(
@@ -45,6 +52,26 @@ defmodule Resdayn.Parser do
         bitmask(flags, blocked: 0x2000, persistent: 0x400, disabled: 0x0800, deleted: 0x0020),
       data: apply(type, :process, [subrecords])
     }
+  end
+
+  defp parse_all_records(<<>>, acc), do: Enum.reverse(acc)
+
+  defp parse_all_records(
+         <<type_raw::char(4), subrecord_size::uint32(), _header1::char(4), flags::uint32(),
+           subrecord_data::char(subrecord_size), rest::binary>>,
+         acc
+       ) do
+    type = Record.to_module(type_raw)
+    subrecords = parse_subrecords(subrecord_data)
+
+    record = %{
+      type: type,
+      flags:
+        bitmask(flags, blocked: 0x2000, persistent: 0x400, disabled: 0x0800, deleted: 0x0020),
+      data: apply(type, :process, [subrecords])
+    }
+
+    parse_all_records(rest, [record | acc])
   end
 
   defp parse_subrecords(<<>>), do: []
