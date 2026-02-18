@@ -1464,9 +1464,11 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
       original = Ash.get!(GameSetting, "fAlarmRadius")
       refute "TestMod.esm" in original.source_file_ids
 
+      fAlarmRadius = Enum.find(config.records, & &1.id == "fAlarmRadius")
+
       # Import with new source file
       {:ok, _} =
-        FastBulkImport.import(config.records, config.resource, source_file_id: "TestMod.esm")
+        FastBulkImport.import([fAlarmRadius], config.resource, source_file_id: "TestMod.esm")
 
       updated = Ash.get!(GameSetting, "fAlarmRadius")
       assert "Morrowind.esm" in updated.source_file_ids
@@ -1487,17 +1489,13 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
       original_value = original.value
 
       # Modify and re-import
-      modified_records =
-        Enum.map(config.records, fn record ->
-          if record.id == "sMonthSunsdawn" do
-            %{record | value: "Test Modified Month"}
-          else
-            record
-          end
-        end)
+      sMonthSunsdawn =
+        config.records
+        |> Enum.find(& &1.id == "sMonthSunsdawn")
+        |> Map.put(:value, "Test Modified Month")
 
       {:ok, _} =
-        FastBulkImport.import(modified_records, config.resource, source_file_id: "TestUpdate.esm")
+        FastBulkImport.import([sMonthSunsdawn], config.resource, source_file_id: "TestUpdate.esm")
 
       updated = Ash.get!(GameSetting, "sMonthSunsdawn")
       assert updated.value == %Ash.Union{type: :string, value: "Test Modified Month"}
