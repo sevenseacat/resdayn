@@ -18,16 +18,21 @@ defmodule Resdayn.Exporter.Helpers do
 
       iex> pad_string("AB", 2)
       <<65, 66>>
+
+      iex> pad_string(Ash.CiString.new("Hello"), 8)
+      <<72, 101, 108, 108, 111, 0, 0, 0>>
   """
   def pad_string(nil, size), do: :binary.copy(<<0>>, size)
 
-  def pad_string(string, size) when byte_size(string) >= size do
+  def pad_string(string, size) when is_binary(string) and byte_size(string) >= size do
     binary_part(string, 0, size)
   end
 
-  def pad_string(string, size) do
+  def pad_string(string, size) when is_binary(string) do
     string <> :binary.copy(<<0>>, size - byte_size(string))
   end
+
+  def pad_string(string, size), do: pad_string(to_string(string), size)
 
   @doc """
   Null-terminate a string.
@@ -41,9 +46,13 @@ defmodule Resdayn.Exporter.Helpers do
 
       iex> null_terminate(nil)
       <<0>>
+
+      iex> null_terminate(Ash.CiString.new("test"))
+      "test" <> <<0>>
   """
   def null_terminate(nil), do: <<0>>
-  def null_terminate(string), do: string <> <<0>>
+  def null_terminate(string) when is_binary(string), do: string <> <<0>>
+  def null_terminate(string), do: null_terminate(to_string(string))
 
   @doc """
   Reconstruct an integer bitmask from a map of flags.

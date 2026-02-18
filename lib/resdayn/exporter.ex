@@ -22,8 +22,9 @@ defmodule Resdayn.Exporter do
     {:ok, IO.iodata_to_binary([header | body])}
   end
 
-  defp encode_resource(_resource) do
-    raise "not yet implemented"
+  defp encode_resource(resource) do
+    encoder = Resdayn.Exporter.Record.encoder_for(resource.__struct__)
+    encoder.encode(resource)
   end
 
   defp frame_record({type_code, flags_map, subrecords}) do
