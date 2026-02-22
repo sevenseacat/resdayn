@@ -71,7 +71,13 @@ defmodule Resdayn.Importer.Quests.Analyzer do
             from_min = from_min || ChoiceChain.get_from_min(choice_presenters, response, quest.id)
 
             # If from_min is still nil, check if topic availability constrains it
-            from_min = apply_topic_availability_bounds(from_min, response.topic_id, quest.id, topic_availability)
+            from_min =
+              apply_topic_availability_bounds(
+                from_min,
+                response.topic_id,
+                quest.id,
+                topic_availability
+              )
 
             %Resdayn.Codex.QuestAnalysis.Transition{
               index: cmd.index,
@@ -96,7 +102,13 @@ defmodule Resdayn.Importer.Quests.Analyzer do
       script_npc_ids = Enum.map(npcs_with_quest_scripts, & &1.id)
 
       # NPCs referenced as subjects in effects (disable, enable, etc.)
-      effect_npc_ids = extract_npc_ids_from_effects(dialogue_updates, script_journals_by_quest_id, quest.id, npc_id_set)
+      effect_npc_ids =
+        extract_npc_ids_from_effects(
+          dialogue_updates,
+          script_journals_by_quest_id,
+          quest.id,
+          npc_id_set
+        )
 
       all_npc_ids = (dialogue_npc_ids ++ script_npc_ids ++ effect_npc_ids) |> ci_uniq()
 
@@ -117,8 +129,12 @@ defmodule Resdayn.Importer.Quests.Analyzer do
       items = extract_key_items(dialogue_updates, script_journals_by_quest_id, quest.id)
 
       condition_item_ids = extract_condition_item_ids(dialogue_updates)
-      add_item_targets = collect_add_item_targets(dialogue_updates, script_journals_by_quest_id, quest.id)
-      item_locations = ItemLocations.get_locations(item_locations, condition_item_ids, add_item_targets)
+
+      add_item_targets =
+        collect_add_item_targets(dialogue_updates, script_journals_by_quest_id, quest.id)
+
+      item_locations =
+        ItemLocations.get_locations(item_locations, condition_item_ids, add_item_targets)
 
       locations = (npc_locations ++ item_locations) |> ci_uniq()
 
@@ -198,7 +214,9 @@ defmodule Resdayn.Importer.Quests.Analyzer do
   defp load_scripts(script_map) do
     script_map
     |> Enum.flat_map(fn {id, text} ->
-      Resdayn.Importer.Quests.ScriptParser.extract_journal_commands(text, script_map, follow_scripts: true)
+      Resdayn.Importer.Quests.ScriptParser.extract_journal_commands(text, script_map,
+        follow_scripts: true
+      )
       |> Enum.map(&Map.put(&1, :script_id, Ash.CiString.new(id)))
     end)
     |> Enum.group_by(& &1.quest_id)
@@ -216,7 +234,9 @@ defmodule Resdayn.Importer.Quests.Analyzer do
         fn script_content ->
           Enum.group_by(
             Resdayn.Importer.Quests.ScriptParser.extract_journal_commands(
-              script_content, script_map, follow_scripts: true
+              script_content,
+              script_map,
+              follow_scripts: true
             ),
             & &1.quest_id
           )
@@ -294,7 +314,12 @@ defmodule Resdayn.Importer.Quests.Analyzer do
     |> Enum.group_by(fn e -> downcase(e[:item_id]) end, fn e -> e[:subject] end)
   end
 
-  defp extract_npc_ids_from_effects(dialogue_updates, script_journals_by_quest_id, quest_id, npc_id_set) do
+  defp extract_npc_ids_from_effects(
+         dialogue_updates,
+         script_journals_by_quest_id,
+         quest_id,
+         npc_id_set
+       ) do
     dialogue_effects =
       dialogue_updates
       |> Enum.flat_map(fn response ->
@@ -308,7 +333,9 @@ defmodule Resdayn.Importer.Quests.Analyzer do
 
     (dialogue_effects ++ script_effects)
     |> Enum.map(fn e -> e[:subject] end)
-    |> Enum.filter(fn subject -> is_binary(subject) and MapSet.member?(npc_id_set, downcase(subject)) end)
+    |> Enum.filter(fn subject ->
+      is_binary(subject) and MapSet.member?(npc_id_set, downcase(subject))
+    end)
     |> Enum.map(&Ash.CiString.new/1)
     |> ci_uniq()
   end
@@ -427,7 +454,8 @@ defmodule Resdayn.Importer.Quests.Analyzer do
   defp narrow_from_range(transition, _known_indices), do: transition
 
   defp apply_topic_availability_bounds(from_min, topic_id, quest_id, topic_availability) do
-    {topic_from_min, _topic_from_max} = TopicAvailability.get_bounds(topic_availability, topic_id, quest_id)
+    {topic_from_min, _topic_from_max} =
+      TopicAvailability.get_bounds(topic_availability, topic_id, quest_id)
 
     case {from_min, topic_from_min} do
       # If we already have a from_min, take the max of the two

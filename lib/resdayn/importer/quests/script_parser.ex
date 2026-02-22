@@ -769,9 +769,18 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
     {subject, rest} = parse_subject(line)
 
     case Regex.run(~r/^stopcombat\s*(.*)$/i, rest) do
-      [_, ""] -> %{function: :stop_combat, subject: normalize_subject(subject)}
-      [_, target] -> %{function: :stop_combat, subject: normalize_subject(subject), target: normalize_subject(target)}
-      nil -> nil
+      [_, ""] ->
+        %{function: :stop_combat, subject: normalize_subject(subject)}
+
+      [_, target] ->
+        %{
+          function: :stop_combat,
+          subject: normalize_subject(subject),
+          target: normalize_subject(target)
+        }
+
+      nil ->
+        nil
     end
   end
 
@@ -883,10 +892,20 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
     case Regex.run(~r/aifollowcell[,\s]+(\w+)[,\s]+["]([^"]+)["]/i, line) ||
            Regex.run(~r/aifollowcell[,\s]+["]([^"]+)["]/i, line) do
       [_, target, cell] ->
-        %{function: :ai_follow_cell, subject: normalize_subject(subject), target: normalize_subject(target), cell: cell}
+        %{
+          function: :ai_follow_cell,
+          subject: normalize_subject(subject),
+          target: normalize_subject(target),
+          cell: cell
+        }
 
       [_, cell] ->
-        %{function: :ai_follow_cell, subject: normalize_subject(subject), target: :player, cell: cell}
+        %{
+          function: :ai_follow_cell,
+          subject: normalize_subject(subject),
+          target: :player,
+          cell: cell
+        }
 
       nil ->
         nil
@@ -923,13 +942,23 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
     # Handle quoted object property syntax: set "npc name".variable to value
     case Regex.run(~r/^set\s+"([^"]+)"\.(\w+)\s+to\s+(.+)$/i, line) do
       [_, subject, variable, value] ->
-        %{function: :set_variable, subject: subject, variable: variable, value: String.trim(value)}
+        %{
+          function: :set_variable,
+          subject: subject,
+          variable: variable,
+          value: String.trim(value)
+        }
 
       nil ->
         # Handle unquoted object property syntax: set object.variable to value
         case Regex.run(~r/^set\s+(\w+)\.(\w+)\s+to\s+(.+)$/i, line) do
           [_, subject, variable, value] ->
-            %{function: :set_variable, subject: subject, variable: variable, value: String.trim(value)}
+            %{
+              function: :set_variable,
+              subject: subject,
+              variable: variable,
+              value: String.trim(value)
+            }
 
           nil ->
             # Handle simple variable: set variable to value
@@ -949,13 +978,23 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
     # Try quoted factions first (may contain spaces)
     case Regex.run(~r/^modfactionreaction[,\s]+"([^"]+)"[,\s]+"([^"]+)"[,\s]+([+-]?\d+)/i, line) do
       [_, faction, towards, value] ->
-        %{function: :mod_faction_reaction, faction: faction, towards: towards, value: String.to_integer(value)}
+        %{
+          function: :mod_faction_reaction,
+          faction: faction,
+          towards: towards,
+          value: String.to_integer(value)
+        }
 
       nil ->
         # Try unquoted single-word factions
         case Regex.run(~r/^modfactionreaction[,\s]+(\w+)[,\s]+(\w+)[,\s]+([+-]?\d+)/i, line) do
           [_, faction, towards, value] ->
-            %{function: :mod_faction_reaction, faction: faction, towards: towards, value: String.to_integer(value)}
+            %{
+              function: :mod_faction_reaction,
+              faction: faction,
+              towards: towards,
+              value: String.to_integer(value)
+            }
 
           nil ->
             nil

@@ -60,7 +60,9 @@ defmodule Resdayn.Importer.Quests.ChoiceChain do
       %{value: %{value: choice_value}} ->
         # Look up the parent response that presented this choice
         # Try with speaker first, then without (for generic responses)
-        key_with_speaker = {downcase(response.topic_id), downcase(response.speaker_npc_id), choice_value}
+        key_with_speaker =
+          {downcase(response.topic_id), downcase(response.speaker_npc_id), choice_value}
+
         key_without_speaker = {downcase(response.topic_id), nil, choice_value}
 
         Map.get(index, key_with_speaker) || Map.get(index, key_without_speaker)

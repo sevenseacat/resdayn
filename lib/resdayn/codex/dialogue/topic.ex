@@ -72,15 +72,15 @@ defmodule Resdayn.Codex.Dialogue.Topic do
     end
   end
 
-  aggregates do
-    count :response_count, :responses
-  end
-
   calculations do
     calculate :filtered_response_count,
               :integer,
               Resdayn.Codex.Dialogue.Calculations.NPCResponseCount do
       argument :npc_id, :string, allow_nil?: true
     end
+  end
+
+  aggregates do
+    count :response_count, :responses
   end
 end

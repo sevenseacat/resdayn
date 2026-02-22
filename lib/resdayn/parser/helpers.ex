@@ -88,7 +88,8 @@ defmodule Resdayn.Parser.Helpers do
     string
     |> truncate()
     |> String.replace("\r\n", "\n")
-    |> String.replace(<<194, 151>>, "—")  # Handle 2-byte sequence first
+    # Handle 2-byte sequence first
+    |> String.replace(<<194, 151>>, "—")
     |> :binary.bin_to_list()
     |> Enum.flat_map(&replace_char/1)
     |> List.to_string()
@@ -96,23 +97,40 @@ defmodule Resdayn.Parser.Helpers do
   end
 
   # Character replacements - using pattern matching for efficiency
-  defp replace_char(1), do: []          # Remove null bytes
-  defp replace_char(33), do: [?!]       # Replace with exclamation mark
-  defp replace_char(133), do: ~c"..."   # Replace with ellipsis
-  defp replace_char(146), do: [?']      # Replace with single quote
-  defp replace_char(147), do: ~c"\""    # Windows-specific smart quote - replace with Unicode quote
-  defp replace_char(148), do: ~c"\""    # Windows-specific smart quote - replace with Unicode quote
-  defp replace_char(151), do: ~c"—"     # Em dash
-  defp replace_char(173), do: []        # Remove soft hyphen
-  defp replace_char(160), do: []        # Remove non-breaking space
-  defp replace_char(225), do: ~c"á"     # á
-  defp replace_char(232), do: ~c"è"     # è
-  defp replace_char(233), do: ~c"é"     # é
-  defp replace_char(239), do: ~c"ï"     # ï
-  defp replace_char(246), do: ~c"ö"     # ö
-  defp replace_char(250), do: ~c"ú"     # ú
-  defp replace_char(251), do: ~c"û"     # û
-  defp replace_char(char), do: [char]   # Keep all other characters as-is
+  # Remove null bytes
+  defp replace_char(1), do: []
+  # Replace with exclamation mark
+  defp replace_char(33), do: [?!]
+  # Replace with ellipsis
+  defp replace_char(133), do: ~c"..."
+  # Replace with single quote
+  defp replace_char(146), do: [?']
+  # Windows-specific smart quote - replace with Unicode quote
+  defp replace_char(147), do: ~c"\""
+  # Windows-specific smart quote - replace with Unicode quote
+  defp replace_char(148), do: ~c"\""
+  # Em dash
+  defp replace_char(151), do: ~c"—"
+  # Remove soft hyphen
+  defp replace_char(173), do: []
+  # Remove non-breaking space
+  defp replace_char(160), do: []
+  # á
+  defp replace_char(225), do: ~c"á"
+  # è
+  defp replace_char(232), do: ~c"è"
+  # é
+  defp replace_char(233), do: ~c"é"
+  # ï
+  defp replace_char(239), do: ~c"ï"
+  # ö
+  defp replace_char(246), do: ~c"ö"
+  # ú
+  defp replace_char(250), do: ~c"ú"
+  # û
+  defp replace_char(251), do: ~c"û"
+  # Keep all other characters as-is
+  defp replace_char(char), do: [char]
 
   def null_separated!(source, field, string) do
     string

@@ -140,7 +140,8 @@ defmodule Resdayn.Importer.Quests.ChoiceChainTest do
         topic_id: Ash.CiString.new("test topic"),
         speaker_npc_id: Ash.CiString.new("test_npc"),
         conditions: [
-          %{function: :choice, value: %{value: 99}}  # Choice 99 not in index
+          # Choice 99 not in index
+          %{function: :choice, value: %{value: 99}}
         ]
       }
 

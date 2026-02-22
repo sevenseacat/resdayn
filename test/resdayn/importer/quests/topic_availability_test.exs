@@ -43,7 +43,8 @@ defmodule Resdayn.Importer.Quests.TopicAvailabilityTest do
 
       availability = TopicAvailability.build(responses, all_topic_ids)
 
-      assert {48, 50} == TopicAvailability.get_bounds(availability, "processus' ring", "TestQuest")
+      assert {48, 50} ==
+               TopicAvailability.get_bounds(availability, "processus' ring", "TestQuest")
     end
 
     test "tracks implicit topic additions via mentions in content" do

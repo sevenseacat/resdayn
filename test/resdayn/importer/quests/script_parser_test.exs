@@ -1491,18 +1491,35 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
     end
 
     test "Set - object property" do
-      assert %{function: :set_variable, subject: "manilian scerius", variable: "slavestatus", value: "2"} =
+      assert %{
+               function: :set_variable,
+               subject: "manilian scerius",
+               variable: "slavestatus",
+               value: "2"
+             } =
                ScriptParser.parse_effect("set \"manilian scerius\".slavestatus to 2")
     end
 
     test "ModFactionReaction - basic" do
-      assert %{function: :mod_faction_reaction, faction: "redoran", towards: "nerevarine", value: 4} =
+      assert %{
+               function: :mod_faction_reaction,
+               faction: "redoran",
+               towards: "nerevarine",
+               value: 4
+             } =
                ScriptParser.parse_effect("modfactionreaction redoran nerevarine 4")
     end
 
     test "ModFactionReaction - quoted factions" do
-      assert %{function: :mod_faction_reaction, faction: "fighters guild", towards: "thieves guild", value: -10} =
-               ScriptParser.parse_effect("modfactionreaction \"fighters guild\" \"thieves guild\" -10")
+      assert %{
+               function: :mod_faction_reaction,
+               faction: "fighters guild",
+               towards: "thieves guild",
+               value: -10
+             } =
+               ScriptParser.parse_effect(
+                 "modfactionreaction \"fighters guild\" \"thieves guild\" -10"
+               )
     end
 
     test "SetPCCrimeLevel - basic" do

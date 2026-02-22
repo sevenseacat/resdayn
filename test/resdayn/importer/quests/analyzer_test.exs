@@ -4,7 +4,12 @@ defmodule Resdayn.Importer.Quests.AnalyzerTest do
 
   setup_all do
     # Add quests here as you write new tests that need them analyzed
-    Resdayn.Importer.Quests.Analyzer.analyze(["MV_DeadTaxman", "MV_SlaveMule", "TG_LootAldruhnMG", "A1_4_MuzgobInformant"])
+    Resdayn.Importer.Quests.Analyzer.analyze([
+      "MV_DeadTaxman",
+      "MV_SlaveMule",
+      "TG_LootAldruhnMG",
+      "A1_4_MuzgobInformant"
+    ])
   end
 
   describe "journal entries" do
@@ -29,7 +34,9 @@ defmodule Resdayn.Importer.Quests.AnalyzerTest do
       assert ci_eq(transition.trigger_id, "processusScript")
     end
 
-    test "from range narrowed to 0 when no journal indices exist below from_max", %{"MV_DeadTaxman" => taxman} do
+    test "from range narrowed to 0 when no journal indices exist below from_max", %{
+      "MV_DeadTaxman" => taxman
+    } do
       # Transition to index 10 has from_max: 9 (set by script).
       # There are no journal indices in 0-9, so this must be the quest
       # start point: from_min and from_max should both be 0.
@@ -75,7 +82,9 @@ defmodule Resdayn.Importer.Quests.AnalyzerTest do
       assert transition.from_min == 10
     end
 
-    test "from range narrowed when only one journal index exists in range", %{"MV_DeadTaxman" => taxman} do
+    test "from range narrowed when only one journal index exists in range", %{
+      "MV_DeadTaxman" => taxman
+    } do
       # Transition to index 20 has from_min: 10, from_max: 19 from topic
       # availability. Since 10 is the only journal index in that range,
       # both bounds should narrow to 10.

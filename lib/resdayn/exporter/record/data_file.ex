@@ -14,10 +14,8 @@ defmodule Resdayn.Exporter.Record.DataFile do
 
     hedr =
       {"HEDR",
-       <<version::float32(), master_flag::uint32(),
-         pad_string(data_file.company, 32)::binary,
-         pad_string(data_file.description, 256)::binary,
-         record_count::uint32()>>}
+       <<version::float32(), master_flag::uint32(), pad_string(data_file.company, 32)::binary,
+         pad_string(data_file.description, 256)::binary, record_count::uint32()>>}
 
     master_subrecords =
       Enum.flat_map(data_file.dependencies, fn dep ->
