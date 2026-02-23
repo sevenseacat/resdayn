@@ -24,15 +24,15 @@ defmodule Resdayn.Codex.Referencable do
         destination_attribute: :id,
         define_attribute?: false
       )
-      |> Ash.Resource.Builder.add_calculation(
+      |> Ash.Resource.Builder.add_aggregate(
         :cell_references_count,
-        :integer,
-        {Resdayn.Codex.Calculations.ReferenceCounts, field: :cell_references_count}
+        :count,
+        [:referencable_object, :cell_references]
       )
-      |> Ash.Resource.Builder.add_calculation(
+      |> Ash.Resource.Builder.add_aggregate(
         :inventory_items_count,
-        :integer,
-        {Resdayn.Codex.Calculations.ReferenceCounts, field: :inventory_items_count}
+        :count,
+        [:referencable_object, :inventory_items]
       )
       |> Ash.Resource.Builder.add_change(
         {Resdayn.Codex.Changes.CreateReferencableObject, object_type: object_type},
