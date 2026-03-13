@@ -3,6 +3,7 @@ import Config
 config :resdayn,
   ecto_repos: [Resdayn.Repo],
   ash_domains: [
+    Resdayn.Codex.Export,
     Resdayn.Codex.Items,
     Resdayn.Codex.Assets,
     Resdayn.Codex.Characters,
