@@ -3,7 +3,7 @@ defmodule Resdayn.Codex.Items.Tool do
     otp_app: :resdayn,
     domain: Resdayn.Codex.Items,
     data_layer: AshPostgres.DataLayer,
-    extensions: [Resdayn.Codex.Importable, Resdayn.Codex.Referencable]
+    extensions: [Resdayn.Codex.Importable, Resdayn.Codex.Referencable, Resdayn.Codex.Exportable]
 
   postgres do
     table "tools"
@@ -12,20 +12,6 @@ defmodule Resdayn.Codex.Items.Tool do
 
   actions do
     defaults [:read]
-
-    update :update do
-      accept [
-        :name,
-        :type,
-        :nif_model_filename,
-        :icon_filename,
-        :weight,
-        :value,
-        :uses,
-        :quality,
-        :script_id
-      ]
-    end
   end
 
   attributes do
