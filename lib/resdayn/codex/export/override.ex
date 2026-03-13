@@ -29,6 +29,13 @@ defmodule Resdayn.Codex.Export.Override do
     timestamps()
   end
 
+  calculations do
+    calculate :record,
+              :struct,
+              {Resdayn.Codex.Calculations.TypedObject,
+               type_field: :resource_type, id_field: :record_id}
+  end
+
   identities do
     identity :unique_record, [:record_id, :resource_type]
   end
