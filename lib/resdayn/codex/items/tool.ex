@@ -12,18 +12,32 @@ defmodule Resdayn.Codex.Items.Tool do
 
   actions do
     defaults [:read]
+
+    update :update do
+      accept [
+        :name,
+        :type,
+        :nif_model_filename,
+        :icon_filename,
+        :weight,
+        :value,
+        :uses,
+        :quality,
+        :script_id
+      ]
+    end
   end
 
   attributes do
     attribute :id, :ci_string, primary_key?: true, allow_nil?: false
     attribute :name, :string, allow_nil?: false
     attribute :type, __MODULE__.Type, allow_nil?: false
-    attribute :nif_model_filename, :string
-    attribute :icon_filename, :string
-    attribute :weight, :float
-    attribute :value, :integer
-    attribute :uses, :integer
-    attribute :quality, :float
+    attribute :nif_model_filename, :string, allow_nil?: false
+    attribute :icon_filename, :string, allow_nil?: false
+    attribute :weight, :float, allow_nil?: false, constraints: [min: 0]
+    attribute :value, :integer, allow_nil?: false, constraints: [min: 0]
+    attribute :uses, :integer, allow_nil?: false, constraints: [min: 0]
+    attribute :quality, :float, allow_nil?: false, constraints: [min: 0]
   end
 
   relationships do
