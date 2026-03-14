@@ -15,7 +15,7 @@ defmodule Resdayn.Codex.Characters.BodyPart do
   end
 
   attributes do
-    attribute :id, :ci_string, primary_key?: true, allow_nil?: false
+    attribute :id, Resdayn.Codex.Types.RecordId, primary_key?: true, allow_nil?: false
     attribute :nif_model_filename, :string
     attribute :type, __MODULE__.Type, allow_nil?: false
     attribute :equipment_type, __MODULE__.EquipmentType, allow_nil?: false

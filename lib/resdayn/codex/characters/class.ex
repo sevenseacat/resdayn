@@ -15,7 +15,7 @@ defmodule Resdayn.Codex.Characters.Class do
   end
 
   attributes do
-    attribute :id, :ci_string, primary_key?: true, allow_nil?: false
+    attribute :id, Resdayn.Codex.Types.RecordId, primary_key?: true, allow_nil?: false
 
     attribute :name, :string, allow_nil?: false
     attribute :description, :string, allow_nil?: true

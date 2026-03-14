@@ -53,7 +53,7 @@ defmodule Resdayn.Codex.Dialogue.Response do
   end
 
   attributes do
-    attribute :id, :ci_string, primary_key?: true, allow_nil?: false
+    attribute :id, Resdayn.Codex.Types.RecordId, primary_key?: true, allow_nil?: false
     attribute :previous_response_id, :ci_string
     attribute :next_response_id, :ci_string
 

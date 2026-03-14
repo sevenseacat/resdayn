@@ -15,7 +15,7 @@ defmodule Resdayn.Codex.Mechanics.GameSetting do
   end
 
   attributes do
-    attribute :id, :ci_string, primary_key?: true, allow_nil?: false
+    attribute :id, Resdayn.Codex.Types.RecordId, primary_key?: true, allow_nil?: false
     attribute :value, __MODULE__.Value, allow_nil?: true
   end
 end

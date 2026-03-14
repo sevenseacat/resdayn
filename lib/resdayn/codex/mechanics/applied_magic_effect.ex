@@ -19,7 +19,7 @@ defmodule Resdayn.Codex.Mechanics.AppliedMagicEffect do
       primary_key?: true,
       allow_nil?: false
 
-    attribute :parent_id, :ci_string,
+    attribute :parent_id, Resdayn.Codex.Types.RecordId,
       primary_key?: true,
       allow_nil?: false
 

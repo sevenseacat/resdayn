@@ -15,7 +15,7 @@ defmodule Resdayn.Codex.World.NPC do
   end
 
   attributes do
-    attribute :id, :ci_string, primary_key?: true, allow_nil?: false
+    attribute :id, Resdayn.Codex.Types.RecordId, primary_key?: true, allow_nil?: false
     attribute :name, :string, allow_nil?: false
     attribute :level, :integer, allow_nil?: false, constraints: [min: 0]
 

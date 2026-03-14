@@ -15,7 +15,10 @@ defmodule Resdayn.Codex.Items.Weapon do
   end
 
   attributes do
-    attribute :id, :ci_string, primary_key?: true, allow_nil?: false, public?: true
+    attribute :id, Resdayn.Codex.Types.RecordId,
+      primary_key?: true,
+      allow_nil?: false,
+      public?: true
 
     attribute :name, :string, public?: true
     attribute :type, __MODULE__.Type, allow_nil?: false, public?: true

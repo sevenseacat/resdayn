@@ -21,7 +21,7 @@ defmodule Resdayn.Codex.Search.SearchIndex do
   end
 
   attributes do
-    attribute :id, :ci_string, primary_key?: true, allow_nil?: false
+    attribute :id, Resdayn.Codex.Types.RecordId, primary_key?: true, allow_nil?: false
     attribute :name, :string, allow_nil?: false
     attribute :type, :atom, allow_nil?: false
     attribute :icon_filename, :string
