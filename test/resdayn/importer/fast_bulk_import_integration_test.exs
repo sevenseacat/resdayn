@@ -306,8 +306,8 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
   describe "Spell" do
     test "imports correct count" do
       count = Ash.count!(Spell)
-      # 1032 in file, minus 1 duplicate that gets filtered
-      assert count == 1031
+      # 1033 in file, minus 1 duplicate that gets filtered
+      assert count == 1032
     end
 
     test "imports spell data correctly" do
