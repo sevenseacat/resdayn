@@ -17,20 +17,20 @@ defmodule Resdayn.Codex.World.NPC do
   attributes do
     attribute :id, Resdayn.Codex.Types.RecordId, primary_key?: true, allow_nil?: false
     attribute :name, :string, allow_nil?: false
-    attribute :level, :integer, allow_nil?: false, constraints: [min: 0]
+    attribute :level, :integer, allow_nil?: false, constraints: [min: 0, max: 65_535]
 
     attribute :head_model_id, :string, allow_nil?: false
     attribute :hair_model_id, :string, allow_nil?: false
 
-    attribute :disposition, :integer, allow_nil?: false, constraints: [min: 0]
-    attribute :global_reputation, :integer, allow_nil?: false, constraints: [min: 0]
+    attribute :disposition, :integer, allow_nil?: false, constraints: [min: 0, max: 255]
+    attribute :global_reputation, :integer, allow_nil?: false, constraints: [min: 0, max: 255]
 
     attribute :faction_rank, :integer, constraints: [min: 0, max: 10]
     attribute :gold, :integer, allow_nil?: false, constraints: [min: 0]
 
-    attribute :health, :integer, constraints: [min: 0]
-    attribute :magicka, :integer, constraints: [min: 0]
-    attribute :fatigue, :integer, constraints: [min: 0]
+    attribute :health, :integer, constraints: [min: 0, max: 65_535]
+    attribute :magicka, :integer, constraints: [min: 0, max: 65_535]
+    attribute :fatigue, :integer, constraints: [min: 0, max: 65_535]
 
     attribute :attributes, {:array, Resdayn.Codex.Characters.AttributeValue},
       allow_nil?: false,

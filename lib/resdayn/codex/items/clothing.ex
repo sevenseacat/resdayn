@@ -19,11 +19,11 @@ defmodule Resdayn.Codex.Items.Clothing do
 
     attribute :name, :string
     attribute :type, __MODULE__.Type, allow_nil?: false
-    attribute :value, :integer, allow_nil?: false, constraints: [min: 0]
+    attribute :value, :integer, allow_nil?: false, constraints: [min: 0, max: 65_535]
     attribute :weight, :decimal, allow_nil?: false, constraints: [min: 0]
     attribute :nif_model_filename, :string, allow_nil?: false
     attribute :icon_filename, :string
-    attribute :enchantment_points, :integer, allow_nil?: false, constraints: [min: 0]
+    attribute :enchantment_points, :integer, allow_nil?: false, constraints: [min: 0, max: 65_535]
 
     attribute :body_part_coverings, {:array, Resdayn.Codex.Characters.BodyPart.Coverable},
       default: []

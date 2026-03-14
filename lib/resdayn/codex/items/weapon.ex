@@ -26,9 +26,9 @@ defmodule Resdayn.Codex.Items.Weapon do
     attribute :weight, :decimal, allow_nil?: false, constraints: [min: 0], public?: true
     attribute :nif_model_filename, :string, allow_nil?: false
     attribute :icon_filename, :string
-    attribute :enchantment_points, :integer, allow_nil?: false, constraints: [min: 0]
+    attribute :enchantment_points, :integer, allow_nil?: false, constraints: [min: 0, max: 65_535]
 
-    attribute :health, :integer, allow_nil?: false, constraints: [min: 0]
+    attribute :health, :integer, allow_nil?: false, constraints: [min: 0, max: 65_535]
     attribute :speed, :float, allow_nil?: false, constraints: [min: 0]
     attribute :reach, :float, allow_nil?: false, constraints: [min: 0]
 
