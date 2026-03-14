@@ -5,6 +5,7 @@ defmodule Resdayn.Codex.Mechanics do
   resources do
     resource __MODULE__.AppliedMagicEffect
     resource __MODULE__.Attribute
+
     resource __MODULE__.DataFile do
       define :list_data_files, action: :read
     end

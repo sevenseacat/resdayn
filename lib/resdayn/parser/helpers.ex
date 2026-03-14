@@ -77,7 +77,7 @@ defmodule Resdayn.Parser.Helpers do
       for i <- 0..String.length(string) do
         if !String.printable?(string, i) do
           raise RuntimeError,
-                "#{inspect(source)}(#{field}): Unprintable value at #{name}[#{i}]: #{inspect(String.at(string, i - 1))}. Seen so far: #{String.slice(string, 0, i-1)}"
+                "#{inspect(source)}(#{field}): Unprintable value at #{name}[#{i}]: #{inspect(String.at(string, i - 1))}. Seen so far: #{String.slice(string, 0, i - 1)}"
         end
       end
     end
