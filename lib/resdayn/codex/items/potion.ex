@@ -19,8 +19,8 @@ defmodule Resdayn.Codex.Items.Potion do
     attribute :name, :string, allow_nil?: false
     attribute :nif_model_filename, :string
     attribute :icon_filename, :string
-    attribute :weight, :float
-    attribute :value, :integer
+    attribute :weight, :float, constraints: [min: 0]
+    attribute :value, :integer, constraints: [min: 0]
     attribute :autocalc, :boolean, default: false
   end
 

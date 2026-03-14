@@ -17,7 +17,7 @@ defmodule Resdayn.Codex.World.Container do
   attributes do
     attribute :id, :ci_string, primary_key?: true, allow_nil?: false
     attribute :name, :string
-    attribute :nif_model_filename, :string
+    attribute :nif_model_filename, :string, allow_nil?: false
     attribute :capacity, :float, allow_nil?: false, constraints: [min: 0]
 
     attribute :container_flags, {:array, __MODULE__.Flag},

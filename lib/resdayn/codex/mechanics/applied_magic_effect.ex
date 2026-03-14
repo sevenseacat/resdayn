@@ -27,7 +27,7 @@ defmodule Resdayn.Codex.Mechanics.AppliedMagicEffect do
       primary_key?: true,
       allow_nil?: false
 
-    attribute :duration, :integer, allow_nil?: false, public?: true
+    attribute :duration, :integer, allow_nil?: false, public?: true, constraints: [min: 0]
 
     attribute :magnitude, Resdayn.Codex.Types.Range,
       allow_nil?: false,
@@ -35,7 +35,7 @@ defmodule Resdayn.Codex.Mechanics.AppliedMagicEffect do
       constraints: [validate?: false]
 
     attribute :range, Resdayn.Codex.MagicRange, allow_nil?: false, public?: true
-    attribute :area, :integer, allow_nil?: false, public?: true
+    attribute :area, :integer, allow_nil?: false, public?: true, constraints: [min: 0]
   end
 
   relationships do

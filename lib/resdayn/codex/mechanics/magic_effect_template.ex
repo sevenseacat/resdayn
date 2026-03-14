@@ -18,11 +18,11 @@ defmodule Resdayn.Codex.Mechanics.MagicEffectTemplate do
     attribute :id, :integer, primary_key?: true, allow_nil?: false
 
     attribute :description, :string, allow_nil?: true
-    attribute :size, :float, allow_nil?: false
+    attribute :size, :float, allow_nil?: false, constraints: [min: 0]
     attribute :color, Resdayn.Codex.Types.Color, allow_nil?: false
-    attribute :speed, :float, allow_nil?: false
-    attribute :base_cost, :float, allow_nil?: false
-    attribute :size_cap, :float, allow_nil?: false
+    attribute :speed, :float, allow_nil?: false, constraints: [min: 0]
+    attribute :base_cost, :float, allow_nil?: false, constraints: [min: 0]
+    attribute :size_cap, :float, allow_nil?: false, constraints: [min: 0]
 
     attribute :icon_filename, :string, allow_nil?: false
     attribute :particle_texture_filename, :string, allow_nil?: false

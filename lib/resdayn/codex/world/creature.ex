@@ -16,7 +16,7 @@ defmodule Resdayn.Codex.World.Creature do
 
   attributes do
     attribute :id, :ci_string, primary_key?: true, allow_nil?: false
-    attribute :name, :string
+    attribute :name, :string, allow_nil?: false
     attribute :type, __MODULE__.Type, allow_nil?: false
 
     attribute :nif_model_filename, :string, allow_nil?: false

@@ -21,7 +21,7 @@ defmodule Resdayn.Codex.Characters.Race.SkillBonus do
   end
 
   attributes do
-    attribute :bonus, :integer, allow_nil?: false, public?: true
+    attribute :bonus, :integer, allow_nil?: false, public?: true, constraints: [min: 0]
   end
 
   relationships do

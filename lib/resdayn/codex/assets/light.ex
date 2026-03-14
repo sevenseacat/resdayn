@@ -19,10 +19,10 @@ defmodule Resdayn.Codex.Assets.Light do
     attribute :name, :string
     attribute :nif_model_filename, :string
     attribute :icon_filename, :string
-    attribute :weight, :float
-    attribute :value, :integer
+    attribute :weight, :float, constraints: [min: 0]
+    attribute :value, :integer, constraints: [min: 0]
     attribute :time, :integer
-    attribute :radius, :integer
+    attribute :radius, :integer, constraints: [min: 0]
     attribute :color, Resdayn.Codex.Types.Color
 
     attribute :light_flags, {:array, Resdayn.Codex.Assets.LightFlag},

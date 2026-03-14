@@ -16,7 +16,7 @@ defmodule Resdayn.Codex.World.NPC do
 
   attributes do
     attribute :id, :ci_string, primary_key?: true, allow_nil?: false
-    attribute :name, :string
+    attribute :name, :string, allow_nil?: false
     attribute :level, :integer, allow_nil?: false, constraints: [min: 0]
 
     attribute :head_model_id, :string, allow_nil?: false

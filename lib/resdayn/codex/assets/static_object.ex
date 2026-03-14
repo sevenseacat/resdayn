@@ -16,6 +16,6 @@ defmodule Resdayn.Codex.Assets.StaticObject do
 
   attributes do
     attribute :id, :ci_string, primary_key?: true, allow_nil?: false
-    attribute :nif_model_filename, :string
+    attribute :nif_model_filename, :string, allow_nil?: false
   end
 end
