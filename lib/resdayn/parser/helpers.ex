@@ -77,7 +77,7 @@ defmodule Resdayn.Parser.Helpers do
       for i <- 0..String.length(string) do
         if !String.printable?(string, i) do
           raise RuntimeError,
-                "#{inspect(source)}(#{field}): Unprintable value at #{name}[#{i}]: #{inspect(String.at(string, i - 1))}"
+                "#{inspect(source)}(#{field}): Unprintable value at #{name}[#{i}]: #{inspect(String.at(string, i - 1))}. Seen so far: #{String.slice(string, 0, i-1)}"
         end
       end
     end
@@ -88,8 +88,6 @@ defmodule Resdayn.Parser.Helpers do
     string
     |> truncate()
     |> String.replace("\r\n", "\n")
-    # Handle 2-byte sequence first
-    |> String.replace(<<194, 151>>, "—")
     |> :binary.bin_to_list()
     |> Enum.flat_map(&replace_char/1)
     |> List.to_string()
@@ -99,16 +97,20 @@ defmodule Resdayn.Parser.Helpers do
   # Character replacements - using pattern matching for efficiency
   # Remove null bytes
   defp replace_char(1), do: []
+  # Replace with space
+  defp replace_char(31), do: ~c" "
   # Replace with exclamation mark
   defp replace_char(33), do: [?!]
   # Replace with ellipsis
   defp replace_char(133), do: ~c"..."
-  # Replace with single quote
-  defp replace_char(146), do: [?']
-  # Windows-specific smart quote - replace with Unicode quote
-  defp replace_char(147), do: ~c"\""
-  # Windows-specific smart quote - replace with Unicode quote
-  defp replace_char(148), do: ~c"\""
+  # Windows-1252 left single quote → Unicode '
+  defp replace_char(145), do: ~c"\u2018"
+  # Windows-1252 right single quote → Unicode '
+  defp replace_char(146), do: ~c"\u2019"
+  # Windows-1252 left double quote → Unicode "
+  defp replace_char(147), do: ~c"\u201C"
+  # Windows-1252 right double quote → Unicode "
+  defp replace_char(148), do: ~c"\u201D"
   # Em dash
   defp replace_char(151), do: ~c"—"
   # Remove soft hyphen
