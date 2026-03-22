@@ -35,7 +35,7 @@ defmodule Resdayn.ExporterTest do
 
     test "exports a lockpick" do
       lockpick = %Resdayn.Codex.Items.Tool{
-        id: "pick_apprentice",
+        id: Ash.CiString.new("pick_apprentice"),
         name: "Apprentice's Lockpick",
         type: :lockpick,
         nif_model_filename: "m/Pick_Apprentice.nif",
@@ -57,6 +57,43 @@ defmodule Resdayn.ExporterTest do
       assert record.data.value == 12
       assert record.data.uses == 25
       assert record.data.quality == 0.5
+    end
+
+    test "exports a book" do
+      book = %Resdayn.Codex.Items.Book{
+        id: Ash.CiString.new("bookskill_unarmored1"),
+        name: "The Wraith's Wedding Dowry",
+        value: 300,
+        weight: Decimal.new("5.2"),
+        nif_model_filename: "m\\Text_Quarto_01.NIF",
+        icon_filename: "m\\Tx_quarto_open_01.tga",
+        enchantment_points: 30,
+        scroll: true,
+        text:
+          "this is the book content. “The poets are right.” said Kepkajna gra-Minfang. áèéïöúû",
+        script_id: "my_script",
+        enchantment_id: "my_enchantment",
+        skill_id: 12
+      }
+
+      [_header, record] = build_and_parse([book])
+
+      assert record.type == Resdayn.Parser.Record.Book
+      assert record.data.id == "bookskill_unarmored1"
+      assert record.data.name == "The Wraith's Wedding Dowry"
+      assert record.data.nif_model_filename == "m\\Text_Quarto_01.NIF"
+      assert record.data.icon_filename == "m\\Tx_quarto_open_01.tga"
+      assert record.data.weight == 5.2
+      assert record.data.value == 300
+      assert record.data.skill_id == 12
+      assert record.data.enchantment_points == 30
+      assert record.data.flags.scroll == true
+
+      assert record.data.text ==
+               "this is the book content. “The poets are right.” said Kepkajna gra-Minfang. áèéïöúû"
+
+      assert record.data.script_id == "my_script"
+      assert record.data.enchantment_id == "my_enchantment"
     end
   end
 end

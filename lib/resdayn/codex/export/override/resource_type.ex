@@ -1,6 +1,7 @@
 defmodule Resdayn.Codex.Export.Override.ResourceType do
   @types %{
-    tool: Resdayn.Codex.Items.Tool
+    tool: Resdayn.Codex.Items.Tool,
+    book: Resdayn.Codex.Items.Book
   }
 
   use Ash.Type.Enum, values: Map.keys(@types)

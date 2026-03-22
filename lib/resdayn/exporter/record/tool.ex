@@ -13,7 +13,7 @@ defmodule Resdayn.Exporter.Record.Tool do
       [
         {"NAME", null_terminate(tool.id)},
         {"MODL", null_terminate(tool.nif_model_filename)},
-        {"FNAM", null_terminate(tool.name)},
+        {"FNAM", null_terminate(encode_string(tool.name))},
         {"ITEX", null_terminate(tool.icon_filename)},
         if(tool.script_id, do: {"SCRI", null_terminate(tool.script_id)}),
         data_subrecord

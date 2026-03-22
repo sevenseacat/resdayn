@@ -51,7 +51,7 @@ Using the amazing work of Dave Humphrey detailed here: http://www.uesp.net/morro
 | ✓      | ✓        | ✓        | `LOCK` (Lockpicking items) * |
 | ✓      | ✓        | ✓        | `PROB` (Probe items) * |
 | ✓      | ✓        |          | `INGR` (Ingredients) |
-| ✓      | ✓        |          | `BOOK` (Books and papers) |
+| ✓      | ✓        | ✓        | `BOOK` (Books and papers) |
 | ✓      | ✓        |          | `ALCH` (Potions) |
 | ✓      | ✓        |          | `LEVI` (Item levelled list) |
 | ✓      | ✓        |          | `LEVC` (Creature levelled list) |

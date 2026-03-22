@@ -3,7 +3,7 @@ defmodule Resdayn.Codex.Items.Book do
     otp_app: :resdayn,
     domain: Resdayn.Codex.Items,
     data_layer: AshPostgres.DataLayer,
-    extensions: [Resdayn.Codex.Importable, Resdayn.Codex.Referencable]
+    extensions: [Resdayn.Codex.Importable, Resdayn.Codex.Referencable, Resdayn.Codex.Exportable]
 
   postgres do
     table "books"
