@@ -10,10 +10,10 @@ defmodule Resdayn.Importer.Runner do
   alias Resdayn.Importer.RecordUpserter
   alias Resdayn.Importer.ChildrenUpserter
 
-  def run(filename) do
-    Logger.configure(level: :info)
+  def run(filename, opts \\ []) do
+    Logger.configure(level: Keyword.get(opts, :log_level, :notice))
 
-    Logger.info("Starting import for #{filename}...")
+    Logger.notice("Starting import for #{filename}...")
 
     records =
       Path.join([:code.priv_dir(:resdayn), "data", filename])
@@ -93,7 +93,7 @@ defmodule Resdayn.Importer.Runner do
         :millisecond
       )
 
-    Logger.info("Completed import in #{Float.round(time / 1000, 2)} seconds.")
+    Logger.notice("Completed import in #{Float.round(time / 1000, 2)} seconds.")
   end
 
   defp parse_records(filename) do

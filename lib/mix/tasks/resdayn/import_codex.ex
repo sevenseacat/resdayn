@@ -29,7 +29,7 @@ defmodule Mix.Tasks.Resdayn.ImportCodex do
   end
 
   defp rebuild_search_index do
-    Logger.info("Rebuilding search index...")
+    Logger.notice("Rebuilding search index...")
 
     {time, count} =
       :timer.tc(
@@ -39,7 +39,7 @@ defmodule Mix.Tasks.Resdayn.ImportCodex do
         :millisecond
       )
 
-    Logger.info(
+    Logger.notice(
       "Search index rebuilt with #{count} entries in #{Float.round(time / 1000, 2)} seconds."
     )
   end
