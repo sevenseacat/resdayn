@@ -1,7 +1,7 @@
-defmodule Resdayn.Importer.FastBulkImportTest do
+defmodule Resdayn.Importer.RecordUpserterTest do
   use Resdayn.DataCase, async: true
 
-  alias Resdayn.Importer.FastBulkImport
+  alias Resdayn.Importer.RecordUpserter
   alias Resdayn.Codex.Mechanics.GameSetting
 
   describe "prepare_record/3" do
@@ -12,14 +12,14 @@ defmodule Resdayn.Importer.FastBulkImportTest do
 
     test "casts and dumps string id", %{attributes: attributes} do
       record = %{id: "sTestSetting", value: "hello"}
-      result = FastBulkImport.prepare_record(record, attributes, "Test.esm")
+      result = RecordUpserter.prepare_record(record, attributes, "Test.esm")
 
       assert result.id == "sTestSetting"
     end
 
     test "casts and dumps string value in union type", %{attributes: attributes} do
       record = %{id: "sTestSetting", value: "hello world"}
-      result = FastBulkImport.prepare_record(record, attributes, "Test.esm")
+      result = RecordUpserter.prepare_record(record, attributes, "Test.esm")
 
       # Union types dump to a tagged format with string keys and atom type value
       assert result.value == %{"type" => :string, "value" => "hello world"}
@@ -27,28 +27,28 @@ defmodule Resdayn.Importer.FastBulkImportTest do
 
     test "casts and dumps integer value in union type", %{attributes: attributes} do
       record = %{id: "iTestSetting", value: 42}
-      result = FastBulkImport.prepare_record(record, attributes, "Test.esm")
+      result = RecordUpserter.prepare_record(record, attributes, "Test.esm")
 
       assert result.value == %{"type" => :integer, "value" => 42}
     end
 
     test "casts and dumps float value in union type", %{attributes: attributes} do
       record = %{id: "fTestSetting", value: 3.14}
-      result = FastBulkImport.prepare_record(record, attributes, "Test.esm")
+      result = RecordUpserter.prepare_record(record, attributes, "Test.esm")
 
       assert result.value == %{"type" => :float, "value" => 3.14}
     end
 
     test "sets source_file_ids from parameter", %{attributes: attributes} do
       record = %{id: "sTest", value: "test"}
-      result = FastBulkImport.prepare_record(record, attributes, "Morrowind.esm")
+      result = RecordUpserter.prepare_record(record, attributes, "Morrowind.esm")
 
       assert result.source_file_ids == ["Morrowind.esm"]
     end
 
     test "sets default empty flags array", %{attributes: attributes} do
       record = %{id: "sTest", value: "test"}
-      result = FastBulkImport.prepare_record(record, attributes, "Test.esm")
+      result = RecordUpserter.prepare_record(record, attributes, "Test.esm")
 
       assert result.flags == []
     end
@@ -56,7 +56,7 @@ defmodule Resdayn.Importer.FastBulkImportTest do
     test "casts flags array of atoms", %{attributes: attributes} do
       # Use valid flag values: :blocked and :persistent
       record = %{id: "sTest", value: "test", flags: [:blocked, :persistent]}
-      result = FastBulkImport.prepare_record(record, attributes, "Test.esm")
+      result = RecordUpserter.prepare_record(record, attributes, "Test.esm")
 
       # Flags should be dumped as strings for PostgreSQL array
       assert result.flags == ["blocked", "persistent"]
@@ -64,9 +64,10 @@ defmodule Resdayn.Importer.FastBulkImportTest do
 
     test "handles nil value in union type", %{attributes: attributes} do
       record = %{id: "sTest", value: nil}
-      result = FastBulkImport.prepare_record(record, attributes, "Test.esm")
+      result = RecordUpserter.prepare_record(record, attributes, "Test.esm")
 
-      assert result.value == nil
+      # nil values are omitted from the prepared map (database defaults to NULL)
+      refute Map.has_key?(result, :value)
     end
   end
 
@@ -78,7 +79,7 @@ defmodule Resdayn.Importer.FastBulkImportTest do
         %{id: "sTestImport3", value: 1.5, flags: []}
       ]
 
-      {:ok, stats} = FastBulkImport.import(records, GameSetting, source_file_id: "Test.esm")
+      {:ok, stats} = RecordUpserter.import(records, GameSetting, source_file_id: "Test.esm")
 
       assert stats.total == 3
 
@@ -97,7 +98,7 @@ defmodule Resdayn.Importer.FastBulkImportTest do
     test "upserts existing records and merges source file ids" do
       # First import
       records1 = [%{id: "sTestUpsert", value: "original", flags: []}]
-      {:ok, _} = FastBulkImport.import(records1, GameSetting, source_file_id: "Base.esm")
+      {:ok, _} = RecordUpserter.import(records1, GameSetting, source_file_id: "Base.esm")
 
       # Verify initial state
       setting = Ash.get!(GameSetting, "sTestUpsert")
@@ -106,7 +107,7 @@ defmodule Resdayn.Importer.FastBulkImportTest do
 
       # Second import with different source file and updated value
       records2 = [%{id: "sTestUpsert", value: "updated", flags: []}]
-      {:ok, stats} = FastBulkImport.import(records2, GameSetting, source_file_id: "Expansion.esm")
+      {:ok, stats} = RecordUpserter.import(records2, GameSetting, source_file_id: "Expansion.esm")
 
       assert stats.total == 1
 
@@ -119,10 +120,10 @@ defmodule Resdayn.Importer.FastBulkImportTest do
     test "does not duplicate source file id on re-import" do
       # First import
       records = [%{id: "sTestDupe", value: "test", flags: []}]
-      {:ok, _} = FastBulkImport.import(records, GameSetting, source_file_id: "Same.esm")
+      {:ok, _} = RecordUpserter.import(records, GameSetting, source_file_id: "Same.esm")
 
       # Re-import with same source file
-      {:ok, _} = FastBulkImport.import(records, GameSetting, source_file_id: "Same.esm")
+      {:ok, _} = RecordUpserter.import(records, GameSetting, source_file_id: "Same.esm")
 
       # Verify source file not duplicated
       setting = Ash.get!(GameSetting, "sTestDupe")
@@ -130,7 +131,7 @@ defmodule Resdayn.Importer.FastBulkImportTest do
     end
 
     test "handles empty records list" do
-      {:ok, stats} = FastBulkImport.import([], GameSetting, source_file_id: "Test.esm")
+      {:ok, stats} = RecordUpserter.import([], GameSetting, source_file_id: "Test.esm")
 
       assert stats.inserted == 0
       assert stats.updated == 0
@@ -143,7 +144,7 @@ defmodule Resdayn.Importer.FastBulkImportTest do
           %{id: "sTestBatch#{i}", value: "value#{i}", flags: []}
         end
 
-      {:ok, stats} = FastBulkImport.import(records, GameSetting, source_file_id: "Test.esm")
+      {:ok, stats} = RecordUpserter.import(records, GameSetting, source_file_id: "Test.esm")
 
       assert stats.total == 1500
 
@@ -165,7 +166,7 @@ defmodule Resdayn.Importer.FastBulkImportTest do
       attributes = Ash.Resource.Info.attributes(GameSetting)
       # Use valid flag values: :blocked and :persistent
       record = %{id: "sTest", value: "test", flags: [:blocked, :persistent]}
-      result = FastBulkImport.prepare_record(record, attributes, "Test.esm")
+      result = RecordUpserter.prepare_record(record, attributes, "Test.esm")
 
       # Enum array types should be dumped as string arrays
       assert is_list(result.flags)
@@ -177,15 +178,15 @@ defmodule Resdayn.Importer.FastBulkImportTest do
       attributes = Ash.Resource.Info.attributes(GameSetting)
 
       record = %{id: "test_string", value: "hello", flags: []}
-      prepared = FastBulkImport.prepare_record(record, attributes, "Test.esm")
+      prepared = RecordUpserter.prepare_record(record, attributes, "Test.esm")
       assert prepared.value == %{"type" => :string, "value" => "hello"}
 
       record = %{id: "test_int", value: 42, flags: []}
-      prepared = FastBulkImport.prepare_record(record, attributes, "Test.esm")
+      prepared = RecordUpserter.prepare_record(record, attributes, "Test.esm")
       assert prepared.value == %{"type" => :integer, "value" => 42}
 
       record = %{id: "test_float", value: 3.14, flags: []}
-      prepared = FastBulkImport.prepare_record(record, attributes, "Test.esm")
+      prepared = RecordUpserter.prepare_record(record, attributes, "Test.esm")
       assert prepared.value == %{"type" => :float, "value" => 3.14}
     end
 
@@ -193,7 +194,7 @@ defmodule Resdayn.Importer.FastBulkImportTest do
       attributes = Ash.Resource.Info.attributes(GameSetting)
 
       record = %{id: "test_flags", value: "test", flags: [:blocked, :persistent]}
-      prepared = FastBulkImport.prepare_record(record, attributes, "Test.esm")
+      prepared = RecordUpserter.prepare_record(record, attributes, "Test.esm")
       assert prepared.flags == ["blocked", "persistent"]
     end
 
@@ -201,7 +202,7 @@ defmodule Resdayn.Importer.FastBulkImportTest do
       attributes = Ash.Resource.Info.attributes(GameSetting)
 
       record = %{id: "test_source", value: "test", flags: []}
-      prepared = FastBulkImport.prepare_record(record, attributes, "MyMod.esm")
+      prepared = RecordUpserter.prepare_record(record, attributes, "MyMod.esm")
       assert prepared.source_file_ids == ["MyMod.esm"]
     end
   end

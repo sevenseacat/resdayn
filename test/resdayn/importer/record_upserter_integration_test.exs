@@ -1,14 +1,14 @@
-defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
+defmodule Resdayn.Importer.RecordUpserterIntegrationTest do
   @moduledoc """
-  Integration tests for FastBulkImport.
+  Integration tests for RecordUpserter.
 
   These tests run the actual Resdayn.Importer.Runner to import Morrowind.esm
   and Tribunal.esm, then verify data integrity for resources that have been
-  converted to FastBulkImport.
+  converted to RecordUpserter.
   """
   use Resdayn.IntegrationCase
 
-  alias Resdayn.Importer.FastBulkImport
+  alias Resdayn.Importer.RecordUpserter
 
   # Resources under test
   alias Resdayn.Codex.Mechanics.{
@@ -1454,7 +1454,7 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
 
       # Re-import with same file
       {:ok, _} =
-        FastBulkImport.import(config.records, config.resource, source_file_id: "Morrowind.esm")
+        RecordUpserter.import(config.records, config.resource, source_file_id: "Morrowind.esm")
 
       reimported = Ash.get!(GameSetting, "sMonthMorningstar")
       assert reimported.source_file_ids == original_source_files
@@ -1473,7 +1473,7 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
 
       # Import with new source file
       {:ok, _} =
-        FastBulkImport.import([fAlarmRadius], config.resource, source_file_id: "TestMod.esm")
+        RecordUpserter.import([fAlarmRadius], config.resource, source_file_id: "TestMod.esm")
 
       updated = Ash.get!(GameSetting, "fAlarmRadius")
       assert "Morrowind.esm" in updated.source_file_ids
@@ -1481,7 +1481,7 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
 
       # Clean up
       {:ok, _} =
-        FastBulkImport.import(config.records, config.resource, source_file_id: "Morrowind.esm")
+        RecordUpserter.import(config.records, config.resource, source_file_id: "Morrowind.esm")
     end
 
     test "upsert updates values correctly" do
@@ -1500,27 +1500,27 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
         |> Map.put(:value, "Test Modified Month")
 
       {:ok, _} =
-        FastBulkImport.import([sMonthSunsdawn], config.resource, source_file_id: "TestUpdate.esm")
+        RecordUpserter.import([sMonthSunsdawn], config.resource, source_file_id: "TestUpdate.esm")
 
       updated = Ash.get!(GameSetting, "sMonthSunsdawn")
       assert updated.value == %Ash.Union{type: :string, value: "Test Modified Month"}
 
       # Restore
       {:ok, _} =
-        FastBulkImport.import(config.records, config.resource, source_file_id: "Morrowind.esm")
+        RecordUpserter.import(config.records, config.resource, source_file_id: "Morrowind.esm")
 
       restored = Ash.get!(GameSetting, "sMonthSunsdawn")
       assert restored.value == original_value
     end
 
-    test "BulkRelationshipImport updates optional fields even when first record omits them" do
+    test "ChildrenUpserter updates optional fields even when first record omits them" do
       # Regression test: replace_columns was computed from only the first record.
       # If the first record omitted an optional field but later records had values,
       # those fields wouldn't be in the ON CONFLICT UPDATE clause, so re-imports
       # wouldn't update those fields.
 
       require Ash.Query
-      alias Resdayn.Codex.Changes.BulkRelationshipImport
+      alias Resdayn.Importer.ChildrenUpserter
       alias Resdayn.Codex.World.Cell.CellReference
 
       # Find two cells with references - one without transport_to, one with
@@ -1573,7 +1573,7 @@ defmodule Resdayn.Importer.FastBulkImportIntegrationTest do
       ]
 
       {:ok, _} =
-        BulkRelationshipImport.import(
+        ChildrenUpserter.import(
           records,
           parent_resource: Resdayn.Codex.World.Cell,
           related_resource: CellReference,

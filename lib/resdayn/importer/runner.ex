@@ -7,8 +7,8 @@ defmodule Resdayn.Importer.Runner do
 
   require Logger
   alias Resdayn.Importer.Record
-  alias Resdayn.Importer.FastBulkImport
-  alias Resdayn.Codex.Changes.BulkRelationshipImport
+  alias Resdayn.Importer.RecordUpserter
+  alias Resdayn.Importer.ChildrenUpserter
 
   def run(filename) do
     Logger.configure(level: :info)
@@ -100,7 +100,7 @@ defmodule Resdayn.Importer.Runner do
     {time, result} =
       :timer.tc(fn -> Resdayn.Parser.read(filename) |> Enum.to_list() end, :millisecond)
 
-    Logger.debug("Parsed #{length(result)} records in #{Float.round(time / 1000, 2)} seconds.")
+    Logger.info("Parsed #{length(result)} records in #{Float.round(time / 1000, 2)} seconds.")
 
     result
   end
@@ -129,7 +129,7 @@ defmodule Resdayn.Importer.Runner do
     source_file_id = Keyword.get(opts, :filename)
 
     {:ok, stats} =
-      BulkRelationshipImport.import(
+      ChildrenUpserter.import(
         config.records,
         parent_resource: config.parent_resource,
         related_resource: config.related_resource,
@@ -148,7 +148,7 @@ defmodule Resdayn.Importer.Runner do
     source_file_id = Keyword.get(opts, :filename)
 
     {:ok, stats} =
-      FastBulkImport.import(
+      RecordUpserter.import(
         config.records,
         config.resource,
         source_file_id: source_file_id,
@@ -172,12 +172,12 @@ defmodule Resdayn.Importer.Runner do
           |> Enum.reject(&is_nil/1)
 
         if not Enum.empty?(messages) do
-          Logger.debug("#{name}: #{Enum.join(messages, ", ")} in #{time_str} seconds.")
+          Logger.info("#{name}: #{Enum.join(messages, ", ")} in #{time_str} seconds.")
         end
 
       {:fast_bulk, stats} ->
         if stats.total > 0 do
-          Logger.debug("#{name}: #{stats.total} records upserted in #{time_str} seconds.")
+          Logger.info("#{name}: #{stats.total} records upserted in #{time_str} seconds.")
         end
     end
   end
