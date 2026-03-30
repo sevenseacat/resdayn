@@ -152,7 +152,7 @@ defmodule Resdayn.Importer.ChildrenUpserter do
           {Map.get(del, id_field), parent_id}
         end)
 
-      {upserts ++ prepared, deletes ++ delete_keys}
+      {prepared ++ upserts, delete_keys ++ deletes}
     end)
   end
 
