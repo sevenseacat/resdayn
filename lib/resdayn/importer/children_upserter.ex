@@ -31,6 +31,8 @@ defmodule Resdayn.Importer.ChildrenUpserter do
 
   import Ecto.Query
 
+  @default_batch_size 50
+
   def import(records, opts) do
     related_resource = Keyword.fetch!(opts, :related_resource)
     parent_key = Keyword.fetch!(opts, :parent_key)
@@ -39,79 +41,87 @@ defmodule Resdayn.Importer.ChildrenUpserter do
     deleted_key = Keyword.get(opts, :deleted_key)
     on_missing = Keyword.get(opts, :on_missing, :ignore)
     source_file_id = Keyword.get(opts, :source_file_id)
+    batch_size = Keyword.get(opts, :batch_size, @default_batch_size)
 
     table = AshPostgres.DataLayer.Info.table(related_resource)
     attributes = Ash.Resource.Info.attributes(related_resource)
     has_source_file_ids = Enum.any?(attributes, &(&1.name == :source_file_ids))
 
-    # Flatten parent→children, preparing each child for insertion
-    {flatten_time, {all_upserts, all_deletes}} =
+    chunk_opts = [
+      parent_key: parent_key,
+      id_field: id_field,
+      relationship_key: relationship_key,
+      deleted_key: deleted_key,
+      on_missing: on_missing,
+      source_file_id: source_file_id,
+      has_source_file_ids: has_source_file_ids,
+      table: table,
+      attributes: attributes
+    ]
+
+    {time, stats} =
       :timer.tc(
         fn ->
-          flatten_children(records, attributes,
-            parent_key: parent_key,
-            id_field: id_field,
-            relationship_key: relationship_key,
-            deleted_key: deleted_key,
-            source_file_id: source_file_id,
-            has_source_file_ids: has_source_file_ids
+          records
+          |> Enum.chunk_every(batch_size)
+          |> Task.async_stream(
+            fn chunk -> process_chunk(chunk, chunk_opts) end,
+            max_concurrency: System.schedulers_online(),
+            ordered: false,
+            timeout: :infinity
           )
+          |> Enum.reduce(%{created: 0, deleted: 0}, fn {:ok, chunk_stats}, acc ->
+            %{
+              created: acc.created + chunk_stats.created,
+              deleted: acc.deleted + chunk_stats.deleted
+            }
+          end)
         end,
         :millisecond
       )
 
-    Logger.info(
-      "ChildrenUpserter: Flattened #{length(all_upserts)} upserts, #{length(all_deletes)} deletes in #{flatten_time}ms"
-    )
+    Logger.info("ChildrenUpserter: #{stats.created} upserted, #{stats.deleted} deleted in #{time}ms")
+
+    {:ok, Map.put(stats, :updated, 0)}
+  end
+
+  # Process a chunk of parent records through the full pipeline:
+  # flatten → on_missing check → upsert → delete
+  defp process_chunk(records, opts) do
+    table = Keyword.fetch!(opts, :table)
+    attributes = Keyword.fetch!(opts, :attributes)
+    parent_key = Keyword.fetch!(opts, :parent_key)
+    id_field = Keyword.fetch!(opts, :id_field)
+    on_missing = Keyword.fetch!(opts, :on_missing)
+    source_file_id = Keyword.fetch!(opts, :source_file_id)
+    has_source_file_ids = Keyword.fetch!(opts, :has_source_file_ids)
+
+    # Flatten
+    {all_upserts, all_deletes} = flatten_children(records, attributes, opts)
 
     # Handle on_missing: :destroy
-    {destroy_time, missing_deletes} =
+    missing_deletes =
       if on_missing == :destroy do
-        :timer.tc(
-          fn -> find_missing_keys(records, all_upserts, table, id_field, parent_key) end,
-          :millisecond
-        )
+        find_missing_keys(records, all_upserts, table, id_field, parent_key)
       else
-        {0, []}
+        []
       end
-
-    if on_missing == :destroy do
-      Logger.info(
-        "ChildrenUpserter: Found #{length(missing_deletes)} missing records to delete in #{destroy_time}ms"
-      )
-    end
 
     total_deletes = all_deletes ++ missing_deletes
 
-    # Execute upserts
-    {upsert_time, upsert_count} =
-      :timer.tc(
-        fn ->
-          Upsert.execute(all_upserts,
-            table: table,
-            conflict_keys: [id_field, parent_key],
-            source_file_id: source_file_id,
-            has_source_file_ids: has_source_file_ids
-          )
-        end,
-        :millisecond
+    # Upsert
+    upsert_count =
+      Upsert.execute(all_upserts,
+        table: table,
+        conflict_keys: [id_field, parent_key],
+        source_file_id: source_file_id,
+        has_source_file_ids: has_source_file_ids
       )
 
-    Logger.info("ChildrenUpserter: Upserted #{upsert_count} records in #{upsert_time}ms")
+    # Delete
+    delete_count = execute_deletes(total_deletes, table, id_field, parent_key)
 
-    # Execute deletes
-    {delete_time, delete_count} =
-      :timer.tc(
-        fn -> execute_deletes(total_deletes, table, id_field, parent_key) end,
-        :millisecond
-      )
-
-    Logger.info("ChildrenUpserter: Deleted #{delete_count} records in #{delete_time}ms")
-
-    total_time = flatten_time + destroy_time + upsert_time + delete_time
-    Logger.info("ChildrenUpserter: Total time #{total_time}ms")
-
-    {:ok, %{created: upsert_count, updated: 0, deleted: delete_count}}
+    %{created: upsert_count, deleted: delete_count}
   end
 
   # ---------------------------------------------------------------------------

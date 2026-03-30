@@ -15,13 +15,13 @@ defmodule Resdayn.Importer.Runner do
 
     Logger.notice("Starting import for #{filename}...")
 
-    records =
-      Path.join([:code.priv_dir(:resdayn), "data", filename])
-      |> parse_records()
-
     {time, _result} =
       :timer.tc(
         fn ->
+          records =
+            Path.join([:code.priv_dir(:resdayn), "data", filename])
+            |> parse_records()
+
           # Resources are listed in dependency order.
           # Order matters: resources must be imported after their dependencies.
           [
