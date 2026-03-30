@@ -45,6 +45,7 @@ defmodule Resdayn.Importer.Runner do
             Record.AppliedMagicEffect,
             Record.Race,
             Record.Faction,
+            Record.FactionSkill,
             # === Phase 4: Depends on Race ===
             Record.BodyPart,
             # === Phase 5: Referencable resources (depends on Phase 1-4) ===
