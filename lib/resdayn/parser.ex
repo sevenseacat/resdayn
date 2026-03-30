@@ -38,20 +38,7 @@ defmodule Resdayn.Parser do
          file,
          <<type_raw::char(4), subrecord_size::uint32(), _header1::char(4), flags::uint32()>>
        ) do
-    type = Record.to_module(type_raw)
-
-    # The 16-byte header contains the size of the set of subrecords
-    subrecords =
-      file
-      |> IO.binread(subrecord_size)
-      |> parse_subrecords()
-
-    %{
-      type: type,
-      flags:
-        bitmask(flags, blocked: 0x2000, persistent: 0x400, disabled: 0x0800, deleted: 0x0020),
-      data: apply(type, :process, [subrecords])
-    }
+    build_record(type_raw, flags, IO.binread(file, subrecord_size))
   end
 
   defp parse_all_records(<<>>, acc), do: Enum.reverse(acc)
@@ -61,17 +48,19 @@ defmodule Resdayn.Parser do
            subrecord_data::char(subrecord_size), rest::binary>>,
          acc
        ) do
+    parse_all_records(rest, [build_record(type_raw, flags, subrecord_data) | acc])
+  end
+
+  defp build_record(type_raw, flags, subrecord_data) do
     type = Record.to_module(type_raw)
     subrecords = parse_subrecords(subrecord_data)
 
-    record = %{
+    %{
       type: type,
       flags:
         bitmask(flags, blocked: 0x2000, persistent: 0x400, disabled: 0x0800, deleted: 0x0020),
       data: apply(type, :process, [subrecords])
     }
-
-    parse_all_records(rest, [record | acc])
   end
 
   defp parse_subrecords(<<>>), do: []
