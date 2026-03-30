@@ -64,7 +64,7 @@ defmodule Resdayn.Parser.Helpers do
   for debugging purposes
   """
   def printable!(source, field, name \\ "data", string) do
-    string = clean_string_fast(string)
+    string = sanitize_string(string)
 
     if String.printable?(string) do
       if string == "" do
@@ -83,56 +83,58 @@ defmodule Resdayn.Parser.Helpers do
     end
   end
 
-  # Optimized string cleaning - single pass instead of multiple String.replace calls
-  defp clean_string_fast(string) do
+  # Sanitize a raw ESP/ESM string: truncate at null bytes, normalize line endings,
+  # strip junk bytes, and convert from Windows-1252 encoding to UTF-8.
+  defp sanitize_string(string) do
     string
-    |> truncate()
-    |> String.replace("\r\n", "\n")
-    |> :binary.bin_to_list()
-    |> Enum.flat_map(&replace_char/1)
-    |> List.to_string()
+    |> decode_win1252(<<>>)
     |> String.trim()
   end
 
-  # Character replacements - using pattern matching for efficiency
-  # Remove null bytes
-  defp replace_char(1), do: []
-  # Replace with space
-  defp replace_char(31), do: ~c" "
-  # Replace with exclamation mark
-  defp replace_char(33), do: [?!]
-  # Replace with ellipsis
-  defp replace_char(133), do: ~c"..."
-  # Windows-1252 left single quote → Unicode '
-  defp replace_char(145), do: ~c"\u2018"
-  # Windows-1252 right single quote → Unicode '
-  defp replace_char(146), do: ~c"\u2019"
-  # Windows-1252 left double quote → Unicode "
-  defp replace_char(147), do: ~c"\u201C"
-  # Windows-1252 right double quote → Unicode "
-  defp replace_char(148), do: ~c"\u201D"
-  # Em dash
-  defp replace_char(151), do: ~c"—"
-  # Remove soft hyphen
-  defp replace_char(173), do: []
-  # Remove non-breaking space
-  defp replace_char(160), do: []
-  # á
-  defp replace_char(225), do: ~c"á"
-  # è
-  defp replace_char(232), do: ~c"è"
-  # é
-  defp replace_char(233), do: ~c"é"
-  # ï
-  defp replace_char(239), do: ~c"ï"
-  # ö
-  defp replace_char(246), do: ~c"ö"
-  # ú
-  defp replace_char(250), do: ~c"ú"
-  # û
-  defp replace_char(251), do: ~c"û"
-  # Keep all other characters as-is
-  defp replace_char(char), do: [char]
+  # Null byte — end of string (replaces truncate/1)
+  defp decode_win1252(<<0, _::binary>>, acc), do: acc
+  defp decode_win1252(<<>>, acc), do: acc
+
+  # CRLF → LF (replaces String.replace/3)
+  defp decode_win1252(<<"\r\n", rest::binary>>, acc),
+    do: decode_win1252(rest, <<acc::binary, ?\n>>)
+
+  # Junk bytes — remove
+  defp decode_win1252(<<1, rest::binary>>, acc), do: decode_win1252(rest, acc)
+  defp decode_win1252(<<160, rest::binary>>, acc), do: decode_win1252(rest, acc)
+  defp decode_win1252(<<173, rest::binary>>, acc), do: decode_win1252(rest, acc)
+
+  # Control char → space
+  defp decode_win1252(<<31, rest::binary>>, acc),
+    do: decode_win1252(rest, <<acc::binary, ?\s>>)
+
+  # Windows-1252 specific (bytes 128-159 that diverge from Latin-1)
+  defp decode_win1252(<<133, rest::binary>>, acc),
+    do: decode_win1252(rest, <<acc::binary, "...">>)
+
+  defp decode_win1252(<<145, rest::binary>>, acc),
+    do: decode_win1252(rest, <<acc::binary, 0x2018::utf8>>)
+
+  defp decode_win1252(<<146, rest::binary>>, acc),
+    do: decode_win1252(rest, <<acc::binary, 0x2019::utf8>>)
+
+  defp decode_win1252(<<147, rest::binary>>, acc),
+    do: decode_win1252(rest, <<acc::binary, 0x201C::utf8>>)
+
+  defp decode_win1252(<<148, rest::binary>>, acc),
+    do: decode_win1252(rest, <<acc::binary, 0x201D::utf8>>)
+
+  defp decode_win1252(<<151, rest::binary>>, acc),
+    do: decode_win1252(rest, <<acc::binary, 0x2014::utf8>>)
+
+  # Non-ASCII Latin-1 range (bytes 160-255) — code point equals byte value,
+  # just needs UTF-8 multi-byte encoding
+  defp decode_win1252(<<byte, rest::binary>>, acc) when byte > 127,
+    do: decode_win1252(rest, <<acc::binary, byte::utf8>>)
+
+  # ASCII (bytes 1-127) — passes through unchanged
+  defp decode_win1252(<<byte, rest::binary>>, acc),
+    do: decode_win1252(rest, <<acc::binary, byte>>)
 
   def null_separated!(source, field, string) do
     string
