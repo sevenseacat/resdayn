@@ -4,6 +4,8 @@ defmodule Resdayn.Importer.SearchIndex do
   This should be run after all other imports are complete.
   """
 
+  require Ash.Query
+
   @searchable_resources [
     {Resdayn.Codex.Items.Weapon, :weapon, :icon_filename},
     {Resdayn.Codex.Items.Armor, :armor, :icon_filename},
@@ -27,21 +29,27 @@ defmodule Resdayn.Importer.SearchIndex do
   def rebuild do
     Resdayn.Repo.query!("TRUNCATE search_index")
 
-    entries =
-      Enum.flat_map(@searchable_resources, &build_entries/1) ++ build_spell_entries()
+    spell_task = Task.async(fn -> insert(build_spell_entries()) end)
 
-    entries
-    |> Enum.chunk_every(1000)
-    |> Enum.reduce(0, fn batch, acc ->
-      {inserted, _} = Resdayn.Repo.insert_all("search_index", batch, on_conflict: :nothing)
-      acc + inserted
-    end)
+    count =
+      @searchable_resources
+      |> Task.async_stream(
+        fn resource ->
+          resource
+          |> build_entries()
+          |> insert()
+        end,
+        ordered: false
+      )
+      |> Enum.sum_by(fn {:ok, count} -> count end)
+
+    count + Task.await(spell_task)
   end
 
   defp build_entries({resource, type, icon_field}) do
     resource
+    |> Ash.Query.filter(not is_nil(name) and name != "")
     |> Ash.read!()
-    |> Enum.filter(&(&1.name && &1.name != ""))
     |> Enum.map(fn record ->
       %{
         id: "#{type}:#{record.id}",
@@ -54,8 +62,8 @@ defmodule Resdayn.Importer.SearchIndex do
 
   defp build_spell_entries do
     Resdayn.Codex.Mechanics.Spell
+    |> Ash.Query.filter(not is_nil(name) and name != "")
     |> Ash.read!(load: [effects: [magic_effect: [:icon_filename]]])
-    |> Enum.filter(&(&1.name && &1.name != ""))
     |> Enum.map(fn spell ->
       %{
         id: "spell:#{spell.id}",
@@ -73,4 +81,10 @@ defmodule Resdayn.Importer.SearchIndex do
   end
 
   defp spell_icon(_effects), do: nil
+
+  defp insert(records) do
+    "search_index"
+    |> Resdayn.Repo.insert_all(records)
+    |> elem(0)
+  end
 end
