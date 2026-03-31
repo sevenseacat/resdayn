@@ -22,8 +22,8 @@ defmodule Resdayn.Parser.Record.Creature do
       spd::uint32(), endurance::uint32(), per::uint32(), luc::uint32(), health::uint32(),
       magicka::uint32(), fatigue::uint32(), soul::uint32(), combat::uint32(), magic::uint32(),
       stealth::uint32(), attack1_min::uint32(), attack1_max::uint32(), attack2_min::uint32(),
-      attack2_max::uint32(), attack3_min::uint32(), attack3_max::uint32(),
-      gold::uint32()>> = value
+      attack2_max::uint32(), attack3_min::uint32(), attack3_max::uint32(), gold::uint32()>> =
+      value
 
     record_unnested_value(data, %{
       type: Map.fetch!(@creature_types, type),

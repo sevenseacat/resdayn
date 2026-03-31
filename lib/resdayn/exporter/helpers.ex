@@ -82,11 +82,16 @@ defmodule Resdayn.Exporter.Helpers do
   # Unicode → Windows-1252 reverse mappings
   # Ellipsis (the parser expands byte 133 to three ASCII dots, so we can't
   # reliably reverse "..." back to a single byte — leave dots as-is)
-  defp encode_char(0x2018), do: 145  # ' → left single quote
-  defp encode_char(0x2019), do: 146  # ' → right single quote
-  defp encode_char(0x201C), do: 147  # " → left double quote
-  defp encode_char(0x201D), do: 148  # " → right double quote
-  defp encode_char(0x2014), do: 151  # — → em dash
+  # ' → left single quote
+  defp encode_char(0x2018), do: 145
+  # ' → right single quote
+  defp encode_char(0x2019), do: 146
+  # " → left double quote
+  defp encode_char(0x201C), do: 147
+  # " → right double quote
+  defp encode_char(0x201D), do: 148
+  # — → em dash
+  defp encode_char(0x2014), do: 151
   # Latin-1 Supplement characters (U+00A0–U+00FF) map directly to the same
   # byte values in Windows-1252
   defp encode_char(cp) when cp in 0x00A0..0x00FF, do: cp

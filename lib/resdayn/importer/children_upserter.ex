@@ -80,7 +80,9 @@ defmodule Resdayn.Importer.ChildrenUpserter do
         :millisecond
       )
 
-    Logger.info("ChildrenUpserter: #{stats.created} upserted, #{stats.deleted} deleted in #{time}ms")
+    Logger.info(
+      "ChildrenUpserter: #{stats.created} upserted, #{stats.deleted} deleted in #{time}ms"
+    )
 
     {:ok, Map.put(stats, :updated, 0)}
   end

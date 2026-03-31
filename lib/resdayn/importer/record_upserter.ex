@@ -43,7 +43,10 @@ defmodule Resdayn.Importer.RecordUpserter do
       {prepare_time, prepared} =
         :timer.tc(
           fn ->
-            Enum.map(records, &Upsert.prepare_record(&1, attributes, source_file_id: source_file_id))
+            Enum.map(
+              records,
+              &Upsert.prepare_record(&1, attributes, source_file_id: source_file_id)
+            )
           end,
           :millisecond
         )
