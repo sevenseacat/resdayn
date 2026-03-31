@@ -17,7 +17,7 @@ defmodule Mix.Tasks.Resdayn.ImportCodex do
     "OAAB_Data.esm"
   ]
 
-  @requirements ["app.start"]
+  @requirements ["app.start --preload-modules"]
 
   def run([filename]) do
     Resdayn.Importer.Runner.run(filename)
