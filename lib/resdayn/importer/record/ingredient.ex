@@ -12,7 +12,7 @@ defmodule Resdayn.Importer.Record.Ingredient do
       end)
 
     %{
-      type: :fast_bulk,
+      type: :record,
       resource: Resdayn.Codex.Items.Ingredient,
       records: processed_records,
       conflict_keys: [:id]

@@ -20,7 +20,7 @@ defmodule Resdayn.Importer.Record.AppliedMagicEffect do
     all_effects = spell_effects ++ potion_effects ++ enchantment_effects
 
     %{
-      type: :fast_bulk,
+      type: :record,
       resource: Resdayn.Codex.Mechanics.AppliedMagicEffect,
       records: all_effects,
       conflict_keys: [:parent_type, :parent_id, :index]

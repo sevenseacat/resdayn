@@ -45,7 +45,7 @@ defmodule Resdayn.Importer.AppliedMagicEffectTest do
 
       result = AppliedMagicEffectImporter.process(records, [])
 
-      assert result.type == :fast_bulk
+      assert result.type == :record
       assert result.resource == Resdayn.Codex.Mechanics.AppliedMagicEffect
       assert result.conflict_keys == [:parent_type, :parent_id, :index]
 

@@ -53,7 +53,7 @@ defmodule Resdayn.Importer.Record.Creature do
       end)
 
     %{
-      type: :fast_bulk,
+      type: :record,
       resource: Resdayn.Codex.World.Creature,
       records: processed_records,
       conflict_keys: [:id]

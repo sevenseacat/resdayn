@@ -14,7 +14,7 @@ defmodule Resdayn.Importer.Record.Book do
       |> Enum.filter(&Map.has_key?(&1, :name))
 
     %{
-      type: :fast_bulk,
+      type: :record,
       resource: Resdayn.Codex.Items.Book,
       records: processed_records,
       conflict_keys: [:id]

@@ -16,7 +16,7 @@ defmodule Resdayn.Importer.Record.Script do
       end)
 
     %{
-      type: :fast_bulk,
+      type: :record,
       resource: Resdayn.Codex.Mechanics.Script,
       records: processed_records,
       conflict_keys: [:id]

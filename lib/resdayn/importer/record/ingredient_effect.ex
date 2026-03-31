@@ -39,7 +39,7 @@ defmodule Resdayn.Importer.Record.IngredientEffect do
       end)
 
     %{
-      type: :bulk_relationship,
+      type: :children,
       parent_resource: Resdayn.Codex.Items.Ingredient,
       related_resource: Resdayn.Codex.Items.Ingredient.Effect,
       parent_key: :ingredient_id,

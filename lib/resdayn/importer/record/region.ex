@@ -17,7 +17,7 @@ defmodule Resdayn.Importer.Record.Region do
       end)
 
     %{
-      type: :fast_bulk,
+      type: :record,
       resource: Resdayn.Codex.World.Region,
       records: processed_records,
       conflict_keys: [:id]

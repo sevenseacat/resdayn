@@ -23,7 +23,7 @@ defmodule Resdayn.Importer.Record.InventoryItem do
       end)
 
     %{
-      type: :bulk_relationship,
+      type: :children,
       parent_resource: Resdayn.Codex.World.NPC,
       related_resource: Resdayn.Codex.World.InventoryItem,
       parent_key: :holder_ref_id,

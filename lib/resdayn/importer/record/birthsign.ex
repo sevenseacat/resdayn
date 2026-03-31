@@ -19,7 +19,7 @@ defmodule Resdayn.Importer.Record.Birthsign do
       end)
 
     %{
-      type: :fast_bulk,
+      type: :record,
       resource: Resdayn.Codex.Characters.Birthsign,
       records: processed_records,
       conflict_keys: [:id]

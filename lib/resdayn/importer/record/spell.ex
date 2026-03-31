@@ -14,7 +14,7 @@ defmodule Resdayn.Importer.Record.Spell do
       |> Enum.uniq_by(fn spell_data -> spell_data.id end)
 
     %{
-      type: :fast_bulk,
+      type: :record,
       resource: Resdayn.Codex.Mechanics.Spell,
       records: processed_records,
       conflict_keys: [:id]

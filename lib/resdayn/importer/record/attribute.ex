@@ -20,7 +20,7 @@ defmodule Resdayn.Importer.Record.Attribute do
       end
 
     %{
-      type: :fast_bulk,
+      type: :record,
       resource: Resdayn.Codex.Mechanics.Attribute,
       records: processed_records,
       conflict_keys: [:id]

@@ -22,7 +22,7 @@ defmodule Resdayn.Importer.Record.JournalEntry do
       end)
 
     %{
-      type: :fast_bulk,
+      type: :record,
       resource: Resdayn.Codex.Dialogue.JournalEntry,
       records: processed_records,
       conflict_keys: [:id]

@@ -21,7 +21,7 @@ defmodule Resdayn.Importer.Record.MagicEffectTemplate do
       end)
 
     %{
-      type: :fast_bulk,
+      type: :record,
       resource: Resdayn.Codex.Mechanics.MagicEffectTemplate,
       records: processed_records,
       conflict_keys: [:id]

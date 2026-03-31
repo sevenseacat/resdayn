@@ -13,7 +13,7 @@ defmodule Resdayn.Importer.Record.Container do
       end)
 
     %{
-      type: :fast_bulk,
+      type: :record,
       resource: Resdayn.Codex.World.Container,
       records: processed_records,
       conflict_keys: [:id]

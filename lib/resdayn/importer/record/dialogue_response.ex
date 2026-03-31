@@ -74,7 +74,7 @@ defmodule Resdayn.Importer.Record.DialogueResponse do
       end)
 
     %{
-      type: :bulk_relationship,
+      type: :children,
       parent_resource: Resdayn.Codex.Dialogue.Topic,
       related_resource: Resdayn.Codex.Dialogue.Response,
       parent_key: :topic_id,

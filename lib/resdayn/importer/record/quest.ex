@@ -16,7 +16,7 @@ defmodule Resdayn.Importer.Record.Quest do
       end)
 
     %{
-      type: :fast_bulk,
+      type: :record,
       resource: Resdayn.Codex.Dialogue.Quest,
       records: processed_records,
       conflict_keys: [:id]

@@ -11,7 +11,7 @@ defmodule Resdayn.Importer.Record.Skill do
       end)
 
     %{
-      type: :fast_bulk,
+      type: :record,
       resource: Resdayn.Codex.Characters.Skill,
       records: processed_records,
       conflict_keys: [:id]

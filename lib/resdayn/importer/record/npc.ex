@@ -67,7 +67,7 @@ defmodule Resdayn.Importer.Record.NPC do
       |> Enum.reject(&(&1.id == "player"))
 
     %{
-      type: :fast_bulk,
+      type: :record,
       resource: Resdayn.Codex.World.NPC,
       records: processed_records,
       conflict_keys: [:id]

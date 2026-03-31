@@ -21,7 +21,7 @@ defmodule Resdayn.Importer.Record.ClassSkill do
       end)
 
     %{
-      type: :bulk_relationship,
+      type: :children,
       parent_resource: Resdayn.Codex.Characters.Class,
       related_resource: Resdayn.Codex.Characters.Class.Skill,
       parent_key: :class_id,

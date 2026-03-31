@@ -18,7 +18,7 @@ defmodule Resdayn.Importer.Record.DataFile do
     ]
 
     %{
-      type: :fast_bulk,
+      type: :record,
       resource: Resdayn.Codex.Mechanics.DataFile,
       records: processed_records,
       conflict_keys: [:id]

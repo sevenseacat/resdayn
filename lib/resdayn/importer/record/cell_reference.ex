@@ -79,9 +79,8 @@ defmodule Resdayn.Importer.Record.CellReference do
         %{id: cell_id, new_references: references, deleted_references: deleted}
       end)
 
-    # Return bulk relationship import format
     %{
-      type: :bulk_relationship,
+      type: :children,
       parent_resource: Resdayn.Codex.World.Cell,
       related_resource: Resdayn.Codex.World.Cell.CellReference,
       parent_key: :cell_id,

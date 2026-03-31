@@ -21,7 +21,7 @@ defmodule Resdayn.Importer.Record.Armor do
       end)
 
     %{
-      type: :fast_bulk,
+      type: :record,
       resource: Resdayn.Codex.Items.Armor,
       records: processed_records,
       conflict_keys: [:id]

@@ -28,7 +28,7 @@ defmodule Resdayn.Importer.Record.CreatureLevelledList do
       end)
 
     %{
-      type: :fast_bulk,
+      type: :record,
       resource: Resdayn.Codex.World.CreatureLevelledList,
       records: processed_records,
       conflict_keys: [:id]

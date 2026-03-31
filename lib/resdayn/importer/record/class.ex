@@ -23,7 +23,7 @@ defmodule Resdayn.Importer.Record.Class do
       end)
 
     %{
-      type: :fast_bulk,
+      type: :record,
       resource: Resdayn.Codex.Characters.Class,
       records: processed_records,
       conflict_keys: [:id]

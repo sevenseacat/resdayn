@@ -16,7 +16,7 @@ defmodule Resdayn.Importer.Record.Sound do
       end)
 
     %{
-      type: :fast_bulk,
+      type: :record,
       resource: Resdayn.Codex.Assets.Sound,
       records: processed_records,
       conflict_keys: [:id]

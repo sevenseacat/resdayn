@@ -20,7 +20,7 @@ defmodule Resdayn.Importer.Record.NpcSkillValue do
       end)
 
     %{
-      type: :bulk_relationship,
+      type: :children,
       parent_resource: Resdayn.Codex.World.NPC,
       related_resource: Resdayn.Codex.World.NPC.SkillValue,
       parent_key: :npc_id,

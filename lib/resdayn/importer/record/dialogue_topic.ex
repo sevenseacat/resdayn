@@ -11,7 +11,7 @@ defmodule Resdayn.Importer.Record.DialogueTopic do
       end)
 
     %{
-      type: :fast_bulk,
+      type: :record,
       resource: Resdayn.Codex.Dialogue.Topic,
       records: processed_records,
       conflict_keys: [:id]

@@ -13,7 +13,7 @@ defmodule Resdayn.Importer.Record.SoundGenerator do
       end)
 
     %{
-      type: :fast_bulk,
+      type: :record,
       resource: Resdayn.Codex.Assets.SoundGenerator,
       records: processed_records,
       conflict_keys: [:id]

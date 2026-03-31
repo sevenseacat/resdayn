@@ -113,11 +113,11 @@ defmodule Resdayn.Importer.Runner do
       :timer.tc(
         fn ->
           case apply(record_type, :process, [records, opts]) do
-            %{type: :bulk_relationship} = config ->
-              import_bulk_relationships(config, opts)
+            %{type: :children} = config ->
+              import_children(config, opts)
 
-            %{type: :fast_bulk} = config ->
-              import_fast_bulk(config, opts)
+            %{type: :record} = config ->
+              import_record(config, opts)
           end
         end,
         :millisecond
@@ -126,7 +126,7 @@ defmodule Resdayn.Importer.Runner do
     log_import_result(name, result, time)
   end
 
-  defp import_bulk_relationships(config, opts) do
+  defp import_children(config, opts) do
     source_file_id = Keyword.get(opts, :filename)
 
     {:ok, stats} =
@@ -142,10 +142,10 @@ defmodule Resdayn.Importer.Runner do
         source_file_id: source_file_id
       )
 
-    {:bulk_relationship, stats}
+    {:children, stats}
   end
 
-  defp import_fast_bulk(config, opts) do
+  defp import_record(config, opts) do
     source_file_id = Keyword.get(opts, :filename)
 
     {:ok, stats} =
@@ -156,14 +156,14 @@ defmodule Resdayn.Importer.Runner do
         conflict_keys: config[:conflict_keys] || [:id]
       )
 
-    {:fast_bulk, stats}
+    {:record, stats}
   end
 
   defp log_import_result(name, result, time) do
     time_str = Float.round(time / 1000, 2)
 
     case result do
-      {:bulk_relationship, stats} ->
+      {:children, stats} ->
         messages =
           [
             if(stats.created > 0, do: "#{stats.created} relationships created"),
@@ -176,7 +176,7 @@ defmodule Resdayn.Importer.Runner do
           Logger.info("#{name}: #{Enum.join(messages, ", ")} in #{time_str} seconds.")
         end
 
-      {:fast_bulk, stats} ->
+      {:record, stats} ->
         if stats.total > 0 do
           Logger.info("#{name}: #{stats.total} records upserted in #{time_str} seconds.")
         end

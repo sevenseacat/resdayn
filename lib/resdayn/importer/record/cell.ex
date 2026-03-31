@@ -25,7 +25,7 @@ defmodule Resdayn.Importer.Record.Cell do
       |> Enum.map(fn {_id, cell_data} -> cell_data end)
 
     %{
-      type: :fast_bulk,
+      type: :record,
       resource: Resdayn.Codex.World.Cell,
       records: processed_records,
       conflict_keys: [:id]

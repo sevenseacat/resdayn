@@ -13,7 +13,7 @@ defmodule Resdayn.Importer.Record.BodyPart do
       end)
 
     %{
-      type: :fast_bulk,
+      type: :record,
       resource: Resdayn.Codex.Characters.BodyPart,
       records: processed_records,
       conflict_keys: [:id]

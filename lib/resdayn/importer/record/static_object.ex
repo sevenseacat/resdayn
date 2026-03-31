@@ -12,7 +12,7 @@ defmodule Resdayn.Importer.Record.StaticObject do
       end)
 
     %{
-      type: :fast_bulk,
+      type: :record,
       resource: Resdayn.Codex.Assets.StaticObject,
       records: processed_records,
       conflict_keys: [:id]

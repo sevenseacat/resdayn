@@ -21,7 +21,7 @@ defmodule Resdayn.Importer.Record.FactionReaction do
       end)
 
     %{
-      type: :bulk_relationship,
+      type: :children,
       parent_resource: Resdayn.Codex.Characters.Faction,
       related_resource: Resdayn.Codex.Characters.Faction.Reaction,
       parent_key: :source_id,

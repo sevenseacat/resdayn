@@ -13,7 +13,7 @@ defmodule Resdayn.Importer.Record.Enchantment do
       end)
 
     %{
-      type: :fast_bulk,
+      type: :record,
       resource: Resdayn.Codex.Mechanics.Enchantment,
       records: processed_records,
       conflict_keys: [:id]

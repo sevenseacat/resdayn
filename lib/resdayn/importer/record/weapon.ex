@@ -12,7 +12,7 @@ defmodule Resdayn.Importer.Record.Weapon do
       end)
 
     %{
-      type: :fast_bulk,
+      type: :record,
       resource: Resdayn.Codex.Items.Weapon,
       records: processed_records,
       conflict_keys: [:id]

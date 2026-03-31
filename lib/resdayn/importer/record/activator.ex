@@ -12,7 +12,7 @@ defmodule Resdayn.Importer.Record.Activator do
       end)
 
     %{
-      type: :fast_bulk,
+      type: :record,
       resource: Resdayn.Codex.World.Activator,
       records: processed_records,
       conflict_keys: [:id]

@@ -12,7 +12,7 @@ defmodule Resdayn.Importer.Record.GlobalVariable do
       end)
 
     %{
-      type: :fast_bulk,
+      type: :record,
       resource: Resdayn.Codex.Mechanics.GlobalVariable,
       records: processed_records,
       conflict_keys: [:id]

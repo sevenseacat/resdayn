@@ -22,7 +22,7 @@ defmodule Resdayn.Importer.Record.MiscellaneousItem do
       |> Enum.reject(&(!Map.get(&1, :name)))
 
     %{
-      type: :fast_bulk,
+      type: :record,
       resource: Resdayn.Codex.Items.MiscellaneousItem,
       records: processed_records,
       conflict_keys: [:id]

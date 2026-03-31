@@ -14,7 +14,7 @@ defmodule Resdayn.Importer.Record.Faction do
       end)
 
     %{
-      type: :fast_bulk,
+      type: :record,
       resource: Resdayn.Codex.Characters.Faction,
       records: processed_records,
       conflict_keys: [:id]
