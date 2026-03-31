@@ -57,26 +57,6 @@ defmodule Resdayn.Importer.Quests.ChoiceChainTest do
       responses = [
         %{
           topic_id: Ash.CiString.new("test topic"),
-          speaker_npc_id: Ash.CiString.new("test_npc"),
-          conditions: [],
-          script_content: %{
-            # No journal commands, just choices
-            "test_quest" => [
-              %{
-                index: nil,
-                effects: [%{function: :choice, choices: [{"Yes", 1}]}]
-              }
-            ]
-          }
-        }
-      ]
-
-      # This response has no index, so it shouldn't be indexed
-      # Actually our current implementation extracts index from cmd.index
-      # Let me adjust the test to have empty script_content
-      responses = [
-        %{
-          topic_id: Ash.CiString.new("test topic"),
           speaker_npc_id: nil,
           conditions: [],
           script_content: %{}
