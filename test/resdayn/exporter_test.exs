@@ -454,4 +454,69 @@ defmodule Resdayn.ExporterTest do
       assert info.data.sound_filename == "vo\\n\\m\\Hlo_NM001.mp3"
     end
   end
+
+  describe "quest / journal entries" do
+    test "exports a quest with a name entry and journal entries" do
+      quest = %Resdayn.Codex.Dialogue.Quest{
+        id: Ash.CiString.new("my_quest"),
+        name: "My Quest",
+        journal_entries: [
+          %Resdayn.Codex.Dialogue.JournalEntry{
+            id: "je_1",
+            index: 10,
+            content: "Started the quest."
+          },
+          %Resdayn.Codex.Dialogue.JournalEntry{
+            id: "je_2",
+            index: 100,
+            content: "Finished!",
+            finishes_quest: true
+          }
+        ]
+      }
+
+      [_header, dial, name_info, info1, info2] = build_and_parse([quest])
+
+      assert dial.type == Resdayn.Parser.Record.DialogueTopic
+      assert dial.data.id == "my_quest"
+      assert dial.data.type == :journal
+
+      # First INFO is the quest naming entry
+      assert name_info.data.content == "My Quest"
+      assert name_info.data.quest_name == true
+      assert name_info.data.disposition_or_journal_index == 0
+
+      # Subsequent entries are the actual journal narrative
+      assert info1.data.disposition_or_journal_index == 10
+      assert info1.data.content == "Started the quest."
+      refute Map.get(info1.data, :quest_name)
+
+      assert info2.data.disposition_or_journal_index == 100
+      assert info2.data.content == "Finished!"
+      assert info2.data.finishes_quest == true
+    end
+
+    test "journal entries are linked including name entry" do
+      quest = %Resdayn.Codex.Dialogue.Quest{
+        id: Ash.CiString.new("q"),
+        name: "Q",
+        journal_entries: [
+          %Resdayn.Codex.Dialogue.JournalEntry{id: "a", index: 10, content: "A"},
+          %Resdayn.Codex.Dialogue.JournalEntry{id: "b", index: 20, content: "B"}
+        ]
+      }
+
+      [_header, _dial, name_info, info1, info2] = build_and_parse([quest])
+
+      # Name entry is the head of the chain
+      assert name_info.data.previous_response_id == nil
+      assert name_info.data.next_response_id == "a"
+
+      assert info1.data.previous_response_id == name_info.data.id
+      assert info1.data.next_response_id == "b"
+
+      assert info2.data.previous_response_id == "a"
+      assert info2.data.next_response_id == nil
+    end
+  end
 end

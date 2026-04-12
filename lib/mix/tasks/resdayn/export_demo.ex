@@ -7,7 +7,7 @@ defmodule Mix.Tasks.Resdayn.ExportDemo do
 
   use Mix.Task
 
-  alias Resdayn.Codex.Dialogue.{Topic, Response}
+  alias Resdayn.Codex.Dialogue.{Topic, Response, Quest, JournalEntry}
   alias Resdayn.Codex.Dialogue.Response.Condition
 
   @output_path "../exported/goatmire_demo.esp"
@@ -15,7 +15,7 @@ defmodule Mix.Tasks.Resdayn.ExportDemo do
   @npc "nileno dorvayn"
 
   def run(_argv) do
-    records = [greeting(), many_others()]
+    records = [greeting(), many_others(), journal()]
 
     {:ok, binary} = Resdayn.Exporter.build([data_file() | records])
     File.write!(@output_path, binary)
@@ -36,7 +36,6 @@ defmodule Mix.Tasks.Resdayn.ExportDemo do
   end
 
   # Nileno greets the player and sets a journal entry
-  # TODO: add journal script_content once Quest encoder is ready
   defp greeting do
     %Topic{
       id: Ash.CiString.new("Greeting 0"),
@@ -48,7 +47,8 @@ defmodule Mix.Tasks.Resdayn.ExportDemo do
             "Hello, %PCName! Though I suspect I'm not just talking to you.... " <>
               "I can sense many others listening to my words as well. " <>
               "Hello to you all!",
-          speaker_npc_id: Ash.CiString.new(@npc)
+          speaker_npc_id: Ash.CiString.new(@npc),
+          script_content: ~S(Journal "goatmire_demo" 10)
         }
       ]
     }
@@ -65,7 +65,8 @@ defmodule Mix.Tasks.Resdayn.ExportDemo do
           id: "goatmire_choice_good",
           content: "Fantastic. Glad I could help! Enjoy the rest of the conference!",
           speaker_npc_id: Ash.CiString.new(@npc),
-          conditions: [%Condition{function: :choice, operator: :=, value: 1}]
+          conditions: [%Condition{function: :choice, operator: :=, value: 1}],
+          script_content: "Goodbye"
         },
         %Response{
           id: "goatmire_choice_bad",
@@ -82,6 +83,23 @@ defmodule Mix.Tasks.Resdayn.ExportDemo do
               "have you really demonstrated how interesting our world is?",
           speaker_npc_id: Ash.CiString.new(@npc),
           script_content: ~S(Choice "I think so!" 1 "Oh no it's going awfully" 2)
+        }
+      ]
+    }
+  end
+
+  defp journal do
+    %Quest{
+      id: Ash.CiString.new("goatmire_demo"),
+      name: "Goatmire Conference Demo",
+      journal_entries: [
+        %JournalEntry{
+          id: "goatmire_journal_1",
+          index: 10,
+          content:
+            "I had a conversation with Nileno Dorvayn and she seemed to be aware " <>
+              "that she's involved in my Goatmire talk demonstration. " <>
+              "This phenomenon should be studied."
         }
       ]
     }
