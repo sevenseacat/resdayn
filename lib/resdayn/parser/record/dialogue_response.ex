@@ -96,6 +96,9 @@ defmodule Resdayn.Parser.Record.DialogueResponse do
     "5" => :<=
   }
 
+  def functions, do: @functions
+  def operators, do: @operators
+
   process_basic_string "INAM", :id
   process_basic_string "PNAM", :previous_response_id
   process_basic_string "NNAM", :next_response_id
