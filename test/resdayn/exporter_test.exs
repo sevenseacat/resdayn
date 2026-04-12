@@ -279,9 +279,10 @@ defmodule Resdayn.ExporterTest do
     end
 
     test "encodes a choice condition" do
-      topic = topic_with_conditions([
-        %Condition{function: :choice, operator: :=, value: 1}
-      ])
+      topic =
+        topic_with_conditions([
+          %Condition{function: :choice, operator: :=, value: 1}
+        ])
 
       [_header, _dial, info] = build_and_parse([topic])
       [condition] = info.data.conditions
@@ -292,9 +293,10 @@ defmodule Resdayn.ExporterTest do
     end
 
     test "encodes a journal condition with name and integer value" do
-      topic = topic_with_conditions([
-        %Condition{function: :journal, operator: :>=, name: "my_quest", value: 10}
-      ])
+      topic =
+        topic_with_conditions([
+          %Condition{function: :journal, operator: :>=, name: "my_quest", value: 10}
+        ])
 
       [_header, _dial, info] = build_and_parse([topic])
       [condition] = info.data.conditions
@@ -306,9 +308,10 @@ defmodule Resdayn.ExporterTest do
     end
 
     test "encodes a global variable condition with float value" do
-      topic = topic_with_conditions([
-        %Condition{function: :global, operator: :>, name: "my_global", value: 5.0}
-      ])
+      topic =
+        topic_with_conditions([
+          %Condition{function: :global, operator: :>, name: "my_global", value: 5.0}
+        ])
 
       [_header, _dial, info] = build_and_parse([topic])
       [condition] = info.data.conditions
@@ -320,9 +323,10 @@ defmodule Resdayn.ExporterTest do
     end
 
     test "encodes a local variable condition" do
-      topic = topic_with_conditions([
-        %Condition{function: :local, operator: :=, name: "my_local", value: 1}
-      ])
+      topic =
+        topic_with_conditions([
+          %Condition{function: :local, operator: :=, name: "my_local", value: 1}
+        ])
 
       [_header, _dial, info] = build_and_parse([topic])
       [condition] = info.data.conditions
@@ -332,9 +336,10 @@ defmodule Resdayn.ExporterTest do
     end
 
     test "encodes a not_local condition" do
-      topic = topic_with_conditions([
-        %Condition{function: :not_local, operator: :=, name: "my_var", value: 0}
-      ])
+      topic =
+        topic_with_conditions([
+          %Condition{function: :not_local, operator: :=, name: "my_var", value: 0}
+        ])
 
       [_header, _dial, info] = build_and_parse([topic])
       [condition] = info.data.conditions
@@ -344,10 +349,11 @@ defmodule Resdayn.ExporterTest do
     end
 
     test "encodes multiple conditions in order" do
-      topic = topic_with_conditions([
-        %Condition{function: :choice, operator: :=, value: 1},
-        %Condition{function: :journal, operator: :>=, name: "quest", value: 10}
-      ])
+      topic =
+        topic_with_conditions([
+          %Condition{function: :choice, operator: :=, value: 1},
+          %Condition{function: :journal, operator: :>=, name: "quest", value: 10}
+        ])
 
       [_header, _dial, info] = build_and_parse([topic])
 
@@ -360,9 +366,10 @@ defmodule Resdayn.ExporterTest do
       operators = [:=, :!=, :>, :>=, :<, :<=]
 
       for operator <- operators do
-        topic = topic_with_conditions([
-          %Condition{function: :choice, operator: operator, value: 1}
-        ])
+        topic =
+          topic_with_conditions([
+            %Condition{function: :choice, operator: operator, value: 1}
+          ])
 
         [_header, _dial, info] = build_and_parse([topic])
         [condition] = info.data.conditions
@@ -414,7 +421,7 @@ defmodule Resdayn.ExporterTest do
       assert info.data.player_faction_id == "Imperial Legion"
     end
 
-    test "nil faction encodes as FFFF sentinel" do
+    test "nil faction omits FNAM subrecord" do
       topic = %Resdayn.Codex.Dialogue.Topic{
         id: Ash.CiString.new("test"),
         type: :topic,
@@ -427,7 +434,7 @@ defmodule Resdayn.ExporterTest do
       }
 
       [_header, _dial, info] = build_and_parse([topic])
-      assert info.data.speaker_faction_id == nil
+      refute Map.has_key?(info.data, :speaker_faction_id)
     end
 
     test "encodes sound filename" do
