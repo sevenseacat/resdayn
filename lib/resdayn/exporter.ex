@@ -9,9 +9,8 @@ defmodule Resdayn.Exporter do
   alias Resdayn.Exporter.Helpers
 
   def build([data_file | records]) do
-    record_count = length(records)
-
-    encoded_records = Enum.map(records, &encode_resource/1)
+    encoded_records = Enum.flat_map(records, &encode_resource/1)
+    record_count = length(encoded_records)
 
     header =
       Resdayn.Exporter.Record.DataFile.encode(data_file, record_count)
@@ -24,7 +23,7 @@ defmodule Resdayn.Exporter do
 
   defp encode_resource(resource) do
     encoder = Resdayn.Exporter.Record.encoder_for(resource.__struct__)
-    encoder.encode(resource)
+    encoder.encode(resource) |> List.wrap()
   end
 
   defp frame_record({type_code, flags_map, subrecords}) do

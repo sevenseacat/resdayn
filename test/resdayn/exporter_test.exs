@@ -96,4 +96,168 @@ defmodule Resdayn.ExporterTest do
       assert record.data.enchantment_id == "my_enchantment"
     end
   end
+
+  describe "dialogue topic" do
+    test "exports a regular topic" do
+      topic = %Resdayn.Codex.Dialogue.Topic{
+        id: Ash.CiString.new("my topic"),
+        type: :topic
+      }
+
+      [_header, record] = build_and_parse([topic])
+
+      assert record.type == Resdayn.Parser.Record.DialogueTopic
+      assert record.data.id == "my topic"
+      assert record.data.type == :topic
+    end
+
+    test "exports a greeting topic" do
+      topic = %Resdayn.Codex.Dialogue.Topic{
+        id: Ash.CiString.new("Greeting 0"),
+        type: :greeting
+      }
+
+      [_header, record] = build_and_parse([topic])
+
+      assert record.type == Resdayn.Parser.Record.DialogueTopic
+      assert record.data.id == "Greeting 0"
+      assert record.data.type == :greeting
+    end
+  end
+
+  describe "dialogue response" do
+    test "exports a topic with a basic response" do
+      topic = %Resdayn.Codex.Dialogue.Topic{
+        id: Ash.CiString.new("my topic"),
+        type: :topic,
+        responses: [
+          %Resdayn.Codex.Dialogue.Response{
+            id: "response_1",
+            content: "Hello there.",
+            disposition: 50
+          }
+        ]
+      }
+
+      [_header, dial, info] = build_and_parse([topic])
+
+      assert dial.type == Resdayn.Parser.Record.DialogueTopic
+      assert dial.data.id == "my topic"
+
+      assert info.type == Resdayn.Parser.Record.DialogueResponse
+      assert info.data.id == "response_1"
+      assert info.data.content == "Hello there."
+      assert info.data.disposition_or_journal_index == 50
+      assert info.data.type == :topic
+    end
+
+    test "exports a greeting response with the correct type" do
+      topic = %Resdayn.Codex.Dialogue.Topic{
+        id: Ash.CiString.new("Greeting 0"),
+        type: :greeting,
+        responses: [
+          %Resdayn.Codex.Dialogue.Response{
+            id: "greet_1",
+            content: "Welcome, traveler."
+          }
+        ]
+      }
+
+      [_header, _dial, info] = build_and_parse([topic])
+
+      assert info.data.type == :greeting
+    end
+
+    test "links multiple responses with PNAM/NNAM" do
+      topic = %Resdayn.Codex.Dialogue.Topic{
+        id: Ash.CiString.new("test topic"),
+        type: :topic,
+        responses: [
+          %Resdayn.Codex.Dialogue.Response{id: "resp_1", content: "First"},
+          %Resdayn.Codex.Dialogue.Response{id: "resp_2", content: "Second"},
+          %Resdayn.Codex.Dialogue.Response{id: "resp_3", content: "Third"}
+        ]
+      }
+
+      [_header, _dial, info1, info2, info3] = build_and_parse([topic])
+
+      assert info1.data.previous_response_id == nil
+      assert info1.data.next_response_id == "resp_2"
+
+      assert info2.data.previous_response_id == "resp_1"
+      assert info2.data.next_response_id == "resp_3"
+
+      assert info3.data.previous_response_id == "resp_2"
+      assert info3.data.next_response_id == nil
+    end
+
+    test "encodes gender and faction ranks" do
+      topic = %Resdayn.Codex.Dialogue.Topic{
+        id: Ash.CiString.new("test"),
+        type: :topic,
+        responses: [
+          %Resdayn.Codex.Dialogue.Response{
+            id: "resp_1",
+            content: "Hello",
+            gender: :female,
+            speaker_faction_rank: 3,
+            player_faction_rank: 1
+          }
+        ]
+      }
+
+      [_header, _dial, info] = build_and_parse([topic])
+
+      assert info.data.gender == :female
+      assert info.data.speaker_faction_rank == 3
+      assert info.data.player_faction_rank == 1
+    end
+
+    test "nil gender and ranks round-trip as nil" do
+      topic = %Resdayn.Codex.Dialogue.Topic{
+        id: Ash.CiString.new("test"),
+        type: :topic,
+        responses: [
+          %Resdayn.Codex.Dialogue.Response{id: "resp_1", content: "Hello"}
+        ]
+      }
+
+      [_header, _dial, info] = build_and_parse([topic])
+
+      assert info.data.gender == nil
+      assert info.data.speaker_faction_rank == nil
+      assert info.data.player_faction_rank == nil
+    end
+
+    test "encodes speaker NPC filter" do
+      topic = %Resdayn.Codex.Dialogue.Topic{
+        id: Ash.CiString.new("Greeting 0"),
+        type: :greeting,
+        responses: [
+          %Resdayn.Codex.Dialogue.Response{
+            id: "greet_1",
+            content: "Hello!",
+            speaker_npc_id: Ash.CiString.new("nileno dorvayn")
+          }
+        ]
+      }
+
+      [_header, _dial, info] = build_and_parse([topic])
+      assert info.data.actor_id == "nileno dorvayn"
+    end
+
+    test "record count includes both DIAL and INFO records" do
+      topic = %Resdayn.Codex.Dialogue.Topic{
+        id: Ash.CiString.new("test"),
+        type: :topic,
+        responses: [
+          %Resdayn.Codex.Dialogue.Response{id: "r1", content: "A"},
+          %Resdayn.Codex.Dialogue.Response{id: "r2", content: "B"}
+        ]
+      }
+
+      [header | _rest] = build_and_parse([topic])
+      assert header.data.header.record_count == 3
+    end
+  end
 end
