@@ -10,7 +10,7 @@ defmodule Mix.Tasks.Resdayn.ExportDemo do
   alias Resdayn.Codex.Dialogue.{Topic, Response}
   alias Resdayn.Codex.Dialogue.Response.Condition
 
-  @output_path "priv/goatmire_demo.esp"
+  @output_path "../exported/goatmire_demo.esp"
   @morrowind_esm_size 79_837_557
   @npc "nileno dorvayn"
 
