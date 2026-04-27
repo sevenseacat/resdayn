@@ -9,13 +9,16 @@ defmodule Mix.Tasks.Resdayn.ExportDemo do
 
   alias Resdayn.Codex.Dialogue.{Topic, Response, Quest, JournalEntry}
   alias Resdayn.Codex.Dialogue.Response.Condition
+  alias Resdayn.Codex.Mechanics.Script
 
   @output_path "../exported/goatmire_demo.esp"
   @morrowind_esm_size 79_837_557
-  @npc "nileno dorvayn"
+
+  # Outdoors in Gnisis — the dialogue NPC who walks over and coughs
+  @npc "hainab lasamsi"
 
   def run(_argv) do
-    records = [greeting(), many_others(), journal()]
+    records = [attention_script(), greeting(), many_others(), journal()]
 
     {:ok, binary} = Resdayn.Exporter.build([data_file() | records])
     File.write!(@output_path, binary)
@@ -35,7 +38,65 @@ defmodule Mix.Tasks.Resdayn.ExportDemo do
     }
   end
 
-  # Nileno greets the player and sets a journal entry
+  # Auto-running start script: after a delay, makes the NPC walk over to the
+  # player, cough, and trigger the greeting dialogue.
+  defp attention_script do
+    %Script{
+      id: "goatmire_attention",
+      start_script: true,
+      local_variables: ["timer", "dist", "px", "py", "pz", "stage"],
+      text: """
+      Begin goatmire_attention
+
+      float timer
+      float dist
+      float px
+      float py
+      float pz
+      short stage
+
+      ; Disable a bunch of annoying NPCs that are getting in the way
+      "molvirian palenix"->Disable
+      "maeonius man-llu"->Disable
+      "largakh gro-bulfim"->Disable
+      "abishpulu shand"->Disable
+      "ughash gro-batul"->Disable
+
+      ; stage 0: waiting for timer; 1: AITravel issued; 2: greeting fired
+
+      if ( stage == 2 )
+          return
+      endif
+
+      if ( stage == 0 )
+          set timer to ( timer + GetSecondsPassed )
+          if ( timer < 2 )
+              return
+          endif
+          set px to ( Player->GetPos x ) - 30
+          set py to ( Player->GetPos y ) - 30
+          set pz to ( Player->GetPos z ) + 30
+          ; Silence his auto-greet so it doesn't pre-empt our cough
+          "#{@npc}"->SetHello 0
+          "#{@npc}"->ForceRun
+          "#{@npc}"->AITravel px py pz
+          set stage to 1
+          return
+      endif
+
+      set dist to ( "#{@npc}"->GetDistance Player )
+
+      if ( dist < 128 )
+          "#{@npc}"->Say "Vo\\d\\m\\Idl_DM001.mp3" "*cough cough*"
+          MessageBox "Someone looks like they're trying to get your attention."
+          set stage to 2
+      endif
+
+      End
+      """
+    }
+  end
+
   defp greeting do
     %Topic{
       id: Ash.CiString.new("Greeting 0"),
@@ -54,19 +115,19 @@ defmodule Mix.Tasks.Resdayn.ExportDemo do
     }
   end
 
-  # "many others" topic with Choice-based branching
   defp many_others do
     %Topic{
       id: Ash.CiString.new("many others"),
       type: :topic,
       responses: [
-        # Choice responses first — Morrowind evaluates first match
         %Response{
           id: "goatmire_choice_good",
           content: "Fantastic. Glad I could help! Enjoy the rest of the conference!",
           speaker_npc_id: Ash.CiString.new(@npc),
           conditions: [%Condition{function: :choice, operator: :=, value: 1}],
-          script_content: "Goodbye"
+          script_content: "Goodbye
+\"#{@npc}\"->ClearForceRun
+\"#{@npc}\"->AIWander 50000 50000 50000 reset"
         },
         %Response{
           id: "goatmire_choice_bad",
@@ -74,7 +135,6 @@ defmodule Mix.Tasks.Resdayn.ExportDemo do
           speaker_npc_id: Ash.CiString.new(@npc),
           conditions: [%Condition{function: :choice, operator: :=, value: 2}]
         },
-        # Default response — shown when no choice has been made yet
         %Response{
           id: "goatmire_others_default",
           content:
@@ -97,8 +157,8 @@ defmodule Mix.Tasks.Resdayn.ExportDemo do
           id: "goatmire_journal_1",
           index: 10,
           content:
-            "I had a conversation with Nileno Dorvayn and she seemed to be aware " <>
-              "that she's involved in my Goatmire talk demonstration. " <>
+            "I had a conversation with Hainab Lasamsi and he seemed to be aware " <>
+              "that he's involved in my Goatmire talk demonstration. " <>
               "This phenomenon should be studied."
         }
       ]
