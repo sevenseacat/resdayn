@@ -138,8 +138,7 @@ defmodule Resdayn.Parser.Helpers do
 
   def null_separated!(source, field, string) do
     string
-    |> truncate()
-    |> String.split(<<0>>)
+    |> String.split(<<0>>, trim: true)
     |> Enum.map(&printable!(source, field, &1))
   end
 

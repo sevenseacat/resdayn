@@ -519,4 +519,98 @@ defmodule Resdayn.ExporterTest do
       assert info2.data.next_response_id == nil
     end
   end
+
+  describe "scripts" do
+    test "exports a basic script" do
+      script = %Resdayn.Codex.Mechanics.Script{
+        id: "my_script",
+        text: """
+        Begin my_script
+
+        short counter
+        set counter to ( counter + 1 )
+
+        End
+        """,
+        local_variables: ["counter"]
+      }
+
+      [_header, record] = build_and_parse([script])
+
+      assert record.type == Resdayn.Parser.Record.Script
+      assert record.data.id == "my_script"
+      assert String.contains?(record.data.text, "Begin my_script")
+      assert record.data.local_variables == ["counter"]
+      assert record.data.num_shorts == 1
+      assert record.data.num_longs == 0
+      assert record.data.num_floats == 0
+    end
+
+    test "round-trips multiple local variables" do
+      script = %Resdayn.Codex.Mechanics.Script{
+        id: "multi_var",
+        text: "Begin multi_var\nshort a\nshort b\nfloat c\nEnd",
+        local_variables: ["a", "b", "c"]
+      }
+
+      [_header, record] = build_and_parse([script])
+
+      assert record.data.local_variables == ["a", "b", "c"]
+    end
+
+    test "counts mixed local variable types" do
+      script = %Resdayn.Codex.Mechanics.Script{
+        id: "mixed",
+        text: """
+        Begin mixed
+
+        short a
+        short b
+        long c
+        float d
+        float e
+
+        End
+        """,
+        local_variables: ["a", "b", "c", "d", "e"]
+      }
+
+      [_header, record] = build_and_parse([script])
+
+      assert record.data.num_shorts == 2
+      assert record.data.num_longs == 1
+      assert record.data.num_floats == 2
+    end
+
+    test "exports a start script as SCPT plus SSCR" do
+      script = %Resdayn.Codex.Mechanics.Script{
+        id: "auto_start",
+        text: "Begin auto_start\n\nEnd",
+        local_variables: [],
+        start_script: true
+      }
+
+      records = build_and_parse([script])
+
+      # Header + SCPT + SSCR
+      assert length(records) == 3
+
+      [_header, scpt, sscr] = records
+      assert scpt.type == Resdayn.Parser.Record.Script
+      assert sscr.type == Resdayn.Parser.Record.StartScript
+      assert sscr.data.script_id == "auto_start"
+    end
+
+    test "non-start scripts do not emit SSCR" do
+      script = %Resdayn.Codex.Mechanics.Script{
+        id: "regular",
+        text: "Begin regular\n\nEnd",
+        local_variables: [],
+        start_script: false
+      }
+
+      records = build_and_parse([script])
+      assert length(records) == 2
+    end
+  end
 end

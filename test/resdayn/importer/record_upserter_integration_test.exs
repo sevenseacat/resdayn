@@ -155,7 +155,7 @@ defmodule Resdayn.Importer.RecordUpserterIntegrationTest do
     test "imports script data correctly" do
       script = Ash.get!(Script, "ajiraScript")
       assert String.starts_with?(script.text, "Begin ajiraScript\n\nshort doOnce")
-      assert script.local_variables == ["doOnce"]
+      assert script.local_variables == ["doOnce", "gemInDesk", "NoLore"]
       assert script.start_script == false
       assert script.source_file_ids == ["Morrowind.esm"]
     end
