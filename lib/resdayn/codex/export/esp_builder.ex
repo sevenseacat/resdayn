@@ -23,7 +23,9 @@ defmodule Resdayn.Codex.Export.EspBuilder do
     records = Enum.map(overrides, & &1.record)
     data_file = build_data_file()
 
-    Resdayn.Exporter.build([data_file | records])
+    {:ok, binary} = Resdayn.Exporter.build([data_file | records])
+    Enum.each(overrides, &Ash.destroy!/1)
+    {:ok, binary}
   end
 
   defp build_data_file do
