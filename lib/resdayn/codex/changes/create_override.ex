@@ -25,7 +25,24 @@ defmodule Resdayn.Codex.Changes.CreateOverride do
       })
       |> Ash.create!()
 
+      update_search_index(record, resource_type)
+
       {:ok, record}
     end)
+  end
+
+  defp update_search_index(record, resource_type) do
+    name = Map.get(record, :name)
+
+    if is_binary(name) and name != "" do
+      Resdayn.Codex.Search.SearchIndex
+      |> Ash.Changeset.for_create(:upsert, %{
+        id: "#{resource_type}:#{record.id}",
+        name: name,
+        type: resource_type,
+        icon_filename: Map.get(record, :icon_filename)
+      })
+      |> Ash.create!()
+    end
   end
 end

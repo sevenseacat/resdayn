@@ -95,6 +95,19 @@ defmodule Resdayn.Codex.Export.OverrideTest do
       assert first_override.id == second_override.id
       assert DateTime.compare(second_override.updated_at, first_override.updated_at) == :gt
     end
+
+    test "updating a tool upserts its search index entry" do
+      tool = Ash.get!(Resdayn.Codex.Items.Tool, "probe_grandmaster")
+
+      tool
+      |> Ash.Changeset.for_update(:update, %{name: "Renamed Probe"})
+      |> Ash.update!()
+
+      entry = Ash.get!(Resdayn.Codex.Search.SearchIndex, "tool:probe_grandmaster")
+      assert entry.name == "Renamed Probe"
+      assert entry.type == :tool
+      assert entry.icon_filename == tool.icon_filename
+    end
   end
 
   describe "record calculation" do

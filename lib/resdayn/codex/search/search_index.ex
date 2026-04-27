@@ -18,6 +18,11 @@ defmodule Resdayn.Codex.Search.SearchIndex do
       filter expr(contains(name, ^arg(:query)))
       prepare build(sort: [:name], limit: 20)
     end
+
+    create :upsert do
+      accept [:id, :name, :type, :icon_filename]
+      upsert? true
+    end
   end
 
   attributes do
