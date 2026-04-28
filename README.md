@@ -12,8 +12,8 @@ Using the amazing work of Dave Humphrey detailed here: http://www.uesp.net/morro
 - [x] Import parsed data into Ash resources in PostgreSQL
 - [x] Import data from multiple files (Morrowind.esm + Tribunal.esm + Bloodmoon.esm)
 - [x] Export selected records back to valid ESP plugin files
-- [ ] Build a web UI for browsing and editing records
-- [ ] Allow users to select modified records and download an ESP
+- [x] Build a web UI for browsing and editing records
+- [x] Allow users to select modified records and download an ESP
 
 ## Record Types
 
@@ -28,7 +28,7 @@ Using the amazing work of Dave Humphrey detailed here: http://www.uesp.net/morro
 | ✓      | ✓        |          | `SOUN` (Sound effects) |
 | ✓      | ✓        |          | `SKIL` (Skills) |
 | ✓      | ✓        |          | `MGEF` (Magic effects) |
-| ✓      | ✓        |          | `SCPT` (Scripts) |
+| ✓      | ✓        | ✓        | `SCPT` (Scripts) |
 | ✓      | ✓        |          | `REGN` (Regions) |
 | ✓      | ✓        |          | `BSGN` (Birth signs) |
 | ✓      | x        |          | `LTEX` (Land textures) |
@@ -59,9 +59,9 @@ Using the amazing work of Dave Humphrey detailed here: http://www.uesp.net/morro
 | x      | x        |          | `LAND` (Landscapes) |
 | x      | x        |          | `PGRD` (Path grids) |
 | ✓      | ✓        |          | `SNDG` (Sound generators) |
-| ✓      | ✓        |          | `DIAL` (Dialogue/journal topics) |
-| ✓      | ✓        |          | `INFO` (Dialogue records) |
-| ✓      | ✓        |          | `INFO` (Journal records) |
+| ✓      | ✓        | ✓        | `DIAL` (Dialogue/journal topics) |
+| ✓      | ✓        | ✓        | `INFO` (Dialogue records) |
+| ✓      | ✓        | ✓        | `INFO` (Journal records) |
 
 ## Implementation Notes
 
