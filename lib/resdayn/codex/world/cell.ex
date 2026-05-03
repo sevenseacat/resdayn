@@ -37,6 +37,10 @@ defmodule Resdayn.Codex.World.Cell do
     # * moved references
   end
 
+  calculations do
+    calculate :display_name, :string, expr(name || region.name || "Wilderness")
+  end
+
   relationships do
     belongs_to :region, Resdayn.Codex.World.Region
 
