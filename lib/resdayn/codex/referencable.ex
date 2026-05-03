@@ -10,6 +10,9 @@ defmodule Resdayn.Codex.Referencable do
   defmodule AddReference do
     use Spark.Dsl.Transformer
 
+    def before?(Ash.Resource.Transformers.SetRelationshipSource), do: true
+    def before?(_), do: false
+
     def transform(dsl_state) do
       object_type =
         dsl_state.persist.module
