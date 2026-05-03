@@ -1411,9 +1411,15 @@ defmodule Resdayn.Importer.RecordUpserterIntegrationTest do
 
     test "imports quest data correctly" do
       quest = Ash.get!(Resdayn.Codex.Dialogue.Quest, "A1_1_FindSpymaster")
-      assert quest != nil
-      assert quest.name != nil
+      assert quest.name == "Report to Caius Cosades"
+      assert is_nil(quest.faction_id)
       assert quest.source_file_ids == ["Morrowind.esm", "Tribunal.esm"]
+    end
+
+    test "records faction reference" do
+      quest = Ash.get!(Resdayn.Codex.Dialogue.Quest, "TG_LootAldruhnMG")
+      assert quest.name == "Loot the Mages Guild"
+      assert to_string(quest.faction_id) == "Thieves Guild"
     end
   end
 

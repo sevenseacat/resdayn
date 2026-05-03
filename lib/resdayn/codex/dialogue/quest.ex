@@ -19,6 +19,7 @@ defmodule Resdayn.Codex.Dialogue.Quest do
   end
 
   relationships do
+    belongs_to :faction, Resdayn.Codex.Characters.Faction
     has_many :journal_entries, Resdayn.Codex.Dialogue.JournalEntry
   end
 end
