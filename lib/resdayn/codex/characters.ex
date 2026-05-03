@@ -31,6 +31,7 @@ defmodule Resdayn.Codex.Characters do
     resource __MODULE__.BodyPart
 
     resource __MODULE__.Faction do
+      define :list_playable_factions, action: :playable_factions
       define :get_faction_by_id, action: :read, get_by: :id
     end
   end

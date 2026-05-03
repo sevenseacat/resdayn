@@ -12,6 +12,11 @@ defmodule Resdayn.Codex.Characters.Faction do
 
   actions do
     defaults [:read]
+
+    read :playable_factions do
+      prepare build(sort: [:name])
+      filter expr(count(quests) > 0)
+    end
   end
 
   attributes do
@@ -39,5 +44,7 @@ defmodule Resdayn.Codex.Characters.Faction do
 
     has_many :reactions, __MODULE__.Reaction, destination_attribute: :source_id
     has_many :reactions_from, __MODULE__.Reaction, destination_attribute: :target_id
+
+    has_many :quests, Resdayn.Codex.Dialogue.Quest
   end
 end
