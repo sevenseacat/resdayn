@@ -27,6 +27,8 @@ defmodule Resdayn.Codex.Mechanics.MagicEffect do
     belongs_to :attribute, Resdayn.Codex.Mechanics.Attribute, attribute_type: :integer
 
     has_many :ingredient_effects, Resdayn.Codex.Items.Ingredient.Effect
+
+    many_to_many :ingredients, Resdayn.Codex.Items.Ingredient, join_relationship: :ingredient_effects
   end
 
   calculations do
