@@ -19,19 +19,31 @@ defmodule Resdayn.Importer.SearchIndex do
     {Resdayn.Codex.World.NPC, :npc, nil},
     {Resdayn.Codex.World.Creature, :creature, nil},
     {Resdayn.Codex.World.Cell, :location, nil},
+    {Resdayn.Codex.World.Region, :region, nil},
     {Resdayn.Codex.Characters.Faction, :faction, nil},
     {Resdayn.Codex.Characters.Class, :class, nil},
     {Resdayn.Codex.Characters.Race, :race, nil},
     {Resdayn.Codex.Characters.Birthsign, :birthsign, nil},
-    {Resdayn.Codex.Characters.Skill, :skill, nil}
+    {Resdayn.Codex.Characters.Skill, :skill, nil},
+    {Resdayn.Codex.Dialogue.Quest, :quest, nil}
+  ]
+
+  # Resources with no `name` attribute — their `id` IS the meaningful name
+  # (e.g. dialogue topics, scripts, levelled lists).
+  @id_indexed_resources [
+    {Resdayn.Codex.Dialogue.Topic, :dialogue_topic},
+    {Resdayn.Codex.Mechanics.Script, :script},
+    {Resdayn.Codex.Items.ItemLevelledList, :item_levelled_list},
+    {Resdayn.Codex.World.CreatureLevelledList, :creature_levelled_list}
   ]
 
   def rebuild do
     Resdayn.Repo.query!("TRUNCATE search_index")
 
     spell_task = Task.async(fn -> insert(build_spell_entries()) end)
+    magic_effect_task = Task.async(fn -> insert(build_magic_effect_entries()) end)
 
-    count =
+    name_count =
       @searchable_resources
       |> Task.async_stream(
         fn resource ->
@@ -43,7 +55,19 @@ defmodule Resdayn.Importer.SearchIndex do
       )
       |> Enum.sum_by(fn {:ok, count} -> count end)
 
-    count + Task.await(spell_task)
+    id_count =
+      @id_indexed_resources
+      |> Task.async_stream(
+        fn resource ->
+          resource
+          |> build_id_entries()
+          |> insert()
+        end,
+        ordered: false
+      )
+      |> Enum.sum_by(fn {:ok, count} -> count end)
+
+    name_count + id_count + Task.await(spell_task) + Task.await(magic_effect_task)
   end
 
   defp build_entries({resource, type, icon_field}) do
@@ -56,6 +80,19 @@ defmodule Resdayn.Importer.SearchIndex do
         name: record.name,
         type: Atom.to_string(type),
         icon_filename: icon_field && Map.get(record, icon_field)
+      }
+    end)
+  end
+
+  defp build_id_entries({resource, type}) do
+    resource
+    |> Ash.read!()
+    |> Enum.map(fn record ->
+      %{
+        id: "#{type}:#{record.id}",
+        name: to_string(record.id),
+        type: Atom.to_string(type),
+        icon_filename: nil
       }
     end)
   end
@@ -81,6 +118,22 @@ defmodule Resdayn.Importer.SearchIndex do
   end
 
   defp spell_icon(_effects), do: nil
+
+  # Magic effects use a module calculation for `name`, so we can't filter at the
+  # database level — load all and trust they have valid names.
+  defp build_magic_effect_entries do
+    Resdayn.Codex.Mechanics.MagicEffect
+    |> Ash.Query.load([:name, :icon_filename])
+    |> Ash.read!()
+    |> Enum.map(fn effect ->
+      %{
+        id: "magic_effect:#{effect.id}",
+        name: effect.name,
+        type: "magic_effect",
+        icon_filename: effect.icon_filename
+      }
+    end)
+  end
 
   defp insert(records) do
     "search_index"
