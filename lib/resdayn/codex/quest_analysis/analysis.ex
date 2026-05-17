@@ -19,7 +19,7 @@ defmodule Resdayn.Codex.QuestAnalysis.Analysis do
 
     field :key_items, {:array, :ci_string}, default: []
 
-    field :key_npcs, {:array, :ci_string}, default: []
+    field :related_npcs, {:array, Resdayn.Codex.QuestAnalysis.RelatedNPC}, default: []
 
     field :key_locations, {:array, :ci_string}, default: []
 

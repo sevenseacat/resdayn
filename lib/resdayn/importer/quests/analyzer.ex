@@ -1,6 +1,7 @@
 defmodule Resdayn.Importer.Quests.Analyzer do
   require Ash.Query
 
+  alias Resdayn.Codex.QuestAnalysis.RelatedNPC
   alias Resdayn.Importer.Quests.ChoiceChain
   alias Resdayn.Importer.Quests.ItemLocations
   alias Resdayn.Importer.Quests.TopicAvailability
@@ -110,12 +111,12 @@ defmodule Resdayn.Importer.Quests.Analyzer do
           npc_id_set
         )
 
-      all_npc_ids = (dialogue_npc_ids ++ script_npc_ids ++ effect_npc_ids) |> ci_uniq()
+      related_npcs = build_related_npcs(dialogue_npc_ids, script_npc_ids, effect_npc_ids)
 
       # Get locations from NPCs
       all_quest_npcs =
-        all_npc_ids
-        |> Enum.map(fn npc_id -> Enum.find(all_npcs, &(downcase(&1.id) == downcase(npc_id))) end)
+        related_npcs
+        |> Enum.map(fn r -> Enum.find(all_npcs, &(downcase(&1.id) == downcase(r.npc_id))) end)
         |> Enum.filter(& &1)
 
       npc_locations =
@@ -143,7 +144,7 @@ defmodule Resdayn.Importer.Quests.Analyzer do
          quest_id: to_string(quest.id),
          transitions: all_transitions,
          journal_entries: format_journal_entries(quest.journal_entries),
-         key_npcs: all_npc_ids,
+         related_npcs: related_npcs,
          key_locations: locations,
          dialogue_topics: topics,
          key_items: items
@@ -470,6 +471,18 @@ defmodule Resdayn.Importer.Quests.Analyzer do
       {existing, _} ->
         existing
     end
+  end
+
+  # Tag each source list with its reason, then dedupe by NPC id. Concatenation
+  # order encodes priority: a dialogue speaker who also bears a quest script
+  # ends up classified as :dialogue_speaker.
+  defp build_related_npcs(dialogue_ids, script_ids, effect_ids) do
+    tagged =
+      Enum.map(dialogue_ids, &%RelatedNPC{npc_id: &1, reason: :dialogue_speaker}) ++
+        Enum.map(script_ids, &%RelatedNPC{npc_id: &1, reason: :script_bearer}) ++
+        Enum.map(effect_ids, &%RelatedNPC{npc_id: &1, reason: :effect_target})
+
+    Enum.uniq_by(tagged, fn r -> downcase(r.npc_id) end)
   end
 
   defp ci_uniq(list), do: Enum.uniq_by(list, &downcase/1)

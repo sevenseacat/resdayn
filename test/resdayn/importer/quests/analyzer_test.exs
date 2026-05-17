@@ -127,23 +127,23 @@ defmodule Resdayn.Importer.Quests.AnalyzerTest do
     end
   end
 
-  describe "key NPCs" do
+  describe "related NPCs" do
     test "direct dialogue speakers", %{"MV_DeadTaxman" => taxman} do
-      assert Ash.CiString.new("chargen class") in taxman.key_npcs
-      assert Ash.CiString.new("thavere vedrano") in taxman.key_npcs
-      assert Ash.CiString.new("foryn gilnith") in taxman.key_npcs
+      assert find_related_npc(taxman, "chargen class").reason == :dialogue_speaker
+      assert find_related_npc(taxman, "thavere vedrano").reason == :dialogue_speaker
+      assert find_related_npc(taxman, "foryn gilnith").reason == :dialogue_speaker
     end
 
     test "NPCs with related scripts attached", %{"MV_DeadTaxman" => taxman} do
-      assert Ash.CiString.new("processus vitellius") in taxman.key_npcs
+      assert find_related_npc(taxman, "processus vitellius").reason == :script_bearer
     end
 
     test "NPCs referenced in followed scripts", %{"TG_LootAldruhnMG" => loot_mg} do
       # TG_LootMG disables these NPCs, TG_LootMG2 re-enables them
-      assert Ash.CiString.new("erranil") in loot_mg.key_npcs
-      assert Ash.CiString.new("movis darys") in loot_mg.key_npcs
-      assert Ash.CiString.new("edwinna elbert") in loot_mg.key_npcs
-      assert Ash.CiString.new("anarenen") in loot_mg.key_npcs
+      assert find_related_npc(loot_mg, "erranil").reason == :effect_target
+      assert find_related_npc(loot_mg, "movis darys").reason == :effect_target
+      assert find_related_npc(loot_mg, "edwinna elbert").reason == :effect_target
+      assert find_related_npc(loot_mg, "anarenen").reason == :effect_target
     end
   end
 
@@ -190,5 +190,12 @@ defmodule Resdayn.Importer.Quests.AnalyzerTest do
     refute is_nil(transition)
 
     transition
+  end
+
+  def find_related_npc(%Resdayn.Codex.QuestAnalysis.Analysis{} = analysis, npc_id) do
+    related = Enum.find(analysis.related_npcs, &ci_eq(&1.npc_id, npc_id))
+    refute is_nil(related)
+
+    related
   end
 end

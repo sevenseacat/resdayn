@@ -1,4 +1,4 @@
-output_dir = "tmp/quest_analysis"
+output_dir = "quest_analysis"
 File.mkdir_p!(output_dir)
 
 {time, results} = :timer.tc(fn -> Resdayn.Importer.Quests.Analyzer.analyze() end)
@@ -40,23 +40,19 @@ for {_key, analysis} <- Enum.sort_by(results, fn {k, _} -> k end) do
     end
   end
 
-  header =
-    if analysis.name do
-      "# #{analysis.quest_id}: #{analysis.name}"
-    else
-      "# #{analysis.quest_id}"
-    end
-
   lines =
-    [header] ++
-      section.("Key NPCs", analysis.key_npcs) ++
+    ["# #{analysis.quest_id}"] ++
+      section.(
+        "Related NPCs",
+        Enum.map(analysis.related_npcs, &"#{&1.npc_id} (#{&1.reason})")
+      ) ++
       section.("Key Items", analysis.key_items) ++
       section.("Key Locations", analysis.key_locations) ++
       section.("Dialogue Topics", analysis.dialogue_topics) ++
       ["", "## Journal Entries", ""] ++
-        journal_lines ++
-        ["", "## Transitions", ""] ++
-        transition_lines
+      journal_lines ++
+      ["", "## Transitions", ""] ++
+      transition_lines
 
   content = Enum.join(lines, "\n") <> "\n"
   path = Path.join(output_dir, "#{analysis.quest_id}.md")
