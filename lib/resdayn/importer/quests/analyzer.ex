@@ -111,7 +111,17 @@ defmodule Resdayn.Importer.Quests.Analyzer do
           npc_id_set
         )
 
-      related_npcs = build_related_npcs(dialogue_npc_ids, script_npc_ids, effect_npc_ids)
+      {quest_giver_npc_ids, quest_finisher_npc_ids} =
+        resolve_role_npc_ids(all_transitions, dialogue_updates, npcs_with_quest_scripts, quest)
+
+      related_npcs =
+        build_related_npcs(
+          dialogue_npc_ids,
+          script_npc_ids,
+          effect_npc_ids,
+          quest_giver_npc_ids,
+          quest_finisher_npc_ids
+        )
 
       # Get locations from NPCs
       all_quest_npcs =
@@ -473,16 +483,88 @@ defmodule Resdayn.Importer.Quests.Analyzer do
     end
   end
 
-  # Tag each source list with its reason, then dedupe by NPC id. Concatenation
-  # order encodes priority: a dialogue speaker who also bears a quest script
-  # ends up classified as :dialogue_speaker.
-  defp build_related_npcs(dialogue_ids, script_ids, effect_ids) do
+  # Tag each source list with its reason, dedupe by NPC id, then stamp role
+  # flags. Concatenation order encodes :reason priority: a dialogue speaker who
+  # also bears a quest script is classified as :dialogue_speaker. Roles
+  # (:quest_giver, :quest_finisher) are orthogonal flags layered on top.
+  defp build_related_npcs(dialogue_ids, script_ids, effect_ids, giver_ids, finisher_ids) do
+    giver_set = MapSet.new(giver_ids, &downcase/1)
+    finisher_set = MapSet.new(finisher_ids, &downcase/1)
+
     tagged =
       Enum.map(dialogue_ids, &%RelatedNPC{npc_id: &1, reason: :dialogue_speaker}) ++
         Enum.map(script_ids, &%RelatedNPC{npc_id: &1, reason: :script_bearer}) ++
         Enum.map(effect_ids, &%RelatedNPC{npc_id: &1, reason: :effect_target})
 
-    Enum.uniq_by(tagged, fn r -> downcase(r.npc_id) end)
+    tagged
+    |> Enum.uniq_by(fn r -> downcase(r.npc_id) end)
+    |> Enum.map(fn r ->
+      key = downcase(r.npc_id)
+
+      %{
+        r
+        | quest_giver?: MapSet.member?(giver_set, key),
+          quest_finisher?: MapSet.member?(finisher_set, key)
+      }
+    end)
+  end
+
+  # Find the NPC(s) responsible for each transition, then split into:
+  # - givers: NPCs triggering transitions that advance from quest state 0 into
+  #   the earliest journal index
+  # - finishers: NPCs triggering transitions to a finish-flagged journal index
+  defp resolve_role_npc_ids(all_transitions, dialogue_updates, npcs_with_quest_scripts, quest) do
+    speakers_by_response_id =
+      Map.new(dialogue_updates, fn r -> {to_string(r.id), r.speaker_npc_id} end)
+
+    bearers_by_script_id =
+      Enum.group_by(npcs_with_quest_scripts, &downcase(&1.script_id), & &1.id)
+
+    finisher_indices =
+      quest.journal_entries
+      |> Enum.filter(& &1.finishes_quest)
+      |> MapSet.new(& &1.index)
+
+    min_index =
+      quest.journal_entries
+      |> Enum.map(& &1.index)
+      |> Enum.min(fn -> nil end)
+
+    giver_ids =
+      all_transitions
+      |> Enum.filter(&quest_start?(&1, min_index))
+      |> Enum.flat_map(&trigger_npc_ids(&1, speakers_by_response_id, bearers_by_script_id))
+      |> ci_uniq()
+
+    finisher_ids =
+      all_transitions
+      |> Enum.filter(&MapSet.member?(finisher_indices, &1.index))
+      |> Enum.flat_map(&trigger_npc_ids(&1, speakers_by_response_id, bearers_by_script_id))
+      |> ci_uniq()
+
+    {giver_ids, finisher_ids}
+  end
+
+  # A transition is the quest's entry point if it advances to the earliest
+  # journal index AND its precondition is compatible with quest state 0.
+  # `from_max == 0` catches narrowed starts (e.g. script triggers with index 1
+  # whose from_max gets pinned by `narrow_from_ranges`). `from_max == nil`
+  # catches unconditioned dialogue that simply lacks any journal precondition.
+  defp quest_start?(transition, min_index) do
+    transition.index == min_index and
+      transition.from_min in [nil, 0] and
+      transition.from_max in [nil, 0]
+  end
+
+  defp trigger_npc_ids(%{trigger_type: :dialogue_response} = t, speakers_by_response_id, _) do
+    case Map.get(speakers_by_response_id, to_string(t.trigger_id)) do
+      nil -> []
+      speaker -> [speaker]
+    end
+  end
+
+  defp trigger_npc_ids(%{trigger_type: :script} = t, _, bearers_by_script_id) do
+    Map.get(bearers_by_script_id, downcase(t.trigger_id), [])
   end
 
   defp ci_uniq(list), do: Enum.uniq_by(list, &downcase/1)

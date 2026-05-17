@@ -145,6 +145,34 @@ defmodule Resdayn.Importer.Quests.AnalyzerTest do
       assert find_related_npc(loot_mg, "edwinna elbert").reason == :effect_target
       assert find_related_npc(loot_mg, "anarenen").reason == :effect_target
     end
+
+    test "quest giver flag", quests do
+      assert find_related_npc(quests["MV_DeadTaxman"], "processus vitellius").quest_giver?
+      refute find_related_npc(quests["MV_DeadTaxman"], "foryn gilnith").quest_giver?
+
+      assert find_related_npc(quests["MV_SlaveMule"], "relam arinith").quest_giver?
+      refute find_related_npc(quests["MV_SlaveMule"], "rabinna").quest_giver?
+
+      assert find_related_npc(quests["TG_LootAldruhnMG"], "aengoth").quest_giver?
+      refute find_related_npc(quests["TG_LootAldruhnMG"], "erranil").quest_giver?
+
+      assert find_related_npc(quests["A1_4_MuzgobInformant"], "caius cosades").quest_giver?
+      refute find_related_npc(quests["A1_4_MuzgobInformant"], "sharn gra-muzgob").quest_giver?
+    end
+
+    test "quest finisher flag", quests do
+      assert find_related_npc(quests["MV_DeadTaxman"], "chargen class").quest_finisher?
+      refute find_related_npc(quests["MV_DeadTaxman"], "foryn gilnith").quest_finisher?
+
+      # Rabinna does technically finish this quest if you kill her
+      assert find_related_npc(quests["MV_SlaveMule"], "im_kilaya").quest_finisher?
+      assert find_related_npc(quests["MV_SlaveMule"], "vorar helas").quest_finisher?
+      assert find_related_npc(quests["MV_SlaveMule"], "rabinna").quest_finisher?
+      refute find_related_npc(quests["MV_SlaveMule"], "relam arinith").quest_finisher?
+
+      assert find_related_npc(quests["TG_LootAldruhnMG"], "aengoth").quest_finisher?
+      refute find_related_npc(quests["TG_LootAldruhnMG"], "anarenen").quest_finisher?
+    end
   end
 
   describe "key dialogue topics" do
@@ -194,7 +222,7 @@ defmodule Resdayn.Importer.Quests.AnalyzerTest do
 
   def find_related_npc(%Resdayn.Codex.QuestAnalysis.Analysis{} = analysis, npc_id) do
     related = Enum.find(analysis.related_npcs, &ci_eq(&1.npc_id, npc_id))
-    refute is_nil(related)
+    refute is_nil(related), "Expected #{npc_id} to be a related NPC but was not"
 
     related
   end

@@ -8,5 +8,8 @@ defmodule Resdayn.Codex.QuestAnalysis.RelatedNPC do
       constraints one_of: [:dialogue_speaker, :script_bearer, :effect_target]
       allow_nil? false
     end
+
+    field :quest_giver?, :boolean, default: false
+    field :quest_finisher?, :boolean, default: false
   end
 end

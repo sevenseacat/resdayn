@@ -44,7 +44,19 @@ for {_key, analysis} <- Enum.sort_by(results, fn {k, _} -> k end) do
     ["# #{analysis.quest_id}"] ++
       section.(
         "Related NPCs",
-        Enum.map(analysis.related_npcs, &"#{&1.npc_id} (#{&1.reason})")
+        Enum.map(analysis.related_npcs, fn related_npc ->
+          roles =
+            [
+              {related_npc.reason, true},
+              {"quest giver", related_npc.quest_giver?},
+              {"quest finisher", related_npc.quest_finisher?}
+            ]
+            |> Enum.filter(fn {_, v} -> v end)
+            |> Enum.map(&elem(&1, 0))
+            |> Enum.join(", ")
+
+          "#{related_npc.npc_id} (#{roles})"
+        end)
       ) ++
       section.("Key Items", analysis.key_items) ++
       section.("Key Locations", analysis.key_locations) ++
