@@ -7,36 +7,33 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
 
   def parse(content) when is_binary(content) do
     lines = parse_input(content)
-
-    {name, locals, remaining_lines} = parse_header(lines)
+    {name, lines} = parse_begin(lines)
+    {locals, body_lines} = extract_locals(lines)
 
     %Script.Ast{
       name: name,
       locals: locals,
-      body: parse_body(remaining_lines, locals)
+      body: parse_body(body_lines, locals)
     }
   end
 
-  defp parse_header(lines, data \\ {nil, [], []})
+  # Pull the `begin Name` line off the top, if present. Returns
+  # {name_or_nil, remaining_lines}.
+  defp parse_begin(["begin " <> name | rest]), do: {name, rest}
+  defp parse_begin(lines), do: {nil, lines}
 
-  defp parse_header(["begin " <> name | lines], {nil, [], []}) do
-    parse_header(lines, {name, [], []})
-  end
-
-  defp parse_header(["short " <> short | lines], {name, locals, []}) do
-    parse_header(lines, {name, [short | locals], []})
-  end
-
-  defp parse_header(["long " <> long | lines], {name, locals, []}) do
-    parse_header(lines, {name, [long | locals], []})
-  end
-
-  defp parse_header(["float " <> float | lines], {name, locals, []}) do
-    parse_header(lines, {name, [float | locals], []})
-  end
-
-  defp parse_header(lines, {name, locals, []}) do
-    {name, Enum.reverse(locals), lines}
+  # Sweep the entire body for `short`/`long`/`float` declarations, returning
+  # the locals (in declaration order) and the body with those lines removed.
+  # Morrowind treats a local declaration as script-scoped regardless of
+  # where it appears, so a mid-body `short laterDecl` is just as valid as
+  # one at the top.
+  defp extract_locals(lines) do
+    Enum.reduce(lines, {[], []}, fn line, {locals, remaining} ->
+      case Regex.run(~r/^(?:short|long|float)\s+(\w+)/, line) do
+        [_, name] -> {locals ++ [name], remaining}
+        _ -> {locals, remaining ++ [line]}
+      end
+    end)
   end
 
   # ============================================================================
@@ -51,6 +48,15 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
 
   defp parse_body([line | lines], locals, acc) do
     cond do
+      # Stray block-terminator tokens at the top level — silently skip.
+      # These leak when scripts have unbalanced if/while structures.
+      # Without this skip, they'd fall through to `parse_single_line` and
+      # become `%Effect{function: :unknown}` entries that mislead analysis.
+      String.starts_with?(line, "endif") or
+        String.starts_with?(line, "endwhile") or
+        String.starts_with?(line, "else") ->
+        parse_body(lines, locals, acc)
+
       String.starts_with?(line, "if") ->
         {block, rest} = parse_if_block(line, lines, locals)
         parse_body(rest, locals, [block | acc])
@@ -732,6 +738,12 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
       parse_add_topic(line) ||
       parse_command(line, "enable", :enable) ||
       parse_command(line, "disable", :disable) ||
+      parse_command(line, "activate", :activate) ||
+      parse_command(line, "clearforcesneak", :clear_force_sneak) ||
+      parse_wake_up_pc(line) ||
+      parse_play_sound(line) ||
+      parse_cast(line) ||
+      parse_place_item(line) ||
       parse_command_with_string(line, "addspell", :add_spell) ||
       parse_command_with_string(line, "removespell", :remove_spell) ||
       parse_command(line, "forcegreeting", :force_greeting) ||
@@ -996,6 +1008,83 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
 
       nil ->
         nil
+    end
+  end
+
+  # Global command — no subject. `wakeuppc` takes no args.
+  defp parse_wake_up_pc(line) do
+    if String.trim(line) == "wakeuppc", do: %{function: :wake_up_pc}
+  end
+
+  # Global command — no subject. Takes one quoted/unquoted sound id which
+  # may contain spaces when quoted (e.g. "bm pipe medium").
+  defp parse_play_sound(line) do
+    case Regex.run(~r/^\s*playsound\s+"?([^"\n]+?)"?\s*$/i, line) do
+      [_, sound_id] -> %{function: :play_sound, sound_id: String.trim(sound_id)}
+      _ -> nil
+    end
+  end
+
+  # Cast spell at target. Subject (the caster) defaults to :self when no
+  # `subject->cast` prefix is present.
+  defp parse_cast(line) do
+    {subject, rest} = parse_subject(line)
+
+    case Regex.run(~r/^\s*cast\s+(?:"([^"]+)"|(\S+))\s+(\S+)/i, rest) do
+      [_, quoted_spell, "", target] ->
+        %{
+          function: :cast,
+          subject: normalize_subject(subject),
+          spell_id: quoted_spell,
+          target: normalize_subject(target)
+        }
+
+      [_, "", unquoted_spell, target] ->
+        %{
+          function: :cast,
+          subject: normalize_subject(subject),
+          spell_id: unquoted_spell,
+          target: normalize_subject(target)
+        }
+
+      _ ->
+        nil
+    end
+  end
+
+  # Global command — no subject. `placeitem item_id x y z rotation` where
+  # each coord can be a literal integer or a local-variable name.
+  defp parse_place_item(line) do
+    case Regex.run(
+           ~r/^\s*placeitem\s+(?:"([^"]+)"|(\S+))\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)/i,
+           line
+         ) do
+      [_, "", unquoted_item, x, y, z, rot] ->
+        place_item_map(unquoted_item, x, y, z, rot)
+
+      [_, quoted_item, _, x, y, z, rot] ->
+        place_item_map(quoted_item, x, y, z, rot)
+
+      _ ->
+        nil
+    end
+  end
+
+  defp place_item_map(item_id, x, y, z, rot) do
+    %{
+      function: :place_item,
+      item_id: item_id,
+      x: parse_int_or_local(x),
+      y: parse_int_or_local(y),
+      z: parse_int_or_local(z),
+      rotation: parse_int_or_local(rot)
+    }
+  end
+
+  defp parse_int_or_local(str) do
+    case Integer.parse(str) do
+      {n, ""} -> n
+      _ -> str
     end
   end
 
