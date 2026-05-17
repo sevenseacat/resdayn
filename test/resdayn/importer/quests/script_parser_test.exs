@@ -165,10 +165,9 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
         body: [
           %Script.IfBlock{
             condition: %{
-              function: :journal_index,
-              target: "mv_slavemule",
+              left: %{function: :journal_index, arg: "mv_slavemule"},
               operator: :<=,
-              value: 100
+              right: %{value: 100}
             },
             body: [
               %Script.Journal{quest_id: "mv_slavemule", index: 101}
@@ -187,7 +186,11 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
         locals: [],
         body: [
           %Script.IfBlock{
-            condition: %{function: :journal_index, target: "quest", operator: :==, value: 10},
+            condition: %{
+              left: %{function: :journal_index, arg: "quest"},
+              operator: :==,
+              right: %{value: 10}
+            },
             body: [
               %Script.Journal{quest_id: "quest", index: 20}
             ],
@@ -208,20 +211,18 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
         body: [
           %Script.IfBlock{
             condition: %{
-              function: :journal_index,
-              target: "mv_slavemule",
+              left: %{function: :journal_index, arg: "mv_slavemule"},
               operator: :<=,
-              value: 100
+              right: %{value: 100}
             },
             body: [
               %Script.Journal{quest_id: "mv_slavemule", index: 101}
             ],
             else_clause: %Script.IfBlock{
               condition: %{
-                function: :journal_index,
-                target: "mv_slavemule",
+                left: %{function: :journal_index, arg: "mv_slavemule"},
                 operator: :==,
-                value: 102
+                right: %{value: 102}
               },
               body: [
                 %Script.Journal{quest_id: "mv_slavemule", index: 103}
@@ -242,26 +243,23 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
         body: [
           %Script.IfBlock{
             condition: %{
-              function: :journal_index,
-              target: "b5_redoranhort",
+              left: %{function: :journal_index, arg: "b5_redoranhort"},
               operator: :>=,
-              value: 50
+              right: %{value: 50}
             },
             body: [
               %Script.IfBlock{
                 condition: %{
-                  function: :journal_index,
-                  target: "b6_hlaaluhort",
+                  left: %{function: :journal_index, arg: "b6_hlaaluhort"},
                   operator: :>=,
-                  value: 50
+                  right: %{value: 50}
                 },
                 body: [
                   %Script.IfBlock{
                     condition: %{
-                      function: :journal_index,
-                      target: "b7_telvannihort",
+                      left: %{function: :journal_index, arg: "b7_telvannihort"},
                       operator: :>=,
-                      value: 50
+                      right: %{value: 50}
                     },
                     body: [
                       %Script.Journal{quest_id: "b8_all_hortator", index: 50}
@@ -286,22 +284,24 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
         locals: [],
         body: [
           %Script.IfBlock{
-            condition: %{function: :dead_count, target: "ahnia", operator: :>, value: 0},
+            condition: %{
+              left: %{function: :dead_count, arg: "ahnia"},
+              operator: :>,
+              right: %{value: 0}
+            },
             body: [
               %Script.IfBlock{
                 condition: %{
-                  function: :journal_index,
-                  target: "ms_scrollsales",
+                  left: %{function: :journal_index, arg: "ms_scrollsales"},
                   operator: :>,
-                  value: 0
+                  right: %{value: 0}
                 },
                 body: [
                   %Script.IfBlock{
                     condition: %{
-                      function: :journal_index,
-                      target: "ms_scrollsales",
+                      left: %{function: :journal_index, arg: "ms_scrollsales"},
                       operator: :<,
-                      value: 40
+                      right: %{value: 40}
                     },
                     body: [
                       %Script.Journal{quest_id: "ms_scrollsales", index: 40}
@@ -327,10 +327,9 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
         body: [
           %Script.IfBlock{
             condition: %{
-              function: :journal_index,
-              target: "c3_destroydagoth",
+              left: %{function: :journal_index, arg: "c3_destroydagoth"},
               operator: :==,
-              value: 20
+              right: %{value: 20}
             },
             body: [
               %Script.Journal{quest_id: "c3_destroydagoth", index: 50},
@@ -351,10 +350,9 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
         body: [
           %Script.IfBlock{
             condition: %{
-              function: :journal_index,
-              target: "mv_slavemule",
+              left: %{function: :journal_index, arg: "mv_slavemule"},
               operator: :<=,
-              value: 100
+              right: %{value: 100}
             },
             body: [
               %Script.Effect{
@@ -378,10 +376,9 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
         body: [
           %Script.IfBlock{
             condition: %{
-              function: :journal_index,
-              target: "mv_slavemule",
+              left: %{function: :journal_index, arg: "mv_slavemule"},
               operator: :<=,
-              value: 100
+              right: %{value: 100}
             },
             body: [
               %Script.Effect{
@@ -406,10 +403,9 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
         body: [
           %Script.IfBlock{
             condition: %{
-              function: :journal_index,
-              target: "c3_destroydagoth",
+              left: %{function: :journal_index, arg: "c3_destroydagoth"},
               operator: :==,
-              value: 20
+              right: %{value: 20}
             },
             body: [
               %Script.Effect{function: :enable, data: %{subject: "ring of azura"}},
@@ -431,7 +427,11 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
         locals: [],
         body: [
           %Script.IfBlock{
-            condition: %{function: :journal_index, target: "quest", operator: :<, value: 50},
+            condition: %{
+              left: %{function: :journal_index, arg: "quest"},
+              operator: :<,
+              right: %{value: 50}
+            },
             body: [
               %Script.Effect{
                 function: :add_item,
@@ -442,7 +442,11 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
             else_clause: nil
           },
           %Script.IfBlock{
-            condition: %{function: :journal_index, target: "quest", operator: :>=, value: 50},
+            condition: %{
+              left: %{function: :journal_index, arg: "quest"},
+              operator: :>=,
+              right: %{value: 50}
+            },
             body: [
               %Script.Effect{
                 function: :add_item,
@@ -465,10 +469,9 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
         body: [
           %Script.IfBlock{
             condition: %{
-              function: :pc_cell,
-              target: "ebonheart, argonian mission",
+              left: %{function: :current_cell, arg: "ebonheart, argonian mission"},
               operator: :==,
-              value: 1
+              right: %{value: 1}
             },
             body: [
               %Script.Journal{quest_id: "mv_slavemule", index: 114}
@@ -487,7 +490,11 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
         locals: [],
         body: [
           %Script.IfBlock{
-            condition: %{function: :on_death, subject: :self, operator: :==, value: 1},
+            condition: %{
+              left: %{function: :on_death, subject: :self},
+              operator: :==,
+              right: %{value: 1}
+            },
             body: [
               %Script.Journal{quest_id: "somequest", index: 50}
             ],
@@ -505,11 +512,19 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
         locals: [],
         body: [
           %Script.IfBlock{
-            condition: %{function: :journal_index, target: "mainquest", operator: :>=, value: 10},
+            condition: %{
+              left: %{function: :journal_index, arg: "mainquest"},
+              operator: :>=,
+              right: %{value: 10}
+            },
             body: [
               %Script.Effect{function: :add_topic, data: %{topic_id: "rumors"}},
               %Script.IfBlock{
-                condition: %{function: :dead_count, target: "villain", operator: :>=, value: 1},
+                condition: %{
+                  left: %{function: :dead_count, arg: "villain"},
+                  operator: :>=,
+                  right: %{value: 1}
+                },
                 body: [
                   %Script.Effect{
                     function: :add_item,
@@ -518,11 +533,9 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
                   %Script.Journal{quest_id: "mainquest", index: 20},
                   %Script.IfBlock{
                     condition: %{
-                      function: :item_count,
-                      subject: :self,
-                      target: "secret_note",
+                      left: %{function: :item_count, subject: :self, arg: "secret_note"},
                       operator: :>=,
-                      value: 1
+                      right: %{value: 1}
                     },
                     body: [
                       %Script.Journal{quest_id: "sidequest", index: 10},
@@ -590,10 +603,9 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
                  effects: [],
                  conditions: [
                    %{
-                     function: :journal_index,
-                     target: "mv_slavemule",
+                     left: %{function: :journal_index, arg: "mv_slavemule"},
                      operator: :<=,
-                     value: 100
+                     right: %{value: 100}
                    }
                  ]
                }
@@ -610,10 +622,9 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
                  effects: [],
                  conditions: [
                    %{
-                     function: :journal_index,
-                     target: "mv_slavemule",
+                     left: %{function: :journal_index, arg: "mv_slavemule"},
                      operator: :<=,
-                     value: 100
+                     right: %{value: 100}
                    }
                  ]
                },
@@ -622,7 +633,11 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
                  index: 103,
                  effects: [],
                  conditions: [
-                   %{function: :journal_index, target: "mv_slavemule", operator: :==, value: 102}
+                   %{
+                     left: %{function: :journal_index, arg: "mv_slavemule"},
+                     operator: :==,
+                     right: %{value: 102}
+                   }
                  ]
                }
              ]
@@ -638,17 +653,19 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
                  effects: [],
                  conditions: [
                    %{
-                     function: :journal_index,
-                     target: "b5_redoranhort",
+                     left: %{function: :journal_index, arg: "b5_redoranhort"},
                      operator: :>=,
-                     value: 50
+                     right: %{value: 50}
                    },
-                   %{function: :journal_index, target: "b6_hlaaluhort", operator: :>=, value: 50},
                    %{
-                     function: :journal_index,
-                     target: "b7_telvannihort",
+                     left: %{function: :journal_index, arg: "b6_hlaaluhort"},
                      operator: :>=,
-                     value: 50
+                     right: %{value: 50}
+                   },
+                   %{
+                     left: %{function: :journal_index, arg: "b7_telvannihort"},
+                     operator: :>=,
+                     right: %{value: 50}
                    }
                  ]
                }
@@ -664,9 +681,21 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
                  index: 40,
                  effects: [],
                  conditions: [
-                   %{function: :dead_count, target: "ahnia", operator: :>, value: 0},
-                   %{function: :journal_index, target: "ms_scrollsales", operator: :>, value: 0},
-                   %{function: :journal_index, target: "ms_scrollsales", operator: :<, value: 40}
+                   %{
+                     left: %{function: :dead_count, arg: "ahnia"},
+                     operator: :>,
+                     right: %{value: 0}
+                   },
+                   %{
+                     left: %{function: :journal_index, arg: "ms_scrollsales"},
+                     operator: :>,
+                     right: %{value: 0}
+                   },
+                   %{
+                     left: %{function: :journal_index, arg: "ms_scrollsales"},
+                     operator: :<,
+                     right: %{value: 40}
+                   }
                  ]
                }
              ]
@@ -683,10 +712,9 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
                  effects: [],
                  conditions: [
                    %{
-                     function: :journal_index,
-                     target: "c3_destroydagoth",
+                     left: %{function: :journal_index, arg: "c3_destroydagoth"},
                      operator: :==,
-                     value: 20
+                     right: %{value: 20}
                    }
                  ]
                },
@@ -696,10 +724,9 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
                  effects: [],
                  conditions: [
                    %{
-                     function: :journal_index,
-                     target: "c3_destroydagoth",
+                     left: %{function: :journal_index, arg: "c3_destroydagoth"},
                      operator: :==,
-                     value: 20
+                     right: %{value: 20}
                    }
                  ]
                }
@@ -709,7 +736,7 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
     test "script with effects before journal command" do
       actual = ScriptParser.extract_journal_commands(@script_effects_before_journal)
 
-      assert [
+      assert actual == [
                %{
                  quest_id: "mv_slavemule",
                  index: 101,
@@ -722,16 +749,20 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
                    }
                  ],
                  conditions: [
-                   %{function: :journal_index, target: "mv_slavemule", operator: :<=, value: 100}
+                   %{
+                     left: %{function: :journal_index, arg: "mv_slavemule"},
+                     operator: :<=,
+                     right: %{value: 100}
+                   }
                  ]
                }
-             ] = actual
+             ]
     end
 
     test "script with effects before and after journal command" do
       actual = ScriptParser.extract_journal_commands(@script_effects_before_and_after)
 
-      assert [
+      assert actual == [
                %{
                  quest_id: "mv_slavemule",
                  index: 101,
@@ -745,17 +776,21 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
                    %{function: :mod_disposition, subject: :self, value: 15}
                  ],
                  conditions: [
-                   %{function: :journal_index, target: "mv_slavemule", operator: :<=, value: 100}
+                   %{
+                     left: %{function: :journal_index, arg: "mv_slavemule"},
+                     operator: :<=,
+                     right: %{value: 100}
+                   }
                  ]
                }
-             ] = actual
+             ]
     end
 
     test "script with multiple quests shares block effects" do
       actual = ScriptParser.extract_journal_commands(@script_shared_effects)
 
       # Both journals get all effects from the block
-      assert [
+      assert actual == [
                %{
                  quest_id: "c3_destroydagoth",
                  index: 50,
@@ -765,10 +800,9 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
                  ],
                  conditions: [
                    %{
-                     function: :journal_index,
-                     target: "c3_destroydagoth",
+                     left: %{function: :journal_index, arg: "c3_destroydagoth"},
                      operator: :==,
-                     value: 20
+                     right: %{value: 20}
                    }
                  ]
                },
@@ -781,26 +815,29 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
                  ],
                  conditions: [
                    %{
-                     function: :journal_index,
-                     target: "c3_destroydagoth",
+                     left: %{function: :journal_index, arg: "c3_destroydagoth"},
                      operator: :==,
-                     value: 20
+                     right: %{value: 20}
                    }
                  ]
                }
-             ] = actual
+             ]
     end
 
     test "different blocks have different effects" do
       actual = ScriptParser.extract_journal_commands(@script_different_blocks)
 
-      assert [
+      assert actual == [
                %{
                  quest_id: "quest",
                  index: 50,
                  effects: [%{function: :add_item, subject: :self, item_id: "reward1", count: 1}],
                  conditions: [
-                   %{function: :journal_index, target: "quest", operator: :<, value: 50}
+                   %{
+                     left: %{function: :journal_index, arg: "quest"},
+                     operator: :<,
+                     right: %{value: 50}
+                   }
                  ]
                },
                %{
@@ -808,10 +845,14 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
                  index: 100,
                  effects: [%{function: :add_item, subject: :self, item_id: "reward2", count: 1}],
                  conditions: [
-                   %{function: :journal_index, target: "quest", operator: :>=, value: 50}
+                   %{
+                     left: %{function: :journal_index, arg: "quest"},
+                     operator: :>=,
+                     right: %{value: 50}
+                   }
                  ]
                }
-             ] = actual
+             ]
     end
 
     test "script with GetPCCell condition" do
@@ -824,10 +865,9 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
                  effects: [],
                  conditions: [
                    %{
-                     function: :pc_cell,
-                     target: "ebonheart, argonian mission",
+                     left: %{function: :current_cell, arg: "ebonheart, argonian mission"},
                      operator: :==,
-                     value: 1
+                     right: %{value: 1}
                    }
                  ]
                }
@@ -842,7 +882,13 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
                  quest_id: "somequest",
                  index: 50,
                  effects: [],
-                 conditions: [%{function: :on_death, subject: :self, operator: :==, value: 1}]
+                 conditions: [
+                   %{
+                     left: %{function: :on_death, subject: :self},
+                     operator: :==,
+                     right: %{value: 1}
+                   }
+                 ]
                }
              ]
     end
@@ -857,8 +903,16 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
                    quest_id: "mainquest",
                    index: 20,
                    conditions: [
-                     %{function: :journal_index, target: "mainquest", operator: :>=, value: 10},
-                     %{function: :dead_count, target: "villain", operator: :>=, value: 1}
+                     %{
+                       left: %{function: :journal_index, arg: "mainquest"},
+                       operator: :>=,
+                       right: %{value: 10}
+                     },
+                     %{
+                       left: %{function: :dead_count, arg: "villain"},
+                       operator: :>=,
+                       right: %{value: 1}
+                     }
                    ],
                    effects: [
                      %{function: :add_topic, topic_id: "rumors"},
@@ -871,14 +925,20 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
                    quest_id: "sidequest",
                    index: 10,
                    conditions: [
-                     %{function: :journal_index, target: "mainquest", operator: :>=, value: 10},
-                     %{function: :dead_count, target: "villain", operator: :>=, value: 1},
                      %{
-                       function: :item_count,
-                       subject: :self,
-                       target: "secret_note",
+                       left: %{function: :journal_index, arg: "mainquest"},
                        operator: :>=,
-                       value: 1
+                       right: %{value: 10}
+                     },
+                     %{
+                       left: %{function: :dead_count, arg: "villain"},
+                       operator: :>=,
+                       right: %{value: 1}
+                     },
+                     %{
+                       left: %{function: :item_count, subject: :self, arg: "secret_note"},
+                       operator: :>=,
+                       right: %{value: 1}
                      }
                    ],
                    effects: [
@@ -892,8 +952,16 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
                    quest_id: "mainquest",
                    index: 30,
                    conditions: [
-                     %{function: :journal_index, target: "mainquest", operator: :>=, value: 10},
-                     %{function: :dead_count, target: "villain", operator: :>=, value: 1}
+                     %{
+                       left: %{function: :journal_index, arg: "mainquest"},
+                       operator: :>=,
+                       right: %{value: 10}
+                     },
+                     %{
+                       left: %{function: :dead_count, arg: "villain"},
+                       operator: :>=,
+                       right: %{value: 1}
+                     }
                    ],
                    effects: [
                      %{function: :add_topic, topic_id: "rumors"},
@@ -906,7 +974,11 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
                    quest_id: "mainquest",
                    index: 15,
                    conditions: [
-                     %{function: :journal_index, target: "mainquest", operator: :>=, value: 10}
+                     %{
+                       left: %{function: :journal_index, arg: "mainquest"},
+                       operator: :>=,
+                       right: %{value: 10}
+                     }
                    ],
                    effects: [
                      %{function: :add_topic, topic_id: "rumors"}
@@ -1622,571 +1694,1011 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
              } =
                ScriptParser.parse_effect("choice, \"yes\", 3, \"no\", 4")
     end
+
+    # ─────────────────────────────────────────────────────────────────────
+    # Effect commands currently parsed as %{function: :unknown, ...}.
+    # Real-world reproducers:
+    #
+    #   activate         processusScript, treestumpScript, jeannechestScript,
+    #                    jeannedoorScript, nunciusStashScript, ralenHlaaloScript, ...
+    #   playsound        stal1/2/3Script (BM_Earth)
+    #   cast             shrineMaarGan (TT_MaarGan)
+    #   placeitem        RitualTransform (BM_WolfGiver)
+    #   wakeuppc         totemScript (BM_Ceremony1)
+    #   clearforcesneak  tarenScript (MS_Adulterer)
+    # ─────────────────────────────────────────────────────────────────────
+
+    test "Activate - bare command (implicit self subject)" do
+      assert ScriptParser.parse_effect("activate") == %{function: :activate, subject: :self}
+    end
+
+    test "Activate - with explicit subject" do
+      assert ScriptParser.parse_effect("\"jeanne_door\"->activate") ==
+               %{function: :activate, subject: "jeanne_door"}
+    end
+
+    test "PlaySound - quoted sound id (global, no subject)" do
+      assert ScriptParser.parse_effect("playsound \"bm pipe medium\"") ==
+               %{function: :play_sound, sound_id: "bm pipe medium"}
+    end
+
+    test "PlaySound - unquoted sound id" do
+      assert ScriptParser.parse_effect("playsound bm_pipe_small") ==
+               %{function: :play_sound, sound_id: "bm_pipe_small"}
+    end
+
+    test "Cast - spell with target (implicit self caster)" do
+      assert ScriptParser.parse_effect("cast \"shrine_maargan_sp\" player") ==
+               %{
+                 function: :cast,
+                 subject: :self,
+                 spell_id: "shrine_maargan_sp",
+                 target: :player
+               }
+    end
+
+    test "Cast - with explicit caster subject" do
+      assert ScriptParser.parse_effect("\"caius cosades\"->cast \"fireball\" player") ==
+               %{
+                 function: :cast,
+                 subject: "caius cosades",
+                 spell_id: "fireball",
+                 target: :player
+               }
+    end
+
+    test "PlaceItem - literal coordinates (global, no subject)" do
+      assert ScriptParser.parse_effect("placeitem \"skeleton\" 100 200 300 90") ==
+               %{
+                 function: :place_item,
+                 item_id: "skeleton",
+                 x: 100,
+                 y: 200,
+                 z: 300,
+                 rotation: 90
+               }
+    end
+
+    test "PlaceItem - local-variable coordinates (RitualTransform pattern)" do
+      assert ScriptParser.parse_effect("placeitem \"ritual_ring\" xpos ypos zpos 0") ==
+               %{
+                 function: :place_item,
+                 item_id: "ritual_ring",
+                 x: "xpos",
+                 y: "ypos",
+                 z: "zpos",
+                 rotation: 0
+               }
+    end
+
+    test "WakeUpPC - bare (global)" do
+      assert ScriptParser.parse_effect("wakeuppc") == %{function: :wake_up_pc}
+    end
+
+    test "ClearForceSneak - bare (implicit self subject)" do
+      assert ScriptParser.parse_effect("clearforcesneak") ==
+               %{function: :clear_force_sneak, subject: :self}
+    end
+
+    test "ClearForceSneak - with explicit subject" do
+      assert ScriptParser.parse_effect("\"taren andoren\"->clearforcesneak") ==
+               %{function: :clear_force_sneak, subject: "taren andoren"}
+    end
   end
 
   describe "parse_condition" do
     test "GetJournalIndex - basic" do
-      assert %{function: :journal_index, target: "MV_SlaveMule", operator: :<=, value: 100} =
-               ScriptParser.parse_condition("if ( getjournalindex \"MV_SlaveMule\" <= 100 )")
+      assert ScriptParser.parse_condition("if ( getjournalindex \"MV_SlaveMule\" <= 100 )") == %{
+               left: %{function: :journal_index, arg: "MV_SlaveMule"},
+               operator: :<=,
+               right: %{value: 100}
+             }
     end
 
     test "GetJournalIndex - unquoted quest id" do
-      assert %{function: :journal_index, target: "B5_RedoranHort", operator: :>=, value: 50} =
-               ScriptParser.parse_condition("if ( getjournalindex B5_RedoranHort >= 50 )")
+      assert ScriptParser.parse_condition("if ( getjournalindex B5_RedoranHort >= 50 )") == %{
+               left: %{function: :journal_index, arg: "B5_RedoranHort"},
+               operator: :>=,
+               right: %{value: 50}
+             }
     end
 
     test "GetJournalIndex - equals" do
-      assert %{function: :journal_index, target: "romance_ahnassi", operator: :==, value: 33} =
-               ScriptParser.parse_condition("if ( getjournalindex romance_ahnassi == 33 )")
+      assert ScriptParser.parse_condition("if ( getjournalindex romance_ahnassi == 33 )") == %{
+               left: %{function: :journal_index, arg: "romance_ahnassi"},
+               operator: :==,
+               right: %{value: 33}
+             }
     end
 
     test "GetDeadCount - basic" do
-      assert %{function: :dead_count, target: "Ahnia", operator: :>, value: 0} =
-               ScriptParser.parse_condition("if ( getdeadcount \"Ahnia\" > 0 )")
+      assert ScriptParser.parse_condition("if ( getdeadcount \"Ahnia\" > 0 )") == %{
+               left: %{function: :dead_count, arg: "Ahnia"},
+               operator: :>,
+               right: %{value: 0}
+             }
     end
 
-    test "GetItemCount - basic" do
-      assert %{function: :item_count, target: "slave_bracer_left", operator: :>, value: 0} =
-               ScriptParser.parse_condition("if ( getitemcount slave_bracer_left > 0 )")
+    test "GetItemCount - basic (implicit self subject)" do
+      assert ScriptParser.parse_condition("if ( getitemcount slave_bracer_left > 0 )") == %{
+               left: %{function: :item_count, subject: :self, arg: "slave_bracer_left"},
+               operator: :>,
+               right: %{value: 0}
+             }
     end
 
-    test "GetItemCount - with subject" do
-      assert %{
-               function: :item_count,
-               subject: :player,
-               target: "katana_goldbrand_unique",
+    test "GetItemCount - with subject (canonical shape)" do
+      assert ScriptParser.parse_condition(
+               "if ( player->getitemcount \"katana_goldbrand_unique\" == 1 )"
+             ) == %{
+               left: %{subject: :player, function: :item_count, arg: "katana_goldbrand_unique"},
                operator: :==,
-               value: 1
-             } =
-               ScriptParser.parse_condition(
-                 "if ( player->getitemcount \"katana_goldbrand_unique\" == 1 )"
-               )
+               right: %{value: 1}
+             }
     end
 
     test "GetItemCount - with nested parens" do
-      assert %{
-               function: :item_count,
-               subject: :player,
-               target: "gold_001",
-               operator: :>=,
-               value: 1500
-             } =
-               ScriptParser.parse_condition("if ( ( player->getitemcount \"gold_001\" ) >= 1500 ")
+      assert ScriptParser.parse_condition("if ( ( player->getitemcount \"gold_001\" ) >= 1500 ") ==
+               %{
+                 left: %{subject: :player, function: :item_count, arg: "gold_001"},
+                 operator: :>=,
+                 right: %{value: 1500}
+               }
     end
 
-    test "GetPCCell - quoted cell name" do
-      assert %{function: :pc_cell, target: "Ebonheart, Argonian Mission", operator: :==, value: 1} =
-               ScriptParser.parse_condition(
-                 "if ( getpccell \"Ebonheart, Argonian Mission\" == 1 )"
-               )
+    test "GetPCCell - quoted cell name (parses as :current_cell, no subject)" do
+      assert ScriptParser.parse_condition("if ( getpccell \"Ebonheart, Argonian Mission\" == 1 )") ==
+               %{
+                 left: %{function: :current_cell, arg: "Ebonheart, Argonian Mission"},
+                 operator: :==,
+                 right: %{value: 1}
+               }
     end
 
-    test "GetPCCell - without == 1" do
-      assert %{function: :pc_cell, target: "vivec, arena", operator: :==, value: 1} =
-               ScriptParser.parse_condition("if ( getpccell \"vivec, arena\" )")
+    test "GetPCCell - implicit == 1" do
+      assert ScriptParser.parse_condition("if ( getpccell \"vivec, arena\" )") == %{
+               left: %{function: :current_cell, arg: "vivec, arena"},
+               operator: :==,
+               right: %{value: 1}
+             }
+    end
+
+    test "GetPCCell - not in cell" do
+      assert ScriptParser.parse_condition("if ( getpccell \"abernanit\" == 0 )") == %{
+               left: %{function: :current_cell, arg: "abernanit"},
+               operator: :==,
+               right: %{value: 0}
+             }
     end
 
     test "OnDeath - basic" do
-      assert %{function: :on_death, subject: :self} =
-               ScriptParser.parse_condition("if ( ondeath == 1 )")
+      assert ScriptParser.parse_condition("if ( ondeath == 1 )") == %{
+               left: %{function: :on_death, subject: :self},
+               operator: :==,
+               right: %{value: 1}
+             }
     end
 
     test "OnDeath - with subject" do
-      assert %{function: :on_death, subject: "netch_giant_unique"} =
-               ScriptParser.parse_condition("if ( \"netch_giant_unique\"->ondeath == 1 )")
+      assert ScriptParser.parse_condition("if ( \"netch_giant_unique\"->ondeath == 1 )") == %{
+               left: %{function: :on_death, subject: "netch_giant_unique"},
+               operator: :==,
+               right: %{value: 1}
+             }
     end
 
     test "OnActivate - basic" do
-      assert %{function: :on_activate, subject: :self, operator: :==, value: 1} =
-               ScriptParser.parse_condition("if ( onactivate == 1 )")
+      assert ScriptParser.parse_condition("if ( onactivate == 1 )") == %{
+               left: %{function: :on_activate, subject: :self},
+               operator: :==,
+               right: %{value: 1}
+             }
     end
 
     test "GetDisabled - basic" do
-      assert %{function: :disabled, subject: :self, operator: :==, value: 1} =
-               ScriptParser.parse_condition("if ( getdisabled == 1 )")
+      assert ScriptParser.parse_condition("if ( getdisabled == 1 )") == %{
+               left: %{function: :disabled, subject: :self},
+               operator: :==,
+               right: %{value: 1}
+             }
     end
 
     test "GetDisabled - with subject" do
-      assert %{function: :disabled, subject: "itermerel", operator: :==, value: 0} =
-               ScriptParser.parse_condition("if ( \"itermerel\"->getdisabled == 0 )")
+      assert ScriptParser.parse_condition("if ( \"itermerel\"->getdisabled == 0 )") == %{
+               left: %{function: :disabled, subject: "itermerel"},
+               operator: :==,
+               right: %{value: 0}
+             }
     end
 
     test "GetDistance - basic" do
-      assert %{function: :distance, subject: :self, target: "player", operator: :<=, value: 256} =
-               ScriptParser.parse_condition("if ( getdistance player <= 256 )")
+      assert ScriptParser.parse_condition("if ( getdistance player <= 256 )") == %{
+               left: %{function: :distance, subject: :self, arg: "player"},
+               operator: :<=,
+               right: %{value: 256}
+             }
     end
 
     test "GetDistance - with quoted target" do
-      assert %{
-               function: :distance,
-               subject: :self,
-               target: "guar_white_unique",
+      assert ScriptParser.parse_condition("if ( getdistance \"guar_white_unique\" <= 256 )") == %{
+               left: %{function: :distance, subject: :self, arg: "guar_white_unique"},
                operator: :<=,
-               value: 256
-             } =
-               ScriptParser.parse_condition("if ( getdistance \"guar_white_unique\" <= 256 )")
+               right: %{value: 256}
+             }
     end
 
-    test "GetDistance - with <==" do
-      # plantScript wtf
-      assert %{function: :distance, subject: :self, target: "player", operator: :<=, value: 512} =
-               ScriptParser.parse_condition("if ( getdistance player <== 512 )")
+    test "GetDistance - with <== (plantScript typo)" do
+      assert ScriptParser.parse_condition("if ( getdistance player <== 512 )") == %{
+               left: %{function: :distance, subject: :self, arg: "player"},
+               operator: :<=,
+               right: %{value: 512}
+             }
     end
 
     test "GetHealth - basic" do
-      assert %{function: :health, subject: :self, operator: :>, value: 0} =
-               ScriptParser.parse_condition("if ( gethealth > 0 )")
+      assert ScriptParser.parse_condition("if ( gethealth > 0 )") == %{
+               left: %{function: :health, subject: :self},
+               operator: :>,
+               right: %{value: 0}
+             }
     end
 
     test "GetHealth - less than or equal" do
-      assert %{function: :health, subject: :self, operator: :<=, value: 0} =
-               ScriptParser.parse_condition("if ( gethealth <= 0 )")
+      assert ScriptParser.parse_condition("if ( gethealth <= 0 )") == %{
+               left: %{function: :health, subject: :self},
+               operator: :<=,
+               right: %{value: 0}
+             }
     end
 
-    test "GetHealth - variable" do
-      assert %{function: :health, subject: :player, operator: :<=, value: "halfhealth"} =
-               ScriptParser.parse_condition("if ( player->gethealth <= halfhealth )")
+    test "GetHealth - RHS is a local variable" do
+      assert ScriptParser.parse_condition("if ( player->gethealth <= halfhealth )") == %{
+               left: %{function: :health, subject: :player},
+               operator: :<=,
+               right: %{local_var: "halfhealth"}
+             }
     end
 
-    test "GetHealth - no spaces" do
-      assert %{function: :health, subject: "Black Dart Malar", operator: :<, value: 1} =
-               ScriptParser.parse_condition("if ( \"Black Dart Malar\"->gethealth<1 )")
+    test "GetHealth - no spaces around operator" do
+      assert ScriptParser.parse_condition("if ( \"Black Dart Malar\"->gethealth<1 )") == %{
+               left: %{function: :health, subject: "Black Dart Malar"},
+               operator: :<,
+               right: %{value: 1}
+             }
     end
 
-    test "GetPCRank - basic" do
-      assert %{function: :pc_rank, target: "redoran", operator: :==, value: -1} =
-               ScriptParser.parse_condition("if ( getpcrank \"redoran\" == -1 )")
+    test "GetPCRank - parses as :rank with subject :player" do
+      assert ScriptParser.parse_condition("if ( getpcrank \"redoran\" == -1 )") == %{
+               left: %{function: :rank, subject: :player, arg: "redoran"},
+               operator: :==,
+               right: %{value: -1}
+             }
     end
 
     test "GetSpell - basic" do
-      assert %{
-               function: :knows_spell,
-               subject: :player,
-               target: "levitate",
+      assert ScriptParser.parse_condition("if ( player->getspell \"levitate\" == 1 )") == %{
+               left: %{function: :knows_spell, subject: :player, arg: "levitate"},
                operator: :==,
-               value: 1
-             } =
-               ScriptParser.parse_condition("if ( player->getspell \"levitate\" == 1 )")
+               right: %{value: 1}
+             }
     end
 
     test "GetBlightDisease - basic" do
-      assert %{function: :blight_disease, subject: :self, operator: :==, value: 0} =
-               ScriptParser.parse_condition("if ( getblightdisease == 0 )")
+      assert ScriptParser.parse_condition("if ( getblightdisease == 0 )") == %{
+               left: %{function: :blight_disease, subject: :self},
+               operator: :==,
+               right: %{value: 0}
+             }
     end
 
     test "GetBlightDisease - with subject" do
-      assert %{function: :blight_disease, subject: "kwama queen_abaesen", operator: :==, value: 1} =
-               ScriptParser.parse_condition(
-                 "if ( \"kwama queen_abaesen\"->getblightdisease == 1 )"
-               )
+      assert ScriptParser.parse_condition("if ( \"kwama queen_abaesen\"->getblightdisease == 1 )") ==
+               %{
+                 left: %{function: :blight_disease, subject: "kwama queen_abaesen"},
+                 operator: :==,
+                 right: %{value: 1}
+               }
     end
 
     test "GetCommonDisease - basic" do
-      assert %{function: :common_disease, subject: :self, operator: :==, value: 0} =
-               ScriptParser.parse_condition("if ( getcommondisease == 0 )")
+      assert ScriptParser.parse_condition("if ( getcommondisease == 0 )") == %{
+               left: %{function: :common_disease, subject: :self},
+               operator: :==,
+               right: %{value: 0}
+             }
     end
 
     test "GetCurrentAIPackage - basic" do
-      assert %{function: :current_ai_package, subject: :self, operator: :==, value: 3} =
-               ScriptParser.parse_condition("if ( getcurrentaipackage == 3 )")
+      assert ScriptParser.parse_condition("if ( getcurrentaipackage == 3 )") == %{
+               left: %{function: :current_ai_package, subject: :self},
+               operator: :==,
+               right: %{value: 3}
+             }
     end
 
     test "GetCurrentAIPackage - with subject" do
-      assert %{
-               function: :current_ai_package,
-               subject: "guar_llovyn_unique",
+      assert ScriptParser.parse_condition(
+               "if ( \"guar_llovyn_unique\"->getcurrentaipackage == 3 )"
+             ) == %{
+               left: %{function: :current_ai_package, subject: "guar_llovyn_unique"},
                operator: :==,
-               value: 3
-             } =
-               ScriptParser.parse_condition(
-                 "if ( \"guar_llovyn_unique\"->getcurrentaipackage == 3 )"
-               )
+               right: %{value: 3}
+             }
     end
 
-    test "MenuMode - basic" do
-      assert %{function: :menu_mode, operator: :==, value: 1} =
-               ScriptParser.parse_condition("if ( menumode == 1 )")
+    test "MenuMode - basic (global, no subject)" do
+      assert ScriptParser.parse_condition("if ( menumode == 1 )") == %{
+               left: %{function: :menu_mode},
+               operator: :==,
+               right: %{value: 1}
+             }
     end
 
     test "CellChanged - basic" do
-      assert %{function: :cell_changed, subject: :self, operator: :==, value: 0} =
-               ScriptParser.parse_condition("if ( cellchanged == 0 )")
+      assert ScriptParser.parse_condition("if ( cellchanged == 0 )") == %{
+               left: %{function: :cell_changed, subject: :self},
+               operator: :==,
+               right: %{value: 0}
+             }
     end
 
-    test "CellChanged - no comparison" do
-      assert %{function: :cell_changed, subject: :self} =
-               ScriptParser.parse_condition("if ( cellchanged )")
+    test "CellChanged - implicit == 1" do
+      assert ScriptParser.parse_condition("if ( cellchanged )") == %{
+               left: %{function: :cell_changed, subject: :self},
+               operator: :==,
+               right: %{value: 1}
+             }
     end
 
     test "IsWerewolf - basic" do
-      assert %{function: :is_werewolf, subject: :self} =
-               ScriptParser.parse_condition("if ( iswerewolf == 1 )")
+      assert ScriptParser.parse_condition("if ( iswerewolf == 1 )") == %{
+               left: %{function: :is_werewolf, subject: :self},
+               operator: :==,
+               right: %{value: 1}
+             }
     end
 
     test "GetRace - basic" do
-      assert %{function: :race, subject: :player, target: "dark elf", operator: :==, value: 1} =
-               ScriptParser.parse_condition("if ( player->getrace \"dark elf\" == 1 )")
+      assert ScriptParser.parse_condition("if ( player->getrace \"dark elf\" == 1 )") == %{
+               left: %{function: :race, subject: :player, arg: "dark elf"},
+               operator: :==,
+               right: %{value: 1}
+             }
     end
 
     test "HasSoulGem - basic" do
-      assert %{
-               function: :has_soul_gem,
-               subject: :player,
-               target: "golden saint",
+      assert ScriptParser.parse_condition("if ( player->hassoulgem \"golden saint\" > 0 )") == %{
+               left: %{function: :has_soul_gem, subject: :player, arg: "golden saint"},
                operator: :>,
-               value: 0
-             } =
-               ScriptParser.parse_condition("if ( player->hassoulgem \"golden saint\" > 0 )")
+               right: %{value: 0}
+             }
     end
 
     test "GetLocked - basic" do
-      assert %{function: :locked, subject: :self} =
-               ScriptParser.parse_condition("if ( getlocked == 1 )")
+      assert ScriptParser.parse_condition("if ( getlocked == 1 )") == %{
+               left: %{function: :locked, subject: :self},
+               operator: :==,
+               right: %{value: 1}
+             }
     end
 
-    test "ScriptRunning - basic" do
-      assert %{function: :script_running, target: "myquest", operator: :==, value: 1} =
-               ScriptParser.parse_condition("if ( scriptrunning myquest )")
+    test "ScriptRunning - basic (global, no subject)" do
+      assert ScriptParser.parse_condition("if ( scriptrunning myquest )") == %{
+               left: %{function: :script_running, arg: "myquest"},
+               operator: :==,
+               right: %{value: 1}
+             }
     end
 
-    test "PCExpelled - basic" do
-      assert %{function: :expelled, target: "mages guild"} =
-               ScriptParser.parse_condition("if ( pcexpelled \"mages guild\" )")
+    test "PCExpelled - basic (global, no subject)" do
+      assert ScriptParser.parse_condition("if ( pcexpelled \"mages guild\" )") == %{
+               left: %{function: :expelled, arg: "mages guild"},
+               operator: :==,
+               right: %{value: 1}
+             }
     end
 
     test "GetAttacked - basic" do
-      assert %{function: :attacked, subject: :self} =
-               ScriptParser.parse_condition("if ( getattacked == 1 )")
+      assert ScriptParser.parse_condition("if ( getattacked == 1 )") == %{
+               left: %{function: :attacked, subject: :self},
+               operator: :==,
+               right: %{value: 1}
+             }
     end
 
     test "GetAttacked - with subject" do
-      assert %{function: :attacked, subject: "yagrum bagarn"} =
-               ScriptParser.parse_condition("if ( \"yagrum bagarn\"->getattacked == 1 )")
+      assert ScriptParser.parse_condition("if ( \"yagrum bagarn\"->getattacked == 1 )") == %{
+               left: %{function: :attacked, subject: "yagrum bagarn"},
+               operator: :==,
+               right: %{value: 1}
+             }
     end
 
-    # DaysPassed and GameHour
-    test "DaysPassed - basic" do
-      assert %{function: :days_passed, operator: :>, value: 10} =
-               ScriptParser.parse_condition("if ( dayspassed > 10 )")
+    test "DaysPassed - basic (global)" do
+      assert ScriptParser.parse_condition("if ( dayspassed > 10 )") == %{
+               left: %{function: :days_passed},
+               operator: :>,
+               right: %{value: 10}
+             }
     end
 
     test "DaysPassed - equals" do
-      assert %{function: :days_passed, operator: :==, value: 0} =
-               ScriptParser.parse_condition("if ( dayspassed == 0 )")
+      assert ScriptParser.parse_condition("if ( dayspassed == 0 )") == %{
+               left: %{function: :days_passed},
+               operator: :==,
+               right: %{value: 0}
+             }
     end
 
-    test "GameHour - greater than or equal" do
-      assert %{function: :game_hour, operator: :>=, value: 9} =
-               ScriptParser.parse_condition("if ( gamehour >= 9 )")
+    test "GameHour - greater than or equal (global)" do
+      assert ScriptParser.parse_condition("if ( gamehour >= 9 )") == %{
+               left: %{function: :game_hour},
+               operator: :>=,
+               right: %{value: 9}
+             }
     end
 
     test "GameHour - less than" do
-      assert %{function: :game_hour, operator: :<, value: 22} =
-               ScriptParser.parse_condition("if ( gamehour < 22 )")
+      assert ScriptParser.parse_condition("if ( gamehour < 22 )") == %{
+               left: %{function: :game_hour},
+               operator: :<,
+               right: %{value: 22}
+             }
     end
 
-    # GetAIPackageDone
     test "GetAIPackageDone - basic" do
-      assert %{function: :ai_package_done, subject: :self, operator: :==, value: 1} =
-               ScriptParser.parse_condition("if ( getaipackagedone == 1 )")
+      assert ScriptParser.parse_condition("if ( getaipackagedone == 1 )") == %{
+               left: %{function: :ai_package_done, subject: :self},
+               operator: :==,
+               right: %{value: 1}
+             }
     end
 
     test "GetAIPackageDone - with subject" do
-      assert %{function: :ai_package_done, subject: "fargoth", operator: :==, value: 1} =
-               ScriptParser.parse_condition("if ( fargoth->getaipackagedone == 1 )")
+      assert ScriptParser.parse_condition("if ( fargoth->getaipackagedone == 1 )") == %{
+               left: %{function: :ai_package_done, subject: "fargoth"},
+               operator: :==,
+               right: %{value: 1}
+             }
     end
 
-    # GetButtonPressed
-    test "GetButtonPressed - basic" do
-      assert %{function: :button_pressed, operator: :!=, value: -1} =
-               ScriptParser.parse_condition("if ( getbuttonpressed != -1 )")
+    test "GetButtonPressed - basic (global)" do
+      assert ScriptParser.parse_condition("if ( getbuttonpressed != -1 )") == %{
+               left: %{function: :button_pressed},
+               operator: :!=,
+               right: %{value: -1}
+             }
     end
 
-    # GetCollidingPC / GetCollidingActor
     test "GetCollidingPC - basic" do
-      assert %{function: :colliding_pc, subject: :self} =
-               ScriptParser.parse_condition("if ( getcollidingpc == 1 )")
+      assert ScriptParser.parse_condition("if ( getcollidingpc == 1 )") == %{
+               left: %{function: :colliding_pc, subject: :self},
+               operator: :==,
+               right: %{value: 1}
+             }
     end
 
-    test "GetCollidingPC - no comparison" do
-      assert %{function: :colliding_pc, subject: :self} =
-               ScriptParser.parse_condition("if ( getcollidingpc )")
+    test "GetCollidingPC - implicit == 1" do
+      assert ScriptParser.parse_condition("if ( getcollidingpc )") == %{
+               left: %{function: :colliding_pc, subject: :self},
+               operator: :==,
+               right: %{value: 1}
+             }
     end
 
-    test "GetCollidingActor - no comparison" do
-      assert %{function: :colliding_actor, subject: :self} =
-               ScriptParser.parse_condition("if ( getcollidingactor )")
+    test "GetCollidingActor - implicit == 1" do
+      assert ScriptParser.parse_condition("if ( getcollidingactor )") == %{
+               left: %{function: :colliding_actor, subject: :self},
+               operator: :==,
+               right: %{value: 1}
+             }
     end
 
-    # GetCurrentWeather
-    test "GetCurrentWeather - basic" do
-      assert %{function: :current_weather, operator: :>=, value: 5} =
-               ScriptParser.parse_condition("if ( getcurrentweather >= 5 )")
+    test "GetCurrentWeather - basic (global)" do
+      assert ScriptParser.parse_condition("if ( getcurrentweather >= 5 )") == %{
+               left: %{function: :current_weather},
+               operator: :>=,
+               right: %{value: 5}
+             }
     end
 
-    # GetDetected
     test "GetDetected - basic" do
-      assert %{function: :detected, subject: :self, target: "player", operator: :==, value: 1} =
-               ScriptParser.parse_condition("if ( getdetected player == 1 )")
+      assert ScriptParser.parse_condition("if ( getdetected player == 1 )") == %{
+               left: %{function: :detected, subject: :self, arg: "player"},
+               operator: :==,
+               right: %{value: 1}
+             }
     end
 
     test "GetDetected - with subject and quoted target" do
-      assert %{function: :detected, subject: "jeanne", target: "player", operator: :==, value: 1} =
-               ScriptParser.parse_condition("if ( jeanne->getdetected player == 1 )")
-    end
-
-    # GetDisposition
-    test "GetDisposition - with subject" do
-      assert %{function: :disposition, subject: "huleeya", operator: :>, value: 50} =
-               ScriptParser.parse_condition("if ( huleeya->getdisposition > 50 )")
-    end
-
-    # GetEffect
-    test "GetEffect - basic" do
-      assert %{
-               function: :effect,
-               subject: :self,
-               target: "seffectinvisibility",
+      assert ScriptParser.parse_condition("if ( jeanne->getdetected player == 1 )") == %{
+               left: %{function: :detected, subject: "jeanne", arg: "player"},
                operator: :==,
-               value: 1
-             } =
-               ScriptParser.parse_condition("if ( geteffect seffectinvisibility == 1 )")
+               right: %{value: 1}
+             }
+    end
+
+    test "GetDisposition - with subject" do
+      assert ScriptParser.parse_condition("if ( huleeya->getdisposition > 50 )") == %{
+               left: %{function: :disposition, subject: "huleeya"},
+               operator: :>,
+               right: %{value: 50}
+             }
+    end
+
+    test "GetEffect - basic" do
+      assert ScriptParser.parse_condition("if ( geteffect seffectinvisibility == 1 )") == %{
+               left: %{function: :effect, subject: :self, arg: "seffectinvisibility"},
+               operator: :==,
+               right: %{value: 1}
+             }
     end
 
     test "GetEffect - with subject" do
-      assert %{
-               function: :effect,
-               subject: :player,
-               target: "seffectpoison",
+      assert ScriptParser.parse_condition("if ( player->geteffect seffectpoison == 1 )") == %{
+               left: %{function: :effect, subject: :player, arg: "seffectpoison"},
                operator: :==,
-               value: 1
-             } =
-               ScriptParser.parse_condition("if ( player->geteffect seffectpoison == 1 )")
+               right: %{value: 1}
+             }
     end
 
-    # GetFatigue / GetMagicka
     test "GetFatigue - basic" do
-      assert %{function: :fatigue, subject: :self, operator: :<, value: 1} =
-               ScriptParser.parse_condition("if ( getfatigue < 1 )")
+      assert ScriptParser.parse_condition("if ( getfatigue < 1 )") == %{
+               left: %{function: :fatigue, subject: :self},
+               operator: :<,
+               right: %{value: 1}
+             }
     end
 
     test "GetMagicka - basic" do
-      assert %{function: :magicka, subject: :self, operator: :>, value: 0} =
-               ScriptParser.parse_condition("if ( getmagicka > 0 )")
+      assert ScriptParser.parse_condition("if ( getmagicka > 0 )") == %{
+               left: %{function: :magicka, subject: :self},
+               operator: :>,
+               right: %{value: 0}
+             }
     end
 
-    # GetLevel
     test "GetLevel - basic" do
-      assert %{function: :level, subject: :player, operator: :>=, value: 30} =
-               ScriptParser.parse_condition("if ( player->getlevel >= 30 )")
+      assert ScriptParser.parse_condition("if ( player->getlevel >= 30 )") == %{
+               left: %{function: :level, subject: :player},
+               operator: :>=,
+               right: %{value: 30}
+             }
     end
 
-    # GetLOS (line of sight)
     test "GetLOS - basic" do
-      assert %{
-               function: :line_of_sight,
-               subject: :self,
-               target: "player",
+      assert ScriptParser.parse_condition("if ( getlos player == 1 )") == %{
+               left: %{function: :line_of_sight, subject: :self, arg: "player"},
                operator: :==,
-               value: 1
-             } =
-               ScriptParser.parse_condition("if ( getlos player == 1 )")
+               right: %{value: 1}
+             }
     end
 
-    # GetPos
     test "GetPos - basic" do
-      assert %{function: :position, subject: :self, target: "y", operator: :>, value: 1730} =
-               ScriptParser.parse_condition("if ( getpos y > 1730 )")
+      assert ScriptParser.parse_condition("if ( getpos y > 1730 )") == %{
+               left: %{function: :position, subject: :self, arg: "y"},
+               operator: :>,
+               right: %{value: 1730}
+             }
     end
 
     test "GetPos - with subject" do
-      assert %{
-               function: :position,
-               subject: "sharn gra-muzgob",
-               target: "z",
+      assert ScriptParser.parse_condition("if ( \"sharn gra-muzgob\"->getpos z < -1000 )") == %{
+               left: %{function: :position, subject: "sharn gra-muzgob", arg: "z"},
                operator: :<,
-               value: -1000
-             } =
-               ScriptParser.parse_condition("if ( \"sharn gra-muzgob\"->getpos z < -1000 )")
+               right: %{value: -1000}
+             }
     end
 
-    # GetSoundPlaying
-    test "GetSoundPlaying - basic" do
-      assert %{
-               function: :sound_playing,
-               subject: :self,
-               target: "sound_id",
+    test "GetSoundPlaying - basic (global, no subject)" do
+      assert ScriptParser.parse_condition("if ( getsoundplaying \"sound_id\" == 1 )") == %{
+               left: %{function: :sound_playing, arg: "sound_id"},
                operator: :==,
-               value: 1
-             } =
-               ScriptParser.parse_condition("if ( getsoundplaying \"sound_id\" == 1 )")
+               right: %{value: 1}
+             }
     end
 
-    # GetStandingPC / GetStandingActor
     test "GetStandingPC - basic" do
-      assert %{function: :standing_pc, subject: :self, operator: :==, value: 1} =
-               ScriptParser.parse_condition("if ( getstandingpc == 1 )")
+      assert ScriptParser.parse_condition("if ( getstandingpc == 1 )") == %{
+               left: %{function: :standing_pc, subject: :self},
+               operator: :==,
+               right: %{value: 1}
+             }
     end
 
     test "GetStandingActor - basic" do
-      assert %{function: :standing_actor, subject: :self, operator: :==, value: 1} =
-               ScriptParser.parse_condition("if ( getstandingactor == 1 )")
+      assert ScriptParser.parse_condition("if ( getstandingactor == 1 )") == %{
+               left: %{function: :standing_actor, subject: :self},
+               operator: :==,
+               right: %{value: 1}
+             }
     end
 
-    # GetTarget
     test "GetTarget - basic" do
-      assert %{function: :target, subject: :self, target: "player", operator: :==, value: 1} =
-               ScriptParser.parse_condition("if ( gettarget player == 1 )")
+      assert ScriptParser.parse_condition("if ( gettarget player == 1 )") == %{
+               left: %{function: :target, subject: :self, arg: "player"},
+               operator: :==,
+               right: %{value: 1}
+             }
     end
 
     test "GetTarget - with subject" do
-      assert %{function: :target, subject: "someone", target: "player", operator: :==, value: 1} =
-               ScriptParser.parse_condition("if ( \"someone\"->gettarget player == 1 )")
-    end
-
-    # GetWaterLevel
-    test "GetWaterLevel - basic" do
-      assert %{function: :water_level, subject: :self, operator: :!=, value: -875} =
-               ScriptParser.parse_condition("if ( getwaterlevel != -875 )")
-    end
-
-    # GetWeaponDrawn
-    test "GetWeaponDrawn - basic" do
-      assert %{function: :weapon_drawn, subject: :player, operator: :==, value: 0} =
-               ScriptParser.parse_condition("if ( player->getweapondrawn == 0 )")
-    end
-
-    # GetWerewolfKills
-    test "GetWerewolfKills - basic" do
-      assert %{function: :werewolf_kills, operator: :==, value: 0} =
-               ScriptParser.parse_condition("if ( getwerewolfkills == 0 )")
-    end
-
-    # HasItemEquipped
-    test "HasItemEquipped - basic" do
-      assert %{
-               function: :has_item_equipped,
-               subject: :player,
-               target: "steel saber_elberoth",
+      assert ScriptParser.parse_condition("if ( \"someone\"->gettarget player == 1 )") == %{
+               left: %{function: :target, subject: "someone", arg: "player"},
                operator: :==,
-               value: 1
-             } =
-               ScriptParser.parse_condition(
-                 "if ( player->hasitemequipped \"steel saber_elberoth\" == 1 )"
-               )
+               right: %{value: 1}
+             }
     end
 
-    # OnKnockout
+    test "GetWaterLevel - basic (global, no subject)" do
+      assert ScriptParser.parse_condition("if ( getwaterlevel != -875 )") == %{
+               left: %{function: :water_level},
+               operator: :!=,
+               right: %{value: -875}
+             }
+    end
+
+    test "GetWeaponDrawn - basic" do
+      assert ScriptParser.parse_condition("if ( player->getweapondrawn == 0 )") == %{
+               left: %{function: :weapon_drawn, subject: :player},
+               operator: :==,
+               right: %{value: 0}
+             }
+    end
+
+    test "GetWerewolfKills - basic (global)" do
+      assert ScriptParser.parse_condition("if ( getwerewolfkills == 0 )") == %{
+               left: %{function: :werewolf_kills},
+               operator: :==,
+               right: %{value: 0}
+             }
+    end
+
+    test "HasItemEquipped - basic" do
+      assert ScriptParser.parse_condition(
+               "if ( player->hasitemequipped \"steel saber_elberoth\" == 1 )"
+             ) == %{
+               left: %{
+                 function: :has_item_equipped,
+                 subject: :player,
+                 arg: "steel saber_elberoth"
+               },
+               operator: :==,
+               right: %{value: 1}
+             }
+    end
+
     test "OnKnockout - basic" do
-      assert %{function: :on_knockout, subject: :self} =
-               ScriptParser.parse_condition("if ( onknockout == 1 )")
+      assert ScriptParser.parse_condition("if ( onknockout == 1 )") == %{
+               left: %{function: :on_knockout, subject: :self},
+               operator: :==,
+               right: %{value: 1}
+             }
     end
 
-    # OnMurder
     test "OnMurder - basic" do
-      assert %{function: :on_murder, subject: :self} =
-               ScriptParser.parse_condition("if ( onmurder == 1 )")
+      assert ScriptParser.parse_condition("if ( onmurder == 1 )") == %{
+               left: %{function: :on_murder, subject: :self},
+               operator: :==,
+               right: %{value: 1}
+             }
     end
 
-    # OnPCEquip
     test "OnPCEquip - basic" do
-      assert %{function: :on_pc_equip, subject: :self, operator: :==, value: 1} =
-               ScriptParser.parse_condition("if ( onpcequip == 1 )")
+      assert ScriptParser.parse_condition("if ( onpcequip == 1 )") == %{
+               left: %{function: :on_equip, subject: :self},
+               operator: :==,
+               right: %{value: 1}
+             }
     end
 
     test "OnPCEquip - not equal" do
-      assert %{function: :on_pc_equip, subject: :self, operator: :!=, value: 1} =
-               ScriptParser.parse_condition("if ( onpcequip != 1 )")
+      assert ScriptParser.parse_condition("if ( onpcequip != 1 )") == %{
+               left: %{function: :on_equip, subject: :self},
+               operator: :!=,
+               right: %{value: 1}
+             }
     end
 
-    # OnPCHitMe
     test "OnPCHitMe - basic" do
-      assert %{function: :on_pc_hit_me, subject: :self} =
-               ScriptParser.parse_condition("if ( onpchitme == 1 )")
+      assert ScriptParser.parse_condition("if ( onpchitme == 1 )") == %{
+               left: %{function: :on_hit_me, subject: :self},
+               operator: :==,
+               right: %{value: 1}
+             }
     end
 
-    # Random
-    test "Random - basic" do
-      assert %{function: :random, target: 100, operator: :>, value: 50} =
-               ScriptParser.parse_condition("if ( random 100 > 50 )")
+    test "Random - basic (global)" do
+      assert ScriptParser.parse_condition("if ( random 100 > 50 )") == %{
+               left: %{function: :random, arg: 100},
+               operator: :>,
+               right: %{value: 50}
+             }
     end
 
     test "Random - nested parens" do
-      assert %{function: :random, target: 100, operator: :<, value: 90} =
-               ScriptParser.parse_condition("if ( ( random 100 ) < 90 )")
+      assert ScriptParser.parse_condition("if ( ( random 100 ) < 90 )") == %{
+               left: %{function: :random, arg: 100},
+               operator: :<,
+               right: %{value: 90}
+             }
     end
 
-    # SayDone
     test "SayDone - basic" do
-      assert %{function: :say_done, subject: :self, operator: :==, value: 1} =
-               ScriptParser.parse_condition("if ( saydone == 1 )")
+      assert ScriptParser.parse_condition("if ( saydone == 1 )") == %{
+               left: %{function: :say_done, subject: :self},
+               operator: :==,
+               right: %{value: 1}
+             }
     end
 
     test "SayDone - with subject" do
-      assert %{function: :say_done, subject: :player, operator: :==, value: 1} =
-               ScriptParser.parse_condition("if ( player->saydone == 1 )")
+      assert ScriptParser.parse_condition("if ( player->saydone == 1 )") == %{
+               left: %{function: :say_done, subject: :player},
+               operator: :==,
+               right: %{value: 1}
+             }
     end
 
-    # GetInterior
-    test "GetInterior - no comparison" do
-      assert %{function: :interior, subject: :self} =
-               ScriptParser.parse_condition("if ( getinterior )")
+    test "GetInterior - implicit == 1" do
+      assert ScriptParser.parse_condition("if ( getinterior )") == %{
+               left: %{function: :interior, subject: :self},
+               operator: :==,
+               right: %{value: 1}
+             }
     end
 
     # Format variations
     test "Subject with space before arrow" do
-      assert %{function: :disabled, subject: "duma gro-lag2", operator: :==, value: 1} =
-               ScriptParser.parse_condition("if ( \"duma gro-lag2\"-> getdisabled == 1 )")
+      assert ScriptParser.parse_condition("if ( \"duma gro-lag2\"-> getdisabled == 1 )") == %{
+               left: %{function: :disabled, subject: "duma gro-lag2"},
+               operator: :==,
+               right: %{value: 1}
+             }
     end
 
     test "No spaces around operator" do
-      assert %{function: :level, subject: :player, operator: :>=, value: 20} =
-               ScriptParser.parse_condition("if ( player->getlevel >=20 )")
+      assert ScriptParser.parse_condition("if ( player->getlevel >=20 )") == %{
+               left: %{function: :level, subject: :player},
+               operator: :>=,
+               right: %{value: 20}
+             }
     end
 
-    test "GetPCCell - not in cell" do
-      assert %{function: :pc_cell, target: "abernanit", operator: :==, value: 0} =
-               ScriptParser.parse_condition("if ( getpccell \"abernanit\" == 0 )")
-    end
-
+    # Local variables — appear in either or both sides as `%{local_var: name}`.
     test "Local variable - basic" do
-      assert %{function: :local_var, target: "doonce", operator: :==, value: 0} =
-               ScriptParser.parse_condition("if ( doonce == 0 )", ["doonce"])
+      assert ScriptParser.parse_condition("if ( doonce == 0 )", ["doonce"]) == %{
+               left: %{local_var: "doonce"},
+               operator: :==,
+               right: %{value: 0}
+             }
     end
 
     test "Local variable - greater than" do
-      assert %{function: :local_var, target: "state", operator: :>, value: 1} =
-               ScriptParser.parse_condition("if ( state > 1 )", ["state"])
+      assert ScriptParser.parse_condition("if ( state > 1 )", ["state"]) == %{
+               left: %{local_var: "state"},
+               operator: :>,
+               right: %{value: 1}
+             }
     end
 
     test "Local variable - overlapping name" do
-      assert %{function: :local_var, target: "randomized", operator: :==, value: 0} =
-               ScriptParser.parse_condition("if ( randomized == 0 )", ["randomized"])
+      assert ScriptParser.parse_condition("if ( randomized == 0 )", ["randomized"]) == %{
+               left: %{local_var: "randomized"},
+               operator: :==,
+               right: %{value: 0}
+             }
     end
 
-    test "Local variable - with arithmetic and nested parens" do
-      assert %{
-               function: :local_var,
-               target: "moneyExpected * 2",
+    test "Local variable - arithmetic kept as raw string on both sides" do
+      assert ScriptParser.parse_condition(
+               "if ( ( moneyExpected * 2 ) < TR_m4_TT_And_GoldCounter )",
+               ["moneyExpected"]
+             ) == %{
+               left: %{local_var: "moneyExpected * 2"},
                operator: :<,
-               value: "TR_m4_TT_And_GoldCounter"
-             } =
-               ScriptParser.parse_condition(
-                 "if ( ( moneyExpected * 2 ) < TR_m4_TT_And_GoldCounter )",
-                 ["moneyExpected"]
-               )
+               right: %{local_var: "TR_m4_TT_And_GoldCounter"}
+             }
     end
 
-    test "something crazy" do
-      assert %{function: :unknown, content: "player->getshortblade > player->getbluntweapon"} =
-               ScriptParser.parse_condition(
-                 "if ( player->getshortblade > player->getbluntweapon )"
-               )
+    test "compound - getshortblade > getbluntweapon (T_ScObj_RuneHestra)" do
+      assert ScriptParser.parse_condition("if ( player->getshortblade > player->getbluntweapon )") ==
+               %{
+                 left: %{function: :short_blade, subject: :player},
+                 operator: :>,
+                 right: %{function: :blunt_weapon, subject: :player}
+               }
+    end
+
+    test "compound - getlongblade > getaxe (T_ScObj_RuneReman)" do
+      assert ScriptParser.parse_condition("if ( player->getlongblade > player->getaxe )") == %{
+               left: %{function: :long_blade, subject: :player},
+               operator: :>,
+               right: %{function: :axe, subject: :player}
+             }
     end
 
     test "returns nil for non-condition" do
       assert nil == ScriptParser.parse_condition("Journal Quest 50")
       assert nil == ScriptParser.parse_condition("AddItem gold 100")
+    end
+  end
+
+  describe "block boundary handling" do
+    # Stray block-terminator tokens (endif, else, endwhile) and mid-body
+    # local declarations currently leak through parse_single_line as
+    # :unknown effects. Real-world reproducers: ColonyTimer (6 stray
+    # endifs), HroldarScript, vedeleaFollow, PlagueNerile, and the
+    # Example_NPC_Stuff fixture (mid-body short/long declarations).
+
+    test "stray endif at top level produces no :unknown effect" do
+      script = """
+      Journal "Q" 10
+      endif
+      """
+
+      ast = ScriptParser.parse(script)
+
+      refute Enum.any?(ast.body, fn
+        %Script.Effect{function: :unknown} -> true
+        _ -> false
+      end)
+    end
+
+    test "stray else at top level produces no :unknown effect" do
+      script = """
+      Journal "Q" 10
+      else
+      """
+
+      ast = ScriptParser.parse(script)
+
+      refute Enum.any?(ast.body, fn
+        %Script.Effect{function: :unknown} -> true
+        _ -> false
+      end)
+    end
+
+    test "local declarations appearing after the header are still collected" do
+      script = """
+      begin TestScript
+      short doOnce
+
+      if ( doOnce == 0 )
+        Journal "Q" 10
+        set doOnce to 1
+      endif
+
+      short laterDecl
+      """
+
+      ast = ScriptParser.parse(script)
+
+      assert ast.name == "testscript"
+      assert "doonce" in ast.locals
+      assert "laterdecl" in ast.locals
+
+      refute Enum.any?(ast.body, fn
+        %Script.Effect{function: :unknown} -> true
+        _ -> false
+      end)
+    end
+  end
+
+  describe "while loops" do
+    # Real-world reproducer: totemScript (BM_Ceremony1) summons N bears via
+    # a while loop, with the place-bear command escaping to the outer scope.
+    test "simple while loop produces a WhileBlock" do
+      script = """
+      begin TestWhile
+      short temp
+
+      while ( temp != 0 )
+        set temp to ( temp - 1 )
+      endwhile
+      """
+
+      expected = %Script.Ast{
+        name: "testwhile",
+        locals: ["temp"],
+        body: [
+          %Script.WhileBlock{
+            condition: %{
+              left: %{local_var: "temp"},
+              operator: :!=,
+              right: %{value: 0}
+            },
+            body: [
+              %Script.Effect{
+                function: :set_variable,
+                data: %{variable: "temp", value: "temp - 1"}
+              }
+            ]
+          }
+        ]
+      }
+
+      assert ScriptParser.parse(script) == expected
+    end
+
+    test "while loops can contain Journal commands" do
+      # Walker contract: WhileBlock should attribute its surrounding effects
+      # and conditions to nested journals the same way IfBlock does.
+      script = """
+      begin BearSummoner
+      short count
+
+      while ( count > 0 )
+        Journal "BM_Ceremony1" 10
+        set count to ( count - 1 )
+      endwhile
+      """
+
+      expected = %Script.Ast{
+        name: "bearsummoner",
+        locals: ["count"],
+        body: [
+          %Script.WhileBlock{
+            condition: %{
+              left: %{local_var: "count"},
+              operator: :>,
+              right: %{value: 0}
+            },
+            body: [
+              %Script.Journal{quest_id: "bm_ceremony1", index: 10},
+              %Script.Effect{
+                function: :set_variable,
+                data: %{variable: "count", value: "count - 1"}
+              }
+            ]
+          }
+        ]
+      }
+
+      assert ScriptParser.parse(script) == expected
+    end
+
+    test "while loops can nest inside if blocks" do
+      script = """
+      begin Nested
+      short ready
+      short count
+
+      if ( ready == 1 )
+        while ( count > 0 )
+          Journal "Q" 10
+        endwhile
+      endif
+      """
+
+      expected = %Script.Ast{
+        name: "nested",
+        locals: ["ready", "count"],
+        body: [
+          %Script.IfBlock{
+            condition: %{
+              left: %{local_var: "ready"},
+              operator: :==,
+              right: %{value: 1}
+            },
+            body: [
+              %Script.WhileBlock{
+                condition: %{
+                  left: %{local_var: "count"},
+                  operator: :>,
+                  right: %{value: 0}
+                },
+                body: [
+                  %Script.Journal{quest_id: "q", index: 10}
+                ]
+              }
+            ],
+            else_clause: nil
+          }
+        ]
+      }
+
+      assert ScriptParser.parse(script) == expected
     end
   end
 end

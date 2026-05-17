@@ -13,6 +13,10 @@ defmodule Resdayn.Importer.Quests.Script do
     defstruct [:condition, :body, :else_clause]
   end
 
+  defmodule WhileBlock do
+    defstruct [:condition, :body]
+  end
+
   defmodule Journal do
     defstruct [:quest_id, :index]
   end

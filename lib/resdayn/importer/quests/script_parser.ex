@@ -50,12 +50,18 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
   defp parse_body([], _locals, acc), do: Enum.reverse(acc)
 
   defp parse_body([line | lines], locals, acc) do
-    if String.starts_with?(line, "if") do
-      {block, rest} = parse_if_block(line, lines, locals)
-      parse_body(rest, locals, [block | acc])
-    else
-      item = parse_single_line(line)
-      parse_body(lines, locals, maybe_cons(item, acc))
+    cond do
+      String.starts_with?(line, "if") ->
+        {block, rest} = parse_if_block(line, lines, locals)
+        parse_body(rest, locals, [block | acc])
+
+      String.starts_with?(line, "while") ->
+        {block, rest} = parse_while_block(line, lines, locals)
+        parse_body(rest, locals, [block | acc])
+
+      true ->
+        item = parse_single_line(line)
+        parse_body(lines, locals, maybe_cons(item, acc))
     end
   end
 
@@ -67,6 +73,18 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
       condition: condition,
       body: body,
       else_clause: else_clause
+    }
+
+    {block, rest}
+  end
+
+  defp parse_while_block(line, lines, locals) do
+    condition = parse_condition(line, locals)
+    {body, rest} = parse_while_body(lines, locals, [])
+
+    block = %Script.WhileBlock{
+      condition: condition,
+      body: body
     }
 
     {block, rest}
@@ -94,10 +112,38 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
         {block, rest} = parse_if_block(line, lines, locals)
         parse_block_body(rest, locals, [block | acc])
 
+      String.starts_with?(line, "while") ->
+        {block, rest} = parse_while_block(line, lines, locals)
+        parse_block_body(rest, locals, [block | acc])
+
       true ->
         # No keywords - a journal, effect, etc.
         item = parse_single_line(line)
         parse_block_body(lines, locals, maybe_cons(item, acc))
+    end
+  end
+
+  defp parse_while_body([], _locals, acc) do
+    # Unbalanced - return what we have
+    {Enum.reverse(acc), []}
+  end
+
+  defp parse_while_body([line | lines], locals, acc) do
+    cond do
+      String.starts_with?(line, "endwhile") ->
+        {Enum.reverse(acc), lines}
+
+      String.starts_with?(line, "if") ->
+        {block, rest} = parse_if_block(line, lines, locals)
+        parse_while_body(rest, locals, [block | acc])
+
+      String.starts_with?(line, "while") ->
+        {block, rest} = parse_while_block(line, lines, locals)
+        parse_while_body(rest, locals, [block | acc])
+
+      true ->
+        item = parse_single_line(line)
+        parse_while_body(lines, locals, maybe_cons(item, acc))
     end
   end
 
@@ -197,6 +243,11 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
             s = walk_if_block(block, %{s | inherited_effects: cumulative})
             {s, cumulative}
 
+          %Script.WhileBlock{} = block ->
+            # Same inheritance rules as IfBlock; no else clause.
+            s = walk_while_block(block, %{s | inherited_effects: cumulative})
+            {s, cumulative}
+
           %Script.Effect{} = effect ->
             # Add to cumulative for future nested blocks
             effect_data = Map.put(effect.data, :function, effect.function)
@@ -248,6 +299,12 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
       else_body when is_list(else_body) ->
         process_branch(nil, else_body, state)
     end
+  end
+
+  defp walk_while_block(%Script.WhileBlock{} = block, state) do
+    # Journals inside the loop body inherit the loop's guard condition,
+    # the same way an if-block's body inherits its condition.
+    process_branch(block.condition, block.body, state)
   end
 
   # Process a branch (if body, elseif body, or else body)
