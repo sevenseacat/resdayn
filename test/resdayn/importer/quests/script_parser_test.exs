@@ -796,7 +796,7 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
                  index: 50,
                  effects: [
                    %{function: :enable, subject: "ring of azura"},
-                   %{function: :mod_reputation, value: 10}
+                   %{function: :mod_reputation, value: 10, subject: :self}
                  ],
                  conditions: [
                    %{
@@ -811,7 +811,7 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
                  index: 50,
                  effects: [
                    %{function: :enable, subject: "ring of azura"},
-                   %{function: :mod_reputation, value: 10}
+                   %{function: :mod_reputation, value: 10, subject: :self}
                  ],
                  conditions: [
                    %{
@@ -2594,7 +2594,7 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
       short temp
 
       while ( temp != 0 )
-        set temp to ( temp - 1 )
+        set temp to temp - 1
       endwhile
       """
 
@@ -2630,7 +2630,7 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
 
       while ( count > 0 )
         Journal "BM_Ceremony1" 10
-        set count to ( count - 1 )
+        set count to count - 1
       endwhile
       """
 

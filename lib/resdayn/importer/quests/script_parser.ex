@@ -400,6 +400,134 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
   # ============================================================================
   # Condition Parsing
   # ============================================================================
+  #
+  # A parsed condition has the shape:
+  #
+  #   %{
+  #     left:     %{function: atom, subject?: term, arg?: term}
+  #            |  %{local_var: name_or_arithmetic_string},
+  #     operator: atom,
+  #     right:    %{value: integer}
+  #            |  %{local_var: name}
+  #            |  %{function: atom, subject?: term, arg?: term}
+  #   }
+  #
+  # Both sides of the comparison are expressions parsed independently, so
+  # compound conditions like `player->getshortblade > player->getbluntweapon`
+  # work — both sides see the same expression parser.
+  #
+  # Boolean-ish conditions (`getinterior`, `iswerewolf`) materialise an
+  # implicit `== 1` rather than leaving operator/right blank.
+  #
+  # The arrow rule: a function takes a `subject` field iff a script can write
+  # `subject->func` in real source. Otherwise the function is global and the
+  # parsed shape omits `subject`. The atom `:rank` (was `:pc_rank`) defaults
+  # to `:player` since the player is the only meaningful subject.
+  # ============================================================================
+
+  # Table of recognised script-condition functions.
+  #
+  #   {keyword, function_atom, arg_kind, subject_kind}
+  #
+  # arg_kind:
+  #   :no_arg       — function takes no argument (e.g. getlevel)
+  #   :string_arg   — function takes a quoted/unquoted identifier (e.g. getitemcount "x")
+  #   :integer_arg  — function takes an integer literal (e.g. random 100)
+  #
+  # subject_kind:
+  #   :actor_bound  — defaults to :self if no `subject->` prefix
+  #   :global       — never carries a subject
+  #   :player       — defaults to :player (rank only, for now)
+  #
+  # Order matters when one keyword is a prefix of another — list longest
+  # first. `starts_with_keyword?/2` also enforces a word boundary after the
+  # keyword so `getlevel` doesn't accidentally match `getleveltracked`.
+  @function_keywords [
+    # Quest / journal
+    {"getjournalindex", :journal_index, :string_arg, :global},
+    {"getdeadcount", :dead_count, :string_arg, :global},
+
+    # Cell / location
+    {"getpccell", :current_cell, :string_arg, :global},
+    {"getinterior", :interior, :no_arg, :actor_bound},
+
+    # Items / inventory
+    {"hasitemequipped", :has_item_equipped, :string_arg, :actor_bound},
+    {"getitemcount", :item_count, :string_arg, :actor_bound},
+    {"hassoulgem", :has_soul_gem, :string_arg, :actor_bound},
+
+    # Events
+    {"onactivate", :on_activate, :no_arg, :actor_bound},
+    {"onknockout", :on_knockout, :no_arg, :actor_bound},
+    {"onpchitme", :on_hit_me, :no_arg, :actor_bound},
+    {"onpcequip", :on_equip, :no_arg, :actor_bound},
+    {"onmurder", :on_murder, :no_arg, :actor_bound},
+    {"ondeath", :on_death, :no_arg, :actor_bound},
+
+    # State checks
+    {"getdisabled", :disabled, :no_arg, :actor_bound},
+    {"getlocked", :locked, :no_arg, :actor_bound},
+    {"getattacked", :attacked, :no_arg, :actor_bound},
+    {"iswerewolf", :is_werewolf, :no_arg, :actor_bound},
+    {"cellchanged", :cell_changed, :no_arg, :actor_bound},
+    {"getweapondrawn", :weapon_drawn, :no_arg, :actor_bound},
+
+    # Stats
+    {"gethealth", :health, :no_arg, :actor_bound},
+    {"getfatigue", :fatigue, :no_arg, :actor_bound},
+    {"getmagicka", :magicka, :no_arg, :actor_bound},
+    {"getpcrank", :rank, :string_arg, :player},
+    {"getrace", :race, :string_arg, :actor_bound},
+
+    # Spells / effects / diseases
+    {"getblightdisease", :blight_disease, :no_arg, :actor_bound},
+    {"getcommondisease", :common_disease, :no_arg, :actor_bound},
+    {"geteffect", :effect, :string_arg, :actor_bound},
+    {"getspell", :knows_spell, :string_arg, :actor_bound},
+
+    # AI
+    {"getcurrentaipackage", :current_ai_package, :no_arg, :actor_bound},
+    {"getaipackagedone", :ai_package_done, :no_arg, :actor_bound},
+    {"saydone", :say_done, :no_arg, :actor_bound},
+
+    # Positioning / sight
+    {"getcollidingactor", :colliding_actor, :no_arg, :actor_bound},
+    {"getcollidingpc", :colliding_pc, :no_arg, :actor_bound},
+    {"getstandingactor", :standing_actor, :no_arg, :actor_bound},
+    {"getstandingpc", :standing_pc, :no_arg, :actor_bound},
+    {"getdetected", :detected, :string_arg, :actor_bound},
+    {"getdistance", :distance, :string_arg, :actor_bound},
+    {"getlos", :line_of_sight, :string_arg, :actor_bound},
+    {"getpos", :position, :string_arg, :actor_bound},
+    {"gettarget", :target, :string_arg, :actor_bound},
+
+    # Social
+    {"getdisposition", :disposition, :no_arg, :actor_bound},
+    {"scriptrunning", :script_running, :string_arg, :global},
+    {"pcexpelled", :expelled, :string_arg, :global},
+
+    # World state
+    {"getbuttonpressed", :button_pressed, :no_arg, :global},
+    {"getcurrentweather", :current_weather, :no_arg, :global},
+    {"getsoundplaying", :sound_playing, :string_arg, :global},
+    {"getwaterlevel", :water_level, :no_arg, :global},
+    {"getwerewolfkills", :werewolf_kills, :no_arg, :global},
+    {"dayspassed", :days_passed, :no_arg, :global},
+    {"gamehour", :game_hour, :no_arg, :global},
+    {"menumode", :menu_mode, :no_arg, :global},
+
+    # Weapon skills (compound conditions / Tamriel Rebuilt runestones)
+    {"getshortblade", :short_blade, :no_arg, :actor_bound},
+    {"getbluntweapon", :blunt_weapon, :no_arg, :actor_bound},
+    {"getlongblade", :long_blade, :no_arg, :actor_bound},
+    {"getaxe", :axe, :no_arg, :actor_bound},
+
+    # Skill: level needs to come AFTER getlevel-prefixed alternatives if any
+    {"getlevel", :level, :no_arg, :actor_bound},
+
+    # Random
+    {"random", :random, :integer_arg, :global}
+  ]
 
   def parse_condition(line, locals \\ []) do
     line = Regex.replace(~r/(if|elseif|while|\(|\))/i, line, "")
@@ -409,252 +537,180 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
     |> do_parse_condition(locals)
   end
 
+  defp do_parse_condition("", _locals), do: nil
+
   defp do_parse_condition(line, locals) do
-    case parse_subject(line) do
-      {subject, line} ->
-        case String.trim(line) do
-          <<"getjournalindex"::binary, line::binary>> ->
-            parse_comparison(line, subject, :journal_index)
-            |> Map.delete(:subject)
-
-          <<"getdeadcount"::binary, line::binary>> ->
-            parse_comparison(line, subject, :dead_count)
-            |> Map.delete(:subject)
-
-          <<"getitemcount"::binary, line::binary>> ->
-            parse_comparison(line, subject, :item_count)
-
-          <<"getinterior"::binary, line::binary>> ->
-            parse_rhs(line, subject, :interior)
-
-          <<"getpccell"::binary, line::binary>> ->
-            parse_comparison(line, subject, :pc_cell)
-            |> Map.delete(:subject)
-
-          <<"ondeath"::binary, line::binary>> ->
-            parse_rhs(line, subject, :on_death)
-
-          <<"onactivate"::binary, line::binary>> ->
-            parse_rhs(line, subject, :on_activate)
-
-          <<"getdisabled"::binary, line::binary>> ->
-            parse_rhs(line, subject, :disabled)
-
-          <<"getdistance"::binary, line::binary>> ->
-            parse_comparison(line, subject, :distance)
-
-          <<"gethealth"::binary, line::binary>> ->
-            parse_rhs(line, subject, :health)
-
-          <<"getpcrank"::binary, line::binary>> ->
-            parse_comparison(line, subject, :pc_rank)
-
-          <<"getspell"::binary, line::binary>> ->
-            parse_comparison(line, subject, :knows_spell)
-
-          <<"getblightdisease"::binary, line::binary>> ->
-            parse_rhs(line, subject, :blight_disease)
-
-          <<"getcommondisease"::binary, line::binary>> ->
-            parse_rhs(line, subject, :common_disease)
-
-          <<"getcurrentaipackage"::binary, line::binary>> ->
-            parse_rhs(line, subject, :current_ai_package)
-
-          <<"menumode"::binary, line::binary>> ->
-            parse_rhs(line, subject, :menu_mode)
-
-          <<"cellchanged"::binary, line::binary>> ->
-            parse_rhs(line, subject, :cell_changed)
-
-          <<"iswerewolf"::binary, line::binary>> ->
-            parse_rhs(line, subject, :is_werewolf)
-
-          <<"getrace"::binary, line::binary>> ->
-            parse_comparison(line, subject, :race)
-
-          <<"hassoulgem"::binary, line::binary>> ->
-            parse_comparison(line, subject, :has_soul_gem)
-
-          <<"getlocked"::binary, line::binary>> ->
-            parse_rhs(line, subject, :locked)
-
-          <<"scriptrunning"::binary, line::binary>> ->
-            parse_comparison(line, subject, :script_running)
-
-          <<"pcexpelled"::binary, line::binary>> ->
-            parse_comparison(line, subject, :expelled)
-
-          <<"getattacked"::binary, line::binary>> ->
-            parse_rhs(line, subject, :attacked)
-
-          <<"geteffect"::binary, line::binary>> ->
-            parse_comparison(line, subject, :effect)
-
-          <<"gamehour"::binary, line::binary>> ->
-            parse_rhs(line, subject, :game_hour)
-
-          <<"getmagicka"::binary, line::binary>> ->
-            parse_rhs(line, subject, :magicka)
-
-          <<"onmurder"::binary, line::binary>> ->
-            parse_rhs(line, subject, :on_murder)
-
-          <<"getfatigue"::binary, line::binary>> ->
-            parse_rhs(line, subject, :fatigue)
-
-          <<"onpchitme"::binary, line::binary>> ->
-            parse_rhs(line, subject, :on_pc_hit_me)
-
-          <<"getcollidingactor"::binary, line::binary>> ->
-            parse_rhs(line, subject, :colliding_actor)
-
-          <<"getlevel"::binary, line::binary>> ->
-            parse_rhs(line, subject, :level)
-
-          <<"getaipackagedone"::binary, line::binary>> ->
-            parse_rhs(line, subject, :ai_package_done)
-
-          <<"onpcequip"::binary, line::binary>> ->
-            parse_rhs(line, subject, :on_pc_equip)
-
-          <<"random "::binary, line::binary>> ->
-            parse_comparison(line, subject, :random)
-            |> Map.update!(:target, &String.to_integer/1)
-
-          <<"getcurrentweather"::binary, line::binary>> ->
-            parse_rhs(line, subject, :current_weather)
-
-          <<"getbuttonpressed"::binary, line::binary>> ->
-            parse_rhs(line, subject, :button_pressed)
-
-          <<"getlos"::binary, line::binary>> ->
-            parse_comparison(line, subject, :line_of_sight)
-
-          <<"getweapondrawn"::binary, line::binary>> ->
-            parse_rhs(line, subject, :weapon_drawn)
-
-          <<"getsoundplaying"::binary, line::binary>> ->
-            parse_comparison(line, subject, :sound_playing)
-
-          <<"dayspassed"::binary, line::binary>> ->
-            parse_rhs(line, subject, :days_passed)
-
-          <<"getcollidingpc"::binary, line::binary>> ->
-            parse_rhs(line, subject, :colliding_pc)
-
-          <<"getstandingactor"::binary, line::binary>> ->
-            parse_rhs(line, subject, :standing_actor)
-
-          <<"saydone"::binary, line::binary>> ->
-            parse_rhs(line, subject, :say_done)
-
-          <<"getdetected"::binary, line::binary>> ->
-            parse_comparison(line, subject, :detected)
-
-          <<"getdisposition"::binary, line::binary>> ->
-            parse_rhs(line, subject, :disposition)
-
-          <<"getwaterlevel"::binary, line::binary>> ->
-            parse_rhs(line, subject, :water_level)
-
-          <<"getpos"::binary, line::binary>> ->
-            parse_comparison(line, subject, :position)
-
-          <<"getwerewolfkills"::binary, line::binary>> ->
-            parse_rhs(line, subject, :werewolf_kills)
-
-          <<"gettarget"::binary, line::binary>> ->
-            parse_comparison(line, subject, :target)
-
-          <<"onknockout"::binary, line::binary>> ->
-            parse_rhs(line, subject, :on_knockout)
-
-          <<"getstandingpc"::binary, line::binary>> ->
-            parse_rhs(line, subject, :standing_pc)
-
-          <<"hasitemequipped"::binary, line::binary>> ->
-            parse_comparison(line, subject, :has_item_equipped)
-
-          _ ->
-            result = parse_comparison(line, subject, :local_var)
-
-            # the target could also be an arithmetic expression - check if it uses locals
-            variables = Regex.run(~r/\w+/, result.target)
-
-            if Enum.all?(variables, &(&1 in locals)) do
-              result
-            else
-              nil
-            end
+    case split_on_operator(line) do
+      nil ->
+        # No operator at all. Only function calls (with implicit "== 1") count
+        # as conditions — a bare local-var reference or random text isn't a
+        # condition, it's a non-condition line we should pass through as nil.
+        case parse_expression(line, locals) do
+          %{function: _} = expr -> %{left: expr, operator: :==, right: %{value: 1}}
+          _ -> nil
         end
 
-      line ->
-        %{function: :unknown, content: line}
+      {left_str, op, right_str} ->
+        left = parse_expression(left_str, locals)
+        right = parse_expression(right_str, locals)
+
+        if is_nil(left) or is_nil(right) do
+          %{function: :unknown, content: line}
+        else
+          %{left: left, operator: op, right: right}
+        end
     end
   end
 
-  defp parse_comparison(line, subject, key) do
-    case Regex.run(~r/^\s*["]?([^"]+)["]?\s+([<>=!]+)\s*(-?\d+|\w+)/i, line) ||
-           Regex.run(~r/^\s*["]?([^"]+)["]?/i, line) do
-      [_, target, op, value] ->
-        value =
-          case Integer.parse(value) do
-            {num, ""} -> num
-            :error -> value
-          end
-
-        %{
-          subject: normalize_subject(subject),
-          function: key,
-          target: target,
-          operator: parse_operator(op),
-          value: value
-        }
-
-      # Implicit "is true, == 1"
-      [_, target] ->
-        %{
-          subject: normalize_subject(subject),
-          function: key,
-          target: target,
-          operator: :==,
-          value: 1
-        }
-
-      # Something that can't be parsed
-      _ ->
-        %{
-          function: :unknown,
-          content: String.trim(line)
-        }
-    end
-  end
-
-  defp parse_rhs(line, subject, key) do
-    case Regex.run(~r/^\s*([<>=!]{1,2})\s*(-?\d+|\w+)/, line) do
-      [_, operator, value] ->
-        value =
-          case Integer.parse(value) do
-            {num, ""} -> num
-            :error -> value
-          end
-
-        %{
-          subject: normalize_subject(subject),
-          function: key,
-          operator: parse_operator(operator),
-          value: value
-        }
+  # Find the first comparison operator in the line and split around it.
+  # Operators ordered longest-first so `<=` doesn't get truncated to `<`.
+  # The `<==` typo (plantScript) maps to `:<=` via `parse_operator/1`.
+  #
+  # The `(?<!-)` negative lookbehind keeps the `>` inside `->` from being
+  # matched as a comparison operator. Without it, `player->getlevel >= 30`
+  # would split as left="player-", op=">", right="getlevel >= 30".
+  defp split_on_operator(line) do
+    case Regex.run(~r/^(.+?)\s*(?<!-)(<==|<=|>=|==|!=|<|>|=)\s*(.+)$/, line) do
+      [_, left, op_str, right] ->
+        {String.trim(left), parse_operator(op_str), String.trim(right)}
 
       nil ->
-        %{
-          subject: normalize_subject(subject),
-          function: key,
-          operator: :==,
-          value: 1
-        }
+        nil
     end
+  end
+
+  # An expression is one of: integer literal, function call, or local-var
+  # reference (which may include arithmetic on locals). We try them in order
+  # and stop at the first match.
+  defp parse_expression(str, _locals) do
+    str = str |> String.trim() |> strip_outer_parens()
+
+    cond do
+      str == "" ->
+        nil
+
+      Regex.match?(~r/^-?\d+$/, str) ->
+        %{value: String.to_integer(str)}
+
+      fc = parse_function_call(str) ->
+        fc
+
+      # Accept a single identifier or an arithmetic expression alternating
+      # operand/operator. Things like "Journal Quest 50" (two consecutive
+      # identifiers with no operator between) are rejected — they're script
+      # commands, not conditions.
+      looks_like_local_var_or_arithmetic?(str) ->
+        %{local_var: str}
+
+      true ->
+        nil
+    end
+  end
+
+  # An "operand" is an identifier (`^[a-zA-Z_]\w*$`) or an integer literal.
+  # A valid local-var expression is either:
+  #   - a single operand
+  #   - operand op operand op operand … (alternating; odd token count)
+  # where op is one of +, -, *, /.
+  defp looks_like_local_var_or_arithmetic?(str) do
+    tokens = String.split(str, ~r/\s+/, trim: true)
+
+    cond do
+      tokens == [] -> false
+      rem(length(tokens), 2) == 0 -> false
+      true -> Enum.all?(Enum.with_index(tokens), &valid_arith_token?/1)
+    end
+  end
+
+  defp valid_arith_token?({token, idx}) do
+    if rem(idx, 2) == 0 do
+      Regex.match?(~r/^[a-zA-Z_]\w*$/, token) or Regex.match?(~r/^-?\d+$/, token)
+    else
+      token in ["+", "-", "*", "/"]
+    end
+  end
+
+  defp strip_outer_parens(str) do
+    case Regex.run(~r/^\(\s*(.+?)\s*\)$/, str) do
+      [_, inner] -> strip_outer_parens(String.trim(inner))
+      nil -> str
+    end
+  end
+
+  defp parse_function_call(str) do
+    {subject, rest} =
+      case String.split(str, "->", parts: 2) do
+        [s, r] -> {normalize_subject(String.trim(s)), String.trim(r)}
+        [r] -> {nil, String.trim(r)}
+      end
+
+    case match_function_keyword(rest) do
+      nil ->
+        nil
+
+      {function, arg} ->
+        base = %{function: function}
+        base = put_subject(base, function, subject)
+        if arg != nil, do: Map.put(base, :arg, arg), else: base
+    end
+  end
+
+  defp match_function_keyword(rest) do
+    Enum.find_value(@function_keywords, fn {keyword, function, arg_kind, _subject_kind} ->
+      if starts_with_keyword?(rest, keyword) do
+        after_kw = rest |> String.replace_prefix(keyword, "") |> String.trim()
+
+        case parse_arg(after_kw, arg_kind) do
+          :no_match -> nil
+          arg -> {function, arg}
+        end
+      end
+    end)
+  end
+
+  # Word-boundary check: the char immediately after the keyword must not be
+  # another word char (letter/digit/underscore). Otherwise `getlevel` would
+  # match a hypothetical `getleveltracked`.
+  defp starts_with_keyword?(str, keyword) do
+    kw_len = String.length(keyword)
+
+    String.starts_with?(str, keyword) and
+      (String.length(str) == kw_len or
+         not Regex.match?(~r/[a-zA-Z0-9_]/, String.at(str, kw_len)))
+  end
+
+  defp parse_arg("", :no_arg), do: nil
+  defp parse_arg(_, :no_arg), do: :no_match
+
+  defp parse_arg("", :string_arg), do: :no_match
+  defp parse_arg(str, :string_arg), do: normalize_value(str)
+
+  defp parse_arg("", :integer_arg), do: :no_match
+
+  defp parse_arg(str, :integer_arg) do
+    case Integer.parse(String.trim(str)) do
+      {n, ""} -> n
+      _ -> :no_match
+    end
+  end
+
+  # Decide what to do with the subject slot:
+  #   - explicit (`subject->` was present): always use it
+  #   - implicit (no arrow): default based on the function's subject_kind
+  defp put_subject(base, function, nil) do
+    case function_subject_kind(function) do
+      :actor_bound -> Map.put(base, :subject, :self)
+      :player -> Map.put(base, :subject, :player)
+      :global -> base
+    end
+  end
+
+  defp put_subject(base, _function, subject), do: Map.put(base, :subject, subject)
+
+  defp function_subject_kind(function) do
+    Enum.find_value(@function_keywords, fn {_kw, fn_atom, _ak, sk} ->
+      if fn_atom == function, do: sk
+    end) || :actor_bound
   end
 
   # ============================================================================
