@@ -29,7 +29,7 @@ for {_key, analysis} <- Enum.sort_by(results, fn {k, _} -> k end) do
         end
 
       topic = if t.trigger_topic_id, do: " topic:#{t.trigger_topic_id}", else: ""
-      "- #{from} → **#{t.index}** (#{t.trigger_type}#{topic})"
+      "- `#{t.id}`: #{from} → **#{t.index}** (#{t.trigger_type}#{topic})"
     end)
 
   section = fn title, items ->
@@ -55,11 +55,39 @@ for {_key, analysis} <- Enum.sort_by(results, fn {k, _} -> k end) do
             |> Enum.map(&elem(&1, 0))
             |> Enum.join(", ")
 
-          "#{related_npc.npc_id} (#{roles})"
+          use_summary =
+            related_npc.uses
+            |> Enum.map(fn u -> "#{u.role}@#{u.transition_id}" end)
+            |> Enum.join(", ")
+
+          "#{related_npc.npc_id} (#{roles}) [#{use_summary}]"
         end)
       ) ++
-      section.("Key Items", analysis.key_items) ++
-      section.("Key Locations", analysis.key_locations) ++
+      section.(
+        "Related Items",
+        Enum.map(analysis.related_items, fn item ->
+          use_summary =
+            item.uses
+            |> Enum.map(fn u -> "#{u.role}@#{u.transition_id}" end)
+            |> Enum.join(", ")
+
+          "#{item.item_id} [#{use_summary}]"
+        end)
+      ) ++
+      section.(
+        "Related Locations",
+        Enum.map(analysis.related_locations, fn loc ->
+          npcs = if loc.npc_ids != [], do: " npcs:#{Enum.join(loc.npc_ids, ",")}", else: ""
+          items = if loc.item_ids != [], do: " items:#{Enum.join(loc.item_ids, ",")}", else: ""
+
+          transitions =
+            if loc.transition_ids != [],
+              do: " transitions:#{length(loc.transition_ids)}",
+              else: ""
+
+          "#{loc.cell_id}#{npcs}#{items}#{transitions}"
+        end)
+      ) ++
       section.("Dialogue Topics", analysis.dialogue_topics) ++
       ["", "## Journal Entries", ""] ++
       journal_lines ++

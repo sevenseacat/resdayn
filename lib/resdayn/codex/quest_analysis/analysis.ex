@@ -17,11 +17,11 @@ defmodule Resdayn.Codex.QuestAnalysis.Analysis do
 
     field :transitions, {:array, Resdayn.Codex.QuestAnalysis.Transition}, default: []
 
-    field :key_items, {:array, :ci_string}, default: []
+    field :related_items, {:array, Resdayn.Codex.QuestAnalysis.RelatedItem}, default: []
 
     field :related_npcs, {:array, Resdayn.Codex.QuestAnalysis.RelatedNPC}, default: []
 
-    field :key_locations, {:array, :ci_string}, default: []
+    field :related_locations, {:array, Resdayn.Codex.QuestAnalysis.RelatedLocation}, default: []
 
     field :dialogue_topics, {:array, :ci_string}, default: []
   end

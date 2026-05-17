@@ -183,31 +183,73 @@ defmodule Resdayn.Importer.Quests.AnalyzerTest do
     end
   end
 
-  describe "key locations" do
-    test "direct dialogue speaker locations", %{"MV_DeadTaxman" => taxman} do
-      assert Ash.CiString.new("Seyda Neen, Lighthouse") in taxman.key_locations
-      assert Ash.CiString.new("Seyda Neen, Census and Excise Office") in taxman.key_locations
-      assert Ash.CiString.new("Seyda Neen, Foryn Gilnith's Shack") in taxman.key_locations
+  describe "related locations" do
+    test "direct dialogue speaker locations link to the speaker NPC", %{"MV_DeadTaxman" => taxman} do
+      assert Ash.CiString.new("thavere vedrano") in find_related_location(
+               taxman,
+               "Seyda Neen, Lighthouse"
+             ).npc_ids
     end
 
-    test "NPCs with related script locations", %{"MV_DeadTaxman" => taxman} do
-      assert Ash.CiString.new("-3,-9") in taxman.key_locations
+    test "a cell with both an NPC and quest items links to both sources", %{
+      "MV_DeadTaxman" => taxman
+    } do
+      # Processus's corpse is at exterior cell -3,-9; his inventory contains
+      # the tax record (a condition item) so the cell has both NPC and item sources.
+      loc = find_related_location(taxman, "-3,-9")
+      assert Ash.CiString.new("processus vitellius") in loc.npc_ids
+      assert Ash.CiString.new("bk_seydaneentaxrecord") in loc.item_ids
     end
 
-    test "location inferred from unique item cell reference", %{"A1_4_MuzgobInformant" => muzgob} do
+    test "location inferred from unique item cell reference links to the item",
+         %{"A1_4_MuzgobInformant" => muzgob} do
       # misc_Skull_Llevule has exactly 1 cell reference: Andrano Ancestral Tomb.
-      # It appears in an item condition, so its location should be a key location.
-      assert Ash.CiString.new("Andrano Ancestral Tomb") in muzgob.key_locations
+      loc = find_related_location(muzgob, "Andrano Ancestral Tomb")
+      assert Ash.CiString.new("misc_Skull_Llevule") in loc.item_ids
+      assert loc.npc_ids == []
     end
   end
 
-  describe "key items" do
-    test "items referenced in dialogue conditions", %{"MV_DeadTaxman" => taxman} do
-      assert Ash.CiString.new("bk_seydaneentaxrecord") in taxman.key_items
+  describe "related items" do
+    test "items referenced in dialogue conditions get a :required use",
+         %{"MV_DeadTaxman" => taxman} do
+      item = find_related_item(taxman, "bk_seydaneentaxrecord")
+      assert Enum.any?(item.uses, &(&1.role == :required))
     end
 
-    test "items transferred in dialogue script effects", %{"MV_DeadTaxman" => taxman} do
-      assert Ash.CiString.new("exquisite_ring_processus") in taxman.key_items
+    test "an item that's both required and surrendered keeps both uses",
+         %{"MV_DeadTaxman" => taxman} do
+      # The ring appears in a dialogue condition (player must have it) AND is
+      # surrendered via removeitem when given to Thavere -- both at journal 90.
+      # The two uses share a transition_id but have different roles.
+      uses = find_related_item(taxman, "exquisite_ring_processus").uses
+
+      assert Enum.any?(uses, &(&1.role == :required))
+      assert Enum.any?(uses, &(&1.role == :surrendered))
+    end
+
+    test "items added to the player are :received at the linked transition",
+         %{"MV_DeadTaxman" => taxman} do
+      # Thavere's response at Journal 90 has `removeitem subject=:self` (her
+      # potions) and `player->additem` (player gains the potions). Only the
+      # :player-subjected effect counts -- net is :received, not :surrendered.
+      potion = find_related_item(taxman, "p_restore_health_s")
+
+      assert potion.uses == [
+               %{role: :received, transition_id: "132381979266658957_90"}
+             ]
+    end
+
+    test "gold is captured as a related item with per-transition uses",
+         %{"MV_DeadTaxman" => taxman} do
+      # Gold used to be filtered out as too noisy; it's now retained because
+      # which transitions involve gold is real quest information.
+      gold = find_related_item(taxman, "gold_001")
+
+      # Gold appears in multiple transitions across the quest's branching paths.
+      assert Enum.any?(gold.uses, &(&1.role == :required))
+      assert Enum.any?(gold.uses, &(&1.role == :surrendered))
+      assert Enum.any?(gold.uses, &(&1.role == :received))
     end
   end
 
@@ -223,6 +265,20 @@ defmodule Resdayn.Importer.Quests.AnalyzerTest do
   def find_related_npc(%Resdayn.Codex.QuestAnalysis.Analysis{} = analysis, npc_id) do
     related = Enum.find(analysis.related_npcs, &ci_eq(&1.npc_id, npc_id))
     refute is_nil(related), "Expected #{npc_id} to be a related NPC but was not"
+
+    related
+  end
+
+  def find_related_item(%Resdayn.Codex.QuestAnalysis.Analysis{} = analysis, item_id) do
+    related = Enum.find(analysis.related_items, &ci_eq(&1.item_id, item_id))
+    refute is_nil(related), "Expected #{item_id} to be a related item but was not"
+
+    related
+  end
+
+  def find_related_location(%Resdayn.Codex.QuestAnalysis.Analysis{} = analysis, cell_id) do
+    related = Enum.find(analysis.related_locations, &ci_eq(&1.cell_id, cell_id))
+    refute is_nil(related), "Expected #{cell_id} to be a related location but was not"
 
     related
   end

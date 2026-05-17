@@ -1,7 +1,10 @@
 defmodule Resdayn.Importer.Quests.Analyzer do
   require Ash.Query
 
+  alias Resdayn.Codex.QuestAnalysis.RelatedItem
+  alias Resdayn.Codex.QuestAnalysis.RelatedLocation
   alias Resdayn.Codex.QuestAnalysis.RelatedNPC
+  alias Resdayn.Codex.QuestAnalysis.Transition
   alias Resdayn.Importer.Quests.ChoiceChain
   alias Resdayn.Importer.Quests.ItemLocations
   alias Resdayn.Importer.Quests.TopicAvailability
@@ -30,7 +33,8 @@ defmodule Resdayn.Importer.Quests.Analyzer do
       script_updates =
         Map.get(script_journals_by_quest_id, downcase(quest.id), [])
         |> Enum.map(fn update ->
-          %Resdayn.Codex.QuestAnalysis.Transition{
+          %Transition{
+            id: Transition.make_id(update.script_id, update.index),
             index: update.index,
             from_max: update.index - 1,
             trigger_type: :script,
@@ -80,7 +84,8 @@ defmodule Resdayn.Importer.Quests.Analyzer do
                 topic_availability
               )
 
-            %Resdayn.Codex.QuestAnalysis.Transition{
+            %Transition{
+              id: Transition.make_id(to_string(response.id), cmd.index),
               index: cmd.index,
               from_min: from_min,
               from_max: from_max,
@@ -95,59 +100,78 @@ defmodule Resdayn.Importer.Quests.Analyzer do
         (script_updates ++ dialogue_transitions)
         |> narrow_from_ranges(quest.journal_entries)
 
-      # NPCs from dialogue + NPCs with quest scripts
-      dialogue_npc_ids =
-        Enum.map(dialogue_updates, & &1.speaker_npc_id)
-        |> Enum.filter(& &1)
-
-      script_npc_ids = Enum.map(npcs_with_quest_scripts, & &1.id)
-
-      # NPCs referenced as subjects in effects (disable, enable, etc.)
-      effect_npc_ids =
-        extract_npc_ids_from_effects(
+      # Build per-transition lookups so each transition can resolve its own
+      # conditions, effects, and trigger NPCs without rescanning the world.
+      effects_by_tid =
+        effects_per_transition(
+          all_transitions,
           dialogue_updates,
           script_journals_by_quest_id,
-          quest.id,
-          npc_id_set
+          quest.id
         )
 
-      {quest_giver_npc_ids, quest_finisher_npc_ids} =
-        resolve_role_npc_ids(all_transitions, dialogue_updates, npcs_with_quest_scripts, quest)
+      conditions_by_tid = conditions_per_transition(all_transitions, dialogue_updates)
+
+      triggers_by_tid =
+        triggers_per_transition(all_transitions, dialogue_updates, npcs_with_quest_scripts)
+
+      # Identify quest-start and quest-finish transitions for role flagging.
+      finisher_indices =
+        quest.journal_entries
+        |> Enum.filter(& &1.finishes_quest)
+        |> MapSet.new(& &1.index)
+
+      min_index =
+        quest.journal_entries
+        |> Enum.map(& &1.index)
+        |> Enum.min(fn -> nil end)
+
+      start_transition_ids =
+        all_transitions
+        |> Enum.filter(&quest_start?(&1, min_index))
+        |> MapSet.new(& &1.id)
+
+      finish_transition_ids =
+        all_transitions
+        |> Enum.filter(fn t -> MapSet.member?(finisher_indices, t.index) end)
+        |> MapSet.new(& &1.id)
+
+      # Flat event lists: each event is {entity_id, role, transition_id}.
+      npc_events = build_npc_events(all_transitions, triggers_by_tid, effects_by_tid, npc_id_set)
+      item_events = build_item_events(all_transitions, conditions_by_tid, effects_by_tid)
 
       related_npcs =
         build_related_npcs(
-          dialogue_npc_ids,
-          script_npc_ids,
-          effect_npc_ids,
-          quest_giver_npc_ids,
-          quest_finisher_npc_ids
+          npc_events,
+          all_transitions,
+          start_transition_ids,
+          finish_transition_ids
         )
 
-      # Get locations from NPCs
+      related_items = build_related_items(item_events)
+
       all_quest_npcs =
         related_npcs
         |> Enum.map(fn r -> Enum.find(all_npcs, &(downcase(&1.id) == downcase(r.npc_id))) end)
         |> Enum.filter(& &1)
 
-      npc_locations =
-        all_quest_npcs
-        |> Enum.flat_map(fn npc -> [npc.cell_name, npc.cell_id] end)
-        |> Enum.filter(& &1)
-        |> Enum.map(&Ash.CiString.new/1)
-
       topics = Enum.map(dialogue_updates, & &1.topic_id) |> ci_uniq()
-
-      items = extract_key_items(dialogue_updates, script_journals_by_quest_id, quest.id)
 
       condition_item_ids = extract_condition_item_ids(dialogue_updates)
 
       add_item_targets =
         collect_add_item_targets(dialogue_updates, script_journals_by_quest_id, quest.id)
 
-      item_locations =
+      item_location_sources =
         ItemLocations.get_locations(item_locations, condition_item_ids, add_item_targets)
 
-      locations = (npc_locations ++ item_locations) |> ci_uniq()
+      related_locations =
+        build_related_locations(
+          all_quest_npcs,
+          item_location_sources,
+          related_npcs,
+          related_items
+        )
 
       {to_string(quest.id),
        %Resdayn.Codex.QuestAnalysis.Analysis{
@@ -155,9 +179,9 @@ defmodule Resdayn.Importer.Quests.Analyzer do
          transitions: all_transitions,
          journal_entries: format_journal_entries(quest.journal_entries),
          related_npcs: related_npcs,
-         key_locations: locations,
+         related_locations: related_locations,
          dialogue_topics: topics,
-         key_items: items
+         related_items: related_items
        }}
     end)
   end
@@ -256,44 +280,251 @@ defmodule Resdayn.Importer.Quests.Analyzer do
     end)
   end
 
-  defp extract_key_items(dialogue_updates, script_journals_by_quest_id, quest_id) do
-    # Items from dialogue response conditions (function: :item)
-    condition_items =
-      dialogue_updates
-      |> Enum.flat_map(fn response ->
-        (response.conditions || [])
-        |> Enum.filter(fn c -> c.function == :item end)
-        |> Enum.map(fn c -> c.name end)
+  # Build related items with journal-index linkage. Each item collects all
+  # journal indices it is associated with (target indices of triggered/gated
+  # journal commands). Reason priority on collision: :required > :surrendered
+  # > :received, reflecting how much player action each implies.
+  # Per-transition effect lookup: transition_id -> list of effects on that
+  # transition's specific journal command.
+  defp effects_per_transition(all_transitions, dialogue_updates, script_journals_by_quest_id, quest_id) do
+    quest_id_lower = downcase(quest_id)
+
+    dialogue_commands_by_trigger_id =
+      Map.new(dialogue_updates, fn response ->
+        {downcase(to_string(response.id)), Map.get(response.script_content, quest_id_lower, [])}
       end)
 
-    # Items from script effects (add_item, remove_item) in dialogue scripts
-    dialogue_script_items =
-      dialogue_updates
-      |> Enum.flat_map(fn response ->
-        quest_commands = Map.get(response.script_content, downcase(quest_id), [])
+    script_commands_by_trigger_id =
+      Map.get(script_journals_by_quest_id, quest_id_lower, [])
+      |> Enum.group_by(&downcase(&1.script_id))
 
-        quest_commands
-        |> Enum.flat_map(fn cmd ->
-          cmd.effects
-          |> Enum.filter(fn e -> e[:function] in [:add_item, :remove_item] end)
-          |> Enum.map(fn e -> e[:item_id] end)
+    Map.new(all_transitions, fn t ->
+      cmds =
+        case t.trigger_type do
+          :dialogue_response -> Map.get(dialogue_commands_by_trigger_id, downcase(t.trigger_id), [])
+          :script -> Map.get(script_commands_by_trigger_id, downcase(t.trigger_id), [])
+        end
+
+      effects =
+        case Enum.find(cmds, &(&1.index == t.index)) do
+          nil -> []
+          cmd -> cmd.effects
+        end
+
+      {t.id, effects}
+    end)
+  end
+
+  # Per-transition condition lookup: transition_id -> conditions on the gating
+  # response. Script transitions have no conditions.
+  defp conditions_per_transition(all_transitions, dialogue_updates) do
+    conditions_by_response_id =
+      Map.new(dialogue_updates, fn r -> {downcase(to_string(r.id)), r.conditions || []} end)
+
+    Map.new(all_transitions, fn t ->
+      conditions =
+        case t.trigger_type do
+          :dialogue_response -> Map.get(conditions_by_response_id, downcase(t.trigger_id), [])
+          :script -> []
+        end
+
+      {t.id, conditions}
+    end)
+  end
+
+  # Per-transition trigger lookup: transition_id -> list of NPC IDs that
+  # cause the transition (dialogue speaker or script-bearing NPCs).
+  defp triggers_per_transition(all_transitions, dialogue_updates, npcs_with_quest_scripts) do
+    speaker_by_response_id =
+      Map.new(dialogue_updates, fn r -> {downcase(to_string(r.id)), r.speaker_npc_id} end)
+
+    npcs_by_script_id =
+      Enum.group_by(npcs_with_quest_scripts, &downcase(&1.script_id), & &1.id)
+
+    Map.new(all_transitions, fn t ->
+      triggers =
+        case t.trigger_type do
+          :dialogue_response ->
+            case Map.get(speaker_by_response_id, downcase(t.trigger_id)) do
+              nil -> []
+              speaker -> [speaker]
+            end
+
+          :script ->
+            Map.get(npcs_by_script_id, downcase(t.trigger_id), [])
+        end
+
+      {t.id, triggers}
+    end)
+  end
+
+  # Flat NPC event list: {npc_id, role, transition_id} per occurrence.
+  defp build_npc_events(all_transitions, triggers_by_tid, effects_by_tid, npc_id_set) do
+    Enum.flat_map(all_transitions, fn t ->
+      trigger_events =
+        triggers_by_tid
+        |> Map.get(t.id, [])
+        |> Enum.map(fn npc_id -> {npc_id, :trigger, t.id} end)
+
+      effect_target_events =
+        effects_by_tid
+        |> Map.get(t.id, [])
+        |> Enum.map(fn e -> e[:subject] end)
+        |> Enum.filter(fn s -> is_binary(s) and MapSet.member?(npc_id_set, downcase(s)) end)
+        |> Enum.map(fn s -> {Ash.CiString.new(s), :effect_target, t.id} end)
+
+      trigger_events ++ effect_target_events
+    end)
+  end
+
+  # Flat item event list: {item_id, role, transition_id} per occurrence.
+  defp build_item_events(all_transitions, conditions_by_tid, effects_by_tid) do
+    Enum.flat_map(all_transitions, fn t ->
+      conditions = Map.get(conditions_by_tid, t.id, [])
+      effects = Map.get(effects_by_tid, t.id, [])
+
+      required =
+        conditions
+        |> Enum.filter(fn c -> c.function == :item and c.name end)
+        |> Enum.map(fn c -> {Ash.CiString.new(c.name), :required, t.id} end)
+
+      received =
+        effects
+        |> Enum.filter(fn e -> e[:function] == :add_item and e[:subject] == :player end)
+        |> Enum.map(fn e -> {Ash.CiString.new(e[:item_id]), :received, t.id} end)
+
+      surrendered =
+        effects
+        |> Enum.filter(fn e -> e[:function] == :remove_item and e[:subject] == :player end)
+        |> Enum.map(fn e -> {Ash.CiString.new(e[:item_id]), :surrendered, t.id} end)
+
+      required ++ received ++ surrendered
+    end)
+  end
+
+  defp build_related_items(item_events) do
+    item_events
+    |> Enum.group_by(fn {item_id, _, _} -> downcase(item_id) end)
+    |> Enum.map(fn {_key, events} ->
+      {first_id, _, _} = hd(events)
+
+      uses =
+        events
+        |> Enum.map(fn {_, role, tid} -> %{role: role, transition_id: tid} end)
+        |> Enum.uniq()
+
+      %RelatedItem{item_id: first_id, uses: uses}
+    end)
+  end
+
+  defp build_related_npcs(npc_events, all_transitions, start_transition_ids, finish_transition_ids) do
+    transition_type_by_tid = Map.new(all_transitions, fn t -> {t.id, t.trigger_type} end)
+
+    npc_events
+    |> Enum.group_by(fn {npc_id, _, _} -> downcase(npc_id) end)
+    |> Enum.map(fn {_key, events} ->
+      {first_npc_id, _, _} = hd(events)
+
+      uses =
+        events
+        |> Enum.map(fn {_, role, tid} -> %{role: role, transition_id: tid} end)
+        |> Enum.uniq()
+
+      reason = derive_npc_reason(events, transition_type_by_tid)
+
+      quest_giver? =
+        Enum.any?(events, fn {_, role, tid} ->
+          role == :trigger and MapSet.member?(start_transition_ids, tid)
         end)
-      end)
 
-    # Items from script effects in standalone scripts
-    standalone_script_items =
-      Map.get(script_journals_by_quest_id, downcase(quest_id), [])
-      |> Enum.flat_map(fn cmd ->
-        cmd.effects
-        |> Enum.filter(fn e -> e[:function] in [:add_item, :remove_item] end)
-        |> Enum.map(fn e -> e[:item_id] end)
-      end)
+      quest_finisher? =
+        Enum.any?(events, fn {_, role, tid} ->
+          role == :trigger and MapSet.member?(finish_transition_ids, tid)
+        end)
 
-    (condition_items ++ dialogue_script_items ++ standalone_script_items)
-    |> Enum.filter(& &1)
-    |> Enum.reject(fn item -> String.downcase(item) == "gold_001" end)
-    |> Enum.map(&Ash.CiString.new/1)
-    |> ci_uniq()
+      %RelatedNPC{
+        npc_id: first_npc_id,
+        reason: reason,
+        uses: uses,
+        quest_giver?: quest_giver?,
+        quest_finisher?: quest_finisher?
+      }
+    end)
+  end
+
+  # Discovery channel derived from the NPC's uses. An NPC triggering at least
+  # one dialogue transition is a :dialogue_speaker; otherwise a :script_bearer
+  # if they trigger any script transition; otherwise an :effect_target.
+  defp derive_npc_reason(events, transition_type_by_tid) do
+    sources =
+      events
+      |> Enum.map(fn {_, role, tid} ->
+        case role do
+          :trigger ->
+            case Map.get(transition_type_by_tid, tid) do
+              :dialogue_response -> :dialogue_speaker
+              :script -> :script_bearer
+            end
+
+          :effect_target ->
+            :effect_target
+        end
+      end)
+      |> MapSet.new()
+
+    cond do
+      MapSet.member?(sources, :dialogue_speaker) -> :dialogue_speaker
+      MapSet.member?(sources, :script_bearer) -> :script_bearer
+      true -> :effect_target
+    end
+  end
+
+  defp build_related_locations(all_quest_npcs, item_locations, related_npcs, related_items) do
+    npc_uses_by_id = Map.new(related_npcs, fn n -> {downcase(n.npc_id), n.uses} end)
+    item_uses_by_id = Map.new(related_items, fn i -> {downcase(i.item_id), i.uses} end)
+
+    from_npcs =
+      all_quest_npcs
+      |> Enum.filter(& &1.cell_id)
+      |> Enum.map(fn npc -> {Ash.CiString.new(npc.cell_id), {:npc, npc.id}} end)
+
+    from_items =
+      Enum.map(item_locations, fn {cell_id, item_id} -> {cell_id, {:item, item_id}} end)
+
+    (from_npcs ++ from_items)
+    |> Enum.group_by(fn {cell, _} -> downcase(cell) end)
+    |> Enum.map(fn {_key, entries} ->
+      {first_cell, _} = hd(entries)
+
+      npc_ids =
+        entries
+        |> Enum.flat_map(fn
+          {_, {:npc, id}} -> [id]
+          _ -> []
+        end)
+        |> Enum.uniq_by(&downcase/1)
+
+      item_ids =
+        entries
+        |> Enum.flat_map(fn
+          {_, {:item, id}} -> [id]
+          _ -> []
+        end)
+        |> Enum.uniq_by(&downcase/1)
+
+      transition_ids =
+        (Enum.flat_map(npc_ids, fn id -> Map.get(npc_uses_by_id, downcase(id), []) end) ++
+           Enum.flat_map(item_ids, fn id -> Map.get(item_uses_by_id, downcase(id), []) end))
+        |> Enum.map(& &1.transition_id)
+        |> Enum.uniq()
+
+      %RelatedLocation{
+        cell_id: first_cell,
+        npc_ids: npc_ids,
+        item_ids: item_ids,
+        transition_ids: transition_ids
+      }
+    end)
   end
 
   defp extract_condition_item_ids(dialogue_updates) do
@@ -303,11 +534,11 @@ defmodule Resdayn.Importer.Quests.Analyzer do
       |> Enum.filter(fn c -> c.function == :item end)
       |> Enum.map(fn c -> c.name end)
     end)
-    |> Enum.reject(fn item -> String.downcase(item) == "gold_001" end)
     |> Enum.uniq()
   end
 
-  # Collect add_item effect targets: returns %{downcased_item_id => [target_ids]}
+  # Collect add_item effect targets: returns %{downcased_item_id => [target_ids]}.
+  # Used by ItemLocations to resolve where quest items live in the world.
   defp collect_add_item_targets(dialogue_updates, script_journals_by_quest_id, quest_id) do
     dialogue_effects =
       dialogue_updates
@@ -323,32 +554,6 @@ defmodule Resdayn.Importer.Quests.Analyzer do
     (dialogue_effects ++ script_effects)
     |> Enum.filter(fn e -> e[:function] == :add_item and is_binary(e[:subject]) end)
     |> Enum.group_by(fn e -> downcase(e[:item_id]) end, fn e -> e[:subject] end)
-  end
-
-  defp extract_npc_ids_from_effects(
-         dialogue_updates,
-         script_journals_by_quest_id,
-         quest_id,
-         npc_id_set
-       ) do
-    dialogue_effects =
-      dialogue_updates
-      |> Enum.flat_map(fn response ->
-        Map.get(response.script_content, downcase(quest_id), [])
-        |> Enum.flat_map(& &1.effects)
-      end)
-
-    script_effects =
-      Map.get(script_journals_by_quest_id, downcase(quest_id), [])
-      |> Enum.flat_map(& &1.effects)
-
-    (dialogue_effects ++ script_effects)
-    |> Enum.map(fn e -> e[:subject] end)
-    |> Enum.filter(fn subject ->
-      is_binary(subject) and MapSet.member?(npc_id_set, downcase(subject))
-    end)
-    |> Enum.map(&Ash.CiString.new/1)
-    |> ci_uniq()
   end
 
   defp format_journal_entries(entries) do
@@ -483,68 +688,6 @@ defmodule Resdayn.Importer.Quests.Analyzer do
     end
   end
 
-  # Tag each source list with its reason, dedupe by NPC id, then stamp role
-  # flags. Concatenation order encodes :reason priority: a dialogue speaker who
-  # also bears a quest script is classified as :dialogue_speaker. Roles
-  # (:quest_giver, :quest_finisher) are orthogonal flags layered on top.
-  defp build_related_npcs(dialogue_ids, script_ids, effect_ids, giver_ids, finisher_ids) do
-    giver_set = MapSet.new(giver_ids, &downcase/1)
-    finisher_set = MapSet.new(finisher_ids, &downcase/1)
-
-    tagged =
-      Enum.map(dialogue_ids, &%RelatedNPC{npc_id: &1, reason: :dialogue_speaker}) ++
-        Enum.map(script_ids, &%RelatedNPC{npc_id: &1, reason: :script_bearer}) ++
-        Enum.map(effect_ids, &%RelatedNPC{npc_id: &1, reason: :effect_target})
-
-    tagged
-    |> Enum.uniq_by(fn r -> downcase(r.npc_id) end)
-    |> Enum.map(fn r ->
-      key = downcase(r.npc_id)
-
-      %{
-        r
-        | quest_giver?: MapSet.member?(giver_set, key),
-          quest_finisher?: MapSet.member?(finisher_set, key)
-      }
-    end)
-  end
-
-  # Find the NPC(s) responsible for each transition, then split into:
-  # - givers: NPCs triggering transitions that advance from quest state 0 into
-  #   the earliest journal index
-  # - finishers: NPCs triggering transitions to a finish-flagged journal index
-  defp resolve_role_npc_ids(all_transitions, dialogue_updates, npcs_with_quest_scripts, quest) do
-    speakers_by_response_id =
-      Map.new(dialogue_updates, fn r -> {to_string(r.id), r.speaker_npc_id} end)
-
-    bearers_by_script_id =
-      Enum.group_by(npcs_with_quest_scripts, &downcase(&1.script_id), & &1.id)
-
-    finisher_indices =
-      quest.journal_entries
-      |> Enum.filter(& &1.finishes_quest)
-      |> MapSet.new(& &1.index)
-
-    min_index =
-      quest.journal_entries
-      |> Enum.map(& &1.index)
-      |> Enum.min(fn -> nil end)
-
-    giver_ids =
-      all_transitions
-      |> Enum.filter(&quest_start?(&1, min_index))
-      |> Enum.flat_map(&trigger_npc_ids(&1, speakers_by_response_id, bearers_by_script_id))
-      |> ci_uniq()
-
-    finisher_ids =
-      all_transitions
-      |> Enum.filter(&MapSet.member?(finisher_indices, &1.index))
-      |> Enum.flat_map(&trigger_npc_ids(&1, speakers_by_response_id, bearers_by_script_id))
-      |> ci_uniq()
-
-    {giver_ids, finisher_ids}
-  end
-
   # A transition is the quest's entry point if it advances to the earliest
   # journal index AND its precondition is compatible with quest state 0.
   # `from_max == 0` catches narrowed starts (e.g. script triggers with index 1
@@ -554,17 +697,6 @@ defmodule Resdayn.Importer.Quests.Analyzer do
     transition.index == min_index and
       transition.from_min in [nil, 0] and
       transition.from_max in [nil, 0]
-  end
-
-  defp trigger_npc_ids(%{trigger_type: :dialogue_response} = t, speakers_by_response_id, _) do
-    case Map.get(speakers_by_response_id, to_string(t.trigger_id)) do
-      nil -> []
-      speaker -> [speaker]
-    end
-  end
-
-  defp trigger_npc_ids(%{trigger_type: :script} = t, _, bearers_by_script_id) do
-    Map.get(bearers_by_script_id, downcase(t.trigger_id), [])
   end
 
   defp ci_uniq(list), do: Enum.uniq_by(list, &downcase/1)

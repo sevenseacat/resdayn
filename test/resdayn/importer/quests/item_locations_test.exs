@@ -4,11 +4,11 @@ defmodule Resdayn.Importer.Quests.ItemLocationsTest do
   alias Resdayn.Importer.Quests.ItemLocations
 
   describe "direct cell references" do
-    test "uniquely-placed item returns its cell" do
+    test "uniquely-placed item returns its cell tagged with the source item" do
       index = ItemLocations.build(%{"skull" => "Andrano Ancestral Tomb"}, %{})
       locations = ItemLocations.get_locations(index, ["skull"])
 
-      assert Ash.CiString.new("Andrano Ancestral Tomb") in locations
+      assert {Ash.CiString.new("Andrano Ancestral Tomb"), Ash.CiString.new("skull")} in locations
     end
 
     test "item not in unique placements returns nothing" do
@@ -21,7 +21,7 @@ defmodule Resdayn.Importer.Quests.ItemLocationsTest do
       index = ItemLocations.build(%{"skull_llevule" => "Andrano Ancestral Tomb"}, %{})
       locations = ItemLocations.get_locations(index, ["Skull_Llevule"])
 
-      assert Ash.CiString.new("Andrano Ancestral Tomb") in locations
+      assert {Ash.CiString.new("Andrano Ancestral Tomb"), Ash.CiString.new("Skull_Llevule")} in locations
     end
   end
 
@@ -34,7 +34,7 @@ defmodule Resdayn.Importer.Quests.ItemLocationsTest do
         )
 
       locations = ItemLocations.get_locations(index, ["tanto"])
-      assert Ash.CiString.new("Ald-ruhn, Guild of Mages") in locations
+      assert {Ash.CiString.new("Ald-ruhn, Guild of Mages"), Ash.CiString.new("tanto")} in locations
     end
 
     test "item in non-unique container returns nothing" do
@@ -53,7 +53,7 @@ defmodule Resdayn.Importer.Quests.ItemLocationsTest do
           "tanto" => ["chest_anararen"]
         })
 
-      assert Ash.CiString.new("Ald-ruhn, Guild of Mages") in locations
+      assert {Ash.CiString.new("Ald-ruhn, Guild of Mages"), Ash.CiString.new("tanto")} in locations
     end
 
     test "add_item target not uniquely placed returns nothing" do
@@ -77,7 +77,7 @@ defmodule Resdayn.Importer.Quests.ItemLocationsTest do
         )
 
       locations = ItemLocations.get_locations(index, ["skull"])
-      assert locations == [Ash.CiString.new("Tomb")]
+      assert locations == [{Ash.CiString.new("Tomb"), Ash.CiString.new("skull")}]
     end
 
     test "multiple condition items each contribute locations" do
@@ -88,8 +88,8 @@ defmodule Resdayn.Importer.Quests.ItemLocationsTest do
         )
 
       locations = ItemLocations.get_locations(index, ["skull", "notes"])
-      assert Ash.CiString.new("Tomb") in locations
-      assert Ash.CiString.new("Guild Hall") in locations
+      assert {Ash.CiString.new("Tomb"), Ash.CiString.new("skull")} in locations
+      assert {Ash.CiString.new("Guild Hall"), Ash.CiString.new("notes")} in locations
     end
   end
 end

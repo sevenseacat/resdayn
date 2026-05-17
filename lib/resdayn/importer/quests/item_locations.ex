@@ -29,7 +29,12 @@ defmodule Resdayn.Importer.Quests.ItemLocations do
   end
 
   @doc """
-  Get unique cell locations for a list of condition item IDs.
+  Get cell locations for a list of condition item IDs, tagged with the source
+  item that produced each location.
+
+  Returns `[{cell_id_ci_string, item_id_ci_string}]`. The same cell may appear
+  multiple times if multiple condition items resolve to it; the caller is
+  responsible for grouping.
 
   `add_item_targets` is a map of `%{downcased_item_id => [target_id_strings]}`
   from script add_item effects, representing items added to containers/NPCs at runtime.
@@ -37,22 +42,23 @@ defmodule Resdayn.Importer.Quests.ItemLocations do
   def get_locations(%__MODULE__{} = index, condition_item_ids, add_item_targets \\ %{}) do
     condition_item_ids
     |> Enum.flat_map(fn item_id ->
-      item_id = downcase(item_id)
+      item_id_lower = downcase(item_id)
 
-      direct = [Map.get(index.unique_placements, item_id)]
+      direct = [Map.get(index.unique_placements, item_id_lower)]
 
       via_holders =
-        Map.get(index.holders, item_id, [])
+        Map.get(index.holders, item_id_lower, [])
         |> Enum.map(fn holder_id -> Map.get(index.unique_placements, downcase(holder_id)) end)
 
       via_targets =
-        Map.get(add_item_targets, item_id, [])
+        Map.get(add_item_targets, item_id_lower, [])
         |> Enum.map(fn target_id -> Map.get(index.unique_placements, downcase(target_id)) end)
 
-      direct ++ via_holders ++ via_targets
+      (direct ++ via_holders ++ via_targets)
+      |> Enum.filter(& &1)
+      |> Enum.uniq()
+      |> Enum.map(fn cell -> {Ash.CiString.new(cell), Ash.CiString.new(item_id)} end)
     end)
-    |> Enum.filter(& &1)
-    |> Enum.map(&Ash.CiString.new/1)
     |> Enum.uniq()
   end
 
