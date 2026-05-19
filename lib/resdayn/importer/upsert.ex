@@ -210,9 +210,14 @@ defmodule Resdayn.Importer.Upsert do
     source_file_id = Keyword.get(opts, :source_file_id)
     has_source_file_ids = Keyword.get(opts, :has_source_file_ids, false)
 
+    # COALESCE preserves the existing column value when a record in this batch
+    # doesn't include the column (i.e. EXCLUDED.col is NULL). ESM partial-update
+    # overrides — records like a TR_Mainland tweak to a vanilla quest that
+    # doesn't repeat the name — should accumulate source_file_ids without
+    # clobbering fields they didn't set.
     regular_sets =
       Enum.map(update_columns, fn col ->
-        "\"#{col}\" = EXCLUDED.\"#{col}\""
+        ~s|"#{col}" = COALESCE(EXCLUDED."#{col}", "#{table}"."#{col}")|
       end)
 
     base_params =

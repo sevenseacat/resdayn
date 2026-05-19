@@ -15,7 +15,7 @@ defmodule Resdayn.Codex.Dialogue.Quest do
 
   attributes do
     attribute :id, :ci_string, primary_key?: true, allow_nil?: false
-    attribute :name, :string, allow_nil?: false
+    attribute :name, :string
   end
 
   relationships do

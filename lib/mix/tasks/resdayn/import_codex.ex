@@ -11,10 +11,7 @@ defmodule Mix.Tasks.Resdayn.ImportCodex do
     "master_index.esp",
     "Tamriel_Data.esm",
     "TR_Mainland.esm",
-    "TR_Factions.esp",
-    "Sky_Main.esm",
-    "Cyr_Main.esm",
-    "OAAB_Data.esm"
+    "TR_Factions.esp"
   ]
 
   @requirements ["app.start --preload-modules"]
