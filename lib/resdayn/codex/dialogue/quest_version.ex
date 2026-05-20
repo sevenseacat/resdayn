@@ -20,6 +20,9 @@ defmodule Resdayn.Codex.Dialogue.QuestVersion do
 
   relationships do
     belongs_to :quest, Resdayn.Codex.Dialogue.Quest
-    has_many :journal_entries, Resdayn.Codex.Dialogue.JournalEntry
+
+    has_many :journal_entries, Resdayn.Codex.Dialogue.JournalEntry do
+      sort index: :asc
+    end
   end
 end
