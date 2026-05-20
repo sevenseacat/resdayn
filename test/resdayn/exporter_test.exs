@@ -457,7 +457,7 @@ defmodule Resdayn.ExporterTest do
 
   describe "quest / journal entries" do
     test "exports a quest with a name entry and journal entries" do
-      quest = %Resdayn.Codex.Dialogue.Quest{
+      quest = %Resdayn.Codex.Dialogue.QuestVersion{
         id: Ash.CiString.new("my_quest"),
         name: "My Quest",
         journal_entries: [
@@ -497,7 +497,7 @@ defmodule Resdayn.ExporterTest do
     end
 
     test "journal entries are linked including name entry" do
-      quest = %Resdayn.Codex.Dialogue.Quest{
+      quest = %Resdayn.Codex.Dialogue.QuestVersion{
         id: Ash.CiString.new("q"),
         name: "Q",
         journal_entries: [

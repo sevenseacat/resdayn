@@ -54,7 +54,7 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
       # become `%Effect{function: :unknown}` entries that mislead analysis.
       String.starts_with?(line, "endif") or
         String.starts_with?(line, "endwhile") or
-        String.starts_with?(line, "else") ->
+          String.starts_with?(line, "else") ->
         parse_body(lines, locals, acc)
 
       String.starts_with?(line, "if") ->

@@ -34,6 +34,7 @@ defmodule Resdayn.Importer.Quests.ItemLocationsTest do
         )
 
       locations = ItemLocations.get_locations(index, ["tanto"])
+
       assert {Ash.CiString.new("Ald-ruhn, Guild of Mages"), Ash.CiString.new("tanto")} in locations
     end
 

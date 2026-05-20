@@ -2540,9 +2540,9 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
       ast = ScriptParser.parse(script)
 
       refute Enum.any?(ast.body, fn
-        %Script.Effect{function: :unknown} -> true
-        _ -> false
-      end)
+               %Script.Effect{function: :unknown} -> true
+               _ -> false
+             end)
     end
 
     test "stray else at top level produces no :unknown effect" do
@@ -2554,9 +2554,9 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
       ast = ScriptParser.parse(script)
 
       refute Enum.any?(ast.body, fn
-        %Script.Effect{function: :unknown} -> true
-        _ -> false
-      end)
+               %Script.Effect{function: :unknown} -> true
+               _ -> false
+             end)
     end
 
     test "local declarations appearing after the header are still collected" do
@@ -2579,9 +2579,9 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
       assert "laterdecl" in ast.locals
 
       refute Enum.any?(ast.body, fn
-        %Script.Effect{function: :unknown} -> true
-        _ -> false
-      end)
+               %Script.Effect{function: :unknown} -> true
+               _ -> false
+             end)
     end
   end
 

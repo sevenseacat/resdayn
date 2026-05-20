@@ -187,13 +187,13 @@ defmodule Resdayn.Importer.Quests.Analyzer do
   end
 
   defp load_quests([]) do
-    Resdayn.Codex.Dialogue.Quest
+    Resdayn.Codex.Dialogue.QuestVersion
     |> Ash.Query.for_read(:read)
     |> Ash.read!(load: [:journal_entries])
   end
 
   defp load_quests(list) when is_list(list) do
-    Resdayn.Codex.Dialogue.Quest
+    Resdayn.Codex.Dialogue.QuestVersion
     |> Ash.Query.for_read(:read)
     |> Ash.Query.filter(id in ^list)
     |> Ash.read!(load: [:journal_entries])
@@ -286,7 +286,12 @@ defmodule Resdayn.Importer.Quests.Analyzer do
   # > :received, reflecting how much player action each implies.
   # Per-transition effect lookup: transition_id -> list of effects on that
   # transition's specific journal command.
-  defp effects_per_transition(all_transitions, dialogue_updates, script_journals_by_quest_id, quest_id) do
+  defp effects_per_transition(
+         all_transitions,
+         dialogue_updates,
+         script_journals_by_quest_id,
+         quest_id
+       ) do
     quest_id_lower = downcase(quest_id)
 
     dialogue_commands_by_trigger_id =
@@ -301,8 +306,11 @@ defmodule Resdayn.Importer.Quests.Analyzer do
     Map.new(all_transitions, fn t ->
       cmds =
         case t.trigger_type do
-          :dialogue_response -> Map.get(dialogue_commands_by_trigger_id, downcase(t.trigger_id), [])
-          :script -> Map.get(script_commands_by_trigger_id, downcase(t.trigger_id), [])
+          :dialogue_response ->
+            Map.get(dialogue_commands_by_trigger_id, downcase(t.trigger_id), [])
+
+          :script ->
+            Map.get(script_commands_by_trigger_id, downcase(t.trigger_id), [])
         end
 
       effects =
@@ -417,7 +425,12 @@ defmodule Resdayn.Importer.Quests.Analyzer do
     end)
   end
 
-  defp build_related_npcs(npc_events, all_transitions, start_transition_ids, finish_transition_ids) do
+  defp build_related_npcs(
+         npc_events,
+         all_transitions,
+         start_transition_ids,
+         finish_transition_ids
+       ) do
     transition_type_by_tid = Map.new(all_transitions, fn t -> {t.id, t.trigger_type} end)
 
     npc_events
