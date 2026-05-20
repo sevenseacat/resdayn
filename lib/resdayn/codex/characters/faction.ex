@@ -45,6 +45,6 @@ defmodule Resdayn.Codex.Characters.Faction do
     has_many :reactions, __MODULE__.Reaction, destination_attribute: :source_id
     has_many :reactions_from, __MODULE__.Reaction, destination_attribute: :target_id
 
-    has_many :quest_versions, Resdayn.Codex.Dialogue.QuestVersion
+    has_many :quests, Resdayn.Codex.Dialogue.Quest
   end
 end

@@ -1,11 +1,11 @@
-defmodule Resdayn.Codex.Dialogue.QuestVersion do
+defmodule Resdayn.Codex.Dialogue.Quest do
   use Ash.Resource,
     domain: Resdayn.Codex.Dialogue,
     data_layer: AshPostgres.DataLayer,
     extensions: [Resdayn.Codex.Importable]
 
   postgres do
-    table "quest_versions"
+    table "quests"
     repo Resdayn.Repo
   end
 
@@ -15,11 +15,11 @@ defmodule Resdayn.Codex.Dialogue.QuestVersion do
 
   attributes do
     attribute :id, :ci_string, primary_key?: true, allow_nil?: false
-    attribute :name, :string
+    attribute :name, :string, allow_nil?: false
   end
 
   relationships do
-    belongs_to :quest, Resdayn.Codex.Dialogue.Quest
-    has_many :journal_entries, Resdayn.Codex.Dialogue.JournalEntry
+    belongs_to :faction, Resdayn.Codex.Characters.Faction
+    has_many :quest_versions, Resdayn.Codex.Dialogue.QuestVersion
   end
 end

@@ -22,19 +22,24 @@ defmodule Mix.Tasks.Resdayn.ImportCodex do
 
   def run(_argv) do
     Enum.map(@all_files, &Resdayn.Importer.Runner.run/1)
+    collate_named_quests()
     rebuild_search_index()
   end
 
   defp rebuild_search_index do
     Logger.notice("Rebuilding search index...")
 
-    {time, count} =
-      :timer.tc(
-        fn ->
-          Resdayn.Importer.SearchIndex.rebuild()
-        end,
-        :millisecond
-      )
+    {time, count} = :timer.tc(&Resdayn.Importer.SearchIndex.rebuild/0, :millisecond)
+
+    Logger.notice(
+      "Search index rebuilt with #{count} entries in #{Float.round(time / 1000, 2)} seconds."
+    )
+  end
+
+  defp collate_named_quests do
+    Logger.notice("Collating named quests...")
+
+    {time, count} = :timer.tc(&Resdayn.Importer.Record.Quest.collate/0, :millisecond)
 
     Logger.notice(
       "Search index rebuilt with #{count} entries in #{Float.round(time / 1000, 2)} seconds."
