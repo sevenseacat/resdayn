@@ -7,7 +7,7 @@ defmodule Mix.Tasks.Resdayn.ExportDemo do
 
   use Mix.Task
 
-  alias Resdayn.Codex.Dialogue.{Topic, Response, Quest, JournalEntry}
+  alias Resdayn.Codex.Dialogue.{Topic, Response, QuestVersion, JournalEntry}
   alias Resdayn.Codex.Dialogue.Response.Condition
   alias Resdayn.Codex.Mechanics.Script
 
@@ -149,7 +149,7 @@ defmodule Mix.Tasks.Resdayn.ExportDemo do
   end
 
   defp journal do
-    %Quest{
+    %QuestVersion{
       id: Ash.CiString.new("goatmire_demo"),
       name: "Goatmire Conference Demo",
       journal_entries: [

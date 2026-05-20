@@ -1,4 +1,4 @@
-defmodule Resdayn.Importer.Record.Quest do
+defmodule Resdayn.Importer.Record.QuestVersion do
   use Resdayn.Importer.Record
 
   def process(records, _opts) do
@@ -31,7 +31,7 @@ defmodule Resdayn.Importer.Record.Quest do
 
     %{
       type: :record,
-      resource: Resdayn.Codex.Dialogue.Quest,
+      resource: Resdayn.Codex.Dialogue.QuestVersion,
       records: processed_records,
       conflict_keys: [:id]
     }

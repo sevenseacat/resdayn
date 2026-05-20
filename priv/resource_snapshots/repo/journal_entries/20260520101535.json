@@ -21,8 +21,44 @@
       "references": null,
       "scale": null,
       "size": null,
-      "source": "name",
+      "source": "index",
+      "type": "bigint"
+    },
+    {
+      "allow_nil?": true,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "content",
       "type": "text"
+    },
+    {
+      "allow_nil?": true,
+      "default": "false",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "finishes_quest",
+      "type": "boolean"
+    },
+    {
+      "allow_nil?": true,
+      "default": "false",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "restarts_quest",
+      "type": "boolean"
     },
     {
       "allow_nil?": false,
@@ -73,16 +109,16 @@
           "global": null,
           "strategy": null
         },
-        "name": "quests_faction_id_fkey",
+        "name": "journal_entries_quest_version_id_fkey",
         "on_delete": null,
         "on_update": null,
         "primary_key?": true,
         "schema": "public",
-        "table": "factions"
+        "table": "quest_versions"
       },
       "scale": null,
       "size": null,
-      "source": "faction_id",
+      "source": "quest_version_id",
       "type": "citext"
     }
   ],
@@ -91,8 +127,8 @@
   "create_table_options": null,
   "custom_indexes": [],
   "custom_statements": [],
-  "has_create_action": false,
-  "hash": "925A127DC1F8B3BD61CFD5ADB4B581D05E907D1DD6514FA24F367C908F5A10E3",
+  "has_create_action": true,
+  "hash": "3D1C9CA61C460303A73096066FB95507A056EC9803340FD125F410D55FB4454B",
   "identities": [],
   "multitenancy": {
     "attribute": null,
@@ -101,5 +137,5 @@
   },
   "repo": "Elixir.Resdayn.Repo",
   "schema": null,
-  "table": "quests"
+  "table": "journal_entries"
 }

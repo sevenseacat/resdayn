@@ -2,8 +2,8 @@ defmodule Resdayn.Codex.Dialogue do
   use Ash.Domain, otp_app: :resdayn
 
   resources do
-    resource __MODULE__.Quest do
-      define :get_quest_by_id, action: :read, get_by: :id
+    resource __MODULE__.QuestVersion do
+      define :get_quest_version_by_id, action: :read, get_by: :id
     end
 
     resource __MODULE__.JournalEntry

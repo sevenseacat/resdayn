@@ -13,7 +13,7 @@
       "type": "citext"
     },
     {
-      "allow_nil?": false,
+      "allow_nil?": true,
       "default": "nil",
       "generated?": false,
       "precision": null,
@@ -53,14 +53,46 @@
         "array",
         "text"
       ]
+    },
+    {
+      "allow_nil?": true,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": {
+        "deferrable": false,
+        "destination_attribute": "id",
+        "destination_attribute_default": null,
+        "destination_attribute_generated": null,
+        "index?": false,
+        "match_type": null,
+        "match_with": null,
+        "multitenancy": {
+          "attribute": null,
+          "global": null,
+          "strategy": null
+        },
+        "name": "quest_versions_faction_id_fkey",
+        "on_delete": null,
+        "on_update": null,
+        "primary_key?": true,
+        "schema": "public",
+        "table": "factions"
+      },
+      "scale": null,
+      "size": null,
+      "source": "faction_id",
+      "type": "citext"
     }
   ],
   "base_filter": null,
   "check_constraints": [],
+  "create_table_options": null,
   "custom_indexes": [],
   "custom_statements": [],
   "has_create_action": false,
-  "hash": "5C9A9C5FEA3C90D71D3DAEAB2072AA772ADEBF73BEFF56FEBED33375DC5D8B3E",
+  "hash": "FE1A1CFB8DBD170537B50C7E646BA998CF963295DE57B86FD25B444EB94CB8CC",
   "identities": [],
   "multitenancy": {
     "attribute": null,
@@ -69,5 +101,5 @@
   },
   "repo": "Elixir.Resdayn.Repo",
   "schema": null,
-  "table": "quests"
+  "table": "quest_versions"
 }

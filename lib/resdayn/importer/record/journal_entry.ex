@@ -12,7 +12,7 @@ defmodule Resdayn.Importer.Record.JournalEntry do
         |> Enum.map(fn entry ->
           %{
             id: entry.data.id,
-            quest_id: topic.data.id,
+            quest_version_id: topic.data.id,
             index: entry.data[:disposition_or_journal_index],
             content: entry.data[:content],
             finishes_quest: entry.data[:finishes_quest] || false,

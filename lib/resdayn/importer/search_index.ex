@@ -25,7 +25,7 @@ defmodule Resdayn.Importer.SearchIndex do
     {Resdayn.Codex.Characters.Race, :race, nil},
     {Resdayn.Codex.Characters.Birthsign, :birthsign, nil},
     {Resdayn.Codex.Characters.Skill, :skill, nil},
-    {Resdayn.Codex.Dialogue.Quest, :quest, nil}
+    {Resdayn.Codex.Dialogue.QuestVersion, :quest_version, nil}
   ]
 
   # Resources with no `name` attribute — their `id` IS the meaningful name

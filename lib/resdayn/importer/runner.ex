@@ -84,7 +84,7 @@ defmodule Resdayn.Importer.Runner do
             # === Phase 9: Dialogue ===
             Record.DialogueTopic,
             Record.DialogueResponse,
-            Record.Quest,
+            Record.QuestVersion,
             Record.JournalEntry
           ]
           |> Enum.each(fn record_type ->

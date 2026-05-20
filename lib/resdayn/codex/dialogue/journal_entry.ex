@@ -11,7 +11,7 @@ defmodule Resdayn.Codex.Dialogue.JournalEntry do
 
   actions do
     defaults [:read, :create, :update, :destroy]
-    default_accept [:id, :index, :content, :finishes_quest, :restarts_quest, :quest_id]
+    default_accept [:id, :index, :content, :finishes_quest, :restarts_quest, :quest_version_id]
   end
 
   attributes do
@@ -25,6 +25,6 @@ defmodule Resdayn.Codex.Dialogue.JournalEntry do
   end
 
   relationships do
-    belongs_to :quest, Resdayn.Codex.Dialogue.Quest
+    belongs_to :quest_version, Resdayn.Codex.Dialogue.QuestVersion
   end
 end

@@ -1,11 +1,11 @@
-defmodule Resdayn.Codex.Dialogue.Quest do
+defmodule Resdayn.Codex.Dialogue.QuestVersion do
   use Ash.Resource,
     domain: Resdayn.Codex.Dialogue,
     data_layer: AshPostgres.DataLayer,
     extensions: [Resdayn.Codex.Importable]
 
   postgres do
-    table "quests"
+    table "quest_versions"
     repo Resdayn.Repo
   end
 
