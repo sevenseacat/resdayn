@@ -1,7 +1,7 @@
-defmodule Resdayn.Importer.Quests.ScriptParserTest do
-  use Resdayn.DataCase, async: true
+defmodule Resdayn.QuestAnalyzer.ScriptParserTest do
+  use ExUnit.Case, async: true
 
-  alias Resdayn.Importer.Quests.{Script, ScriptParser}
+  alias Resdayn.QuestAnalyzer.ScriptParser
 
   @script_simple """
   Journal "MV_DeadTaxman" 100
@@ -138,20 +138,20 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
 
   describe "parse" do
     test "simple scripts" do
-      expected = %Script.Ast{
+      expected = %ScriptParser.AST{
         name: nil,
         locals: [],
         body: [
-          %Script.Journal{quest_id: "mv_deadtaxman", index: 100},
-          %Script.Effect{
+          %ScriptParser.Journal{quest_id: "mv_deadtaxman", index: 100},
+          %ScriptParser.Effect{
             function: :remove_item,
             data: %{subject: :self, item_id: "gold_001", count: 500}
           },
-          %Script.Effect{
+          %ScriptParser.Effect{
             function: :add_item,
             data: %{subject: :player, item_id: "gold_001", count: 500}
           },
-          %Script.Effect{function: :goodbye, data: %{}}
+          %ScriptParser.Effect{function: :goodbye, data: %{}}
         ]
       }
 
@@ -159,18 +159,18 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
     end
 
     test "script with single condition" do
-      expected = %Script.Ast{
+      expected = %ScriptParser.AST{
         name: nil,
         locals: [],
         body: [
-          %Script.IfBlock{
+          %ScriptParser.IfBlock{
             condition: %{
               left: %{function: :journal_index, arg: "mv_slavemule"},
               operator: :<=,
               right: %{value: 100}
             },
             body: [
-              %Script.Journal{quest_id: "mv_slavemule", index: 101}
+              %ScriptParser.Journal{quest_id: "mv_slavemule", index: 101}
             ],
             else_clause: nil
           }
@@ -181,21 +181,21 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
     end
 
     test "script with else" do
-      expected = %Script.Ast{
+      expected = %ScriptParser.AST{
         name: nil,
         locals: [],
         body: [
-          %Script.IfBlock{
+          %ScriptParser.IfBlock{
             condition: %{
               left: %{function: :journal_index, arg: "quest"},
               operator: :==,
               right: %{value: 10}
             },
             body: [
-              %Script.Journal{quest_id: "quest", index: 20}
+              %ScriptParser.Journal{quest_id: "quest", index: 20}
             ],
             else_clause: [
-              %Script.Journal{quest_id: "quest", index: 30}
+              %ScriptParser.Journal{quest_id: "quest", index: 30}
             ]
           }
         ]
@@ -205,27 +205,27 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
     end
 
     test "script with elseif" do
-      expected = %Script.Ast{
+      expected = %ScriptParser.AST{
         name: nil,
         locals: [],
         body: [
-          %Script.IfBlock{
+          %ScriptParser.IfBlock{
             condition: %{
               left: %{function: :journal_index, arg: "mv_slavemule"},
               operator: :<=,
               right: %{value: 100}
             },
             body: [
-              %Script.Journal{quest_id: "mv_slavemule", index: 101}
+              %ScriptParser.Journal{quest_id: "mv_slavemule", index: 101}
             ],
-            else_clause: %Script.IfBlock{
+            else_clause: %ScriptParser.IfBlock{
               condition: %{
                 left: %{function: :journal_index, arg: "mv_slavemule"},
                 operator: :==,
                 right: %{value: 102}
               },
               body: [
-                %Script.Journal{quest_id: "mv_slavemule", index: 103}
+                %ScriptParser.Journal{quest_id: "mv_slavemule", index: 103}
               ],
               else_clause: nil
             }
@@ -237,32 +237,32 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
     end
 
     test "script with nested conditions" do
-      expected = %Script.Ast{
+      expected = %ScriptParser.AST{
         name: nil,
         locals: [],
         body: [
-          %Script.IfBlock{
+          %ScriptParser.IfBlock{
             condition: %{
               left: %{function: :journal_index, arg: "b5_redoranhort"},
               operator: :>=,
               right: %{value: 50}
             },
             body: [
-              %Script.IfBlock{
+              %ScriptParser.IfBlock{
                 condition: %{
                   left: %{function: :journal_index, arg: "b6_hlaaluhort"},
                   operator: :>=,
                   right: %{value: 50}
                 },
                 body: [
-                  %Script.IfBlock{
+                  %ScriptParser.IfBlock{
                     condition: %{
                       left: %{function: :journal_index, arg: "b7_telvannihort"},
                       operator: :>=,
                       right: %{value: 50}
                     },
                     body: [
-                      %Script.Journal{quest_id: "b8_all_hortator", index: 50}
+                      %ScriptParser.Journal{quest_id: "b8_all_hortator", index: 50}
                     ],
                     else_clause: nil
                   }
@@ -279,32 +279,32 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
     end
 
     test "script with death condition" do
-      expected = %Script.Ast{
+      expected = %ScriptParser.AST{
         name: nil,
         locals: [],
         body: [
-          %Script.IfBlock{
+          %ScriptParser.IfBlock{
             condition: %{
               left: %{function: :dead_count, arg: "ahnia"},
               operator: :>,
               right: %{value: 0}
             },
             body: [
-              %Script.IfBlock{
+              %ScriptParser.IfBlock{
                 condition: %{
                   left: %{function: :journal_index, arg: "ms_scrollsales"},
                   operator: :>,
                   right: %{value: 0}
                 },
                 body: [
-                  %Script.IfBlock{
+                  %ScriptParser.IfBlock{
                     condition: %{
                       left: %{function: :journal_index, arg: "ms_scrollsales"},
                       operator: :<,
                       right: %{value: 40}
                     },
                     body: [
-                      %Script.Journal{quest_id: "ms_scrollsales", index: 40}
+                      %ScriptParser.Journal{quest_id: "ms_scrollsales", index: 40}
                     ],
                     else_clause: nil
                   }
@@ -321,19 +321,19 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
     end
 
     test "script with multiple quests" do
-      expected = %Script.Ast{
+      expected = %ScriptParser.AST{
         name: nil,
         locals: [],
         body: [
-          %Script.IfBlock{
+          %ScriptParser.IfBlock{
             condition: %{
               left: %{function: :journal_index, arg: "c3_destroydagoth"},
               operator: :==,
               right: %{value: 20}
             },
             body: [
-              %Script.Journal{quest_id: "c3_destroydagoth", index: 50},
-              %Script.Journal{quest_id: "a1_sleepersawake", index: 50}
+              %ScriptParser.Journal{quest_id: "c3_destroydagoth", index: 50},
+              %ScriptParser.Journal{quest_id: "a1_sleepersawake", index: 50}
             ],
             else_clause: nil
           }
@@ -344,22 +344,22 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
     end
 
     test "script with effects before journal" do
-      expected = %Script.Ast{
+      expected = %ScriptParser.AST{
         name: nil,
         locals: [],
         body: [
-          %Script.IfBlock{
+          %ScriptParser.IfBlock{
             condition: %{
               left: %{function: :journal_index, arg: "mv_slavemule"},
               operator: :<=,
               right: %{value: 100}
             },
             body: [
-              %Script.Effect{
+              %ScriptParser.Effect{
                 function: :add_item,
                 data: %{subject: :self, item_id: "ingred_moon_sugar_01", count: 20}
               },
-              %Script.Journal{quest_id: "mv_slavemule", index: 101}
+              %ScriptParser.Journal{quest_id: "mv_slavemule", index: 101}
             ],
             else_clause: nil
           }
@@ -370,23 +370,23 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
     end
 
     test "script with effects before and after journal" do
-      expected = %Script.Ast{
+      expected = %ScriptParser.AST{
         name: nil,
         locals: [],
         body: [
-          %Script.IfBlock{
+          %ScriptParser.IfBlock{
             condition: %{
               left: %{function: :journal_index, arg: "mv_slavemule"},
               operator: :<=,
               right: %{value: 100}
             },
             body: [
-              %Script.Effect{
+              %ScriptParser.Effect{
                 function: :add_item,
                 data: %{subject: :self, item_id: "ingred_moon_sugar_01", count: 20}
               },
-              %Script.Journal{quest_id: "mv_slavemule", index: 101},
-              %Script.Effect{function: :mod_disposition, data: %{subject: :self, value: 15}}
+              %ScriptParser.Journal{quest_id: "mv_slavemule", index: 101},
+              %ScriptParser.Effect{function: :mod_disposition, data: %{subject: :self, value: 15}}
             ],
             else_clause: nil
           }
@@ -397,21 +397,21 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
     end
 
     test "script with shared effects" do
-      expected = %Script.Ast{
+      expected = %ScriptParser.AST{
         name: nil,
         locals: [],
         body: [
-          %Script.IfBlock{
+          %ScriptParser.IfBlock{
             condition: %{
               left: %{function: :journal_index, arg: "c3_destroydagoth"},
               operator: :==,
               right: %{value: 20}
             },
             body: [
-              %Script.Effect{function: :enable, data: %{subject: "ring of azura"}},
-              %Script.Journal{quest_id: "c3_destroydagoth", index: 50},
-              %Script.Journal{quest_id: "a1_sleepersawake", index: 50},
-              %Script.Effect{function: :mod_reputation, data: %{subject: :self, value: 10}}
+              %ScriptParser.Effect{function: :enable, data: %{subject: "ring of azura"}},
+              %ScriptParser.Journal{quest_id: "c3_destroydagoth", index: 50},
+              %ScriptParser.Journal{quest_id: "a1_sleepersawake", index: 50},
+              %ScriptParser.Effect{function: :mod_reputation, data: %{subject: :self, value: 10}}
             ],
             else_clause: nil
           }
@@ -422,37 +422,37 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
     end
 
     test "script with different blocks" do
-      expected = %Script.Ast{
+      expected = %ScriptParser.AST{
         name: nil,
         locals: [],
         body: [
-          %Script.IfBlock{
+          %ScriptParser.IfBlock{
             condition: %{
               left: %{function: :journal_index, arg: "quest"},
               operator: :<,
               right: %{value: 50}
             },
             body: [
-              %Script.Effect{
+              %ScriptParser.Effect{
                 function: :add_item,
                 data: %{subject: :self, item_id: "reward1", count: 1}
               },
-              %Script.Journal{quest_id: "quest", index: 50}
+              %ScriptParser.Journal{quest_id: "quest", index: 50}
             ],
             else_clause: nil
           },
-          %Script.IfBlock{
+          %ScriptParser.IfBlock{
             condition: %{
               left: %{function: :journal_index, arg: "quest"},
               operator: :>=,
               right: %{value: 50}
             },
             body: [
-              %Script.Effect{
+              %ScriptParser.Effect{
                 function: :add_item,
                 data: %{subject: :self, item_id: "reward2", count: 1}
               },
-              %Script.Journal{quest_id: "quest", index: 100}
+              %ScriptParser.Journal{quest_id: "quest", index: 100}
             ],
             else_clause: nil
           }
@@ -463,18 +463,18 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
     end
 
     test "script with PCCell condition (and supports)" do
-      expected = %Script.Ast{
+      expected = %ScriptParser.AST{
         name: "scriptpccellcondition",
         locals: ["currentcell", "longtimeago"],
         body: [
-          %Script.IfBlock{
+          %ScriptParser.IfBlock{
             condition: %{
               left: %{function: :current_cell, arg: "ebonheart, argonian mission"},
               operator: :==,
               right: %{value: 1}
             },
             body: [
-              %Script.Journal{quest_id: "mv_slavemule", index: 114}
+              %ScriptParser.Journal{quest_id: "mv_slavemule", index: 114}
             ],
             else_clause: nil
           }
@@ -485,18 +485,18 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
     end
 
     test "script with OnDeath condition" do
-      expected = %Script.Ast{
+      expected = %ScriptParser.AST{
         name: nil,
         locals: [],
         body: [
-          %Script.IfBlock{
+          %ScriptParser.IfBlock{
             condition: %{
               left: %{function: :on_death, subject: :self},
               operator: :==,
               right: %{value: 1}
             },
             body: [
-              %Script.Journal{quest_id: "somequest", index: 50}
+              %ScriptParser.Journal{quest_id: "somequest", index: 50}
             ],
             else_clause: nil
           }
@@ -507,51 +507,51 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
     end
 
     test "script with hierarchical conditions" do
-      expected = %Script.Ast{
+      expected = %ScriptParser.AST{
         name: nil,
         locals: [],
         body: [
-          %Script.IfBlock{
+          %ScriptParser.IfBlock{
             condition: %{
               left: %{function: :journal_index, arg: "mainquest"},
               operator: :>=,
               right: %{value: 10}
             },
             body: [
-              %Script.Effect{function: :add_topic, data: %{topic_id: "rumors"}},
-              %Script.IfBlock{
+              %ScriptParser.Effect{function: :add_topic, data: %{topic_id: "rumors"}},
+              %ScriptParser.IfBlock{
                 condition: %{
                   left: %{function: :dead_count, arg: "villain"},
                   operator: :>=,
                   right: %{value: 1}
                 },
                 body: [
-                  %Script.Effect{
+                  %ScriptParser.Effect{
                     function: :add_item,
                     data: %{subject: :player, item_id: "gold_001", count: 500}
                   },
-                  %Script.Journal{quest_id: "mainquest", index: 20},
-                  %Script.IfBlock{
+                  %ScriptParser.Journal{quest_id: "mainquest", index: 20},
+                  %ScriptParser.IfBlock{
                     condition: %{
                       left: %{function: :item_count, subject: :self, arg: "secret_note"},
                       operator: :>=,
                       right: %{value: 1}
                     },
                     body: [
-                      %Script.Journal{quest_id: "sidequest", index: 10},
-                      %Script.Effect{function: :add_topic, data: %{topic_id: "secret"}}
+                      %ScriptParser.Journal{quest_id: "sidequest", index: 10},
+                      %ScriptParser.Effect{function: :add_topic, data: %{topic_id: "secret"}}
                     ],
                     else_clause: nil
                   },
-                  %Script.Effect{
+                  %ScriptParser.Effect{
                     function: :mod_faction_reputation,
                     data: %{faction_id: "fighters guild", value: 5}
                   },
-                  %Script.Journal{quest_id: "mainquest", index: 30}
+                  %ScriptParser.Journal{quest_id: "mainquest", index: 30}
                 ],
                 else_clause: nil
               },
-              %Script.Journal{quest_id: "mainquest", index: 15}
+              %ScriptParser.Journal{quest_id: "mainquest", index: 15}
             ],
             else_clause: nil
           }
@@ -562,12 +562,12 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
     end
 
     test "script with start script" do
-      expected = %Script.Ast{
+      expected = %ScriptParser.AST{
         name: nil,
         locals: [],
         body: [
-          %Script.Journal{quest_id: "quest", index: 20},
-          %Script.Effect{function: :start_script, data: %{script_id: "otherscript"}}
+          %ScriptParser.Journal{quest_id: "quest", index: 20},
+          %ScriptParser.Effect{function: :start_script, data: %{script_id: "otherscript"}}
         ]
       }
 
@@ -2620,7 +2620,7 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
       ast = ScriptParser.parse(script)
 
       refute Enum.any?(ast.body, fn
-               %Script.Effect{function: :unknown} -> true
+               %ScriptParser.Effect{function: :unknown} -> true
                _ -> false
              end)
     end
@@ -2634,7 +2634,7 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
       ast = ScriptParser.parse(script)
 
       refute Enum.any?(ast.body, fn
-               %Script.Effect{function: :unknown} -> true
+               %ScriptParser.Effect{function: :unknown} -> true
                _ -> false
              end)
     end
@@ -2659,7 +2659,7 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
       assert "laterdecl" in ast.locals
 
       refute Enum.any?(ast.body, fn
-               %Script.Effect{function: :unknown} -> true
+               %ScriptParser.Effect{function: :unknown} -> true
                _ -> false
              end)
     end
@@ -2678,18 +2678,18 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
       endwhile
       """
 
-      expected = %Script.Ast{
+      expected = %ScriptParser.AST{
         name: "testwhile",
         locals: ["temp"],
         body: [
-          %Script.WhileBlock{
+          %ScriptParser.WhileBlock{
             condition: %{
               left: %{local_var: "temp"},
               operator: :!=,
               right: %{value: 0}
             },
             body: [
-              %Script.Effect{
+              %ScriptParser.Effect{
                 function: :set_variable,
                 data: %{variable: "temp", value: "temp - 1"}
               }
@@ -2714,19 +2714,19 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
       endwhile
       """
 
-      expected = %Script.Ast{
+      expected = %ScriptParser.AST{
         name: "bearsummoner",
         locals: ["count"],
         body: [
-          %Script.WhileBlock{
+          %ScriptParser.WhileBlock{
             condition: %{
               left: %{local_var: "count"},
               operator: :>,
               right: %{value: 0}
             },
             body: [
-              %Script.Journal{quest_id: "bm_ceremony1", index: 10},
-              %Script.Effect{
+              %ScriptParser.Journal{quest_id: "bm_ceremony1", index: 10},
+              %ScriptParser.Effect{
                 function: :set_variable,
                 data: %{variable: "count", value: "count - 1"}
               }
@@ -2751,25 +2751,25 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
       endif
       """
 
-      expected = %Script.Ast{
+      expected = %ScriptParser.AST{
         name: "nested",
         locals: ["ready", "count"],
         body: [
-          %Script.IfBlock{
+          %ScriptParser.IfBlock{
             condition: %{
               left: %{local_var: "ready"},
               operator: :==,
               right: %{value: 1}
             },
             body: [
-              %Script.WhileBlock{
+              %ScriptParser.WhileBlock{
                 condition: %{
                   left: %{local_var: "count"},
                   operator: :>,
                   right: %{value: 0}
                 },
                 body: [
-                  %Script.Journal{quest_id: "q", index: 10}
+                  %ScriptParser.Journal{quest_id: "q", index: 10}
                 ]
               }
             ],

@@ -249,7 +249,7 @@ defmodule Resdayn.Importer.Quests.Analyzer do
   defp load_scripts(script_map) do
     script_map
     |> Enum.flat_map(fn {id, text} ->
-      Resdayn.Importer.Quests.ScriptParser.extract_journal_commands(text, script_map,
+      Resdayn.QuestAnalyzer.ScriptParser.extract_journal_commands(text, script_map,
         follow_scripts: true
       )
       |> Enum.map(&Map.put(&1, :script_id, Ash.CiString.new(id)))
@@ -268,7 +268,7 @@ defmodule Resdayn.Importer.Quests.Analyzer do
         :script_content,
         fn script_content ->
           Enum.group_by(
-            Resdayn.Importer.Quests.ScriptParser.extract_journal_commands(
+            Resdayn.QuestAnalyzer.ScriptParser.extract_journal_commands(
               script_content,
               script_map,
               follow_scripts: true

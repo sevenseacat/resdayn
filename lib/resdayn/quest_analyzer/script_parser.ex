@@ -1,16 +1,44 @@
-defmodule Resdayn.Importer.Quests.ScriptParser do
+defmodule Resdayn.QuestAnalyzer.ScriptParser do
   @moduledoc """
   Parse raw script content into its AST form, ready for analysis.
   """
 
-  alias Resdayn.Importer.Quests.Script
+  defmodule AST do
+    @moduledoc """
+    An AST definition for a parsed in-game script.
+    This can be used for both standalone scripts, and dialogue response scripts.
+    """
+
+    # For dialogue scripts, name and locals will be nil
+    defstruct [:name, :locals, :body]
+  end
+
+  defmodule IfBlock do
+    defstruct [:condition, :body, :else_clause]
+  end
+
+  defmodule WhileBlock do
+    defstruct [:condition, :body]
+  end
+
+  defmodule Journal do
+    defstruct [:quest_id, :index]
+  end
+
+  defmodule Effect do
+    defstruct [:function, :data]
+  end
+
+  defmodule Condition do
+    defstruct [:function, :data]
+  end
 
   def parse(content) when is_binary(content) do
     lines = parse_input(content)
     {name, lines} = parse_begin(lines)
     {locals, body_lines} = extract_locals(lines)
 
-    %Script.Ast{
+    %AST{
       name: name,
       locals: locals,
       body: parse_body(body_lines, locals)
@@ -75,7 +103,7 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
     condition = parse_condition(line, locals)
     {body, else_clause, rest} = parse_block_body(lines, locals, [])
 
-    block = %Script.IfBlock{
+    block = %IfBlock{
       condition: condition,
       body: body,
       else_clause: else_clause
@@ -88,7 +116,7 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
     condition = parse_condition(line, locals)
     {body, rest} = parse_while_body(lines, locals, [])
 
-    block = %Script.WhileBlock{
+    block = %WhileBlock{
       condition: condition,
       body: body
     }
@@ -157,12 +185,12 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
     cond do
       String.starts_with?(line, "journal ") or String.starts_with?(line, "journal,") ->
         {quest_id, index} = parse_journal_command(line)
-        %Script.Journal{quest_id: quest_id, index: index}
+        %Journal{quest_id: quest_id, index: index}
 
       String.contains?(line, "->journal ") ->
         [_, rest] = String.split(line, "->", parts: 2)
         {quest_id, index} = parse_journal_command(rest)
-        %Script.Journal{quest_id: quest_id, index: index}
+        %Journal{quest_id: quest_id, index: index}
 
       line in ~w(end return) or String.starts_with?(line, "end ") ->
         nil
@@ -171,10 +199,10 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
         case parse_effect(line) do
           nil ->
             # Record unknown commands as generic effects
-            %Script.Effect{function: :unknown, data: %{content: line}}
+            %Effect{function: :unknown, data: %{content: line}}
 
           effect ->
-            %Script.Effect{function: effect.function, data: Map.drop(effect, [:function])}
+            %Effect{function: effect.function, data: Map.drop(effect, [:function])}
         end
     end
   end
@@ -222,7 +250,9 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
   # Both passes use the same `all_effects` set: journals — whether at this
   # level or nested deeper — see every sibling effect from this scope plus
   # everything inherited from ancestor scopes, regardless of textual position.
-  # Tracked in Linear 7CC-89.
+  # Tracked in Linear 7CC-89; see test/resdayn/quest_analyzer/script_parser_test.exs
+  # for the cases that failed under the previous "effects-before-block-only"
+  # rule.
   defp walk_body(nodes, state) do
     # Pass 1: Collect all effects at this level
     {level_effects, state} = collect_effects(nodes, state)
@@ -234,7 +264,7 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
     # Pass 2: Process journals and recurse into nested blocks
     Enum.reduce(nodes, state, fn node, s ->
       case node do
-        %Script.Journal{} = journal ->
+        %Journal{} = journal ->
           entry = %{
             quest_id: journal.quest_id,
             index: journal.index,
@@ -244,10 +274,10 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
 
           %{s | journals: s.journals ++ [entry]}
 
-        %Script.IfBlock{} = block ->
+        %IfBlock{} = block ->
           walk_if_block(block, %{s | inherited_effects: all_effects})
 
-        %Script.WhileBlock{} = block ->
+        %WhileBlock{} = block ->
           walk_while_block(block, %{s | inherited_effects: all_effects})
 
         _ ->
@@ -260,7 +290,7 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
   defp collect_effects(nodes, state) do
     Enum.reduce(nodes, {[], state}, fn node, {effects, s} ->
       case node do
-        %Script.Effect{} = effect ->
+        %Effect{} = effect ->
           effect_data = Map.put(effect.data, :function, effect.function)
 
           # Follow StartScript and collect its top-level effects
@@ -279,7 +309,7 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
     end)
   end
 
-  defp walk_if_block(%Script.IfBlock{} = block, state) do
+  defp walk_if_block(%IfBlock{} = block, state) do
     # Process the "if" branch
     state = process_branch(block.condition, block.body, state)
 
@@ -288,7 +318,7 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
       nil ->
         state
 
-      %Script.IfBlock{} = elseif_block ->
+      %IfBlock{} = elseif_block ->
         walk_if_block(elseif_block, state)
 
       else_body when is_list(else_body) ->
@@ -296,7 +326,7 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
     end
   end
 
-  defp walk_while_block(%Script.WhileBlock{} = block, state) do
+  defp walk_while_block(%WhileBlock{} = block, state) do
     # Journals inside the loop body inherit the loop's guard condition,
     # the same way an if-block's body inherits its condition.
     process_branch(block.condition, block.body, state)
@@ -350,7 +380,7 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
 
     Enum.reduce(body, {[], state}, fn node, {effects, s} ->
       case node do
-        %Script.Effect{} = effect ->
+        %Effect{} = effect ->
           effect_data = Map.put(effect.data, :function, effect.function)
 
           # Recursively follow nested StartScripts

@@ -165,7 +165,7 @@ defmodule Resdayn.Importer.Quests.ChoiceChainTest do
         :script_content,
         fn script_content ->
           Enum.group_by(
-            Resdayn.Importer.Quests.ScriptParser.extract_journal_commands(script_content),
+            Resdayn.QuestAnalyzer.ScriptParser.extract_journal_commands(script_content),
             & &1.quest_id
           )
         end
