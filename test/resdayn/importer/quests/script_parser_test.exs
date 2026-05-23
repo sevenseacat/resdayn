@@ -920,7 +920,9 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
                      %{function: :mod_faction_reputation, faction_id: "fighters guild", value: 5}
                    ]
                  },
-                 # SideQuest 10: gets all effects from outer blocks plus its own
+                 # SideQuest 10: gets all sibling effects from every enclosing scope
+                 # (position-independent — including the mod_faction_reputation that
+                 # appears in the intermediate scope AFTER the inner block).
                  %{
                    quest_id: "sidequest",
                    index: 10,
@@ -944,6 +946,7 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
                    effects: [
                      %{function: :add_topic, topic_id: "rumors"},
                      %{function: :add_item, subject: :player, item_id: "gold_001", count: 500},
+                     %{function: :mod_faction_reputation, faction_id: "fighters guild", value: 5},
                      %{function: :add_topic, topic_id: "secret"}
                    ]
                  },
@@ -1023,6 +1026,83 @@ defmodule Resdayn.Importer.Quests.ScriptParserTest do
                    %{function: :disable, subject: "edwinna elbert"}
                  ]
                }
+             ]
+    end
+  end
+
+  describe "extract_journal_commands — walker effect attribution" do
+    # Targeted regression coverage for 7CC-89. The broader hierarchical test
+    # above also exercises this, but these minimal cases isolate the rule.
+    test "same-scope effects attach position-independently (baseline)" do
+      script = """
+      AddSpell "spell_before"
+      Journal "q" 10
+      AddSpell "spell_after"
+      """
+
+      assert ScriptParser.extract_journal_commands(script) == [
+               %{
+                 quest_id: "q",
+                 index: 10,
+                 conditions: [],
+                 effects: [
+                   %{function: :add_spell, value: "spell_before", subject: :self},
+                   %{function: :add_spell, value: "spell_after", subject: :self}
+                 ]
+               }
+             ]
+    end
+
+    test "a journal in a nested if-block sees outer-scope effects regardless of position" do
+      script = """
+      AddSpell "spell_before"
+      if ( SomeCondition == 1 )
+        Journal "q" 10
+      endif
+      AddSpell "spell_after"
+      """
+
+      assert ScriptParser.extract_journal_commands(script) == [
+               %{
+                 quest_id: "q",
+                 index: 10,
+                 conditions: [
+                   %{
+                     left: %{local_var: "somecondition"},
+                     operator: :==,
+                     right: %{value: 1}
+                   }
+                 ],
+                 effects: [
+                   %{function: :add_spell, value: "spell_before", subject: :self},
+                   %{function: :add_spell, value: "spell_after", subject: :self}
+                 ]
+               }
+             ]
+    end
+
+    test "a journal nested two levels deep sees sibling effects from each enclosing scope" do
+      # Pattern matches the Sky_qRe_KG4_Vampire reproducer: journal in the
+      # innermost block; effects in the intermediate scope before AND after
+      # the innermost block both attach.
+      script = """
+      if ( OuterCondition == 1 )
+        AddSpell "outer_before"
+        if ( InnerCondition == 1 )
+          Journal "q" 10
+        endif
+        AddSpell "outer_after"
+      endif
+      """
+
+      [command] = ScriptParser.extract_journal_commands(script)
+
+      assert command.quest_id == "q"
+      assert command.index == 10
+
+      assert command.effects == [
+               %{function: :add_spell, value: "outer_before", subject: :self},
+               %{function: :add_spell, value: "outer_after", subject: :self}
              ]
     end
   end

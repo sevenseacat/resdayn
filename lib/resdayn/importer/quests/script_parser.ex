@@ -219,52 +219,41 @@ defmodule Resdayn.Importer.Quests.ScriptParser do
   # 1. First pass: collect ALL effects at this level (including from StartScript)
   # 2. Second pass: create journal entries and recurse into nested blocks
   #
-  # This is done in two passes because nested blocks should only get the effects
-  # that appear before the block, but effects after the nested block should get
-  # all the effects from the same level
+  # Both passes use the same `all_effects` set: journals — whether at this
+  # level or nested deeper — see every sibling effect from this scope plus
+  # everything inherited from ancestor scopes, regardless of textual position.
+  # Tracked in Linear 7CC-89.
   defp walk_body(nodes, state) do
     # Pass 1: Collect all effects at this level
     {level_effects, state} = collect_effects(nodes, state)
 
-    # All effects for journals at this level = inherited + this level's
+    # All effects for journals at this level (and any nested journals reached
+    # via if/while blocks below) = inherited + this level's
     all_effects = state.inherited_effects ++ level_effects
 
     # Pass 2: Process journals and recurse into nested blocks
-    # For nested blocks, we pass cumulative effects up to that point
-    {final_state, _cumulative} =
-      Enum.reduce(nodes, {state, state.inherited_effects}, fn node, {s, cumulative} ->
-        case node do
-          %Script.Journal{} = journal ->
-            entry = %{
-              quest_id: journal.quest_id,
-              index: journal.index,
-              conditions: s.conditions,
-              effects: all_effects
-            }
+    Enum.reduce(nodes, state, fn node, s ->
+      case node do
+        %Script.Journal{} = journal ->
+          entry = %{
+            quest_id: journal.quest_id,
+            index: journal.index,
+            conditions: s.conditions,
+            effects: all_effects
+          }
 
-            {%{s | journals: s.journals ++ [entry]}, cumulative}
+          %{s | journals: s.journals ++ [entry]}
 
-          %Script.IfBlock{} = block ->
-            # Nested block inherits effects accumulated SO FAR (not all level effects)
-            s = walk_if_block(block, %{s | inherited_effects: cumulative})
-            {s, cumulative}
+        %Script.IfBlock{} = block ->
+          walk_if_block(block, %{s | inherited_effects: all_effects})
 
-          %Script.WhileBlock{} = block ->
-            # Same inheritance rules as IfBlock; no else clause.
-            s = walk_while_block(block, %{s | inherited_effects: cumulative})
-            {s, cumulative}
+        %Script.WhileBlock{} = block ->
+          walk_while_block(block, %{s | inherited_effects: all_effects})
 
-          %Script.Effect{} = effect ->
-            # Add to cumulative for future nested blocks
-            effect_data = Map.put(effect.data, :function, effect.function)
-            {s, cumulative ++ [effect_data]}
-
-          _ ->
-            {s, cumulative}
-        end
-      end)
-
-    final_state
+        _ ->
+          s
+      end
+    end)
   end
 
   # Collect all effects at this level, following StartScript if enabled
