@@ -253,30 +253,30 @@ defmodule Resdayn.Importer.Quests.AnalyzerTest do
     end
   end
 
-  def ci_eq(a, b), do: Ash.CiString.compare(Ash.CiString.new(a), Ash.CiString.new(b)) == :eq
+  defp ci_eq(a, b), do: Ash.CiString.compare(Ash.CiString.new(a), Ash.CiString.new(b)) == :eq
 
-  def find_transition(%Resdayn.Codex.QuestAnalysis.Analysis{} = analysis, index) do
+  defp find_transition(%Resdayn.Codex.QuestAnalysis.Analysis{} = analysis, index) do
     transition = Enum.find(analysis.transitions, &(&1.index == index))
     refute is_nil(transition)
 
     transition
   end
 
-  def find_related_npc(%Resdayn.Codex.QuestAnalysis.Analysis{} = analysis, npc_id) do
+  defp find_related_npc(%Resdayn.Codex.QuestAnalysis.Analysis{} = analysis, npc_id) do
     related = Enum.find(analysis.related_npcs, &ci_eq(&1.npc_id, npc_id))
     refute is_nil(related), "Expected #{npc_id} to be a related NPC but was not"
 
     related
   end
 
-  def find_related_item(%Resdayn.Codex.QuestAnalysis.Analysis{} = analysis, item_id) do
+  defp find_related_item(%Resdayn.Codex.QuestAnalysis.Analysis{} = analysis, item_id) do
     related = Enum.find(analysis.related_items, &ci_eq(&1.item_id, item_id))
     refute is_nil(related), "Expected #{item_id} to be a related item but was not"
 
     related
   end
 
-  def find_related_location(%Resdayn.Codex.QuestAnalysis.Analysis{} = analysis, cell_id) do
+  defp find_related_location(%Resdayn.Codex.QuestAnalysis.Analysis{} = analysis, cell_id) do
     related = Enum.find(analysis.related_locations, &ci_eq(&1.cell_id, cell_id))
     refute is_nil(related), "Expected #{cell_id} to be a related location but was not"
 

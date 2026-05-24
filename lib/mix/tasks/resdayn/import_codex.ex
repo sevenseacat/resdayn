@@ -8,10 +8,10 @@ defmodule Mix.Tasks.Resdayn.ImportCodex do
     "Morrowind.esm",
     "Tribunal.esm",
     "Bloodmoon.esm",
-    "master_index.esp",
-    "Tamriel_Data.esm",
-    "TR_Mainland.esm",
-    "TR_Factions.esp"
+    # "master_index.esp",
+    # "Tamriel_Data.esm",
+    # "TR_Mainland.esm",
+    # "TR_Factions.esp"
   ]
 
   @requirements ["app.start --preload-modules"]
@@ -42,7 +42,7 @@ defmodule Mix.Tasks.Resdayn.ImportCodex do
     {time, count} = :timer.tc(&Resdayn.Importer.Record.Quest.collate/0, :millisecond)
 
     Logger.notice(
-      "Search index rebuilt with #{count} entries in #{Float.round(time / 1000, 2)} seconds."
+      "Named quests collated with #{count} entries in #{Float.round(time / 1000, 2)} seconds."
     )
   end
 end
