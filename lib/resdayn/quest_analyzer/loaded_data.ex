@@ -3,14 +3,19 @@ defmodule Resdayn.QuestAnalyzer.LoadedData do
   All of the data needed to run the full quest analyzer, pre-loaded and pre-
   prepared. Built once at the start of a run, then threaded through extractors
   that will pick out the relevant information.
+
+  Every field is a map keyed by the downcased entity id, so extractors can
+  cross-reference in O(1) (e.g. resolving a parsed command's `quest_id` back
+  to its `QuestVersion`). When the whole collection is needed for iteration,
+  use `Map.values/1`.
   """
 
-  # %QuestVersion{}, with journal_entries + quest_id preloaded
-  defstruct quest_versions: [],
-            # %{downcased_script_id => raw_script_text}
-            scripts_by_id: %{},
-            # %Response{} with script_content pre-parsed
-            dialogue_responses: []
+  # %QuestVersion{} with journal_entries preloaded
+  defstruct quest_versions: %{},
+            # Raw script text — used as the script_map for follow_scripts during parsing
+            scripts: %{},
+            # %Response{} with script_content pre-parsed into journal commands
+            dialogue_responses: %{}
 
   require Ash.Query
   require Logger
@@ -20,13 +25,13 @@ defmodule Resdayn.QuestAnalyzer.LoadedData do
 
   def load(quest_ids \\ []) do
     quest_versions = time(fn -> load_quest_versions(quest_ids) end, "quest versions")
-    script_map = time(&load_scripts_by_id/0, "script map")
+    scripts = time(&load_scripts/0, "scripts")
 
     %__MODULE__{
       quest_versions: quest_versions,
-      scripts_by_id: script_map,
+      scripts: scripts,
       dialogue_responses:
-        time(fn -> load_dialogue_responses(script_map) end, "dialogue responses")
+        time(fn -> load_dialogue_responses(scripts) end, "dialogue responses")
     }
   end
 
@@ -39,9 +44,10 @@ defmodule Resdayn.QuestAnalyzer.LoadedData do
       query
     end
     |> Ash.read!(load: [:journal_entries])
+    |> Map.new(fn qv -> {str(qv.id), qv} end)
   end
 
-  defp load_scripts_by_id do
+  defp load_scripts do
     Resdayn.Codex.Mechanics.Script
     |> Ash.read!()
     |> Map.new(fn script -> {str(script.id), script.text} end)
@@ -62,6 +68,7 @@ defmodule Resdayn.QuestAnalyzer.LoadedData do
     |> Enum.map(fn response ->
       Map.update!(response, :script_content, &parse_content(&1, script_map))
     end)
+    |> Map.new(fn response -> {str(response.id), response} end)
   end
 
   defp parse_content(content, script_map) do
