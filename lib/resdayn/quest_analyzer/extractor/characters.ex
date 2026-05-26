@@ -3,20 +3,22 @@ defmodule Resdayn.QuestAnalyzer.Extractor.Characters do
   Extractors for character involvement (NPCs and creatures) across a quest.
 
   Each public function takes a `%LoadedData{}` and returns a list of
-  involvement-row maps with this shape:
+  involvement-row maps shaped to match
+  `Resdayn.Codex.QuestAnalysis.NPCInvolvement`:
 
       %{
         quest_id: <player-concept Quest id, downcased>,
         quest_version_id: <per-ESM record id, downcased>,
         npc_id: <speaker / bearer / target npc id, downcased>,
         reason: <:dialogue_speaker | :script_bearer | :effect_target | :effect_mention>,
-        source_type: <:dialogue_response | :script>,
-        source_id: <id of the source record that caused inclusion, downcased>
+        dialogue_response_id: <Response.id, downcased> | nil,
+        dialogue_response_topic_id: <Response.topic_id, downcased> | nil,
+        script_id: <Script.id, downcased> | nil
       }
 
-  All id fields are passed through `str/1` so the row representation is
-  consistently downcased. Display-case forms come from joining back to source
-  records at query time.
+  Exactly one of `(dialogue_response_id + dialogue_response_topic_id)` or
+  `script_id` is populated per row, matching the resource's XOR check
+  constraint. All id fields are downcased via `str/1`.
   """
 
   import Resdayn.QuestAnalyzer.Helpers
@@ -32,6 +34,7 @@ defmodule Resdayn.QuestAnalyzer.Extractor.Characters do
   - Responses without a `speaker_npc_id` (unrestricted dialogue)
   - Responses whose speaker isn't in `data.npcs` (orphan reference)
   - Responses touching quests not in `data.quest_versions` (filter propagation)
+  - QuestVersions without a parent Quest (orphan QuestVersions)
   """
   def dialogue_speakers(%LoadedData{} = data) do
     for response <- Map.values(data.dialogue_responses),
@@ -45,8 +48,9 @@ defmodule Resdayn.QuestAnalyzer.Extractor.Characters do
         quest_version_id: str(qv.id),
         npc_id: str(npc.id),
         reason: :dialogue_speaker,
-        source_type: :dialogue_response,
-        source_id: str(response.id)
+        dialogue_response_id: str(response.id),
+        dialogue_response_topic_id: str(response.topic_id),
+        script_id: nil
       }
     end
   end
@@ -59,6 +63,7 @@ defmodule Resdayn.QuestAnalyzer.Extractor.Characters do
   Skipped:
   - NPCs without an attached `script_id`
   - Quests not in `data.quest_versions` (filter propagation)
+  - QuestVersions without a parent Quest (orphan QuestVersions)
 
   Raises `KeyError` if an NPC references a `script_id` not in `data.scripts` —
   that's a data integrity issue worth crashing on.
@@ -75,8 +80,9 @@ defmodule Resdayn.QuestAnalyzer.Extractor.Characters do
         quest_version_id: str(qv.id),
         npc_id: str(npc.id),
         reason: :script_bearer,
-        source_type: :script,
-        source_id: str(npc.script_id)
+        dialogue_response_id: nil,
+        dialogue_response_topic_id: nil,
+        script_id: str(npc.script_id)
       }
     end
   end
@@ -103,8 +109,11 @@ defmodule Resdayn.QuestAnalyzer.Extractor.Characters do
           response.script_content,
           data.quest_versions,
           data.npcs,
-          :dialogue_response,
-          str(response.id)
+          %{
+            dialogue_response_id: str(response.id),
+            dialogue_response_topic_id: str(response.topic_id),
+            script_id: nil
+          }
         )
       end)
 
@@ -114,15 +123,18 @@ defmodule Resdayn.QuestAnalyzer.Extractor.Characters do
           parsed_commands,
           data.quest_versions,
           data.npcs,
-          :script,
-          str(script_id)
+          %{
+            dialogue_response_id: nil,
+            dialogue_response_topic_id: nil,
+            script_id: str(script_id)
+          }
         )
       end)
 
     from_dialogue ++ from_scripts
   end
 
-  defp effect_rows(parsed_commands, quest_versions, npcs, source_type, source_id) do
+  defp effect_rows(parsed_commands, quest_versions, npcs, source_fields) do
     Enum.uniq(
       for command <- parsed_commands,
           {:ok, qv} <- [Map.fetch(quest_versions, command.quest_id)],
@@ -130,14 +142,12 @@ defmodule Resdayn.QuestAnalyzer.Extractor.Characters do
           effect <- command.effects,
           {:ok, subject} when is_binary(subject) <- [Map.fetch(effect, :subject)],
           {:ok, npc} <- [Map.fetch(npcs, str(subject))] do
-        %{
+        Map.merge(source_fields, %{
           quest_id: str(qv.quest_id),
           quest_version_id: str(qv.id),
           npc_id: str(npc.id),
-          reason: reason_for(effect.function),
-          source_type: source_type,
-          source_id: source_id
-        }
+          reason: reason_for(effect.function)
+        })
       end
     )
   end

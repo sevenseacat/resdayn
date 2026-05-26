@@ -1,0 +1,46 @@
+defmodule Resdayn.QuestAnalyzerTest do
+  @moduledoc """
+  End-to-end tests for the quest analyzer: load → extract → persist, then
+  query the persisted involvement table for known cases.
+  """
+  use Resdayn.IntegrationCase
+
+  require Ash.Query
+
+  alias Resdayn.Codex.QuestAnalysis.NPCInvolvement
+
+  setup do
+    Resdayn.Repo.query!("TRUNCATE npc_involvements")
+    :ok
+  end
+
+  describe "run/1" do
+    test "persists NPC involvements for a filtered quest set" do
+      counts = Resdayn.QuestAnalyzer.run(["A1_4_MuzgobInformant"])
+
+      assert counts.npc_involvements > 0
+
+      # Caius is the quest giver — appears as both dialogue_speaker (4 responses)
+      # and effect_target/mention rows in his responses' effects.
+      caius_rows =
+        NPCInvolvement
+        |> Ash.Query.filter(
+          quest_version_id == "a1_4_muzgobinformant" and npc_id == "caius cosades"
+        )
+        |> Ash.read!()
+
+      reasons = caius_rows |> Enum.map(& &1.reason) |> Enum.uniq() |> Enum.sort()
+      assert :dialogue_speaker in reasons
+    end
+
+    test "is idempotent" do
+      Resdayn.QuestAnalyzer.run(["A1_4_MuzgobInformant"])
+      first = Ash.count!(NPCInvolvement)
+
+      Resdayn.QuestAnalyzer.run(["A1_4_MuzgobInformant"])
+      second = Ash.count!(NPCInvolvement)
+
+      assert first == second
+    end
+  end
+end

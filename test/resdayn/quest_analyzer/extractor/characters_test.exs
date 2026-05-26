@@ -17,19 +17,24 @@ defmodule Resdayn.QuestAnalyzer.Extractor.CharactersTest do
   end
 
   describe "dialogue_speakers/1" do
-    test "every row has :dialogue_speaker reason and :dialogue_response source", %{speaker_rows: rows} do
+    test "every row has :dialogue_speaker reason and a dialogue response source",
+         %{speaker_rows: rows} do
       refute Enum.empty?(rows)
       assert Enum.all?(rows, &(&1.reason == :dialogue_speaker))
-      assert Enum.all?(rows, &(&1.source_type == :dialogue_response))
+      assert Enum.all?(rows, &(not is_nil(&1.dialogue_response_id)))
+      assert Enum.all?(rows, &(not is_nil(&1.dialogue_response_topic_id)))
+      assert Enum.all?(rows, &is_nil(&1.script_id))
     end
 
-    test "emits one row per (quest, response, speaker) for A1_4_MuzgobInformant", %{speaker_rows: rows} do
+    test "emits one row per (quest, response, speaker) for A1_4_MuzgobInformant",
+         %{speaker_rows: rows} do
       # Caius speaks 4 quest-touching responses, Sharn speaks 4 — 8 rows total.
       muzgob_rows = rows_for_quest_version(rows, "a1_4_muzgobinformant")
       assert length(muzgob_rows) == 8
     end
 
-    test "captures all speakers across responses for A1_4_MuzgobInformant", %{speaker_rows: rows} do
+    test "captures all speakers across responses for A1_4_MuzgobInformant",
+         %{speaker_rows: rows} do
       speakers =
         rows
         |> rows_for_quest_version("a1_4_muzgobinformant")
@@ -57,13 +62,17 @@ defmodule Resdayn.QuestAnalyzer.Extractor.CharactersTest do
   end
 
   describe "script_bearers/1" do
-    test "every row has :script_bearer reason and :script source", %{bearer_rows: rows} do
+    test "every row has :script_bearer reason and a script source",
+         %{bearer_rows: rows} do
       refute Enum.empty?(rows)
       assert Enum.all?(rows, &(&1.reason == :script_bearer))
-      assert Enum.all?(rows, &(&1.source_type == :script))
+      assert Enum.all?(rows, &(not is_nil(&1.script_id)))
+      assert Enum.all?(rows, &is_nil(&1.dialogue_response_id))
+      assert Enum.all?(rows, &is_nil(&1.dialogue_response_topic_id))
     end
 
-    test "emits a row for an NPC whose attached script touches a quest", %{bearer_rows: rows} do
+    test "emits a row for an NPC whose attached script touches a quest",
+         %{bearer_rows: rows} do
       # processusScript sets journal index 10 for MV_DeadTaxman; the script is
       # attached to Processus Vitellius.
       row =
@@ -72,12 +81,13 @@ defmodule Resdayn.QuestAnalyzer.Extractor.CharactersTest do
         end)
 
       refute is_nil(row)
-      assert row.source_id == "processusscript"
+      assert row.script_id == "processusscript"
     end
   end
 
   describe "effect_targets/1" do
-    test "every row is either :effect_target or :effect_mention", %{target_rows: rows} do
+    test "every row is either :effect_target or :effect_mention",
+         %{target_rows: rows} do
       refute Enum.empty?(rows)
       assert Enum.all?(rows, &(&1.reason in [:effect_target, :effect_mention]))
     end
@@ -113,6 +123,7 @@ defmodule Resdayn.QuestAnalyzer.Extractor.CharactersTest do
         dialogue_responses: %{
           "r1" => %{
             id: "r1",
+            topic_id: "t1",
             speaker_npc_id: nil,
             script_content: [
               %{
@@ -146,6 +157,7 @@ defmodule Resdayn.QuestAnalyzer.Extractor.CharactersTest do
         dialogue_responses: %{
           "r1" => %{
             id: "r1",
+            topic_id: "t1",
             speaker_npc_id: nil,
             script_content: [
               %{
