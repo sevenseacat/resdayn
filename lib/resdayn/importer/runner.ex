@@ -11,6 +11,7 @@ defmodule Resdayn.Importer.Runner do
   alias Resdayn.Importer.ChildrenUpserter
 
   def run(filename, opts \\ []) do
+    log_level = Logger.level()
     Logger.configure(level: Keyword.get(opts, :log_level, :notice))
 
     Logger.notice("Starting import for #{filename}...")
@@ -95,6 +96,7 @@ defmodule Resdayn.Importer.Runner do
       )
 
     Logger.notice("Completed import in #{Float.round(time / 1000, 2)} seconds.")
+    Logger.configure(level: log_level)
   end
 
   defp parse_records(filename) do

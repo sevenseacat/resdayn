@@ -21,9 +21,12 @@ defmodule Mix.Tasks.Resdayn.ImportCodex do
   end
 
   def run(_argv) do
+    Logger.configure(level: :info)
+
     Enum.map(@all_files, &Resdayn.Importer.Runner.run/1)
     collate_named_quests()
     rebuild_search_index()
+    run_quest_analyzer()
   end
 
   defp rebuild_search_index do
@@ -43,6 +46,16 @@ defmodule Mix.Tasks.Resdayn.ImportCodex do
 
     Logger.notice(
       "Named quests collated with #{count} entries in #{Float.round(time / 1000, 2)} seconds."
+    )
+  end
+
+  defp run_quest_analyzer do
+    Logger.notice("Running quest analyzer...")
+
+    {time, counts} = :timer.tc(&Resdayn.QuestAnalyzer.run/0, :millisecond)
+
+    Logger.notice(
+      "Quest analyzer completed in #{Float.round(time / 1000, 2)} seconds: #{inspect(counts)}"
     )
   end
 end
