@@ -17,11 +17,23 @@ defmodule Resdayn.QuestAnalyzer.LoadedDataTest do
       refute Enum.empty?(data.quest_versions)
       refute Enum.empty?(data.scripts)
       refute Enum.empty?(data.dialogue_responses)
+      refute Enum.empty?(data.npcs)
     end
 
     test "preloads journal entries on quest versions", %{data: data} do
       quest = Map.fetch!(data.quest_versions, "a1_4_muzgobinformant")
       assert length(quest.journal_entries) == 8
+    end
+
+    test "scripts contain parsed journal commands", %{data: data} do
+      # processusScript sets journal index 10 for MV_DeadTaxman
+      parsed = Map.fetch!(data.scripts, "processusscript")
+      assert Enum.any?(parsed, &(&1.quest_id == "mv_deadtaxman" and &1.index == 10))
+    end
+
+    test "npcs are loaded with cell info", %{data: data} do
+      caius = Map.fetch!(data.npcs, "caius cosades")
+      refute is_nil(caius.cell_id)
     end
   end
 

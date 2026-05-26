@@ -80,6 +80,10 @@ defmodule Resdayn.IntegrationCase do
     # Include Tribunal to get quest updates (named/finish/restart)
     Resdayn.Importer.Runner.run("Morrowind.esm")
     Resdayn.Importer.Runner.run("Tribunal.esm")
+
+    # Collate QuestVersions by name into player-concept Quest records, matching
+    # what the import_codex mix task does after the per-file imports.
+    Resdayn.Importer.Record.Quest.collate()
   end
 
   @doc """

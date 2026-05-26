@@ -12,10 +12,12 @@ defmodule Resdayn.QuestAnalyzer.LoadedData do
 
   # %QuestVersion{} with journal_entries preloaded
   defstruct quest_versions: %{},
-            # Raw script text — used as the script_map for follow_scripts during parsing
+            # [parsed_journal_command] — standalone scripts pre-parsed
             scripts: %{},
             # %Response{} with script_content pre-parsed into journal commands
-            dialogue_responses: %{}
+            dialogue_responses: %{},
+            # %NPC{} with cell info preloaded
+            npcs: %{}
 
   require Ash.Query
   require Logger
@@ -25,13 +27,14 @@ defmodule Resdayn.QuestAnalyzer.LoadedData do
 
   def load(quest_ids \\ []) do
     quest_versions = time(fn -> load_quest_versions(quest_ids) end, "quest versions")
-    scripts = time(&load_scripts/0, "scripts")
+    script_text_map = time(&load_script_text_map/0, "script text")
 
     %__MODULE__{
       quest_versions: quest_versions,
-      scripts: scripts,
+      scripts: time(fn -> parse_scripts(script_text_map) end, "scripts"),
       dialogue_responses:
-        time(fn -> load_dialogue_responses(scripts) end, "dialogue responses")
+        time(fn -> load_dialogue_responses(script_text_map) end, "dialogue responses"),
+      npcs: time(&load_npcs/0, "npcs")
     }
   end
 
@@ -47,10 +50,20 @@ defmodule Resdayn.QuestAnalyzer.LoadedData do
     |> Map.new(fn qv -> {str(qv.id), qv} end)
   end
 
-  defp load_scripts do
+  # Build a transient map of raw script text keyed by downcased id. Used as
+  # the script_map argument to ScriptParser.extract_journal_commands/3 so that
+  # StartScript references can be followed during parsing. Not exposed on
+  # LoadedData — once parsing finishes nothing else needs the raw text.
+  defp load_script_text_map do
     Resdayn.Codex.Mechanics.Script
     |> Ash.read!()
     |> Map.new(fn script -> {str(script.id), script.text} end)
+  end
+
+  defp parse_scripts(script_text_map) do
+    Map.new(script_text_map, fn {id, text} ->
+      {id, ScriptParser.extract_journal_commands(text, script_text_map, follow_scripts: true)}
+    end)
   end
 
   # Load all relevant dialogue from the database, with parsed script content.
@@ -77,6 +90,13 @@ defmodule Resdayn.QuestAnalyzer.LoadedData do
       script_map,
       follow_scripts: true
     )
+  end
+
+  defp load_npcs do
+    Resdayn.Codex.World.NPC
+    |> Ash.Query.for_read(:read)
+    |> Ash.read!(load: [:cell_id, :cell_name])
+    |> Map.new(fn npc -> {str(npc.id), npc} end)
   end
 
   defp time(func, label) do
