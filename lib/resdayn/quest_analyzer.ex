@@ -18,19 +18,19 @@ defmodule Resdayn.QuestAnalyzer do
   def run(quest_ids \\ []) do
     data = time(fn -> LoadedData.load(quest_ids) end, "load")
 
-    npc_rows =
+    actor_rows =
       time(
         fn ->
-          Extractor.Characters.dialogue_speakers(data) ++
-            Extractor.Characters.script_bearers(data) ++
-            Extractor.Characters.effect_targets(data)
+          Extractor.Actors.dialogue_speakers(data) ++
+            Extractor.Actors.script_bearers(data) ++
+            Extractor.Actors.effect_targets(data)
         end,
-        "extract npc involvements"
+        "extract actor involvements"
       )
 
-    time(fn -> Persister.npc_involvements(npc_rows) end, "persist npc involvements")
+    time(fn -> Persister.actor_involvements(actor_rows) end, "persist actor involvements")
 
-    %{npc_involvements: length(npc_rows)}
+    %{actor_involvements: length(actor_rows)}
   end
 
   defp time(func, label) do

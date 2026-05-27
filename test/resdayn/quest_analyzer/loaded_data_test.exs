@@ -18,6 +18,7 @@ defmodule Resdayn.QuestAnalyzer.LoadedDataTest do
       refute Enum.empty?(data.scripts)
       refute Enum.empty?(data.dialogue_responses)
       refute Enum.empty?(data.npcs)
+      refute Enum.empty?(data.creatures)
     end
 
     test "preloads journal entries on quest versions", %{data: data} do

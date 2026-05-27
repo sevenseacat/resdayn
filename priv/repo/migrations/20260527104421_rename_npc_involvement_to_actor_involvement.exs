@@ -117,7 +117,7 @@ defmodule Resdayn.Repo.Migrations.RenameNpcInvolvementToActorInvolvement do
       )
     end
 
-    drop_if_exists(constraint(:npc_involvements, :exactly_one_source))
+    drop_if_exists(constraint(:actor_involvements, :exactly_one_source))
 
     create constraint(:actor_involvements, :exactly_one_subject,
              check: """
@@ -142,7 +142,7 @@ defmodule Resdayn.Repo.Migrations.RenameNpcInvolvementToActorInvolvement do
 
     drop_if_exists(constraint(:actor_involvements, :exactly_one_subject))
 
-    create constraint(:npc_involvements, :exactly_one_source,
+    create constraint(:actor_involvements, :exactly_one_source,
              check: """
                (
                (dialogue_response_id IS NOT NULL

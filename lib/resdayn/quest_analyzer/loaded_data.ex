@@ -17,7 +17,9 @@ defmodule Resdayn.QuestAnalyzer.LoadedData do
             # %Response{} with script_content pre-parsed into journal commands
             dialogue_responses: %{},
             # %NPC{} with cell info preloaded
-            npcs: %{}
+            npcs: %{},
+            # %Creature{} (id + script_id)
+            creatures: %{}
 
   require Ash.Query
   require Logger
@@ -34,7 +36,8 @@ defmodule Resdayn.QuestAnalyzer.LoadedData do
       scripts: time(fn -> parse_scripts(script_text_map) end, "scripts"),
       dialogue_responses:
         time(fn -> load_dialogue_responses(script_text_map) end, "dialogue responses"),
-      npcs: time(&load_npcs/0, "npcs")
+      npcs: time(&load_npcs/0, "npcs"),
+      creatures: time(&load_creatures/0, "creatures")
     }
   end
 
@@ -97,6 +100,13 @@ defmodule Resdayn.QuestAnalyzer.LoadedData do
     |> Ash.Query.for_read(:read)
     |> Ash.read!(load: [:cell_id])
     |> Map.new(fn npc -> {str(npc.id), npc} end)
+  end
+
+  defp load_creatures do
+    Resdayn.Codex.World.Creature
+    |> Ash.Query.for_read(:read)
+    |> Ash.read!()
+    |> Map.new(fn creature -> {str(creature.id), creature} end)
   end
 
   defp perform_async(data, operation) do

@@ -7,23 +7,23 @@ defmodule Resdayn.QuestAnalyzerTest do
 
   require Ash.Query
 
-  alias Resdayn.Codex.QuestAnalysis.NPCInvolvement
+  alias Resdayn.Codex.QuestAnalysis.ActorInvolvement
 
   setup do
-    Resdayn.Repo.query!("TRUNCATE npc_involvements")
+    Resdayn.Repo.query!("TRUNCATE actor_involvements")
     :ok
   end
 
   describe "run/1" do
-    test "persists NPC involvements for a filtered quest set" do
+    test "persists actor involvements for a filtered quest set" do
       counts = Resdayn.QuestAnalyzer.run(["A1_4_MuzgobInformant"])
 
-      assert counts.npc_involvements > 0
+      assert counts.actor_involvements > 0
 
       # Caius is the quest giver — appears as both dialogue_speaker (4 responses)
       # and effect_target/mention rows in his responses' effects.
       caius_rows =
-        NPCInvolvement
+        ActorInvolvement
         |> Ash.Query.filter(
           quest_version_id == "a1_4_muzgobinformant" and npc_id == "caius cosades"
         )
@@ -35,10 +35,10 @@ defmodule Resdayn.QuestAnalyzerTest do
 
     test "is idempotent" do
       Resdayn.QuestAnalyzer.run(["A1_4_MuzgobInformant"])
-      first = Ash.count!(NPCInvolvement)
+      first = Ash.count!(ActorInvolvement)
 
       Resdayn.QuestAnalyzer.run(["A1_4_MuzgobInformant"])
-      second = Ash.count!(NPCInvolvement)
+      second = Ash.count!(ActorInvolvement)
 
       assert first == second
     end
