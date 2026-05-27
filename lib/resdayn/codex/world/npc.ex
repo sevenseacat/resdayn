@@ -90,11 +90,18 @@ defmodule Resdayn.Codex.World.NPC do
       no_attributes? true
       filter expr(id == parent(cell_id))
     end
+
+    has_many :quest_involvements, Resdayn.Codex.QuestAnalysis.ActorInvolvement,
+      destination_attribute: :npc_id
   end
 
   calculations do
     calculate :gender, :atom, expr(if :female in npc_flags, do: :female, else: :male)
     calculate :essential?, :boolean, expr(:essential in npc_flags)
+
+    calculate :related_quests,
+              :term,
+              {Resdayn.Codex.QuestAnalysis.QuestsWithRoles, involvements: :quest_involvements}
   end
 
   aggregates do

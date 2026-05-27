@@ -45,6 +45,28 @@ defmodule Resdayn.QuestAnalyzerTest do
 
       assert Enum.all?(quest.related_npcs, &match?(%Resdayn.Codex.World.NPC{}, &1.actor))
       assert Enum.any?(quest.related_npcs, &(:dialogue_speaker in &1.roles))
+
+      # Each entry's primary_role is its most important role, and the most
+      # central actors are listed first.
+      alias Resdayn.Codex.QuestAnalysis.ActorInvolvement.Reason
+
+      assert Enum.all?(quest.related_npcs, fn entry ->
+               entry.primary_role == Enum.min_by(entry.roles, &Reason.importance/1)
+             end)
+
+      primary_ranks = Enum.map(quest.related_npcs, &Reason.importance(&1.primary_role))
+      assert primary_ranks == Enum.sort(primary_ranks)
+    end
+
+    test "exposes related_quests as a loadable calculation on an NPC" do
+      Resdayn.QuestAnalyzer.run(["A1_4_MuzgobInformant"])
+
+      npc = Ash.get!(Resdayn.Codex.World.NPC, "caius cosades", load: :related_quests)
+
+      refute Enum.empty?(npc.related_quests)
+
+      assert Enum.all?(npc.related_quests, &match?(%Resdayn.Codex.Dialogue.Quest{}, &1.quest))
+      assert Enum.any?(npc.related_quests, &(:dialogue_speaker in &1.roles))
     end
 
     test "is idempotent" do

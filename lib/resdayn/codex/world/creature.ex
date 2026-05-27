@@ -73,5 +73,14 @@ defmodule Resdayn.Codex.World.Creature do
     has_many :sound_generators, Resdayn.Codex.Assets.SoundGenerator,
       source_attribute: :sound_generator_key,
       destination_attribute: :creature_key
+
+    has_many :quest_involvements, Resdayn.Codex.QuestAnalysis.ActorInvolvement,
+      destination_attribute: :creature_id
+  end
+
+  calculations do
+    calculate :related_quests,
+              :term,
+              {Resdayn.Codex.QuestAnalysis.QuestsWithRoles, involvements: :quest_involvements}
   end
 end
