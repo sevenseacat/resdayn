@@ -1,17 +1,33 @@
-defmodule Resdayn.Codex.QuestAnalysis.NPCInvolvement do
+defmodule Resdayn.Codex.QuestAnalysis.ActorInvolvement do
+  @moduledoc """
+  An involvement row linking an actor (an NPC or a creature) to a quest,
+  with a reason explaining why the actor is involved and a reference to the
+  source record that caused the inclusion.
+
+  Two independent XOR invariants per row:
+
+  - **Subject**: exactly one of `npc_id` / `creature_id` is set — who is involved.
+  - **Source**: exactly one of `(dialogue_response_id + dialogue_response_topic_id)`
+    / `script_id` is set — how the involvement was found.
+
+  The composite uniqueness invariant (with `NULLS NOT DISTINCT`) prevents
+  duplicate rows for the same (quest, actor, reason, source) tuple.
+  """
+
   use Ash.Resource,
     otp_app: :resdayn,
     domain: Resdayn.Codex.QuestAnalysis,
     data_layer: AshPostgres.DataLayer
 
   postgres do
-    table "npc_involvements"
+    table "actor_involvements"
     repo Resdayn.Repo
 
     references do
       reference :quest, on_delete: :delete
       reference :quest_version, on_delete: :delete
       reference :npc, on_delete: :delete
+      reference :creature, on_delete: :delete
       reference :script, on_delete: :delete
 
       # Response has a composite PK (topic_id + id); match_with adds the
@@ -21,9 +37,15 @@ defmodule Resdayn.Codex.QuestAnalysis.NPCInvolvement do
         match_with: [dialogue_response_topic_id: :topic_id]
     end
 
-    # Source is either a dialogue response (both id columns set) or a
-    # standalone script. Exactly one source-kind per row.
     check_constraints do
+      # Subject is exactly one of an NPC or a creature.
+      check_constraint :npc_id,
+        name: "exactly_one_subject",
+        check: "(npc_id IS NOT NULL) <> (creature_id IS NOT NULL)",
+        message: "exactly one of npc_id or creature_id must be set"
+
+      # Source is exactly one of a dialogue response (both id columns set) or
+      # a standalone script.
       check_constraint :dialogue_response_id,
         name: "exactly_one_source",
         check: """
@@ -47,6 +69,7 @@ defmodule Resdayn.Codex.QuestAnalysis.NPCInvolvement do
         :quest_id,
         :quest_version_id,
         :npc_id,
+        :creature_id,
         :dialogue_response_id,
         :dialogue_response_topic_id,
         :script_id
@@ -75,10 +98,8 @@ defmodule Resdayn.Codex.QuestAnalysis.NPCInvolvement do
       allow_nil? false
     end
 
-    belongs_to :npc, Resdayn.Codex.World.NPC do
-      allow_nil? false
-    end
-
+    belongs_to :npc, Resdayn.Codex.World.NPC
+    belongs_to :creature, Resdayn.Codex.World.Creature
     belongs_to :dialogue_response, Resdayn.Codex.Dialogue.Response
     belongs_to :script, Resdayn.Codex.Mechanics.Script
   end
@@ -89,6 +110,7 @@ defmodule Resdayn.Codex.QuestAnalysis.NPCInvolvement do
                :quest_id,
                :quest_version_id,
                :npc_id,
+               :creature_id,
                :reason,
                :dialogue_response_id,
                :dialogue_response_topic_id,

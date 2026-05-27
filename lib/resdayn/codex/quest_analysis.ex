@@ -3,6 +3,6 @@ defmodule Resdayn.Codex.QuestAnalysis do
     otp_app: :resdayn
 
   resources do
-    resource Resdayn.Codex.QuestAnalysis.NPCInvolvement
+    resource Resdayn.Codex.QuestAnalysis.ActorInvolvement
   end
 end

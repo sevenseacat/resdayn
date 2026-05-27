@@ -55,7 +55,7 @@
           "global": null,
           "strategy": null
         },
-        "name": "npc_involvements_quest_id_fkey",
+        "name": "actor_involvements_quest_id_fkey",
         "on_delete": "delete",
         "on_update": null,
         "primary_key?": true,
@@ -86,7 +86,7 @@
           "global": null,
           "strategy": null
         },
-        "name": "npc_involvements_quest_version_id_fkey",
+        "name": "actor_involvements_quest_version_id_fkey",
         "on_delete": "delete",
         "on_update": null,
         "primary_key?": true,
@@ -99,7 +99,7 @@
       "type": "citext"
     },
     {
-      "allow_nil?": false,
+      "allow_nil?": true,
       "default": "nil",
       "generated?": false,
       "precision": null,
@@ -117,7 +117,7 @@
           "global": null,
           "strategy": null
         },
-        "name": "npc_involvements_npc_id_fkey",
+        "name": "actor_involvements_npc_id_fkey",
         "on_delete": "delete",
         "on_update": null,
         "primary_key?": true,
@@ -142,6 +142,37 @@
         "destination_attribute_generated": null,
         "index?": false,
         "match_type": null,
+        "match_with": null,
+        "multitenancy": {
+          "attribute": null,
+          "global": null,
+          "strategy": null
+        },
+        "name": "actor_involvements_creature_id_fkey",
+        "on_delete": "delete",
+        "on_update": null,
+        "primary_key?": true,
+        "schema": "public",
+        "table": "creatures"
+      },
+      "scale": null,
+      "size": null,
+      "source": "creature_id",
+      "type": "citext"
+    },
+    {
+      "allow_nil?": true,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": {
+        "deferrable": false,
+        "destination_attribute": "id",
+        "destination_attribute_default": null,
+        "destination_attribute_generated": null,
+        "index?": false,
+        "match_type": null,
         "match_with": {
           "dialogue_response_topic_id": "topic_id"
         },
@@ -150,7 +181,7 @@
           "global": null,
           "strategy": null
         },
-        "name": "npc_involvements_dialogue_response_id_fkey",
+        "name": "actor_involvements_dialogue_response_id_fkey",
         "on_delete": "delete",
         "on_update": null,
         "primary_key?": true,
@@ -181,7 +212,7 @@
           "global": null,
           "strategy": null
         },
-        "name": "npc_involvements_script_id_fkey",
+        "name": "actor_involvements_script_id_fkey",
         "on_delete": "delete",
         "on_update": null,
         "primary_key?": true,
@@ -198,10 +229,18 @@
   "check_constraints": [
     {
       "attribute": [
+        "npc_id"
+      ],
+      "base_filter": null,
+      "check": "(npc_id IS NOT NULL) <> (creature_id IS NOT NULL)",
+      "name": "exactly_one_subject"
+    },
+    {
+      "attribute": [
         "dialogue_response_id"
       ],
       "base_filter": null,
-      "check": "(\n  (dialogue_response_id IS NOT NULL\n    AND dialogue_response_topic_id IS NOT NULL\n    AND script_id IS NULL)\n  OR\n  (dialogue_response_id IS NULL\n    AND dialogue_response_topic_id IS NULL\n    AND script_id IS NOT NULL)\n)\n",
+      "check": "(\n  (dialogue_response_id IS NOT NULL AND dialogue_response_topic_id IS NOT NULL AND script_id IS NULL)\n  OR\n  (dialogue_response_id IS NULL AND dialogue_response_topic_id IS NULL AND script_id IS NOT NULL)\n)\n",
       "name": "exactly_one_source"
     }
   ],
@@ -209,12 +248,12 @@
   "custom_indexes": [],
   "custom_statements": [],
   "has_create_action": true,
-  "hash": "30D8AE7A2E7BBDBB149B9ADBCFBB6D6B1C0CE3CDAFE5A584C2088469B9C70B23",
+  "hash": "2164886D35C05F10CCB68D96E821254A218DCCF864DF24E8AAD2AAD4B560C77A",
   "identities": [
     {
       "all_tenants?": false,
       "base_filter": null,
-      "index_name": "npc_involvements_unique_involvement_index",
+      "index_name": "actor_involvements_unique_involvement_index",
       "keys": [
         {
           "type": "atom",
@@ -227,6 +266,10 @@
         {
           "type": "atom",
           "value": "npc_id"
+        },
+        {
+          "type": "atom",
+          "value": "creature_id"
         },
         {
           "type": "atom",
@@ -257,5 +300,5 @@
   },
   "repo": "Elixir.Resdayn.Repo",
   "schema": null,
-  "table": "npc_involvements"
+  "table": "actor_involvements"
 }

@@ -1,4 +1,4 @@
-defmodule Resdayn.Codex.QuestAnalysis.NPCInvolvement.Reason do
+defmodule Resdayn.Codex.QuestAnalysis.ActorInvolvement.Reason do
   use Ash.Type.Enum,
     values: [
       dialogue_speaker: [label: "Dialogue Speaker"],
