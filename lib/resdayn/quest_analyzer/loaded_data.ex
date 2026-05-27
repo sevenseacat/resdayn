@@ -61,9 +61,11 @@ defmodule Resdayn.QuestAnalyzer.LoadedData do
   end
 
   defp parse_scripts(script_text_map) do
-    Map.new(script_text_map, fn {id, text} ->
+    script_text_map
+    |> perform_async(fn {id, text} ->
       {id, ScriptParser.extract_journal_commands(text, script_text_map, follow_scripts: true)}
     end)
+    |> Map.new()
   end
 
   # Load all relevant dialogue from the database, with parsed script content.
@@ -76,27 +78,36 @@ defmodule Resdayn.QuestAnalyzer.LoadedData do
   def load_dialogue_responses(script_map) do
     Resdayn.Codex.Dialogue.Response
     |> Ash.Query.for_read(:read)
-    |> Ash.Query.filter(not is_nil(script_content))
+    |> Ash.Query.filter(
+      ilike(script_content, "%journal%") or ilike(script_content, "%startscript%")
+    )
     |> Ash.read!()
-    |> Enum.map(fn response ->
+    |> perform_async(fn response ->
       Map.update!(response, :script_content, &parse_content(&1, script_map))
     end)
     |> Map.new(fn response -> {str(response.id), response} end)
   end
 
   defp parse_content(content, script_map) do
-    ScriptParser.extract_journal_commands(
-      content,
-      script_map,
-      follow_scripts: true
-    )
+    ScriptParser.extract_journal_commands(content, script_map, follow_scripts: true)
   end
 
   defp load_npcs do
     Resdayn.Codex.World.NPC
     |> Ash.Query.for_read(:read)
-    |> Ash.read!(load: [:cell_id, :cell_name])
+    |> Ash.read!(load: [:cell_id])
     |> Map.new(fn npc -> {str(npc.id), npc} end)
+  end
+
+  defp perform_async(data, operation) do
+    data
+    |> Enum.chunk_every(100)
+    |> Task.async_stream(
+      fn group -> Enum.map(group, &operation.(&1)) end,
+      ordered: false,
+      timeout: :infinity
+    )
+    |> Enum.flat_map(&elem(&1, 1))
   end
 
   defp time(func, label) do
