@@ -67,6 +67,17 @@ defmodule Resdayn.QuestAnalyzerTest do
 
       assert Enum.all?(npc.related_quests, &match?(%Resdayn.Codex.Dialogue.Quest{}, &1.quest))
       assert Enum.any?(npc.related_quests, &(:dialogue_speaker in &1.roles))
+
+      # Each entry's primary_role is its most important role, and the quests
+      # where this actor is most central are listed first.
+      alias Resdayn.Codex.QuestAnalysis.ActorInvolvement.Reason
+
+      assert Enum.all?(npc.related_quests, fn entry ->
+               entry.primary_role == Enum.min_by(entry.roles, &Reason.importance/1)
+             end)
+
+      primary_ranks = Enum.map(npc.related_quests, &Reason.importance(&1.primary_role))
+      assert primary_ranks == Enum.sort(primary_ranks)
     end
 
     test "is idempotent" do

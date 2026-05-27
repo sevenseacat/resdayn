@@ -9,15 +9,20 @@ defmodule Resdayn.Codex.QuestAnalysis.QuestsWithRoles do
       calculate :related_quests, :term,
         {__MODULE__, involvements: :quest_involvements}
 
-  Returns a list of `%{quest: quest, roles: [reason]}`, sorted by quest name.
-  An actor involved in several versions of the same quest collapses to one
-  entry, since involvements are grouped by the player-concept `quest_id`.
+  Returns a list of `%{quest: quest, roles: [reason], primary_role: reason}`.
+  Each quest's `roles` and the list itself are ordered by involvement
+  importance (see `Reason.by_importance/0`), with quest name as a tiebreaker,
+  so the quests where the actor matters most surface first. An actor involved
+  in several versions of the same quest collapses to one entry, grouped by the
+  player-concept `quest_id`.
   """
   use Ash.Resource.Calculation
 
+  alias Resdayn.Codex.QuestAnalysis.ActorInvolvement.Reason
+
   @impl true
   def load(_query, opts, _context) do
-    [{opts[:involvements], [:quest, :reason]}]
+    [{opts[:involvements], [:reason, {:quest, [:name]}]}]
   end
 
   @impl true
@@ -29,9 +34,19 @@ defmodule Resdayn.Codex.QuestAnalysis.QuestsWithRoles do
       |> Map.fetch!(involvements_key)
       |> Enum.group_by(& &1.quest_id)
       |> Enum.map(fn {_quest_id, [first | _] = rows} ->
-        %{quest: first.quest, roles: rows |> Enum.map(& &1.reason) |> Enum.uniq() |> Enum.sort()}
+        roles =
+          rows
+          |> Enum.map(& &1.reason)
+          |> Enum.uniq()
+          |> Enum.sort_by(&Reason.importance/1)
+
+        %{
+          quest: first.quest,
+          roles: roles,
+          primary_role: hd(roles)
+        }
       end)
-      |> Enum.sort_by(& &1.quest.name)
+      |> Enum.sort_by(&{Reason.importance(&1.primary_role), &1.quest.name})
     end)
   end
 end
