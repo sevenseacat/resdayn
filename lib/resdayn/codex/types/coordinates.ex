@@ -18,9 +18,9 @@ defmodule Resdayn.Codex.Types.Coordinates do
           type: :map,
           constraints: [
             fields: [
-              x: [type: :decimal, constraints: [min: -180.0, max: 180.0]],
-              y: [type: :decimal, constraints: [min: -180.0, max: 180.0]],
-              z: [type: :decimal, constraints: [min: -180.0, max: 180.0]]
+              x: [type: :decimal, constraints: [min: Decimal.new("-180"), max: Decimal.new("180")]],
+              y: [type: :decimal, constraints: [min: Decimal.new("-180"), max: Decimal.new("180")]],
+              z: [type: :decimal, constraints: [min: Decimal.new("-180"), max: Decimal.new("180")]]
             ]
           ]
         ]
