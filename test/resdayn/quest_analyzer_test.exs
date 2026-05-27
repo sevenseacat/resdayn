@@ -33,6 +33,20 @@ defmodule Resdayn.QuestAnalyzerTest do
       assert :dialogue_speaker in reasons
     end
 
+    test "exposes related_npcs as a loadable calculation on the quest concept" do
+      Resdayn.QuestAnalyzer.run(["A1_4_MuzgobInformant"])
+
+      quest =
+        Resdayn.Codex.Dialogue.QuestVersion
+        |> Ash.get!("A1_4_MuzgobInformant", load: [quest: :related_npcs])
+        |> Map.fetch!(:quest)
+
+      refute Enum.empty?(quest.related_npcs)
+
+      assert Enum.all?(quest.related_npcs, &match?(%Resdayn.Codex.World.NPC{}, &1.actor))
+      assert Enum.any?(quest.related_npcs, &(:dialogue_speaker in &1.roles))
+    end
+
     test "is idempotent" do
       Resdayn.QuestAnalyzer.run(["A1_4_MuzgobInformant"])
       first = Ash.count!(ActorInvolvement)
