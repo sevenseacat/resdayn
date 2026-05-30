@@ -99,6 +99,8 @@ defmodule Resdayn.Codex.World.NPC do
     calculate :gender, :atom, expr(if :female in npc_flags, do: :female, else: :male)
     calculate :essential?, :boolean, expr(:essential in npc_flags)
 
+    # Display-shaped view of the involvements: distinct quests paired with the
+    # roles the NPC plays, ordered by importance.
     calculate :related_quests,
               :term,
               {Resdayn.Codex.QuestAnalysis.QuestsWithRoles, involvements: :quest_involvements}
@@ -107,5 +109,6 @@ defmodule Resdayn.Codex.World.NPC do
   aggregates do
     first :cell_id, :cell_references, :cell_id
     first :cell_name, [:cell_references, :cell], :name
+    count :related_quest_count, :quest_involvements, field: :quest_id, uniq?: true
   end
 end

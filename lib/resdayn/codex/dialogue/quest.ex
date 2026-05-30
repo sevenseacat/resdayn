@@ -39,5 +39,12 @@ defmodule Resdayn.Codex.Dialogue.Quest do
     calculate :related_creatures,
               :term,
               {__MODULE__.ActorsWithRoles, involvements: :creature_involvements, actor: :creature}
+
+    calculate :actor_count, :integer, expr(npc_count + creature_count)
+  end
+
+  aggregates do
+    count :npc_count, :npc_involvements, field: :npc_id, uniq?: true
+    count :creature_count, :creature_involvements, field: :creature_id, uniq?: true
   end
 end

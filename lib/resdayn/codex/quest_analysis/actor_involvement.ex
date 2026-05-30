@@ -23,6 +23,16 @@ defmodule Resdayn.Codex.QuestAnalysis.ActorInvolvement do
     table "actor_involvements"
     repo Resdayn.Repo
 
+    # The unique-involvement index leads with `quest_id`, so it can't serve the
+    # per-actor lookups behind the `related_quest_count` aggregate.
+    # These actor-leading partial indexes make those an index-only scan (partial
+    # because each row sets exactly one of npc_id/creature_id — see the
+    # `exactly_one_subject` check constraint).
+    custom_indexes do
+      index [:npc_id, :quest_id], where: "npc_id IS NOT NULL"
+      index [:creature_id, :quest_id], where: "creature_id IS NOT NULL"
+    end
+
     references do
       reference :quest, on_delete: :delete
       reference :quest_version, on_delete: :delete

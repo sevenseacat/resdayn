@@ -79,8 +79,14 @@ defmodule Resdayn.Codex.World.Creature do
   end
 
   calculations do
+    # Display-shaped view of the involvements: distinct quests paired with the
+    # roles the creature plays, ordered by importance.
     calculate :related_quests,
               :term,
               {Resdayn.Codex.QuestAnalysis.QuestsWithRoles, involvements: :quest_involvements}
+  end
+
+  aggregates do
+    count :related_quest_count, :quest_involvements, field: :quest_id, uniq?: true
   end
 end

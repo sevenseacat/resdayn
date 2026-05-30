@@ -58,6 +58,31 @@ defmodule Resdayn.QuestAnalyzerTest do
       assert primary_ranks == Enum.sort(primary_ranks)
     end
 
+    test "counts and sorts quests by involved actor headcount" do
+      Resdayn.QuestAnalyzer.run(["A1_4_MuzgobInformant"])
+
+      quest =
+        Resdayn.Codex.Dialogue.QuestVersion
+        |> Ash.get!("A1_4_MuzgobInformant",
+          load: [quest: [:npc_count, :creature_count, :actor_count]]
+        )
+        |> Map.fetch!(:quest)
+
+      assert quest.npc_count > 0
+      assert quest.actor_count == quest.npc_count + quest.creature_count
+
+      # The combined count pushes down to SQL, so it's usable as a sort key.
+      sorted =
+        Resdayn.Codex.Dialogue.Quest
+        |> Ash.Query.sort(actor_count: :desc)
+        |> Ash.Query.load(:actor_count)
+        |> Ash.read!()
+
+      counts = Enum.map(sorted, & &1.actor_count)
+      assert counts == Enum.sort(counts, :desc)
+      assert Enum.max(counts) == quest.actor_count
+    end
+
     test "exposes related_quests as a loadable calculation on an NPC" do
       Resdayn.QuestAnalyzer.run(["A1_4_MuzgobInformant"])
 
@@ -78,6 +103,17 @@ defmodule Resdayn.QuestAnalyzerTest do
 
       primary_ranks = Enum.map(npc.related_quests, &Reason.importance(&1.primary_role))
       assert primary_ranks == Enum.sort(primary_ranks)
+    end
+
+    test "exposes related_quest_count on an NPC" do
+      Resdayn.QuestAnalyzer.run(["A1_4_MuzgobInformant"])
+
+      npc = Ash.get!(Resdayn.Codex.World.NPC, "caius cosades", load: [:related_quest_count])
+
+      # Only this one quest was analyzed, so there's a single distinct related
+      # quest — even though the NPC has multiple involvement rows for it (one
+      # join row each), the uniq? aggregate collapses them to a count of 1.
+      assert npc.related_quest_count == 1
     end
 
     test "is idempotent" do
