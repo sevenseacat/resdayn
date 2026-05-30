@@ -25,8 +25,8 @@ defmodule Mix.Tasks.Resdayn.ImportCodex do
 
     Enum.map(@all_files, &Resdayn.Importer.Runner.run/1)
     collate_named_quests()
-    rebuild_search_index()
     run_quest_analyzer()
+    rebuild_search_index()
   end
 
   defp rebuild_search_index do
