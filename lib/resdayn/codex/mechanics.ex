@@ -16,6 +16,7 @@ defmodule Resdayn.Codex.Mechanics do
 
     resource __MODULE__.MagicEffect do
       define :list_magic_effects, action: :read
+      define :get_magic_effect_by_id, action: :read, get_by: :id
     end
 
     resource __MODULE__.MagicEffectTemplate
