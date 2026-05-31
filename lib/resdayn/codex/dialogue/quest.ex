@@ -29,6 +29,8 @@ defmodule Resdayn.Codex.Dialogue.Quest do
     has_many :creature_involvements, Resdayn.Codex.QuestAnalysis.ActorInvolvement do
       filter expr(not is_nil(creature_id))
     end
+
+    has_many :item_involvements, Resdayn.Codex.QuestAnalysis.ItemInvolvement
   end
 
   calculations do
@@ -40,11 +42,16 @@ defmodule Resdayn.Codex.Dialogue.Quest do
               :term,
               {__MODULE__.ActorsWithRoles, involvements: :creature_involvements, actor: :creature}
 
+    calculate :related_items,
+              :term,
+              {__MODULE__.ItemsWithRoles, involvements: :item_involvements}
+
     calculate :actor_count, :integer, expr(npc_count + creature_count)
   end
 
   aggregates do
     count :npc_count, :npc_involvements, field: :npc_id, uniq?: true
     count :creature_count, :creature_involvements, field: :creature_id, uniq?: true
+    count :item_count, :item_involvements, field: :object_id, uniq?: true
   end
 end

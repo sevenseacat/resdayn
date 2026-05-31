@@ -30,7 +30,18 @@ defmodule Resdayn.QuestAnalyzer do
 
     time(fn -> Persister.actor_involvements(actor_rows) end, "persist actor involvements")
 
-    %{actor_involvements: length(actor_rows)}
+    item_rows =
+      time(
+        fn -> Extractor.Items.required_items(data) end,
+        "extract item involvements"
+      )
+
+    time(fn -> Persister.item_involvements(item_rows) end, "persist item involvements")
+
+    %{
+      actor_involvements: length(actor_rows),
+      item_involvements: length(item_rows)
+    }
   end
 
   defp time(func, label) do
