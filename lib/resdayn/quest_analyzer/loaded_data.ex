@@ -19,7 +19,15 @@ defmodule Resdayn.QuestAnalyzer.LoadedData do
             # %NPC{} with cell info preloaded
             npcs: %{},
             # %Creature{} (id + script_id)
-            creatures: %{}
+            creatures: %{},
+            # %Container{} — used to recognise an `additem` subject as a
+            # placement target (chest/sack/urn/etc.)
+            containers: %{},
+            # downcased id => type atom (:weapon, :book, :ingredient, …) for
+            # every addressable in-game entity. Used to validate item ids
+            # referenced from conditions/effects and to filter non-item
+            # subjects out of ItemInvolvement extraction.
+            referencable_objects: %{}
 
   require Ash.Query
   require Logger
@@ -37,7 +45,9 @@ defmodule Resdayn.QuestAnalyzer.LoadedData do
       dialogue_responses:
         time(fn -> load_dialogue_responses(script_text_map) end, "dialogue responses"),
       npcs: time(&load_npcs/0, "npcs"),
-      creatures: time(&load_creatures/0, "creatures")
+      creatures: time(&load_creatures/0, "creatures"),
+      containers: time(&load_containers/0, "containers"),
+      referencable_objects: time(&load_referencable_objects/0, "referencable objects")
     }
   end
 
@@ -107,6 +117,20 @@ defmodule Resdayn.QuestAnalyzer.LoadedData do
     |> Ash.Query.for_read(:read)
     |> Ash.read!()
     |> Map.new(fn creature -> {str(creature.id), creature} end)
+  end
+
+  defp load_containers do
+    Resdayn.Codex.World.Container
+    |> Ash.Query.for_read(:read)
+    |> Ash.read!()
+    |> Map.new(fn container -> {str(container.id), container} end)
+  end
+
+  defp load_referencable_objects do
+    Resdayn.Codex.World.ReferencableObject
+    |> Ash.Query.for_read(:read)
+    |> Ash.read!()
+    |> Map.new(fn ro -> {str(ro.id), ro.type} end)
   end
 
   defp perform_async(data, operation) do

@@ -9,17 +9,22 @@ defmodule Resdayn.QuestAnalyzer.Persister do
   identity.
   """
 
-  alias Resdayn.Codex.QuestAnalysis.ActorInvolvement
+  alias Resdayn.Codex.QuestAnalysis.{ActorInvolvement, ItemInvolvement}
 
   @doc """
   Bulk-create actor involvement rows with on-conflict-do-nothing semantics.
   Returns the bulk-operation result from `Ash.bulk_create/4`.
   """
-  def actor_involvements(rows) do
-    Ash.bulk_create(
-      rows,
-      ActorInvolvement,
-      :create,
+  def actor_involvements(rows), do: bulk_upsert(rows, ActorInvolvement)
+
+  @doc """
+  Bulk-create item involvement rows with on-conflict-do-nothing semantics.
+  Returns the bulk-operation result from `Ash.bulk_create/4`.
+  """
+  def item_involvements(rows), do: bulk_upsert(rows, ItemInvolvement)
+
+  defp bulk_upsert(rows, resource) do
+    Ash.bulk_create(rows, resource, :create,
       upsert?: true,
       upsert_identity: :unique_involvement,
       upsert_fields: [],

@@ -4,5 +4,6 @@ defmodule Resdayn.Codex.QuestAnalysis do
 
   resources do
     resource Resdayn.Codex.QuestAnalysis.ActorInvolvement
+    resource Resdayn.Codex.QuestAnalysis.ItemInvolvement
   end
 end
