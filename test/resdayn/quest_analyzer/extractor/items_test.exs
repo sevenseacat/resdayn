@@ -32,15 +32,12 @@ defmodule Resdayn.QuestAnalyzer.Extractor.ItemsTest do
       assert Enum.all?(rows, &exactly_one_source?/1)
     end
 
-    # In the MW/TB/BM/TR corpus, almost all "quest requires item X" gating
-    # lives at the INFO-conditions layer (separate Response fields), not inside
-    # the response's result-script. We only walk parsed script_content, so
-    # dialogue-source `:required` rows are rare-to-nonexistent; standalone
-    # scripts with `if (getitemcount ...) ... endif` are the dominant pathway.
-    # Recovering INFO-level item conditions is a known gap — worth a separate
-    # extractor in a later phase.
-    test "rows surface from script sources", %{required_rows: rows} do
+    test "rows surface from both source kinds (script if/then + dialogue INFO)",
+         %{required_rows: rows} do
+      from_dialogue = Enum.filter(rows, &(not is_nil(&1.dialogue_response_id)))
       from_scripts = Enum.filter(rows, &(not is_nil(&1.script_id)))
+
+      refute Enum.empty?(from_dialogue)
       refute Enum.empty?(from_scripts)
     end
   end
@@ -163,12 +160,79 @@ defmodule Resdayn.QuestAnalyzer.Extractor.ItemsTest do
 
       assert Extractor.Items.required_items(data) == []
     end
+
+    test "emits a :required row from a response's INFO-level :item condition" do
+      [row] =
+        synthetic(
+          commands: [
+            %{quest_id: "q1", conditions: [], effects: []}
+          ],
+          info_conditions: [
+            %{function: :item, name: "test_potion", operator: :>=, value: 1}
+          ]
+        )
+        |> Extractor.Items.required_items()
+
+      assert row.reason == :required
+      assert row.object_id == "test_potion"
+      assert row.quest_id == "q1_concept"
+      assert row.dialogue_response_id == "r1"
+      assert is_nil(row.script_id)
+    end
+
+    test "ignores INFO conditions whose function isn't :item" do
+      data =
+        synthetic(
+          commands: [%{quest_id: "q1", conditions: [], effects: []}],
+          info_conditions: [
+            %{function: :journal, name: "q1", operator: :>=, value: 10},
+            %{function: :rank_low, name: nil, operator: :>=, value: 2}
+          ]
+        )
+
+      assert Extractor.Items.required_items(data) == []
+    end
+
+    test "ignores INFO :item conditions whose name resolves to a non-item type" do
+      data =
+        synthetic(
+          commands: [%{quest_id: "q1", conditions: [], effects: []}],
+          info_conditions: [
+            %{function: :item, name: "test_npc", operator: :>=, value: 1}
+          ],
+          extra_ros: %{"test_npc" => :npc}
+        )
+
+      assert Extractor.Items.required_items(data) == []
+    end
+
+    test "the same item required by INFO and script_content collapses to one row" do
+      rows =
+        synthetic(
+          commands: [
+            %{
+              quest_id: "q1",
+              conditions: [item_count_condition("test_potion", :>, 0)],
+              effects: []
+            }
+          ],
+          info_conditions: [
+            %{function: :item, name: "test_potion", operator: :>=, value: 1}
+          ]
+        )
+        |> Extractor.Items.required_items()
+
+      # Same (quest, item, reason, source) tuple from two sources within one
+      # response — dedupes via the per-source Enum.uniq across both walkers.
+      assert length(rows) == 1
+    end
   end
 
   defp synthetic(opts) do
     commands = Keyword.fetch!(opts, :commands)
     orphan = Keyword.get(opts, :orphan, false)
     extra_ros = Keyword.get(opts, :extra_ros, %{})
+    info_conditions = Keyword.get(opts, :info_conditions, [])
 
     %LoadedData{
       quest_versions: %{
@@ -181,7 +245,8 @@ defmodule Resdayn.QuestAnalyzer.Extractor.ItemsTest do
           topic_id: "t1",
           speaker_npc_id: nil,
           speaker_creature_id: nil,
-          script_content: commands
+          script_content: commands,
+          conditions: info_conditions
         }
       },
       npcs: %{},

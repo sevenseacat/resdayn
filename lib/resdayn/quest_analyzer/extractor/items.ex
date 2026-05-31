@@ -48,33 +48,36 @@ defmodule Resdayn.QuestAnalyzer.Extractor.Items do
   def required_items(%LoadedData{} = data) do
     from_dialogue =
       Enum.flat_map(Map.values(data.dialogue_responses), fn response ->
-        condition_rows(response.script_content, data, dialogue_source(response))
+        Enum.uniq(
+          condition_rows(response.script_content, data, dialogue_source(response)) ++
+            info_condition_rows(response, data)
+        )
       end)
 
     from_scripts =
       Enum.flat_map(data.scripts, fn {script_id, parsed_commands} ->
-        condition_rows(parsed_commands, data, %{
-          dialogue_response_id: nil,
-          dialogue_response_topic_id: nil,
-          script_id: str(script_id)
-        })
+        Enum.uniq(
+          condition_rows(parsed_commands, data, %{
+            dialogue_response_id: nil,
+            dialogue_response_topic_id: nil,
+            script_id: str(script_id)
+          })
+        )
       end)
 
     from_dialogue ++ from_scripts
   end
 
   defp condition_rows(parsed_commands, data, source_fields) do
-    Enum.uniq(
-      for command <- parsed_commands,
-          {:ok, qv} <- [Map.fetch(data.quest_versions, command.quest_id)],
-          not is_nil(qv.quest_id),
-          condition <- command.conditions,
-          object_id <- referenced_items(condition, data.referencable_objects) do
-        qv
-        |> base_row(object_id, :required)
-        |> Map.merge(source_fields)
-      end
-    )
+    for command <- parsed_commands,
+        {:ok, qv} <- [Map.fetch(data.quest_versions, command.quest_id)],
+        not is_nil(qv.quest_id),
+        condition <- command.conditions,
+        object_id <- referenced_items(condition, data.referencable_objects) do
+      qv
+      |> base_row(object_id, :required)
+      |> Map.merge(source_fields)
+    end
   end
 
   # Walk both sides of a parsed condition for item-referencing function calls.
@@ -91,6 +94,37 @@ defmodule Resdayn.QuestAnalyzer.Extractor.Items do
   # `getspelleffects`). Those carry no structured arg, so nothing item-related
   # can be extracted.
   defp referenced_items(_unrecognised, _ro_types), do: []
+
+  # Walk INFO-level conditions on a dialogue response — the `Response.conditions`
+  # array of `%Dialogue.Response.Condition{function: ..., name: ..., ...}`
+  # entries. These gate the response from being shown at all, independent of
+  # any `if/then` inside `script_content`. The `:item` function maps directly
+  # to a `:required` involvement against `name`. We attribute the condition to
+  # every quest the response touches via its parsed script content — INFO
+  # conditions don't name a quest themselves, but they're gates on whatever
+  # journal-setting the response performs.
+  defp info_condition_rows(response, data) do
+    for parsed_quest_id <- response.script_content |> Enum.map(& &1.quest_id) |> Enum.uniq(),
+        {:ok, qv} <- [Map.fetch(data.quest_versions, parsed_quest_id)],
+        not is_nil(qv.quest_id),
+        condition <- response.conditions || [],
+        object_id <- info_item_id(condition, data.referencable_objects) do
+      qv
+      |> base_row(object_id, :required)
+      |> Map.merge(dialogue_source(response))
+    end
+  end
+
+  defp info_item_id(%{function: :item, name: name}, ro_types) when is_binary(name) do
+    key = str(name)
+
+    case Map.fetch(ro_types, key) do
+      {:ok, type} when type in @item_object_types -> [key]
+      _ -> []
+    end
+  end
+
+  defp info_item_id(_other, _ro_types), do: []
 
   defp item_id_from_expression(%{function: function, arg: arg}, ro_types)
        when function in @item_condition_functions and is_binary(arg) do
