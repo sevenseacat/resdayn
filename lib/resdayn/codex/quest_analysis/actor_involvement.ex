@@ -93,10 +93,6 @@ defmodule Resdayn.Codex.QuestAnalysis.ActorInvolvement do
     attribute :reason, __MODULE__.Reason do
       allow_nil? false
     end
-
-    # Second half of the composite FK to Response — paired with the
-    # `dialogue_response_id` that belongs_to :dialogue_response generates.
-    attribute :dialogue_response_topic_id, :ci_string
   end
 
   relationships do
@@ -111,6 +107,10 @@ defmodule Resdayn.Codex.QuestAnalysis.ActorInvolvement do
     belongs_to :npc, Resdayn.Codex.World.NPC
     belongs_to :creature, Resdayn.Codex.World.Creature
     belongs_to :dialogue_response, Resdayn.Codex.Dialogue.Response
+
+    belongs_to :dialogue_topic, Resdayn.Codex.Dialogue.Topic,
+      source_attribute: :dialogue_response_topic_id
+
     belongs_to :script, Resdayn.Codex.Mechanics.Script
   end
 

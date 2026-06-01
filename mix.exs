@@ -26,7 +26,9 @@ defmodule Resdayn.MixProject do
     [
       {:sourceror, "~> 1.7", only: [:dev, :test]},
       {:ash_postgres, "~> 2.0"},
-      {:ash, "~> 3.0"},
+      # Use from GitHub until https://github.com/ash-project/ash/commit/453664ce3853b53dafc69270520ad451a3bb84c6 is released
+      # {:ash, "~> 3.0"},
+      {:ash, github: "ash-project/ash", override: true},
       {:igniter, "~> 0.5", only: [:dev]}
     ]
   end

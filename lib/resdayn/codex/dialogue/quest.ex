@@ -30,6 +30,7 @@ defmodule Resdayn.Codex.Dialogue.Quest do
       filter expr(not is_nil(creature_id))
     end
 
+    has_many :actor_involvements, Resdayn.Codex.QuestAnalysis.ActorInvolvement
     has_many :item_involvements, Resdayn.Codex.QuestAnalysis.ItemInvolvement
   end
 
@@ -49,9 +50,14 @@ defmodule Resdayn.Codex.Dialogue.Quest do
     calculate :actor_count, :integer, expr(npc_count + creature_count)
   end
 
+
   aggregates do
     count :npc_count, :npc_involvements, field: :npc_id, uniq?: true
     count :creature_count, :creature_involvements, field: :creature_id, uniq?: true
     count :item_count, :item_involvements, field: :object_id, uniq?: true
+
+    list :related_dialogue_topics, [:actor_involvements, :dialogue_topic], :id do
+      uniq? true
+    end
   end
 end
