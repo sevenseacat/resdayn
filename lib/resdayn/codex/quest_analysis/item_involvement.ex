@@ -93,6 +93,12 @@ defmodule Resdayn.Codex.QuestAnalysis.ItemInvolvement do
     belongs_to :script, Resdayn.Codex.Mechanics.Script
   end
 
+  calculations do
+    # Resolves the polymorphic :object (ReferencableObject) to its concrete
+    # typed resource (Weapon, Book, …) so display has a name, icon and link.
+    calculate :typed_object, :struct, {Resdayn.Codex.Calculations.TypedObject, field: :object}
+  end
+
   identities do
     identity :unique_involvement,
              [
