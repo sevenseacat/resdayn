@@ -37,16 +37,17 @@ defmodule Resdayn.Codex.Dialogue.Topic do
 
         case Ash.Query.get_argument(query, :npc_id) do
           nil ->
-            Ash.Query.load(query, ordered_responses: response_loads)
+            Ash.Query.load(query, [:related_quests, ordered_responses: response_loads])
 
           npc_id ->
             Ash.Query.after_action(query, fn _query, results ->
               filtered_results =
                 Enum.map(results, fn topic ->
                   topic
-                  |> Ash.load!(
+                  |> Ash.load!([
+                    :related_quests,
                     ordered_responses: response_loads ++ [valid_for_npc?: [npc_id: npc_id]]
-                  )
+                  ])
                   |> Map.update!(:ordered_responses, fn responses ->
                     Enum.filter(responses, & &1.valid_for_npc?)
                   end)
@@ -70,6 +71,9 @@ defmodule Resdayn.Codex.Dialogue.Topic do
     has_many :ordered_responses, Resdayn.Codex.Dialogue.Response do
       manual Resdayn.Codex.Dialogue.OrderedResponseRelationship
     end
+
+    has_many :quest_involvements, Resdayn.Codex.QuestAnalysis.ActorInvolvement,
+      destination_attribute: :dialogue_response_topic_id
   end
 
   calculations do
@@ -78,9 +82,12 @@ defmodule Resdayn.Codex.Dialogue.Topic do
               Resdayn.Codex.Dialogue.Calculations.NPCResponseCount do
       argument :npc_id, :string, allow_nil?: true
     end
+
+    calculate :related_quests, :term, __MODULE__.RelatedQuests
   end
 
   aggregates do
     count :response_count, :responses
+    count :related_quest_count, :quest_involvements, field: :quest_id, uniq?: true
   end
 end
