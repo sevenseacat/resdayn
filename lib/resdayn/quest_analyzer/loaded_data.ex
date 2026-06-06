@@ -8,6 +8,10 @@ defmodule Resdayn.QuestAnalyzer.LoadedData do
   cross-reference in O(1) (e.g. resolving a parsed command's `quest_id` back
   to its `QuestVersion`). When the whole collection is needed for iteration,
   use `Map.values/1`.
+
+  Exception: `dialogue_responses` is keyed by `{topic_id, id}` since `Response`
+  has a composite PK — the same INFO id can appear under multiple DIALs and
+  keying by id alone silently drops the colliding rows.
   """
 
   # %QuestVersion{} with journal_entries preloaded
@@ -163,7 +167,12 @@ defmodule Resdayn.QuestAnalyzer.LoadedData do
     |> perform_async(fn response ->
       Map.update!(response, :script_content, &parse_content(&1, script_map))
     end)
-    |> Map.new(fn response -> {str(response.id), response} end)
+    # Response has a composite PK (topic_id, id) — the same INFO id can appear
+    # under multiple DIALs in the source data. Keying by id alone silently drops
+    # the colliding rows (~30 ids, 57 dropped rows across the MW/TB/BM/TR
+    # corpus), losing whole topic→quest associations like "1000-drake pledge".
+    # Key by the full composite to preserve every row.
+    |> Map.new(fn response -> {{str(response.topic_id), str(response.id)}, response} end)
   end
 
   defp parse_content(content, script_map) do
