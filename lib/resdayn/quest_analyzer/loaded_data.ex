@@ -51,6 +51,71 @@ defmodule Resdayn.QuestAnalyzer.LoadedData do
     }
   end
 
+  @doc """
+  Look up a quest version by raw id, normalising via `str/1`. Returns
+  `{:ok, %QuestVersion{}}` or `:error`. Non-string ids (atoms, nil, etc.)
+  resolve to `:error` rather than crashing — extractors can pass anything
+  they got from parser output without pre-checking the shape.
+  """
+  def fetch_quest_version(%__MODULE__{} = data, id), do: lookup(data.quest_versions, id)
+
+  @doc "Look up an NPC by raw id. See `fetch_quest_version/2` for semantics."
+  def fetch_npc(%__MODULE__{} = data, id), do: lookup(data.npcs, id)
+
+  @doc "Look up a creature by raw id."
+  def fetch_creature(%__MODULE__{} = data, id), do: lookup(data.creatures, id)
+
+  @doc "Look up a container by raw id."
+  def fetch_container(%__MODULE__{} = data, id), do: lookup(data.containers, id)
+
+  @doc """
+  Look up an actor (NPC or creature) by raw id, returning a tagged tuple so
+  downstream code can branch on which kind matched. Tries NPC first, then
+  creature. Returns `{:ok, {:npc | :creature, struct}}` or `:error`.
+  """
+  def fetch_actor(%__MODULE__{} = data, id) do
+    with :error <- tag_lookup(data.npcs, id, :npc),
+         :error <- tag_lookup(data.creatures, id, :creature) do
+      :error
+    end
+  end
+
+  @doc """
+  Look up the `ReferencableObject` type atom (`:weapon`, `:npc`, …) for an id.
+  Returns `{:ok, type}` or `:error` if the id isn't in the corpus.
+  """
+  def fetch_object_type(%__MODULE__{} = data, id), do: lookup(data.referencable_objects, id)
+
+  @doc """
+  Look up a parsed script by raw id, raising if missing. Every script in the
+  corpus is loaded eagerly, so a miss is a data integrity bug worth crashing on.
+  """
+  def fetch_script!(%__MODULE__{} = data, id), do: Map.fetch!(data.scripts, str(id))
+
+  @doc "True if the id resolves to a loaded NPC."
+  def has_npc?(%__MODULE__{} = data, id), do: has?(data.npcs, id)
+
+  @doc "True if the id resolves to a loaded creature."
+  def has_creature?(%__MODULE__{} = data, id), do: has?(data.creatures, id)
+
+  @doc "True if the id resolves to a loaded container."
+  def has_container?(%__MODULE__{} = data, id), do: has?(data.containers, id)
+
+  defp lookup(map, id) when is_binary(id), do: Map.fetch(map, str(id))
+  defp lookup(map, %Ash.CiString{} = id), do: Map.fetch(map, str(id))
+  defp lookup(_map, _other), do: :error
+
+  defp has?(map, id) when is_binary(id), do: Map.has_key?(map, str(id))
+  defp has?(map, %Ash.CiString{} = id), do: Map.has_key?(map, str(id))
+  defp has?(_map, _other), do: false
+
+  defp tag_lookup(map, id, kind) do
+    case lookup(map, id) do
+      {:ok, val} -> {:ok, {kind, val}}
+      :error -> :error
+    end
+  end
+
   defp load_quest_versions(quest_ids) do
     query = Ash.Query.for_read(Resdayn.Codex.Dialogue.QuestVersion, :read)
 

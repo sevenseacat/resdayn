@@ -35,9 +35,9 @@ defmodule Resdayn.QuestAnalyzer.Extractor.Actors do
   """
   def dialogue_speakers(%LoadedData{} = data) do
     for response <- Map.values(data.dialogue_responses),
-        {actor_type, actor} <- resolve_speaker(response, data.npcs, data.creatures),
+        {actor_type, actor} <- resolve_speaker(response, data),
         parsed_quest_id <- response.script_content |> Enum.map(& &1.quest_id) |> Enum.uniq(),
-        {:ok, qv} <- [Map.fetch(data.quest_versions, parsed_quest_id)],
+        {:ok, qv} <- [LoadedData.fetch_quest_version(data, parsed_quest_id)],
         not is_nil(qv.quest_id) do
       qv
       |> base_row(actor_type, actor, :dialogue_speaker)
@@ -60,9 +60,9 @@ defmodule Resdayn.QuestAnalyzer.Extractor.Actors do
   defp bearer_rows(actors, actor_type, data) do
     for actor <- actors,
         not is_nil(actor.script_id),
-        parsed_commands = Map.fetch!(data.scripts, str(actor.script_id)),
+        parsed_commands = LoadedData.fetch_script!(data, actor.script_id),
         parsed_quest_id <- parsed_commands |> Enum.map(& &1.quest_id) |> Enum.uniq(),
-        {:ok, qv} <- [Map.fetch(data.quest_versions, parsed_quest_id)],
+        {:ok, qv} <- [LoadedData.fetch_quest_version(data, parsed_quest_id)],
         not is_nil(qv.quest_id) do
       qv
       |> base_row(actor_type, actor, :script_bearer)
@@ -117,11 +117,11 @@ defmodule Resdayn.QuestAnalyzer.Extractor.Actors do
   defp effect_rows(parsed_commands, data, source_fields) do
     Enum.uniq(
       for command <- parsed_commands,
-          {:ok, qv} <- [Map.fetch(data.quest_versions, command.quest_id)],
+          {:ok, qv} <- [LoadedData.fetch_quest_version(data, command.quest_id)],
           not is_nil(qv.quest_id),
           effect <- command.effects,
-          {:ok, subject} when is_binary(subject) <- [Map.fetch(effect, :subject)],
-          {actor_type, actor} <- resolve_actor(subject, data.npcs, data.creatures) do
+          {:ok, subject} <- [Map.fetch(effect, :subject)],
+          {:ok, {actor_type, actor}} <- [LoadedData.fetch_actor(data, subject)] do
         qv
         |> base_row(actor_type, actor, reason_for(effect.function))
         |> Map.merge(source_fields)
@@ -131,33 +131,21 @@ defmodule Resdayn.QuestAnalyzer.Extractor.Actors do
 
   # Resolve a dialogue response's speaker to an actor tuple, using whichever
   # speaker field is populated to pick the lookup table.
-  defp resolve_speaker(%{speaker_npc_id: id}, npcs, _creatures) when not is_nil(id) do
-    case Map.fetch(npcs, str(id)) do
+  defp resolve_speaker(%{speaker_npc_id: id}, data) when not is_nil(id) do
+    case LoadedData.fetch_npc(data, id) do
       {:ok, npc} -> [{:npc, npc}]
       :error -> []
     end
   end
 
-  defp resolve_speaker(%{speaker_creature_id: id}, _npcs, creatures) when not is_nil(id) do
-    case Map.fetch(creatures, str(id)) do
+  defp resolve_speaker(%{speaker_creature_id: id}, data) when not is_nil(id) do
+    case LoadedData.fetch_creature(data, id) do
       {:ok, creature} -> [{:creature, creature}]
       :error -> []
     end
   end
 
-  defp resolve_speaker(_response, _npcs, _creatures), do: []
-
-  # Resolve a bare effect subject (a string) to an actor, trying NPCs then
-  # creatures. Returns a list for use as a comprehension generator.
-  defp resolve_actor(subject, npcs, creatures) do
-    key = str(subject)
-
-    cond do
-      Map.has_key?(npcs, key) -> [{:npc, Map.fetch!(npcs, key)}]
-      Map.has_key?(creatures, key) -> [{:creature, Map.fetch!(creatures, key)}]
-      true -> []
-    end
-  end
+  defp resolve_speaker(_response, _data), do: []
 
   defp base_row(qv, actor_type, actor, reason) do
     %{quest_id: str(qv.quest_id), quest_version_id: str(qv.id), reason: reason}

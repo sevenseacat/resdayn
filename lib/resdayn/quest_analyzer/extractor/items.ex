@@ -76,10 +76,10 @@ defmodule Resdayn.QuestAnalyzer.Extractor.Items do
 
   defp condition_rows(parsed_commands, data, source_fields) do
     for command <- parsed_commands,
-        {:ok, qv} <- [Map.fetch(data.quest_versions, command.quest_id)],
+        {:ok, qv} <- [LoadedData.fetch_quest_version(data, command.quest_id)],
         not is_nil(qv.quest_id),
         condition <- command.conditions,
-        object_id <- referenced_items(condition, data.referencable_objects) do
+        object_id <- referenced_items(condition, data) do
       qv
       |> base_row(object_id, :required)
       |> Map.merge(source_fields)
@@ -89,9 +89,9 @@ defmodule Resdayn.QuestAnalyzer.Extractor.Items do
   # Walk both sides of a parsed condition for item-referencing function calls.
   # Returns the validated, downcased item ids; an empty list if neither side
   # references an item.
-  defp referenced_items(%{left: left, right: right}, ro_types) do
+  defp referenced_items(%{left: left, right: right}, data) do
     for side <- [left, right],
-        id <- item_id_from_expression(side, ro_types),
+        id <- item_id_from_expression(side, data),
         do: id
   end
 
@@ -99,7 +99,7 @@ defmodule Resdayn.QuestAnalyzer.Extractor.Items do
   # a condition uses a function it doesn't know how to parse (e.g.
   # `getspelleffects`). Those carry no structured arg, so nothing item-related
   # can be extracted.
-  defp referenced_items(_unrecognised, _ro_types), do: []
+  defp referenced_items(_unrecognised, _data), do: []
 
   # Walk INFO-level conditions on a dialogue response — the `Response.conditions`
   # array of `%Dialogue.Response.Condition{function: ..., name: ..., ...}`
@@ -111,26 +111,24 @@ defmodule Resdayn.QuestAnalyzer.Extractor.Items do
   # journal-setting the response performs.
   defp info_condition_rows(response, data) do
     for parsed_quest_id <- response.script_content |> Enum.map(& &1.quest_id) |> Enum.uniq(),
-        {:ok, qv} <- [Map.fetch(data.quest_versions, parsed_quest_id)],
+        {:ok, qv} <- [LoadedData.fetch_quest_version(data, parsed_quest_id)],
         not is_nil(qv.quest_id),
         condition <- response.conditions || [],
-        object_id <- info_item_id(condition, data.referencable_objects) do
+        object_id <- info_item_id(condition, data) do
       qv
       |> base_row(object_id, :required)
       |> Map.merge(dialogue_source(response))
     end
   end
 
-  defp info_item_id(%{function: :item, name: name}, ro_types) when is_binary(name) do
-    key = str(name)
-
-    case Map.fetch(ro_types, key) do
-      {:ok, type} when type in @item_object_types -> [key]
+  defp info_item_id(%{function: :item, name: name}, data) when is_binary(name) do
+    case LoadedData.fetch_object_type(data, name) do
+      {:ok, type} when type in @item_object_types -> [str(name)]
       _ -> []
     end
   end
 
-  defp info_item_id(_other, _ro_types), do: []
+  defp info_item_id(_other, _data), do: []
 
   @doc """
   Emit a row for every item named by an item-mutating effect on a quest-touching
@@ -173,7 +171,7 @@ defmodule Resdayn.QuestAnalyzer.Extractor.Items do
 
   defp effect_rows(parsed_commands, data, source_fields) do
     for command <- parsed_commands,
-        {:ok, qv} <- [Map.fetch(data.quest_versions, command.quest_id)],
+        {:ok, qv} <- [LoadedData.fetch_quest_version(data, command.quest_id)],
         not is_nil(qv.quest_id),
         effect <- command.effects,
         {object_id, reason} <- effect_item_classification(effect, data) do
@@ -186,10 +184,9 @@ defmodule Resdayn.QuestAnalyzer.Extractor.Items do
   defp effect_item_classification(effect, data) do
     with %{function: function} when function in @item_effect_functions <- effect,
          {:ok, item_id} when is_binary(item_id) <- Map.fetch(effect, :item_id),
-         key <- str(item_id),
          {:ok, type} when type in @item_object_types <-
-           Map.fetch(data.referencable_objects, key) do
-      [{key, effect_reason(function, effect, data)}]
+           LoadedData.fetch_object_type(data, item_id) do
+      [{str(item_id), effect_reason(function, effect, data)}]
     else
       _ -> []
     end
@@ -220,27 +217,24 @@ defmodule Resdayn.QuestAnalyzer.Extractor.Items do
   # something that can hold an item (NPC, creature, container), otherwise
   # `:item_mention` — we couldn't tell what kind of placement target it was.
   defp placement_or_mention(subject, data) do
-    key = str(subject)
-
-    cond do
-      Map.has_key?(data.npcs, key) -> :placed
-      Map.has_key?(data.creatures, key) -> :placed
-      Map.has_key?(data.containers, key) -> :placed
-      true -> :item_mention
+    if LoadedData.has_npc?(data, subject) or
+         LoadedData.has_creature?(data, subject) or
+         LoadedData.has_container?(data, subject) do
+      :placed
+    else
+      :item_mention
     end
   end
 
-  defp item_id_from_expression(%{function: function, arg: arg}, ro_types)
+  defp item_id_from_expression(%{function: function, arg: arg}, data)
        when function in @item_condition_functions and is_binary(arg) do
-    key = str(arg)
-
-    case Map.fetch(ro_types, key) do
-      {:ok, type} when type in @item_object_types -> [key]
+    case LoadedData.fetch_object_type(data, arg) do
+      {:ok, type} when type in @item_object_types -> [str(arg)]
       _ -> []
     end
   end
 
-  defp item_id_from_expression(_other, _ro_types), do: []
+  defp item_id_from_expression(_other, _data), do: []
 
   defp base_row(qv, object_id, reason) do
     %{
