@@ -32,7 +32,10 @@ defmodule Resdayn.QuestAnalyzer do
 
     item_rows =
       time(
-        fn -> Extractor.Items.required_items(data) end,
+        fn ->
+          Extractor.Items.required_items(data) ++
+            Extractor.Items.effect_items(data)
+        end,
         "extract item involvements"
       )
 

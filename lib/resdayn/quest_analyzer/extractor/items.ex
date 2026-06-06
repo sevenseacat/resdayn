@@ -36,6 +36,12 @@ defmodule Resdayn.QuestAnalyzer.Extractor.Items do
     alchemy_apparatus tool miscellaneous_item
   )a
 
+  # Parsed effect functions that name an item via `:item_id`. Names match the
+  # atoms emitted by `Resdayn.QuestAnalyzer.ScriptParser` (snake_case, e.g.
+  # `additem` → `:add_item`). Equip/unequip aren't parsed as effects (only as
+  # conditions), so they're absent here — a parser-side gap to revisit.
+  @item_effect_functions ~w(add_item remove_item drop_item place_at_pc place_item)a
+
   @doc """
   Emit a `:required` row for every (quest, item) pair where a condition on a
   quest-touching source reads the item's count or equipped status.
@@ -125,6 +131,104 @@ defmodule Resdayn.QuestAnalyzer.Extractor.Items do
   end
 
   defp info_item_id(_other, _ro_types), do: []
+
+  @doc """
+  Emit a row for every item named by an item-mutating effect on a quest-touching
+  source. The reason is derived from the effect's function and subject:
+
+      add_item    + subject :player       → :received
+      add_item    + subject :self/NPC/etc → :placed
+      remove_item + subject :player       → :surrendered
+      remove_item + subject anything else → :item_mention
+      place_at_pc / place_item            → :placed
+      drop_item                           → :item_mention
+
+  Within a single source, identical rows collapse via the per-source dedup.
+  Effects naming an `item_id` that doesn't resolve to an item-typed
+  ReferencableObject are skipped.
+
+  Effects where the *subject* is itself an item (e.g. `enable "myitem"`) are a
+  separate angle on item involvement not yet covered — captured here is only
+  the `item_id`-bearing effect set.
+  """
+  def effect_items(%LoadedData{} = data) do
+    from_dialogue =
+      Enum.flat_map(Map.values(data.dialogue_responses), fn response ->
+        Enum.uniq(effect_rows(response.script_content, data, dialogue_source(response)))
+      end)
+
+    from_scripts =
+      Enum.flat_map(data.scripts, fn {script_id, parsed_commands} ->
+        Enum.uniq(
+          effect_rows(parsed_commands, data, %{
+            dialogue_response_id: nil,
+            dialogue_response_topic_id: nil,
+            script_id: str(script_id)
+          })
+        )
+      end)
+
+    from_dialogue ++ from_scripts
+  end
+
+  defp effect_rows(parsed_commands, data, source_fields) do
+    for command <- parsed_commands,
+        {:ok, qv} <- [Map.fetch(data.quest_versions, command.quest_id)],
+        not is_nil(qv.quest_id),
+        effect <- command.effects,
+        {object_id, reason} <- effect_item_classification(effect, data) do
+      qv
+      |> base_row(object_id, reason)
+      |> Map.merge(source_fields)
+    end
+  end
+
+  defp effect_item_classification(effect, data) do
+    with %{function: function} when function in @item_effect_functions <- effect,
+         {:ok, item_id} when is_binary(item_id) <- Map.fetch(effect, :item_id),
+         key <- str(item_id),
+         {:ok, type} when type in @item_object_types <-
+           Map.fetch(data.referencable_objects, key) do
+      [{key, effect_reason(function, effect, data)}]
+    else
+      _ -> []
+    end
+  end
+
+  defp effect_reason(:add_item, effect, data) do
+    case Map.fetch(effect, :subject) do
+      {:ok, :player} -> :received
+      {:ok, :self} -> :placed
+      {:ok, binary} when is_binary(binary) -> placement_or_mention(binary, data)
+      _ -> :item_mention
+    end
+  end
+
+  defp effect_reason(:remove_item, effect, _data) do
+    case Map.fetch(effect, :subject) do
+      {:ok, :player} -> :surrendered
+      _ -> :item_mention
+    end
+  end
+
+  defp effect_reason(function, _effect, _data) when function in ~w(place_at_pc place_item)a,
+    do: :placed
+
+  defp effect_reason(:drop_item, _effect, _data), do: :item_mention
+
+  # An `additem` to a binary subject is `:placed` if the subject resolves to
+  # something that can hold an item (NPC, creature, container), otherwise
+  # `:item_mention` — we couldn't tell what kind of placement target it was.
+  defp placement_or_mention(subject, data) do
+    key = str(subject)
+
+    cond do
+      Map.has_key?(data.npcs, key) -> :placed
+      Map.has_key?(data.creatures, key) -> :placed
+      Map.has_key?(data.containers, key) -> :placed
+      true -> :item_mention
+    end
+  end
 
   defp item_id_from_expression(%{function: function, arg: arg}, ro_types)
        when function in @item_condition_functions and is_binary(arg) do
