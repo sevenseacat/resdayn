@@ -10,7 +10,7 @@ defmodule Resdayn.QuestAnalyzerTest do
   alias Resdayn.Codex.QuestAnalysis.ActorInvolvement
 
   setup do
-    Resdayn.Repo.query!("TRUNCATE actor_involvements")
+    Resdayn.Repo.query!("TRUNCATE actor_involvements, item_involvements, transitions")
     :ok
   end
 
@@ -114,6 +114,38 @@ defmodule Resdayn.QuestAnalyzerTest do
       # quest — even though the NPC has multiple involvement rows for it (one
       # join row each), the uniq? aggregate collapses them to a count of 1.
       assert npc.related_quest_count == 1
+    end
+
+    test "Quest.related_dialogue_topics surfaces topics with faction-only speakers (Morag Tong writs)" do
+      # MT_WritGalasa's writ-giving dialogue is spoken by any Morag Tong member
+      # of the right rank, not a specific NPC — so ActorInvolvement produces no
+      # rows for this quest. Walking through `transitions` (which depends only
+      # on the `Journal X N` call site, not on speaker resolution) restores the
+      # topic.
+      Resdayn.QuestAnalyzer.run(["MT_WritGalasa"])
+
+      quest =
+        Resdayn.Codex.Dialogue.QuestVersion
+        |> Ash.get!("MT_WritGalasa", load: [quest: :related_dialogue_topics])
+        |> Map.fetch!(:quest)
+
+      topics =
+        Enum.map(quest.related_dialogue_topics, &(&1 |> to_string() |> String.downcase()))
+
+      assert "galasa uvayn" in topics
+    end
+
+    test "Topic.related_quests surfaces quests gated by faction-only speakers" do
+      Resdayn.QuestAnalyzer.run(["MT_WritGalasa"])
+
+      topic =
+        Ash.get!(Resdayn.Codex.Dialogue.Topic, "galasa uvayn",
+          load: [:related_quests, :related_quest_count]
+        )
+
+      quest_ids = topic.related_quests |> Enum.map(& to_string(&1.id))
+      assert "morag-tong-writ-for-galasa-uvayn" in quest_ids
+      assert topic.related_quest_count >= 1
     end
 
     test "is idempotent" do

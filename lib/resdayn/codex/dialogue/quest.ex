@@ -32,6 +32,7 @@ defmodule Resdayn.Codex.Dialogue.Quest do
 
     has_many :actor_involvements, Resdayn.Codex.QuestAnalysis.ActorInvolvement
     has_many :item_involvements, Resdayn.Codex.QuestAnalysis.ItemInvolvement
+    has_many :transitions, Resdayn.Codex.QuestAnalysis.Transition
   end
 
   calculations do
@@ -55,7 +56,7 @@ defmodule Resdayn.Codex.Dialogue.Quest do
     count :creature_count, :creature_involvements, field: :creature_id, uniq?: true
     count :item_count, :item_involvements, field: :object_id, uniq?: true
 
-    list :related_dialogue_topics, [:actor_involvements, :dialogue_topic], :id do
+    list :related_dialogue_topics, [:transitions, :dialogue_topic], :id do
       uniq? true
     end
   end

@@ -97,6 +97,10 @@ defmodule Resdayn.Codex.QuestAnalysis.Transition do
     end
 
     belongs_to :dialogue_response, Resdayn.Codex.Dialogue.Response
+
+    belongs_to :dialogue_topic, Resdayn.Codex.Dialogue.Topic,
+      source_attribute: :dialogue_response_topic_id
+
     belongs_to :script, Resdayn.Codex.Mechanics.Script
   end
 

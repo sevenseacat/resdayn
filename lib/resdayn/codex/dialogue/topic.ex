@@ -72,7 +72,7 @@ defmodule Resdayn.Codex.Dialogue.Topic do
       manual Resdayn.Codex.Dialogue.OrderedResponseRelationship
     end
 
-    has_many :quest_involvements, Resdayn.Codex.QuestAnalysis.ActorInvolvement,
+    has_many :quest_transitions, Resdayn.Codex.QuestAnalysis.Transition,
       destination_attribute: :dialogue_response_topic_id
   end
 
@@ -88,6 +88,6 @@ defmodule Resdayn.Codex.Dialogue.Topic do
 
   aggregates do
     count :response_count, :responses
-    count :related_quest_count, :quest_involvements, field: :quest_id, uniq?: true
+    count :related_quest_count, :quest_transitions, field: :quest_id, uniq?: true
   end
 end
