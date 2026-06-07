@@ -41,9 +41,15 @@ defmodule Resdayn.QuestAnalyzer do
 
     time(fn -> Persister.item_involvements(item_rows) end, "persist item involvements")
 
+    transition_rows =
+      time(fn -> Extractor.Transitions.discover(data) end, "extract transitions")
+
+    time(fn -> Persister.transitions(transition_rows) end, "persist transitions")
+
     %{
       actor_involvements: length(actor_rows),
-      item_involvements: length(item_rows)
+      item_involvements: length(item_rows),
+      transitions: length(transition_rows)
     }
   end
 
