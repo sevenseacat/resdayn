@@ -65,7 +65,9 @@ defmodule Resdayn.Codex.QuestAnalysis.Transition do
         :quest_version_id,
         :dialogue_response_id,
         :dialogue_response_topic_id,
-        :script_id
+        :script_id,
+        :from_min,
+        :from_max
       ]
     end
   end
@@ -102,18 +104,5 @@ defmodule Resdayn.Codex.QuestAnalysis.Transition do
       source_attribute: :dialogue_response_topic_id
 
     belongs_to :script, Resdayn.Codex.Mechanics.Script
-  end
-
-  identities do
-    identity :unique_transition,
-             [
-               :quest_id,
-               :quest_version_id,
-               :dialogue_response_id,
-               :dialogue_response_topic_id,
-               :script_id,
-               :target_index
-             ],
-             nils_distinct?: false
   end
 end

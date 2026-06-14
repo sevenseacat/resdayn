@@ -55,6 +55,13 @@ defmodule Resdayn.QuestAnalyzer.Extractor.TransitionsTest do
       |> Enum.filter(&(&1.from_min && &1.from_max))
       |> Enum.each(fn row -> assert row.from_min <= row.from_max end)
     end
+
+    test "no two rows are byte-identical", %{rows: rows} do
+      # Distinct edges to the same index are allowed (they differ in bounds),
+      # but two fully-identical rows are pointless — nothing we store tells
+      # them apart, so the per-source `Enum.uniq` should have collapsed them.
+      assert length(rows) == length(Enum.uniq(rows))
+    end
   end
 
   test "orphan QuestVersions are skipped", %{data: data, rows: rows} do
@@ -252,6 +259,25 @@ defmodule Resdayn.QuestAnalyzer.Extractor.TransitionsTest do
 
       assert is_nil(row.from_min)
       assert row.from_max == 100
+    end
+  end
+
+  describe "MG_Excavation (Mages Guild: Nchuleftingth Expedition)" do
+    test "hgwcscript reaches index 40 via two separately-gated edges", %{rows: rows} do
+      # One `if` block gates the journal call on `on_activate`/`journal_index < 40`;
+      # another on the player's `distance` alone (no journal bound). Reachable
+      # if *either* fires, so they're two distinct edges with their own
+      # preconditions — not one row to be merged.
+      bounds =
+        rows
+        |> Enum.filter(
+          &(&1.quest_version_id == "mg_excavation" and &1.target_index == 40 and
+              &1.script_id == "hgwcscript")
+        )
+        |> Enum.map(&{&1.from_min, &1.from_max})
+        |> Enum.sort()
+
+      assert bounds == [{nil, 39}, {nil, nil}]
     end
   end
 
