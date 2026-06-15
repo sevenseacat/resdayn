@@ -7,9 +7,9 @@ defmodule Mix.Tasks.Resdayn.ExportDemo do
 
   use Mix.Task
 
-  alias Resdayn.Codex.Dialogue.{Topic, Response, QuestVersion, JournalEntry}
-  alias Resdayn.Codex.Dialogue.Response.Condition
-  alias Resdayn.Codex.Mechanics.Script
+  alias Resdayn.Catalog.Dialogue.{Topic, Response, QuestVersion, JournalEntry}
+  alias Resdayn.Catalog.Dialogue.Response.Condition
+  alias Resdayn.Catalog.Mechanics.Script
 
   @output_path "../exported/goatmire_demo.esp"
   @morrowind_esm_size 79_837_557
@@ -27,7 +27,7 @@ defmodule Mix.Tasks.Resdayn.ExportDemo do
   end
 
   defp data_file do
-    %Resdayn.Codex.Mechanics.DataFile{
+    %Resdayn.Catalog.Mechanics.DataFile{
       id: "goatmire_demo",
       filename: "goatmire_demo.esp",
       version: Decimal.new("1.0"),

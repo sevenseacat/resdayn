@@ -1,0 +1,50 @@
+defmodule Resdayn.Catalog.Characters.Faction do
+  use Ash.Resource,
+    otp_app: :resdayn,
+    domain: Resdayn.Catalog.Characters,
+    data_layer: AshPostgres.DataLayer,
+    extensions: [Resdayn.Catalog.Importable]
+
+  postgres do
+    table "factions"
+    repo Resdayn.Repo
+  end
+
+  actions do
+    defaults [:read]
+
+    read :playable_factions do
+      prepare build(sort: [:name])
+      filter expr(count(quests) > 0)
+    end
+  end
+
+  attributes do
+    attribute :id, Resdayn.Catalog.Types.RecordId, primary_key?: true, allow_nil?: false
+
+    attribute :name, :string, allow_nil?: false
+    attribute :ranks, {:array, __MODULE__.Rank}, default: [], allow_nil?: false
+
+    attribute :hidden, :boolean, default: false, allow_nil?: false
+  end
+
+  relationships do
+    belongs_to :attribute1, Resdayn.Catalog.Mechanics.Attribute,
+      allow_nil?: false,
+      attribute_type: :integer
+
+    belongs_to :attribute2, Resdayn.Catalog.Mechanics.Attribute,
+      allow_nil?: false,
+      attribute_type: :integer
+
+    has_many :favored_skill_relationships, __MODULE__.Skill
+
+    many_to_many :favored_skills, Resdayn.Catalog.Characters.Skill,
+      join_relationship: :favored_skill_relationships
+
+    has_many :reactions, __MODULE__.Reaction, destination_attribute: :source_id
+    has_many :reactions_from, __MODULE__.Reaction, destination_attribute: :target_id
+
+    has_many :quests, Resdayn.Catalog.Dialogue.Quest
+  end
+end

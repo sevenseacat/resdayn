@@ -4,7 +4,7 @@ defmodule Resdayn.ExporterTest do
   alias Resdayn.Exporter
 
   defp data_file do
-    %Resdayn.Codex.Mechanics.DataFile{
+    %Resdayn.Catalog.Mechanics.DataFile{
       id: "test",
       filename: "test.esp",
       version: Decimal.new("1.3"),
@@ -34,7 +34,7 @@ defmodule Resdayn.ExporterTest do
     end
 
     test "exports a lockpick" do
-      lockpick = %Resdayn.Codex.Items.Tool{
+      lockpick = %Resdayn.Catalog.Items.Tool{
         id: Ash.CiString.new("pick_apprentice"),
         name: "Apprentice's Lockpick",
         type: :lockpick,
@@ -60,7 +60,7 @@ defmodule Resdayn.ExporterTest do
     end
 
     test "exports a book" do
-      book = %Resdayn.Codex.Items.Book{
+      book = %Resdayn.Catalog.Items.Book{
         id: Ash.CiString.new("bookskill_unarmored1"),
         name: "The Wraith's Wedding Dowry",
         value: 300,
@@ -99,7 +99,7 @@ defmodule Resdayn.ExporterTest do
 
   describe "dialogue topic" do
     test "exports a regular topic" do
-      topic = %Resdayn.Codex.Dialogue.Topic{
+      topic = %Resdayn.Catalog.Dialogue.Topic{
         id: Ash.CiString.new("my topic"),
         type: :topic
       }
@@ -112,7 +112,7 @@ defmodule Resdayn.ExporterTest do
     end
 
     test "exports a greeting topic" do
-      topic = %Resdayn.Codex.Dialogue.Topic{
+      topic = %Resdayn.Catalog.Dialogue.Topic{
         id: Ash.CiString.new("Greeting 0"),
         type: :greeting
       }
@@ -127,11 +127,11 @@ defmodule Resdayn.ExporterTest do
 
   describe "dialogue response" do
     test "exports a topic with a basic response" do
-      topic = %Resdayn.Codex.Dialogue.Topic{
+      topic = %Resdayn.Catalog.Dialogue.Topic{
         id: Ash.CiString.new("my topic"),
         type: :topic,
         responses: [
-          %Resdayn.Codex.Dialogue.Response{
+          %Resdayn.Catalog.Dialogue.Response{
             id: "response_1",
             content: "Hello there.",
             disposition: 50
@@ -152,11 +152,11 @@ defmodule Resdayn.ExporterTest do
     end
 
     test "exports a greeting response with the correct type" do
-      topic = %Resdayn.Codex.Dialogue.Topic{
+      topic = %Resdayn.Catalog.Dialogue.Topic{
         id: Ash.CiString.new("Greeting 0"),
         type: :greeting,
         responses: [
-          %Resdayn.Codex.Dialogue.Response{
+          %Resdayn.Catalog.Dialogue.Response{
             id: "greet_1",
             content: "Welcome, traveler."
           }
@@ -169,13 +169,13 @@ defmodule Resdayn.ExporterTest do
     end
 
     test "links multiple responses with PNAM/NNAM" do
-      topic = %Resdayn.Codex.Dialogue.Topic{
+      topic = %Resdayn.Catalog.Dialogue.Topic{
         id: Ash.CiString.new("test topic"),
         type: :topic,
         responses: [
-          %Resdayn.Codex.Dialogue.Response{id: "resp_1", content: "First"},
-          %Resdayn.Codex.Dialogue.Response{id: "resp_2", content: "Second"},
-          %Resdayn.Codex.Dialogue.Response{id: "resp_3", content: "Third"}
+          %Resdayn.Catalog.Dialogue.Response{id: "resp_1", content: "First"},
+          %Resdayn.Catalog.Dialogue.Response{id: "resp_2", content: "Second"},
+          %Resdayn.Catalog.Dialogue.Response{id: "resp_3", content: "Third"}
         ]
       }
 
@@ -192,11 +192,11 @@ defmodule Resdayn.ExporterTest do
     end
 
     test "encodes gender and faction ranks" do
-      topic = %Resdayn.Codex.Dialogue.Topic{
+      topic = %Resdayn.Catalog.Dialogue.Topic{
         id: Ash.CiString.new("test"),
         type: :topic,
         responses: [
-          %Resdayn.Codex.Dialogue.Response{
+          %Resdayn.Catalog.Dialogue.Response{
             id: "resp_1",
             content: "Hello",
             gender: :female,
@@ -214,11 +214,11 @@ defmodule Resdayn.ExporterTest do
     end
 
     test "nil gender and ranks round-trip as nil" do
-      topic = %Resdayn.Codex.Dialogue.Topic{
+      topic = %Resdayn.Catalog.Dialogue.Topic{
         id: Ash.CiString.new("test"),
         type: :topic,
         responses: [
-          %Resdayn.Codex.Dialogue.Response{id: "resp_1", content: "Hello"}
+          %Resdayn.Catalog.Dialogue.Response{id: "resp_1", content: "Hello"}
         ]
       }
 
@@ -230,11 +230,11 @@ defmodule Resdayn.ExporterTest do
     end
 
     test "encodes speaker NPC filter" do
-      topic = %Resdayn.Codex.Dialogue.Topic{
+      topic = %Resdayn.Catalog.Dialogue.Topic{
         id: Ash.CiString.new("Greeting 0"),
         type: :greeting,
         responses: [
-          %Resdayn.Codex.Dialogue.Response{
+          %Resdayn.Catalog.Dialogue.Response{
             id: "greet_1",
             content: "Hello!",
             speaker_npc_id: Ash.CiString.new("nileno dorvayn")
@@ -247,12 +247,12 @@ defmodule Resdayn.ExporterTest do
     end
 
     test "record count includes both DIAL and INFO records" do
-      topic = %Resdayn.Codex.Dialogue.Topic{
+      topic = %Resdayn.Catalog.Dialogue.Topic{
         id: Ash.CiString.new("test"),
         type: :topic,
         responses: [
-          %Resdayn.Codex.Dialogue.Response{id: "r1", content: "A"},
-          %Resdayn.Codex.Dialogue.Response{id: "r2", content: "B"}
+          %Resdayn.Catalog.Dialogue.Response{id: "r1", content: "A"},
+          %Resdayn.Catalog.Dialogue.Response{id: "r2", content: "B"}
         ]
       }
 
@@ -262,14 +262,14 @@ defmodule Resdayn.ExporterTest do
   end
 
   describe "dialogue conditions" do
-    alias Resdayn.Codex.Dialogue.Response.Condition
+    alias Resdayn.Catalog.Dialogue.Response.Condition
 
     defp topic_with_conditions(conditions) do
-      %Resdayn.Codex.Dialogue.Topic{
+      %Resdayn.Catalog.Dialogue.Topic{
         id: Ash.CiString.new("test"),
         type: :topic,
         responses: [
-          %Resdayn.Codex.Dialogue.Response{
+          %Resdayn.Catalog.Dialogue.Response{
             id: "resp_1",
             content: "Conditional response",
             conditions: conditions
@@ -380,11 +380,11 @@ defmodule Resdayn.ExporterTest do
 
   describe "dialogue optional fields" do
     test "encodes result script" do
-      topic = %Resdayn.Codex.Dialogue.Topic{
+      topic = %Resdayn.Catalog.Dialogue.Topic{
         id: Ash.CiString.new("test"),
         type: :greeting,
         responses: [
-          %Resdayn.Codex.Dialogue.Response{
+          %Resdayn.Catalog.Dialogue.Response{
             id: "resp_1",
             content: "Welcome",
             script_content: ~S(Journal "my_quest" 10)
@@ -397,11 +397,11 @@ defmodule Resdayn.ExporterTest do
     end
 
     test "encodes speaker faction, race, class, and cell" do
-      topic = %Resdayn.Codex.Dialogue.Topic{
+      topic = %Resdayn.Catalog.Dialogue.Topic{
         id: Ash.CiString.new("test"),
         type: :topic,
         responses: [
-          %Resdayn.Codex.Dialogue.Response{
+          %Resdayn.Catalog.Dialogue.Response{
             id: "resp_1",
             content: "Filtered",
             speaker_faction_id: Ash.CiString.new("Hlaalu"),
@@ -422,11 +422,11 @@ defmodule Resdayn.ExporterTest do
     end
 
     test "nil faction omits FNAM subrecord" do
-      topic = %Resdayn.Codex.Dialogue.Topic{
+      topic = %Resdayn.Catalog.Dialogue.Topic{
         id: Ash.CiString.new("test"),
         type: :topic,
         responses: [
-          %Resdayn.Codex.Dialogue.Response{
+          %Resdayn.Catalog.Dialogue.Response{
             id: "resp_1",
             content: "Hello"
           }
@@ -438,11 +438,11 @@ defmodule Resdayn.ExporterTest do
     end
 
     test "encodes sound filename" do
-      topic = %Resdayn.Codex.Dialogue.Topic{
+      topic = %Resdayn.Catalog.Dialogue.Topic{
         id: Ash.CiString.new("test"),
         type: :topic,
         responses: [
-          %Resdayn.Codex.Dialogue.Response{
+          %Resdayn.Catalog.Dialogue.Response{
             id: "resp_1",
             content: "Hello",
             sound_filename: "vo\\n\\m\\Hlo_NM001.mp3"
@@ -457,16 +457,16 @@ defmodule Resdayn.ExporterTest do
 
   describe "quest / journal entries" do
     test "exports a quest with a name entry and journal entries" do
-      quest = %Resdayn.Codex.Dialogue.QuestVersion{
+      quest = %Resdayn.Catalog.Dialogue.QuestVersion{
         id: Ash.CiString.new("my_quest"),
         name: "My Quest",
         journal_entries: [
-          %Resdayn.Codex.Dialogue.JournalEntry{
+          %Resdayn.Catalog.Dialogue.JournalEntry{
             id: "je_1",
             index: 10,
             content: "Started the quest."
           },
-          %Resdayn.Codex.Dialogue.JournalEntry{
+          %Resdayn.Catalog.Dialogue.JournalEntry{
             id: "je_2",
             index: 100,
             content: "Finished!",
@@ -497,12 +497,12 @@ defmodule Resdayn.ExporterTest do
     end
 
     test "journal entries are linked including name entry" do
-      quest = %Resdayn.Codex.Dialogue.QuestVersion{
+      quest = %Resdayn.Catalog.Dialogue.QuestVersion{
         id: Ash.CiString.new("q"),
         name: "Q",
         journal_entries: [
-          %Resdayn.Codex.Dialogue.JournalEntry{id: "a", index: 10, content: "A"},
-          %Resdayn.Codex.Dialogue.JournalEntry{id: "b", index: 20, content: "B"}
+          %Resdayn.Catalog.Dialogue.JournalEntry{id: "a", index: 10, content: "A"},
+          %Resdayn.Catalog.Dialogue.JournalEntry{id: "b", index: 20, content: "B"}
         ]
       }
 
@@ -522,7 +522,7 @@ defmodule Resdayn.ExporterTest do
 
   describe "scripts" do
     test "exports a basic script" do
-      script = %Resdayn.Codex.Mechanics.Script{
+      script = %Resdayn.Catalog.Mechanics.Script{
         id: "my_script",
         text: """
         Begin my_script
@@ -547,7 +547,7 @@ defmodule Resdayn.ExporterTest do
     end
 
     test "round-trips multiple local variables" do
-      script = %Resdayn.Codex.Mechanics.Script{
+      script = %Resdayn.Catalog.Mechanics.Script{
         id: "multi_var",
         text: "Begin multi_var\nshort a\nshort b\nfloat c\nEnd",
         local_variables: ["a", "b", "c"]
@@ -559,7 +559,7 @@ defmodule Resdayn.ExporterTest do
     end
 
     test "counts mixed local variable types" do
-      script = %Resdayn.Codex.Mechanics.Script{
+      script = %Resdayn.Catalog.Mechanics.Script{
         id: "mixed",
         text: """
         Begin mixed
@@ -583,7 +583,7 @@ defmodule Resdayn.ExporterTest do
     end
 
     test "exports a start script as SCPT plus SSCR" do
-      script = %Resdayn.Codex.Mechanics.Script{
+      script = %Resdayn.Catalog.Mechanics.Script{
         id: "auto_start",
         text: "Begin auto_start\n\nEnd",
         local_variables: [],
@@ -602,7 +602,7 @@ defmodule Resdayn.ExporterTest do
     end
 
     test "non-start scripts do not emit SSCR" do
-      script = %Resdayn.Codex.Mechanics.Script{
+      script = %Resdayn.Catalog.Mechanics.Script{
         id: "regular",
         text: "Begin regular\n\nEnd",
         local_variables: [],

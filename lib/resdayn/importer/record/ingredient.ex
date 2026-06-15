@@ -13,7 +13,7 @@ defmodule Resdayn.Importer.Record.Ingredient do
 
     %{
       type: :record,
-      resource: Resdayn.Codex.Items.Ingredient,
+      resource: Resdayn.Catalog.Items.Ingredient,
       records: processed_records,
       conflict_keys: [:id]
     }

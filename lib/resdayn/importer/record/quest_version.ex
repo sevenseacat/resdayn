@@ -25,7 +25,7 @@ defmodule Resdayn.Importer.Record.QuestVersion do
 
     %{
       type: :record,
-      resource: Resdayn.Codex.Dialogue.QuestVersion,
+      resource: Resdayn.Catalog.Dialogue.QuestVersion,
       records: processed_records,
       conflict_keys: [:id]
     }

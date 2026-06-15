@@ -18,7 +18,7 @@ defmodule Resdayn.Importer.Record.Region do
 
     %{
       type: :record,
-      resource: Resdayn.Codex.World.Region,
+      resource: Resdayn.Catalog.World.Region,
       records: processed_records,
       conflict_keys: [:id]
     }

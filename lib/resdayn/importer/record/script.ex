@@ -17,7 +17,7 @@ defmodule Resdayn.Importer.Record.Script do
 
     %{
       type: :record,
-      resource: Resdayn.Codex.Mechanics.Script,
+      resource: Resdayn.Catalog.Mechanics.Script,
       records: processed_records,
       conflict_keys: [:id]
     }

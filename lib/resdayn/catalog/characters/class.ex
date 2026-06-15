@@ -1,0 +1,68 @@
+defmodule Resdayn.Catalog.Characters.Class do
+  use Ash.Resource,
+    otp_app: :resdayn,
+    domain: Resdayn.Catalog.Characters,
+    data_layer: AshPostgres.DataLayer,
+    extensions: [Resdayn.Catalog.Importable]
+
+  postgres do
+    table "classes"
+    repo Resdayn.Repo
+  end
+
+  actions do
+    defaults [:read]
+  end
+
+  attributes do
+    attribute :id, Resdayn.Catalog.Types.RecordId, primary_key?: true, allow_nil?: false
+
+    attribute :name, :string, allow_nil?: false
+    attribute :description, :string, allow_nil?: true
+
+    attribute :services_offered, {:array, Resdayn.Catalog.Characters.ServicesOffered},
+      default: [],
+      allow_nil?: false
+
+    attribute :playable, :boolean, allow_nil?: false
+    attribute :specialization, Resdayn.Catalog.Characters.Specialization, allow_nil?: false
+
+    attribute :items_vendored, {:array, Resdayn.Catalog.Characters.ItemsVendored},
+      default: [],
+      allow_nil?: false,
+      description: """
+      This doesn't seem to be actually used in the game - more of a guide?
+
+      NPCs have their own set of flags for vendoring different types of items,
+      and they don't have to match those of their assigned class
+
+      eg. specific NPCs of class Apothecary Service (flags apparatus,ingredients,
+      potions) but their own flags are all false - will not have the option to Barter
+      """
+  end
+
+  relationships do
+    belongs_to :attribute1, Resdayn.Catalog.Mechanics.Attribute,
+      allow_nil?: false,
+      attribute_type: :integer
+
+    belongs_to :attribute2, Resdayn.Catalog.Mechanics.Attribute,
+      allow_nil?: false,
+      attribute_type: :integer
+
+    has_many :major_skill_relationships, __MODULE__.Skill, filter: expr(category == :major)
+
+    many_to_many :major_skills, Resdayn.Catalog.Characters.Skill,
+      join_relationship: :major_skill_relationships
+
+    has_many :minor_skill_relationships, __MODULE__.Skill, filter: expr(category == :minor)
+
+    many_to_many :minor_skills, Resdayn.Catalog.Characters.Skill,
+      join_relationship: :minor_skill_relationships
+  end
+
+  aggregates do
+    list :major_skill_ids, :major_skills, :id
+    list :minor_skill_ids, :minor_skills, :id
+  end
+end

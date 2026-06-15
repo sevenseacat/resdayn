@@ -2,7 +2,7 @@ defmodule Resdayn.Importer.RecordUpserterTest do
   use Resdayn.DataCase, async: true
 
   alias Resdayn.Importer.RecordUpserter
-  alias Resdayn.Codex.Mechanics.GameSetting
+  alias Resdayn.Catalog.Mechanics.GameSetting
 
   describe "prepare_record/3" do
     setup do

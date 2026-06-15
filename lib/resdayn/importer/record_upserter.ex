@@ -89,8 +89,8 @@ defmodule Resdayn.Importer.RecordUpserter do
   def get_referencable_type(resource) do
     extensions = Spark.extensions(resource)
 
-    if Resdayn.Codex.Referencable in extensions do
-      Resdayn.Codex.World.ReferencableObject.Type.resource_to_type(resource)
+    if Resdayn.Catalog.Referencable in extensions do
+      Resdayn.Catalog.World.ReferencableObject.Type.resource_to_type(resource)
     else
       nil
     end

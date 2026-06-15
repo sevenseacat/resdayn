@@ -46,7 +46,7 @@ defmodule Resdayn.Importer.AppliedMagicEffectTest do
       result = AppliedMagicEffectImporter.process(records, [])
 
       assert result.type == :record
-      assert result.resource == Resdayn.Codex.Mechanics.AppliedMagicEffect
+      assert result.resource == Resdayn.Catalog.Mechanics.AppliedMagicEffect
       assert result.conflict_keys == [:parent_type, :parent_id, :index]
 
       assert length(result.records) == 1

@@ -40,8 +40,8 @@ defmodule Resdayn.Importer.Record.IngredientEffect do
 
     %{
       type: :children,
-      parent_resource: Resdayn.Codex.Items.Ingredient,
-      related_resource: Resdayn.Codex.Items.Ingredient.Effect,
+      parent_resource: Resdayn.Catalog.Items.Ingredient,
+      related_resource: Resdayn.Catalog.Items.Ingredient.Effect,
       parent_key: :ingredient_id,
       id_field: :magic_effect_id,
       relationship_key: :ingredient_effects,

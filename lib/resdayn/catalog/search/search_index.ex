@@ -1,0 +1,34 @@
+defmodule Resdayn.Catalog.Search.SearchIndex do
+  use Ash.Resource,
+    otp_app: :resdayn,
+    domain: Resdayn.Catalog.Search,
+    data_layer: AshPostgres.DataLayer
+
+  postgres do
+    table "search_index"
+    repo Resdayn.Repo
+  end
+
+  actions do
+    defaults [:read]
+
+    read :search do
+      argument :query, :ci_string, allow_nil?: false
+
+      filter expr(contains(name, ^arg(:query)))
+      prepare build(sort: [:name], limit: 20)
+    end
+
+    create :upsert do
+      accept [:id, :name, :type, :icon_filename]
+      upsert? true
+    end
+  end
+
+  attributes do
+    attribute :id, :ci_string, primary_key?: true, allow_nil?: false
+    attribute :name, :string, allow_nil?: false
+    attribute :type, :atom, allow_nil?: false
+    attribute :icon_filename, :string
+  end
+end

@@ -21,7 +21,7 @@ defmodule Resdayn.Importer.Record.Attribute do
 
     %{
       type: :record,
-      resource: Resdayn.Codex.Mechanics.Attribute,
+      resource: Resdayn.Catalog.Mechanics.Attribute,
       records: processed_records,
       conflict_keys: [:id]
     }

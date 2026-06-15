@@ -23,7 +23,7 @@ defmodule Resdayn.Importer.Record.AlchemyApparatus do
 
     %{
       type: :record,
-      resource: Resdayn.Codex.Items.AlchemyApparatus,
+      resource: Resdayn.Catalog.Items.AlchemyApparatus,
       records: processed_records,
       conflict_keys: [:id]
     }

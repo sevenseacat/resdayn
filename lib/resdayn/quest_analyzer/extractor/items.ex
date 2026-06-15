@@ -4,7 +4,7 @@ defmodule Resdayn.QuestAnalyzer.Extractor.Items do
 
   Each public function takes a `%LoadedData{}` and returns a list of
   involvement-row maps shaped to match
-  `Resdayn.Codex.QuestAnalysis.ItemInvolvement`:
+  `Resdayn.Catalog.QuestAnalysis.ItemInvolvement`:
 
       %{
         quest_id: <player-concept Quest id, downcased>,

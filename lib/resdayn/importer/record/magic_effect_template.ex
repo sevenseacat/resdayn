@@ -22,7 +22,7 @@ defmodule Resdayn.Importer.Record.MagicEffectTemplate do
 
     %{
       type: :record,
-      resource: Resdayn.Codex.Mechanics.MagicEffectTemplate,
+      resource: Resdayn.Catalog.Mechanics.MagicEffectTemplate,
       records: processed_records,
       conflict_keys: [:id]
     }

@@ -26,7 +26,7 @@ defmodule Resdayn.Importer.Record.Light do
 
     %{
       type: :record,
-      resource: Resdayn.Codex.Assets.Light,
+      resource: Resdayn.Catalog.Assets.Light,
       records: processed_records,
       conflict_keys: [:id]
     }

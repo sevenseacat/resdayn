@@ -7,7 +7,7 @@ defmodule Resdayn.QuestAnalyzer.PersisterTest do
 
   require Ash.Query
 
-  alias Resdayn.Codex.QuestAnalysis.{ActorInvolvement, Transition}
+  alias Resdayn.Catalog.QuestAnalysis.{ActorInvolvement, Transition}
   alias Resdayn.QuestAnalyzer.{Extractor, LoadedData, Persister}
 
   setup do

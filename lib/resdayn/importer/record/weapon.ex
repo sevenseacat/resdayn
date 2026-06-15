@@ -13,7 +13,7 @@ defmodule Resdayn.Importer.Record.Weapon do
 
     %{
       type: :record,
-      resource: Resdayn.Codex.Items.Weapon,
+      resource: Resdayn.Catalog.Items.Weapon,
       records: processed_records,
       conflict_keys: [:id]
     }

@@ -13,7 +13,7 @@ defmodule Resdayn.Importer.Record.GameSetting do
 
     %{
       type: :record,
-      resource: Resdayn.Codex.Mechanics.GameSetting,
+      resource: Resdayn.Catalog.Mechanics.GameSetting,
       records: processed_records,
       conflict_keys: [:id]
     }

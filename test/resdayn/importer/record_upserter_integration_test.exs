@@ -11,7 +11,7 @@ defmodule Resdayn.Importer.RecordUpserterIntegrationTest do
   alias Resdayn.Importer.RecordUpserter
 
   # Resources under test
-  alias Resdayn.Codex.Mechanics.{
+  alias Resdayn.Catalog.Mechanics.{
     GameSetting,
     GlobalVariable,
     Attribute,
@@ -22,10 +22,10 @@ defmodule Resdayn.Importer.RecordUpserterIntegrationTest do
     Enchantment
   }
 
-  alias Resdayn.Codex.Characters.{Skill, Class, Birthsign, Race, BodyPart, Faction}
-  alias Resdayn.Codex.Assets.{Sound, Light, SoundGenerator}
+  alias Resdayn.Catalog.Characters.{Skill, Class, Birthsign, Race, BodyPart, Faction}
+  alias Resdayn.Catalog.Assets.{Sound, Light, SoundGenerator}
 
-  alias Resdayn.Codex.Items.{
+  alias Resdayn.Catalog.Items.{
     Book,
     Weapon,
     MiscellaneousItem,
@@ -37,7 +37,7 @@ defmodule Resdayn.Importer.RecordUpserterIntegrationTest do
     ItemLevelledList
   }
 
-  alias Resdayn.Codex.World.{
+  alias Resdayn.Catalog.World.{
     Activator,
     Door,
     Container,
@@ -253,7 +253,7 @@ defmodule Resdayn.Importer.RecordUpserterIntegrationTest do
 
   describe "ClassSkill" do
     test "imports correct count" do
-      count = Ash.count!(Resdayn.Codex.Characters.Class.Skill)
+      count = Ash.count!(Resdayn.Catalog.Characters.Class.Skill)
       # 82 classes * 10 skills each (5 major + 5 minor) = 820
       assert count == 820
     end
@@ -262,7 +262,7 @@ defmodule Resdayn.Importer.RecordUpserterIntegrationTest do
       require Ash.Query
 
       skills =
-        Resdayn.Codex.Characters.Class.Skill
+        Resdayn.Catalog.Characters.Class.Skill
         |> Ash.Query.filter(class_id == "Warrior")
         |> Ash.read!()
 
@@ -754,12 +754,12 @@ defmodule Resdayn.Importer.RecordUpserterIntegrationTest do
 
   describe "AlchemyApparatus (Referencable)" do
     test "imports correct count" do
-      count = Ash.count!(Resdayn.Codex.Items.AlchemyApparatus)
+      count = Ash.count!(Resdayn.Catalog.Items.AlchemyApparatus)
       assert count == 22
     end
 
     test "imports alchemy apparatus data correctly" do
-      apparatus = Ash.get!(Resdayn.Codex.Items.AlchemyApparatus, "apparatus_a_mortar_01")
+      apparatus = Ash.get!(Resdayn.Catalog.Items.AlchemyApparatus, "apparatus_a_mortar_01")
 
       assert apparatus.name == "Apprentice's Mortar and Pestle"
       assert apparatus.type == :mortar_and_pestle
@@ -768,7 +768,7 @@ defmodule Resdayn.Importer.RecordUpserterIntegrationTest do
     end
 
     test "creates corresponding ReferencableObject" do
-      apparatus_count = Ash.count!(Resdayn.Codex.Items.AlchemyApparatus)
+      apparatus_count = Ash.count!(Resdayn.Catalog.Items.AlchemyApparatus)
       ref_count = Ash.count!(ReferencableObject, query: [filter: [type: :alchemy_apparatus]])
 
       assert apparatus_count == ref_count,
@@ -1201,12 +1201,12 @@ defmodule Resdayn.Importer.RecordUpserterIntegrationTest do
 
   describe "Cell" do
     test "imports correct count" do
-      count = Ash.count!(Resdayn.Codex.World.Cell)
+      count = Ash.count!(Resdayn.Catalog.World.Cell)
       assert count == 2634
     end
 
     test "imports interior cell data correctly" do
-      cell = Ash.get!(Resdayn.Codex.World.Cell, "Balmora, South Wall Cornerclub")
+      cell = Ash.get!(Resdayn.Catalog.World.Cell, "Balmora, South Wall Cornerclub")
 
       assert cell.name == "Balmora, South Wall Cornerclub"
       assert cell.grid_position == nil
@@ -1215,7 +1215,7 @@ defmodule Resdayn.Importer.RecordUpserterIntegrationTest do
     end
 
     test "imports exterior cell data correctly" do
-      cell = Ash.get!(Resdayn.Codex.World.Cell, "0,0")
+      cell = Ash.get!(Resdayn.Catalog.World.Cell, "0,0")
 
       assert cell.grid_position == [0, 0]
       assert cell.region_id == Ash.CiString.new("Ashlands Region")
@@ -1224,7 +1224,7 @@ defmodule Resdayn.Importer.RecordUpserterIntegrationTest do
 
     test "imports cell light embedded type correctly" do
       # Find an interior cell with light data
-      cell = Ash.get!(Resdayn.Codex.World.Cell, "Balmora, South Wall Cornerclub")
+      cell = Ash.get!(Resdayn.Catalog.World.Cell, "Balmora, South Wall Cornerclub")
 
       if cell.light do
         assert is_map(cell.light)
@@ -1237,7 +1237,7 @@ defmodule Resdayn.Importer.RecordUpserterIntegrationTest do
       require Ash.Query
 
       references =
-        Resdayn.Codex.World.Cell.CellReference
+        Resdayn.Catalog.World.Cell.CellReference
         |> Ash.Query.filter(cell_id == "Balmora, South Wall Cornerclub")
         |> Ash.read!()
 
@@ -1248,7 +1248,7 @@ defmodule Resdayn.Importer.RecordUpserterIntegrationTest do
       require Ash.Query
 
       references =
-        Resdayn.Codex.World.Cell.CellReference
+        Resdayn.Catalog.World.Cell.CellReference
         |> Ash.Query.filter(cell_id == "Balmora, South Wall Cornerclub")
         |> Ash.read!()
 
@@ -1262,7 +1262,7 @@ defmodule Resdayn.Importer.RecordUpserterIntegrationTest do
       require Ash.Query
 
       reference =
-        Resdayn.Codex.World.Cell.CellReference
+        Resdayn.Catalog.World.Cell.CellReference
         |> Ash.Query.filter(
           cell_id == "Maar Gan, Tashpi Ashibael's Hut" and
             reference_id == "in_redoran_hut_door_01"
@@ -1275,7 +1275,7 @@ defmodule Resdayn.Importer.RecordUpserterIntegrationTest do
     end
 
     test "imports total reference count" do
-      count = Ash.count!(Resdayn.Codex.World.Cell.CellReference)
+      count = Ash.count!(Resdayn.Catalog.World.Cell.CellReference)
       # Morrowind.esm has 331,219 references
       # assert count == 331_219
       # But only 123,981 references excluding statics
@@ -1289,7 +1289,7 @@ defmodule Resdayn.Importer.RecordUpserterIntegrationTest do
 
   describe "RaceSkillBonus" do
     test "imports correct count" do
-      count = Ash.count!(Resdayn.Codex.Characters.Race.SkillBonus)
+      count = Ash.count!(Resdayn.Catalog.Characters.Race.SkillBonus)
       # 10 races with varying skill bonuses
       assert count == 62
     end
@@ -1298,7 +1298,7 @@ defmodule Resdayn.Importer.RecordUpserterIntegrationTest do
       require Ash.Query
 
       bonuses =
-        Resdayn.Codex.Characters.Race.SkillBonus
+        Resdayn.Catalog.Characters.Race.SkillBonus
         |> Ash.Query.filter(race_id == "Dark Elf")
         |> Ash.read!()
 
@@ -1310,7 +1310,7 @@ defmodule Resdayn.Importer.RecordUpserterIntegrationTest do
 
   describe "FactionReaction" do
     test "imports faction reactions" do
-      count = Ash.count!(Resdayn.Codex.Characters.Faction.Reaction)
+      count = Ash.count!(Resdayn.Catalog.Characters.Faction.Reaction)
       assert count > 0
     end
 
@@ -1318,7 +1318,7 @@ defmodule Resdayn.Importer.RecordUpserterIntegrationTest do
       require Ash.Query
 
       reactions =
-        Resdayn.Codex.Characters.Faction.Reaction
+        Resdayn.Catalog.Characters.Faction.Reaction
         |> Ash.Query.filter(source_id == "Fighters Guild")
         |> Ash.read!()
 
@@ -1333,7 +1333,7 @@ defmodule Resdayn.Importer.RecordUpserterIntegrationTest do
 
       # Find NPCs with inventory
       items =
-        Resdayn.Codex.World.InventoryItem
+        Resdayn.Catalog.World.InventoryItem
         |> Ash.Query.limit(100)
         |> Ash.read!()
 
@@ -1344,7 +1344,7 @@ defmodule Resdayn.Importer.RecordUpserterIntegrationTest do
       require Ash.Query
 
       items =
-        Resdayn.Codex.World.InventoryItem
+        Resdayn.Catalog.World.InventoryItem
         |> Ash.Query.filter(holder_ref_id == "arrille")
         |> Ash.read!()
 
@@ -1362,12 +1362,12 @@ defmodule Resdayn.Importer.RecordUpserterIntegrationTest do
 
   describe "DialogueTopic" do
     test "imports correct count" do
-      count = Ash.count!(Resdayn.Codex.Dialogue.Topic)
+      count = Ash.count!(Resdayn.Catalog.Dialogue.Topic)
       assert count == 1943
     end
 
     test "imports dialogue topic data correctly" do
-      topic = Ash.get!(Resdayn.Codex.Dialogue.Topic, "Background")
+      topic = Ash.get!(Resdayn.Catalog.Dialogue.Topic, "Background")
       assert topic != nil
       assert topic.source_file_ids == ["Morrowind.esm", "Tribunal.esm"]
     end
@@ -1375,7 +1375,7 @@ defmodule Resdayn.Importer.RecordUpserterIntegrationTest do
 
   describe "DialogueResponse" do
     test "imports dialogue responses" do
-      count = Ash.count!(Resdayn.Codex.Dialogue.Response)
+      count = Ash.count!(Resdayn.Catalog.Dialogue.Response)
       assert count == 24466
     end
 
@@ -1383,7 +1383,7 @@ defmodule Resdayn.Importer.RecordUpserterIntegrationTest do
       require Ash.Query
 
       responses =
-        Resdayn.Codex.Dialogue.Response
+        Resdayn.Catalog.Dialogue.Response
         |> Ash.Query.limit(10)
         |> Ash.read!()
 
@@ -1394,7 +1394,7 @@ defmodule Resdayn.Importer.RecordUpserterIntegrationTest do
 
     test "imports speaker race ID condition" do
       response =
-        Ash.get!(Resdayn.Codex.Dialogue.Response, %{
+        Ash.get!(Resdayn.Catalog.Dialogue.Response, %{
           topic_id: "Abolitionists",
           id: "184722846711832269"
         })
@@ -1405,12 +1405,12 @@ defmodule Resdayn.Importer.RecordUpserterIntegrationTest do
 
   describe "Quest" do
     test "imports quests" do
-      count = Ash.count!(Resdayn.Codex.Dialogue.QuestVersion)
+      count = Ash.count!(Resdayn.Catalog.Dialogue.QuestVersion)
       assert count == 691
     end
 
     test "imports quest data correctly" do
-      quest = Ash.get!(Resdayn.Codex.Dialogue.QuestVersion, "A1_1_FindSpymaster")
+      quest = Ash.get!(Resdayn.Catalog.Dialogue.QuestVersion, "A1_1_FindSpymaster")
       assert quest.name == "Report to Caius Cosades"
       assert quest.source_file_ids == ["Morrowind.esm", "Tribunal.esm"]
     end
@@ -1418,7 +1418,7 @@ defmodule Resdayn.Importer.RecordUpserterIntegrationTest do
 
   describe "JournalEntry" do
     test "imports journal entries" do
-      count = Ash.count!(Resdayn.Codex.Dialogue.JournalEntry)
+      count = Ash.count!(Resdayn.Catalog.Dialogue.JournalEntry)
       assert count == 2860
     end
 
@@ -1426,7 +1426,7 @@ defmodule Resdayn.Importer.RecordUpserterIntegrationTest do
       require Ash.Query
 
       entries =
-        Resdayn.Codex.Dialogue.JournalEntry
+        Resdayn.Catalog.Dialogue.JournalEntry
         |> Ash.Query.filter(quest_version_id == "A1_1_FindSpymaster")
         |> Ash.read!()
 
@@ -1520,7 +1520,7 @@ defmodule Resdayn.Importer.RecordUpserterIntegrationTest do
 
       require Ash.Query
       alias Resdayn.Importer.ChildrenUpserter
-      alias Resdayn.Codex.World.Cell.CellReference
+      alias Resdayn.Catalog.World.Cell.CellReference
 
       # Find two cells with references - one without transport_to, one with
       ref_without_transport =
@@ -1574,7 +1574,7 @@ defmodule Resdayn.Importer.RecordUpserterIntegrationTest do
       {:ok, _} =
         ChildrenUpserter.import(
           records,
-          parent_resource: Resdayn.Codex.World.Cell,
+          parent_resource: Resdayn.Catalog.World.Cell,
           related_resource: CellReference,
           parent_key: :cell_id,
           id_field: :id,

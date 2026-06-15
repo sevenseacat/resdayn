@@ -14,7 +14,7 @@ defmodule Resdayn.Importer.Record.Enchantment do
 
     %{
       type: :record,
-      resource: Resdayn.Codex.Mechanics.Enchantment,
+      resource: Resdayn.Catalog.Mechanics.Enchantment,
       records: processed_records,
       conflict_keys: [:id]
     }

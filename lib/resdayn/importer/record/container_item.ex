@@ -23,8 +23,8 @@ defmodule Resdayn.Importer.Record.ContainerItem do
 
     %{
       type: :children,
-      parent_resource: Resdayn.Codex.World.Container,
-      related_resource: Resdayn.Codex.World.InventoryItem,
+      parent_resource: Resdayn.Catalog.World.Container,
+      related_resource: Resdayn.Catalog.World.InventoryItem,
       parent_key: :holder_ref_id,
       id_field: :object_ref_id,
       relationship_key: :inventory,

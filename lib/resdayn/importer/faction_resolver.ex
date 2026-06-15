@@ -1,7 +1,7 @@
 defmodule Resdayn.Importer.FactionResolver do
   @moduledoc """
   Resolves a quest-name prefix ("Imperial Cult" in
-  "Imperial Cult: Buckmoth Alms") to a `Resdayn.Codex.Characters.Faction` id.
+  "Imperial Cult: Buckmoth Alms") to a `Resdayn.Catalog.Characters.Faction` id.
 
   Each faction is indexed under its full `name` and any derived short form:
 
@@ -23,7 +23,7 @@ defmodule Resdayn.Importer.FactionResolver do
   @aliases %{"Fighter's Guild" => "Fighters Guild"}
 
   def build_index do
-    Resdayn.Codex.Characters.Faction
+    Resdayn.Catalog.Characters.Faction
     |> Ash.Query.select([:id, :name])
     |> Ash.read!()
     |> build_index()

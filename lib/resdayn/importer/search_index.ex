@@ -7,34 +7,34 @@ defmodule Resdayn.Importer.SearchIndex do
   require Ash.Query
 
   @searchable_resources [
-    {Resdayn.Codex.Items.Weapon, :weapon, :icon_filename},
-    {Resdayn.Codex.Items.Armor, :armor, :icon_filename},
-    {Resdayn.Codex.Items.Clothing, :clothing, :icon_filename},
-    {Resdayn.Codex.Items.Book, :book, :icon_filename},
-    {Resdayn.Codex.Items.Potion, :potion, :icon_filename},
-    {Resdayn.Codex.Items.Ingredient, :ingredient, :icon_filename},
-    {Resdayn.Codex.Items.AlchemyApparatus, :apparatus, :icon_filename},
-    {Resdayn.Codex.Items.Tool, :tool, :icon_filename},
-    {Resdayn.Codex.Items.MiscellaneousItem, :misc_item, :icon_filename},
-    {Resdayn.Codex.World.NPC, :npc, nil},
-    {Resdayn.Codex.World.Creature, :creature, nil},
-    {Resdayn.Codex.World.Cell, :location, nil},
-    {Resdayn.Codex.World.Region, :region, nil},
-    {Resdayn.Codex.Characters.Faction, :faction, nil},
-    {Resdayn.Codex.Characters.Class, :class, nil},
-    {Resdayn.Codex.Characters.Race, :race, nil},
-    {Resdayn.Codex.Characters.Birthsign, :birthsign, nil},
-    {Resdayn.Codex.Characters.Skill, :skill, nil},
-    {Resdayn.Codex.Dialogue.Quest, :quest, nil}
+    {Resdayn.Catalog.Items.Weapon, :weapon, :icon_filename},
+    {Resdayn.Catalog.Items.Armor, :armor, :icon_filename},
+    {Resdayn.Catalog.Items.Clothing, :clothing, :icon_filename},
+    {Resdayn.Catalog.Items.Book, :book, :icon_filename},
+    {Resdayn.Catalog.Items.Potion, :potion, :icon_filename},
+    {Resdayn.Catalog.Items.Ingredient, :ingredient, :icon_filename},
+    {Resdayn.Catalog.Items.AlchemyApparatus, :apparatus, :icon_filename},
+    {Resdayn.Catalog.Items.Tool, :tool, :icon_filename},
+    {Resdayn.Catalog.Items.MiscellaneousItem, :misc_item, :icon_filename},
+    {Resdayn.Catalog.World.NPC, :npc, nil},
+    {Resdayn.Catalog.World.Creature, :creature, nil},
+    {Resdayn.Catalog.World.Cell, :location, nil},
+    {Resdayn.Catalog.World.Region, :region, nil},
+    {Resdayn.Catalog.Characters.Faction, :faction, nil},
+    {Resdayn.Catalog.Characters.Class, :class, nil},
+    {Resdayn.Catalog.Characters.Race, :race, nil},
+    {Resdayn.Catalog.Characters.Birthsign, :birthsign, nil},
+    {Resdayn.Catalog.Characters.Skill, :skill, nil},
+    {Resdayn.Catalog.Dialogue.Quest, :quest, nil}
   ]
 
   # Resources with no `name` attribute — their `id` IS the meaningful name
   # (e.g. dialogue topics, scripts, levelled lists).
   @id_indexed_resources [
-    {Resdayn.Codex.Dialogue.Topic, :dialogue_topic},
-    {Resdayn.Codex.Mechanics.Script, :script},
-    {Resdayn.Codex.Items.ItemLevelledList, :item_levelled_list},
-    {Resdayn.Codex.World.CreatureLevelledList, :creature_levelled_list}
+    {Resdayn.Catalog.Dialogue.Topic, :dialogue_topic},
+    {Resdayn.Catalog.Mechanics.Script, :script},
+    {Resdayn.Catalog.Items.ItemLevelledList, :item_levelled_list},
+    {Resdayn.Catalog.World.CreatureLevelledList, :creature_levelled_list}
   ]
 
   def rebuild do
@@ -98,7 +98,7 @@ defmodule Resdayn.Importer.SearchIndex do
   end
 
   defp build_spell_entries do
-    Resdayn.Codex.Mechanics.Spell
+    Resdayn.Catalog.Mechanics.Spell
     |> Ash.Query.filter(not is_nil(name) and name != "")
     |> Ash.read!(load: [effects: [magic_effect: [:icon_filename]]])
     |> Enum.map(fn spell ->
@@ -122,7 +122,7 @@ defmodule Resdayn.Importer.SearchIndex do
   # Magic effects use a module calculation for `name`, so we can't filter at the
   # database level — load all and trust they have valid names.
   defp build_magic_effect_entries do
-    Resdayn.Codex.Mechanics.MagicEffect
+    Resdayn.Catalog.Mechanics.MagicEffect
     |> Ash.Query.load([:name, :icon_filename])
     |> Ash.read!()
     |> Enum.map(fn effect ->

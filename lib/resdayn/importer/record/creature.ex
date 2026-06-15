@@ -54,7 +54,7 @@ defmodule Resdayn.Importer.Record.Creature do
 
     %{
       type: :record,
-      resource: Resdayn.Codex.World.Creature,
+      resource: Resdayn.Catalog.World.Creature,
       records: processed_records,
       conflict_keys: [:id]
     }

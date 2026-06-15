@@ -14,7 +14,7 @@ defmodule Resdayn.Importer.Record.Container do
 
     %{
       type: :record,
-      resource: Resdayn.Codex.World.Container,
+      resource: Resdayn.Catalog.World.Container,
       records: processed_records,
       conflict_keys: [:id]
     }

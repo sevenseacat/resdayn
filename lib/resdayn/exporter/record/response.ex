@@ -1,6 +1,6 @@
 defmodule Resdayn.Exporter.Record.Response do
   @moduledoc """
-  Encodes a `Resdayn.Codex.Dialogue.Response` resource as an INFO record.
+  Encodes a `Resdayn.Catalog.Dialogue.Response` resource as an INFO record.
 
   Called by `Resdayn.Exporter.Record.Topic` for each child response —
   not dispatched to directly from `Exporter.build/1`.

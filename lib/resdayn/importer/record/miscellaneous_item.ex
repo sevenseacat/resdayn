@@ -23,7 +23,7 @@ defmodule Resdayn.Importer.Record.MiscellaneousItem do
 
     %{
       type: :record,
-      resource: Resdayn.Codex.Items.MiscellaneousItem,
+      resource: Resdayn.Catalog.Items.MiscellaneousItem,
       records: processed_records,
       conflict_keys: [:id]
     }

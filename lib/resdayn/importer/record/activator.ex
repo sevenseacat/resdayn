@@ -13,7 +13,7 @@ defmodule Resdayn.Importer.Record.Activator do
 
     %{
       type: :record,
-      resource: Resdayn.Codex.World.Activator,
+      resource: Resdayn.Catalog.World.Activator,
       records: processed_records,
       conflict_keys: [:id]
     }

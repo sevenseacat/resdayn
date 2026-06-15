@@ -5,7 +5,7 @@ defmodule Resdayn.Importer.Record.CellReference do
   def process(records, _opts) do
     # TR has a lot of dodgy body parts and other non-referencable things as references for some reason?
     referencable =
-      Ash.read!(Resdayn.Codex.World.ReferencableObject)
+      Ash.read!(Resdayn.Catalog.World.ReferencableObject)
       |> Enum.map(&to_string(&1.id))
       |> MapSet.new()
 
@@ -81,8 +81,8 @@ defmodule Resdayn.Importer.Record.CellReference do
 
     %{
       type: :children,
-      parent_resource: Resdayn.Codex.World.Cell,
-      related_resource: Resdayn.Codex.World.Cell.CellReference,
+      parent_resource: Resdayn.Catalog.World.Cell,
+      related_resource: Resdayn.Catalog.World.Cell.CellReference,
       parent_key: :cell_id,
       id_field: :id,
       relationship_key: :new_references,

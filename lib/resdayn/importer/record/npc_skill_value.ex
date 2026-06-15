@@ -21,8 +21,8 @@ defmodule Resdayn.Importer.Record.NpcSkillValue do
 
     %{
       type: :children,
-      parent_resource: Resdayn.Codex.World.NPC,
-      related_resource: Resdayn.Codex.World.NPC.SkillValue,
+      parent_resource: Resdayn.Catalog.World.NPC,
+      related_resource: Resdayn.Catalog.World.NPC.SkillValue,
       parent_key: :npc_id,
       id_field: :skill_id,
       relationship_key: :skill_values,

@@ -1,0 +1,32 @@
+defmodule Resdayn.Catalog.Characters.Class.Skill do
+  use Ash.Resource,
+    otp_app: :resdayn,
+    domain: Resdayn.Catalog.Characters,
+    data_layer: AshPostgres.DataLayer,
+    extensions: [Resdayn.Catalog.Importable]
+
+  postgres do
+    table "class_skills"
+    repo Resdayn.Repo
+  end
+
+  actions do
+    defaults [:create, :read, :update, :destroy]
+    default_accept [:class_id, :category, :skill_id]
+  end
+
+  attributes do
+    attribute :category, :atom, constraints: [one_of: [:major, :minor]], allow_nil?: false
+  end
+
+  relationships do
+    belongs_to :class, Resdayn.Catalog.Characters.Class,
+      primary_key?: true,
+      allow_nil?: false
+
+    belongs_to :skill, Resdayn.Catalog.Characters.Skill,
+      primary_key?: true,
+      allow_nil?: false,
+      attribute_type: :integer
+  end
+end

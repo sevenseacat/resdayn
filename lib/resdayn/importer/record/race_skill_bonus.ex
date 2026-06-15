@@ -20,8 +20,8 @@ defmodule Resdayn.Importer.Record.RaceSkillBonus do
 
     %{
       type: :children,
-      parent_resource: Resdayn.Codex.Characters.Race,
-      related_resource: Resdayn.Codex.Characters.Race.SkillBonus,
+      parent_resource: Resdayn.Catalog.Characters.Race,
+      related_resource: Resdayn.Catalog.Characters.Race.SkillBonus,
       parent_key: :race_id,
       id_field: :skill_id,
       relationship_key: :skill_bonuses,

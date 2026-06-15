@@ -12,7 +12,7 @@ defmodule Resdayn.Importer.Record.Skill do
 
     %{
       type: :record,
-      resource: Resdayn.Codex.Characters.Skill,
+      resource: Resdayn.Catalog.Characters.Skill,
       records: processed_records,
       conflict_keys: [:id]
     }

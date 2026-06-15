@@ -1,6 +1,6 @@
 defmodule Resdayn.Exporter.Record.DataFile do
   @moduledoc """
-  Encodes a `Resdayn.Codex.Mechanics.DataFile` resource as a TES3 header record.
+  Encodes a `Resdayn.Catalog.Mechanics.DataFile` resource as a TES3 header record.
   """
 
   import Resdayn.Parser.DataSizes

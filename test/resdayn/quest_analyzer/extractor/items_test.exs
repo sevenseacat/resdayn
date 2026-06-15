@@ -234,7 +234,13 @@ defmodule Resdayn.QuestAnalyzer.Extractor.ItemsTest do
     end
 
     test "additem to :player → :received" do
-      [row] = effect_rows_for(%{function: :add_item, subject: :player, item_id: "test_potion", count: 1})
+      [row] =
+        effect_rows_for(%{
+          function: :add_item,
+          subject: :player,
+          item_id: "test_potion",
+          count: 1
+        })
 
       assert row.reason == :received
       assert row.object_id == "test_potion"
@@ -261,21 +267,32 @@ defmodule Resdayn.QuestAnalyzer.Extractor.ItemsTest do
     end
 
     test "additem to :self → :placed" do
-      [row] = effect_rows_for(%{function: :add_item, subject: :self, item_id: "test_potion", count: 1})
+      [row] =
+        effect_rows_for(%{function: :add_item, subject: :self, item_id: "test_potion", count: 1})
 
       assert row.reason == :placed
     end
 
     test "additem to an unresolved subject → :item_mention" do
       [row] =
-        effect_rows_for(%{function: :add_item, subject: "ghost", item_id: "test_potion", count: 1})
+        effect_rows_for(%{
+          function: :add_item,
+          subject: "ghost",
+          item_id: "test_potion",
+          count: 1
+        })
 
       assert row.reason == :item_mention
     end
 
     test "removeitem from :player → :surrendered" do
       [row] =
-        effect_rows_for(%{function: :remove_item, subject: :player, item_id: "test_potion", count: 1})
+        effect_rows_for(%{
+          function: :remove_item,
+          subject: :player,
+          item_id: "test_potion",
+          count: 1
+        })
 
       assert row.reason == :surrendered
     end
@@ -292,7 +309,11 @@ defmodule Resdayn.QuestAnalyzer.Extractor.ItemsTest do
 
     test "place_at_pc and place_item → :placed" do
       assert [%{reason: :placed}] =
-               effect_rows_for(%{function: :place_at_pc, item_id: "test_potion", subject: :player})
+               effect_rows_for(%{
+                 function: :place_at_pc,
+                 item_id: "test_potion",
+                 subject: :player
+               })
 
       assert [%{reason: :placed}] =
                effect_rows_for(%{function: :place_item, item_id: "test_potion"})
@@ -418,7 +439,11 @@ defmodule Resdayn.QuestAnalyzer.Extractor.ItemsTest do
       npcs: Keyword.get(overrides, :npcs, %{}),
       creatures: Keyword.get(overrides, :creatures, %{}),
       containers: Keyword.get(overrides, :containers, %{}),
-      referencable_objects: %{"test_potion" => :potion, "test_npc" => :npc, "test_chest" => :container}
+      referencable_objects: %{
+        "test_potion" => :potion,
+        "test_npc" => :npc,
+        "test_chest" => :container
+      }
     }
     |> Extractor.Items.effect_items()
   end

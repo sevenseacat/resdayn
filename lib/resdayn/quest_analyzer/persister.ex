@@ -1,7 +1,7 @@
 defmodule Resdayn.QuestAnalyzer.Persister do
   @moduledoc """
   Bulk-persists rows produced by `Resdayn.QuestAnalyzer.Extractor.*` modules
-  into the `Resdayn.Codex.QuestAnalysis` tables.
+  into the `Resdayn.Catalog.QuestAnalysis` tables.
 
   Involvement tables upsert against a composite uniqueness identity, so
   re-running the analyzer over the same data leaves existing rows untouched
@@ -11,7 +11,7 @@ defmodule Resdayn.QuestAnalyzer.Persister do
 
   require Ash.Query
 
-  alias Resdayn.Codex.QuestAnalysis.{ActorInvolvement, ItemInvolvement, Transition}
+  alias Resdayn.Catalog.QuestAnalysis.{ActorInvolvement, ItemInvolvement, Transition}
 
   @doc """
   Bulk-create actor involvement rows with on-conflict-do-nothing semantics.

@@ -82,7 +82,7 @@ defmodule Resdayn.IntegrationCase do
     Resdayn.Importer.Runner.run("Tribunal.esm")
 
     # Collate QuestVersions by name into player-concept Quest records, matching
-    # what the import_codex mix task does after the per-file imports.
+    # what the import_catalog mix task does after the per-file imports.
     Resdayn.Importer.Record.Quest.collate()
   end
 

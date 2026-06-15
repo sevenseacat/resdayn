@@ -15,7 +15,7 @@ defmodule Resdayn.Importer.Record.Book do
 
     %{
       type: :record,
-      resource: Resdayn.Codex.Items.Book,
+      resource: Resdayn.Catalog.Items.Book,
       records: processed_records,
       conflict_keys: [:id]
     }

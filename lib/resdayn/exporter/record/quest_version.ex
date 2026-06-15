@@ -1,6 +1,6 @@
 defmodule Resdayn.Exporter.Record.QuestVersion do
   @moduledoc """
-  Encodes a `Resdayn.Codex.Dialogue.QuestVersion` resource as a journal DIAL record
+  Encodes a `Resdayn.Catalog.Dialogue.QuestVersion` resource as a journal DIAL record
   followed by INFO records for each `JournalEntry`.
   """
 

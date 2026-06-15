@@ -15,7 +15,7 @@ defmodule Resdayn.Importer.Record.Spell do
 
     %{
       type: :record,
-      resource: Resdayn.Codex.Mechanics.Spell,
+      resource: Resdayn.Catalog.Mechanics.Spell,
       records: processed_records,
       conflict_keys: [:id]
     }

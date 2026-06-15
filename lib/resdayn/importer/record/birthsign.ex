@@ -20,7 +20,7 @@ defmodule Resdayn.Importer.Record.Birthsign do
 
     %{
       type: :record,
-      resource: Resdayn.Codex.Characters.Birthsign,
+      resource: Resdayn.Catalog.Characters.Birthsign,
       records: processed_records,
       conflict_keys: [:id]
     }

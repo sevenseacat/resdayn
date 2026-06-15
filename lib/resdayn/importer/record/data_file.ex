@@ -19,7 +19,7 @@ defmodule Resdayn.Importer.Record.DataFile do
 
     %{
       type: :record,
-      resource: Resdayn.Codex.Mechanics.DataFile,
+      resource: Resdayn.Catalog.Mechanics.DataFile,
       records: processed_records,
       conflict_keys: [:id]
     }

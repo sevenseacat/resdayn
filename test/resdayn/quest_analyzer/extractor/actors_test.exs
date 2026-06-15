@@ -102,7 +102,9 @@ defmodule Resdayn.QuestAnalyzer.Extractor.ActorsTest do
       # are reached via StartScript from a quest-touching dialogue response.
       targets =
         rows
-        |> Enum.filter(&(&1.quest_version_id == "tg_lootaldruhnmg" and &1.reason == :effect_target))
+        |> Enum.filter(
+          &(&1.quest_version_id == "tg_lootaldruhnmg" and &1.reason == :effect_target)
+        )
         |> Enum.map(& &1.npc_id)
         |> MapSet.new()
 

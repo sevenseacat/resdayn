@@ -21,7 +21,7 @@ defmodule Resdayn.Importer.Record.AppliedMagicEffect do
 
     %{
       type: :record,
-      resource: Resdayn.Codex.Mechanics.AppliedMagicEffect,
+      resource: Resdayn.Catalog.Mechanics.AppliedMagicEffect,
       records: all_effects,
       conflict_keys: [:parent_type, :parent_id, :index]
     }

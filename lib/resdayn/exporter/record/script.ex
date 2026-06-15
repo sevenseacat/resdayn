@@ -1,6 +1,6 @@
 defmodule Resdayn.Exporter.Record.Script do
   @moduledoc """
-  Encodes a `Resdayn.Codex.Mechanics.Script` resource as a SCPT record.
+  Encodes a `Resdayn.Catalog.Mechanics.Script` resource as a SCPT record.
 
   If `start_script: true`, also emits an SSCR record so the engine
   registers the script as auto-running.

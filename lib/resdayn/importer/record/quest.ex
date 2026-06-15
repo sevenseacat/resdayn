@@ -16,7 +16,7 @@ defmodule Resdayn.Importer.Record.Quest do
 
     index = Resdayn.Importer.FactionResolver.build_index()
 
-    Resdayn.Codex.Dialogue.QuestVersion
+    Resdayn.Catalog.Dialogue.QuestVersion
     |> Ash.Query.for_read(:read)
     |> Ash.Query.filter(not is_nil(name))
     |> Ash.read!()

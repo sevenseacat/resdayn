@@ -18,8 +18,8 @@ defmodule Resdayn.Importer.Record.FactionSkill do
 
     %{
       type: :children,
-      parent_resource: Resdayn.Codex.Characters.Faction,
-      related_resource: Resdayn.Codex.Characters.Faction.Skill,
+      parent_resource: Resdayn.Catalog.Characters.Faction,
+      related_resource: Resdayn.Catalog.Characters.Faction.Skill,
       parent_key: :faction_id,
       id_field: :skill_id,
       relationship_key: :skills,

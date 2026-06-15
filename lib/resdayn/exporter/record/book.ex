@@ -1,6 +1,6 @@
 defmodule Resdayn.Exporter.Record.Book do
   @moduledoc """
-  Encodes a `Resdayn.Codex.Items.Book` resource as a BOOK record.
+  Encodes a `Resdayn.Catalog.Items.Book` resource as a BOOK record.
   """
 
   import Resdayn.Parser.DataSizes

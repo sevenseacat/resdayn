@@ -12,7 +12,7 @@ defmodule Resdayn.Importer.Record.Door do
 
     %{
       type: :record,
-      resource: Resdayn.Codex.World.Door,
+      resource: Resdayn.Catalog.World.Door,
       records: processed_records,
       conflict_keys: [:id]
     }

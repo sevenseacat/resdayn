@@ -26,7 +26,7 @@ defmodule Resdayn.Importer.Record.Cell do
 
     %{
       type: :record,
-      resource: Resdayn.Codex.World.Cell,
+      resource: Resdayn.Catalog.World.Cell,
       records: processed_records,
       conflict_keys: [:id]
     }

@@ -35,7 +35,7 @@ defmodule Resdayn.Importer.Record.Tool do
 
     %{
       type: :record,
-      resource: Resdayn.Codex.Items.Tool,
+      resource: Resdayn.Catalog.Items.Tool,
       records: processed_records,
       conflict_keys: [:id]
     }

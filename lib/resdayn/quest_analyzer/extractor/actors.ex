@@ -4,7 +4,7 @@ defmodule Resdayn.QuestAnalyzer.Extractor.Actors do
 
   Each public function takes a `%LoadedData{}` and returns a list of
   involvement-row maps shaped to match
-  `Resdayn.Codex.QuestAnalysis.ActorInvolvement`:
+  `Resdayn.Catalog.QuestAnalysis.ActorInvolvement`:
 
       %{
         quest_id: <player-concept Quest id, downcased>,

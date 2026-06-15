@@ -121,7 +121,7 @@ defmodule Resdayn.QuestAnalyzer.LoadedData do
   end
 
   defp load_quest_versions(quest_ids) do
-    query = Ash.Query.for_read(Resdayn.Codex.Dialogue.QuestVersion, :read)
+    query = Ash.Query.for_read(Resdayn.Catalog.Dialogue.QuestVersion, :read)
 
     if quest_ids != [] do
       Ash.Query.filter(query, id in ^quest_ids)
@@ -137,7 +137,7 @@ defmodule Resdayn.QuestAnalyzer.LoadedData do
   # StartScript references can be followed during parsing. Not exposed on
   # LoadedData — once parsing finishes nothing else needs the raw text.
   defp load_script_text_map do
-    Resdayn.Codex.Mechanics.Script
+    Resdayn.Catalog.Mechanics.Script
     |> Ash.read!()
     |> Map.new(fn script -> {str(script.id), script.text} end)
   end
@@ -158,7 +158,7 @@ defmodule Resdayn.QuestAnalyzer.LoadedData do
   # eg. dialogue response 2013624711243725845 for TG_LootAldruhnMG uses a nested
   # StartScript to disable all of the NPCs and spawn the required item
   def load_dialogue_responses(script_map) do
-    Resdayn.Codex.Dialogue.Response
+    Resdayn.Catalog.Dialogue.Response
     |> Ash.Query.for_read(:read)
     |> Ash.Query.filter(
       ilike(script_content, "%journal%") or ilike(script_content, "%startscript%")
@@ -180,28 +180,28 @@ defmodule Resdayn.QuestAnalyzer.LoadedData do
   end
 
   defp load_npcs do
-    Resdayn.Codex.World.NPC
+    Resdayn.Catalog.World.NPC
     |> Ash.Query.for_read(:read)
     |> Ash.read!(load: [:cell_id])
     |> Map.new(fn npc -> {str(npc.id), npc} end)
   end
 
   defp load_creatures do
-    Resdayn.Codex.World.Creature
+    Resdayn.Catalog.World.Creature
     |> Ash.Query.for_read(:read)
     |> Ash.read!()
     |> Map.new(fn creature -> {str(creature.id), creature} end)
   end
 
   defp load_containers do
-    Resdayn.Codex.World.Container
+    Resdayn.Catalog.World.Container
     |> Ash.Query.for_read(:read)
     |> Ash.read!()
     |> Map.new(fn container -> {str(container.id), container} end)
   end
 
   defp load_referencable_objects do
-    Resdayn.Codex.World.ReferencableObject
+    Resdayn.Catalog.World.ReferencableObject
     |> Ash.Query.for_read(:read)
     |> Ash.read!()
     |> Map.new(fn ro -> {str(ro.id), ro.type} end)

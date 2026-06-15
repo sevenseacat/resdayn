@@ -14,7 +14,7 @@ defmodule Resdayn.Importer.Record.SoundGenerator do
 
     %{
       type: :record,
-      resource: Resdayn.Codex.Assets.SoundGenerator,
+      resource: Resdayn.Catalog.Assets.SoundGenerator,
       records: processed_records,
       conflict_keys: [:id]
     }

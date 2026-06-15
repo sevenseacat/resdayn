@@ -22,7 +22,7 @@ defmodule Resdayn.Importer.Record.Armor do
 
     %{
       type: :record,
-      resource: Resdayn.Codex.Items.Armor,
+      resource: Resdayn.Catalog.Items.Armor,
       records: processed_records,
       conflict_keys: [:id]
     }

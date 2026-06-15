@@ -22,7 +22,7 @@ defmodule Resdayn.Importer.Record.Potion do
 
     %{
       type: :record,
-      resource: Resdayn.Codex.Items.Potion,
+      resource: Resdayn.Catalog.Items.Potion,
       records: processed_records,
       conflict_keys: [:id]
     }

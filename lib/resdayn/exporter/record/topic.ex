@@ -1,6 +1,6 @@
 defmodule Resdayn.Exporter.Record.Topic do
   @moduledoc """
-  Encodes a `Resdayn.Codex.Dialogue.Topic` resource as a DIAL record.
+  Encodes a `Resdayn.Catalog.Dialogue.Topic` resource as a DIAL record.
   """
 
   import Resdayn.Parser.DataSizes

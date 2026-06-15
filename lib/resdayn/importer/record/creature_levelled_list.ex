@@ -29,7 +29,7 @@ defmodule Resdayn.Importer.Record.CreatureLevelledList do
 
     %{
       type: :record,
-      resource: Resdayn.Codex.World.CreatureLevelledList,
+      resource: Resdayn.Catalog.World.CreatureLevelledList,
       records: processed_records,
       conflict_keys: [:id]
     }

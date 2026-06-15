@@ -3,12 +3,12 @@ defmodule Resdayn.Importer.Record.DialogueResponse do
 
   def process(records, _opts) do
     npcs =
-      Ash.read!(Resdayn.Codex.World.NPC)
+      Ash.read!(Resdayn.Catalog.World.NPC)
       |> Enum.map(&String.downcase(to_string(&1.id)))
       |> MapSet.new()
 
     creatures =
-      Ash.read!(Resdayn.Codex.World.Creature)
+      Ash.read!(Resdayn.Catalog.World.Creature)
       |> Enum.map(&String.downcase(to_string(&1.id)))
       |> MapSet.new()
 
@@ -75,8 +75,8 @@ defmodule Resdayn.Importer.Record.DialogueResponse do
 
     %{
       type: :children,
-      parent_resource: Resdayn.Codex.Dialogue.Topic,
-      related_resource: Resdayn.Codex.Dialogue.Response,
+      parent_resource: Resdayn.Catalog.Dialogue.Topic,
+      related_resource: Resdayn.Catalog.Dialogue.Response,
       parent_key: :topic_id,
       id_field: :id,
       relationship_key: :responses,

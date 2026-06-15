@@ -1,6 +1,6 @@
 defmodule Resdayn.Exporter.Record.Tool do
   @moduledoc """
-  Encodes a `Resdayn.Codex.Items.Tool` resource as a REPA, LOCK, or PROB record.
+  Encodes a `Resdayn.Catalog.Items.Tool` resource as a REPA, LOCK, or PROB record.
   """
 
   import Resdayn.Parser.DataSizes

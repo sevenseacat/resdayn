@@ -3,15 +3,15 @@ import Config
 config :resdayn,
   ecto_repos: [Resdayn.Repo],
   ash_domains: [
-    Resdayn.Codex.QuestAnalysis,
-    Resdayn.Codex.Export,
-    Resdayn.Codex.Items,
-    Resdayn.Codex.Assets,
-    Resdayn.Codex.Characters,
-    Resdayn.Codex.Mechanics,
-    Resdayn.Codex.World,
-    Resdayn.Codex.Dialogue,
-    Resdayn.Codex.Search
+    Resdayn.Catalog.QuestAnalysis,
+    Resdayn.Catalog.Export,
+    Resdayn.Catalog.Items,
+    Resdayn.Catalog.Assets,
+    Resdayn.Catalog.Characters,
+    Resdayn.Catalog.Mechanics,
+    Resdayn.Catalog.World,
+    Resdayn.Catalog.Dialogue,
+    Resdayn.Catalog.Search
   ]
 
 config :ash,

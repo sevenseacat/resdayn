@@ -22,8 +22,8 @@ defmodule Resdayn.Importer.Record.ClassSkill do
 
     %{
       type: :children,
-      parent_resource: Resdayn.Codex.Characters.Class,
-      related_resource: Resdayn.Codex.Characters.Class.Skill,
+      parent_resource: Resdayn.Catalog.Characters.Class,
+      related_resource: Resdayn.Catalog.Characters.Class.Skill,
       parent_key: :class_id,
       id_field: :skill_id,
       relationship_key: :skills,

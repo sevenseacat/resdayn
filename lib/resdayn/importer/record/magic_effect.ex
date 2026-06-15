@@ -46,7 +46,7 @@ defmodule Resdayn.Importer.Record.MagicEffect do
 
     %{
       type: :record,
-      resource: Resdayn.Codex.Mechanics.MagicEffect,
+      resource: Resdayn.Catalog.Mechanics.MagicEffect,
       records: unique_effects,
       conflict_keys: [:id]
     }

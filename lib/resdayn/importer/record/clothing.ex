@@ -12,7 +12,7 @@ defmodule Resdayn.Importer.Record.Clothing do
 
     %{
       type: :record,
-      resource: Resdayn.Codex.Items.Clothing,
+      resource: Resdayn.Catalog.Items.Clothing,
       records: processed_records,
       conflict_keys: [:id]
     }

@@ -138,7 +138,7 @@ defmodule Resdayn.Repo.Migrations.ConvertIdsToCitext do
 
     # ============================================
     # Referencable extension: id -> referencable_objects.id
-    # These are added by the Resdayn.Codex.Referencable extension
+    # These are added by the Resdayn.Catalog.Referencable extension
     # All use NO ACTION (default)
     # ============================================
     # Assets

@@ -12,7 +12,7 @@ defmodule Resdayn.Importer.Record.DialogueTopic do
 
     %{
       type: :record,
-      resource: Resdayn.Codex.Dialogue.Topic,
+      resource: Resdayn.Catalog.Dialogue.Topic,
       records: processed_records,
       conflict_keys: [:id]
     }

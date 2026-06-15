@@ -14,7 +14,7 @@ defmodule Resdayn.Importer.Record.BodyPart do
 
     %{
       type: :record,
-      resource: Resdayn.Codex.Characters.BodyPart,
+      resource: Resdayn.Catalog.Characters.BodyPart,
       records: processed_records,
       conflict_keys: [:id]
     }

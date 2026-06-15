@@ -31,7 +31,7 @@ defmodule Resdayn.Importer.Helpers do
   This is used to determine whether effects use skills or attributes.
   """
   def build_magic_effect_template_lookup do
-    Resdayn.Codex.Mechanics.MagicEffectTemplate
+    Resdayn.Catalog.Mechanics.MagicEffectTemplate
     |> Ash.Query.select([:id, :game_setting_id])
     |> Ash.read!()
     |> Map.new(fn template ->

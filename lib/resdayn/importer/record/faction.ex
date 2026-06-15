@@ -15,7 +15,7 @@ defmodule Resdayn.Importer.Record.Faction do
 
     %{
       type: :record,
-      resource: Resdayn.Codex.Characters.Faction,
+      resource: Resdayn.Catalog.Characters.Faction,
       records: processed_records,
       conflict_keys: [:id]
     }

@@ -16,7 +16,7 @@ defmodule Resdayn.Importer.Record.Race do
 
     %{
       type: :record,
-      resource: Resdayn.Codex.Characters.Race,
+      resource: Resdayn.Catalog.Characters.Race,
       records: processed_records,
       conflict_keys: [:id]
     }
