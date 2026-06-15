@@ -4,17 +4,18 @@ defmodule Resdayn.Catalog.QuestAnalysis.Transition do
 
   Each row records the source (a dialogue response or a standalone script)
   that contains the call and the `target_index` the call advances the quest
-  to. Transitions are the foundation of Phase C's state machine — see
+  to. Transitions are the edges of the quest state machine — see
   `docs/quest-analyzer-v4.md` §4.4.
 
-  The C1 pass populates the bare fields (source + `target_index`). Later
-  passes fill in:
+  Discovery populates the bare fields (source + `target_index`). Later passes
+  fill in:
 
-  - `from_min` / `from_max` — derived from `:journal` conditions on the
-    source (C2), then narrowed by known indices (C3), choice-chain
-    fallback (C4), topic-availability fallback (C5).
-  - `is_quest_start` / `is_quest_finish` — derived after the precondition
-    chain is complete (C6).
+  - `from_min` / `from_max` — the journal range this transition can fire from,
+    derived from `:journal` conditions on the source and then narrowed to the
+    quest's known journal indices.
+  - `flags` — edge-level roles (currently `:start`). Finish and restart are
+    properties of the journal entry, not the transition, so they live on
+    `JournalEntry`.
 
   Source XOR mirrors `ActorInvolvement` / `ItemInvolvement`: exactly one
   of `(dialogue_response_id + dialogue_response_topic_id)` / `script_id`
@@ -67,7 +68,8 @@ defmodule Resdayn.Catalog.QuestAnalysis.Transition do
         :dialogue_response_topic_id,
         :script_id,
         :from_min,
-        :from_max
+        :from_max,
+        :flags
       ]
     end
   end
@@ -82,11 +84,14 @@ defmodule Resdayn.Catalog.QuestAnalysis.Transition do
 
     attribute :dialogue_response_topic_id, :ci_string
 
-    # Filled by later phases — nullable for now.
+    # Filled by later passes.
     attribute :from_min, :integer
     attribute :from_max, :integer
-    attribute :is_quest_start, :boolean
-    attribute :is_quest_finish, :boolean
+
+    attribute :flags, {:array, Resdayn.Catalog.QuestAnalysis.Transition.Flag} do
+      allow_nil? false
+      default []
+    end
   end
 
   relationships do
