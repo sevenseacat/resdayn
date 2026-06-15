@@ -1,12 +1,14 @@
 defmodule Resdayn.QuestAnalyzer.Extractor.TransitionsTest do
   @moduledoc """
-  C1 transition-discovery tests, asserted against the real imported corpus.
+  Transition-discovery tests, asserted against the real imported corpus.
 
   Shape invariants apply to every row; per-quest assertions pin known cases
   to their exact expected transitions. Add a new `describe` block per quest
   whose journal structure you've audited.
   """
   use Resdayn.IntegrationCase
+
+  import Resdayn.TransitionTestHelpers
 
   alias Resdayn.QuestAnalyzer.{Extractor, LoadedData}
 
@@ -33,8 +35,8 @@ defmodule Resdayn.QuestAnalyzer.Extractor.TransitionsTest do
     end
 
     test "both dialogue and script sources produce rows", %{rows: rows} do
-      from_dialogue = Enum.filter(rows, &(&1.dialogue_response_id))
-      from_scripts = Enum.filter(rows, &(&1.script_id))
+      from_dialogue = Enum.filter(rows, & &1.dialogue_response_id)
+      from_scripts = Enum.filter(rows, & &1.script_id)
 
       refute Enum.empty?(from_dialogue)
       refute Enum.empty?(from_scripts)
@@ -87,7 +89,7 @@ defmodule Resdayn.QuestAnalyzer.Extractor.TransitionsTest do
       quest_rows = transitions_for(rows, "a1_4_muzgobinformant")
 
       assert length(quest_rows) == 8
-      assert Enum.all?(quest_rows, &(&1.dialogue_response_id))
+      assert Enum.all?(quest_rows, & &1.dialogue_response_id)
 
       indices = quest_rows |> Enum.map(& &1.target_index) |> Enum.sort()
       assert indices == [1, 10, 12, 15, 20, 25, 30, 55]
@@ -99,10 +101,12 @@ defmodule Resdayn.QuestAnalyzer.Extractor.TransitionsTest do
       quest_rows = transitions_for(rows, "tg_lootaldruhnmg")
 
       assert length(quest_rows) == 2
-      assert Enum.all?(quest_rows, &(&1.dialogue_response_id))
+      assert Enum.all?(quest_rows, & &1.dialogue_response_id)
+
       assert Enum.all?(
                quest_rows,
-               &Ash.CiString.compare(&1.dialogue_response_topic_id, "anareren's devil tanto") == :eq
+               &(Ash.CiString.compare(&1.dialogue_response_topic_id, "anareren's devil tanto") ==
+                   :eq)
              )
 
       indices = quest_rows |> Enum.map(& &1.target_index) |> Enum.sort()
@@ -124,7 +128,7 @@ defmodule Resdayn.QuestAnalyzer.Extractor.TransitionsTest do
       script_rows =
         rows
         |> transitions_for("mv_deadtaxman")
-        |> Enum.filter(&(&1.script_id))
+        |> Enum.filter(& &1.script_id)
 
       assert [row] = script_rows
       assert to_string(row.script_id) == "processusscript"
@@ -215,8 +219,27 @@ defmodule Resdayn.QuestAnalyzer.Extractor.TransitionsTest do
       indices = quest_rows |> Enum.map(& &1.target_index) |> Enum.sort()
 
       assert indices == [
-               10, 20, 30, 40, 65, 75, 75, 95, 100,
-               101, 102, 103, 103, 108, 109, 111, 112, 113, 113, 114, 115
+               10,
+               20,
+               30,
+               40,
+               65,
+               75,
+               75,
+               95,
+               100,
+               101,
+               102,
+               103,
+               103,
+               108,
+               109,
+               111,
+               112,
+               113,
+               113,
+               114,
+               115
              ]
     end
 
@@ -278,29 +301,6 @@ defmodule Resdayn.QuestAnalyzer.Extractor.TransitionsTest do
         |> Enum.sort()
 
       assert bounds == [{nil, 39}, {nil, nil}]
-    end
-  end
-
-  defp transitions_for(rows, quest_version_id) do
-    Enum.filter(rows, &(&1.quest_version_id == quest_version_id))
-  end
-
-  # Find the single transition row matching all of the provided filters. Raises
-  # if none / multiple match — the tests pin specific (qv, index, source) tuples
-  # so anything else is a setup error.
-  defp find_transition(rows, filters) do
-    matches =
-      Enum.filter(rows, fn row ->
-        Enum.all?(filters, fn {key, value} ->
-          row_value = Map.get(row, key)
-          to_string(row_value) == to_string(value)
-        end)
-      end)
-
-    case matches do
-      [row] -> row
-      [] -> raise "no transition matched #{inspect(filters)}"
-      many -> raise "#{length(many)} transitions matched #{inspect(filters)} — refine filters"
     end
   end
 end
