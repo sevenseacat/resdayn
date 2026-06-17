@@ -26,5 +26,21 @@ defmodule Resdayn.Catalog.Dialogue.JournalEntry do
 
   relationships do
     belongs_to :quest_version, Resdayn.Catalog.Dialogue.QuestVersion
+
+    # Every transition in this entry's quest version. Reachability narrows these
+    # to the ones advancing to *this* entry's index via the aggregate below.
+    has_many :quest_version_transitions, Resdayn.Catalog.QuestAnalysis.Transition do
+      source_attribute :quest_version_id
+      destination_attribute :quest_version_id
+    end
+  end
+
+  aggregates do
+    # An entry is reachable when some transition in its quest version advances
+    # to its index. Entries with no such transition are dead journal text the
+    # player can never see.
+    exists :reachable, :quest_version_transitions do
+      filter expr(target_index == parent(index))
+    end
   end
 end
