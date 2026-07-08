@@ -31,9 +31,7 @@ defmodule Resdayn.Parser.Helpers do
   Round a floating-point number to a reasonable number of decimal places.
   """
   def float(float) do
-    float
-    |> :erlang.float_to_binary(decimals: 2)
-    |> :erlang.binary_to_float()
+    Float.round(float, 2)
   end
 
   @doc """
