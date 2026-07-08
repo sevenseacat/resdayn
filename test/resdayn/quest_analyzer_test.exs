@@ -58,6 +58,31 @@ defmodule Resdayn.QuestAnalyzerTest do
       assert primary_ranks == Enum.sort(primary_ranks)
     end
 
+    test "exposes related_items as a loadable calculation on the quest concept" do
+      Resdayn.QuestAnalyzer.run(["MV_DeadTaxman"])
+
+      quest =
+        Resdayn.Catalog.Dialogue.QuestVersion
+        |> Ash.get!("MV_DeadTaxman", load: [quest: :related_items])
+        |> Map.fetch!(:quest)
+
+      refute Enum.empty?(quest.related_items)
+
+      # Each entry carries its group key and roles; ordering mirrors the actor
+      # calculation — most important role first, groups sorted by it.
+      alias Resdayn.Catalog.QuestAnalysis.ItemInvolvement.Reason
+
+      assert Enum.all?(quest.related_items, &(not is_nil(&1.object_id)))
+      assert Enum.all?(quest.related_items, &(&1.roles != []))
+
+      assert Enum.all?(quest.related_items, fn entry ->
+               entry.primary_role == Enum.min_by(entry.roles, &Reason.importance/1)
+             end)
+
+      primary_ranks = Enum.map(quest.related_items, &Reason.importance(&1.primary_role))
+      assert primary_ranks == Enum.sort(primary_ranks)
+    end
+
     test "counts and sorts quests by involved actor headcount" do
       Resdayn.QuestAnalyzer.run(["A1_4_MuzgobInformant"])
 

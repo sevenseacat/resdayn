@@ -25,4 +25,8 @@ defmodule Resdayn.Catalog.Dialogue.QuestVersion do
       sort index: :asc
     end
   end
+
+  aggregates do
+    count :journal_count, :journal_entries
+  end
 end

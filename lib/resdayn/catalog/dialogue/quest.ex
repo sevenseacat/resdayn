@@ -20,7 +20,10 @@ defmodule Resdayn.Catalog.Dialogue.Quest do
 
   relationships do
     belongs_to :faction, Resdayn.Catalog.Characters.Faction
-    has_many :quest_versions, Resdayn.Catalog.Dialogue.QuestVersion
+
+    has_many :quest_versions, Resdayn.Catalog.Dialogue.QuestVersion do
+      sort journal_count: :desc
+    end
 
     has_many :npc_involvements, Resdayn.Catalog.QuestAnalysis.ActorInvolvement do
       filter expr(not is_nil(npc_id))
