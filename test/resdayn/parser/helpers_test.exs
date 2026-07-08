@@ -71,20 +71,6 @@ defmodule Resdayn.Parser.HelpersTest do
 
       assert actual == expected
     end
-
-    test "the dodgy rot_x value" do
-      actual =
-        <<205, 111, 38, 69, 252, 35, 6, 69, 227, 40, 130, 66, 0, 0, 192, 255, 219, 15, 201, 63, 0,
-          0, 0, 0>>
-        |> Helpers.coordinates()
-
-      expected = %{
-        position: %{x: 2662.99, y: 2146.25, z: 65.08},
-        rotation: %{x: nil, y: 90.0, z: 0.0}
-      }
-
-      assert actual == expected
-    end
   end
 
   describe "printable!/4" do
