@@ -191,5 +191,33 @@ defmodule Resdayn.Parser.HelpersTest do
 
       assert Helpers.printable!(nil, nil, raw) == String.trim(parsed)
     end
+
+    test "decodes the Windows-1252 symbols in the 0x80-0x9F range" do
+      # euro (0x80), trademark (0x99), em dash (0x97), horizontal ellipsis (0x85) —
+      # bytes the plain-Latin-1 fallback would have decoded to the wrong code points.
+      assert Helpers.printable!(nil, nil, <<0x80, 0x99, 0x97, 0x85>>) ==
+               <<0x20AC::utf8, 0x2122::utf8, 0x2014::utf8, 0x2026::utf8>>
+    end
+
+    test "drops the bytes that are undefined in Windows-1252" do
+      # 0x81, 0x8D, 0x8F, 0x90 and 0x9D have no assignment in the encoding.
+      assert Helpers.printable!(nil, nil, <<?a, 0x81, 0x8D, 0x8F, 0x90, 0x9D, ?b>>) == "ab"
+    end
+
+    test "strips control characters left as corruption in an identifier" do
+      # A script reference from TR_Mainland.esm with a stray SOH (0x01) appended; the
+      # byte would otherwise leave the id unresolvable (and trip the printable check).
+      raw =
+        <<84, 82, 95, 109, 55, 95, 84, 86, 52, 95, 71, 114, 111, 116, 116, 111, 95, 85, 110, 100,
+          101, 114, 119, 97, 116, 101, 114, 95, 84, 114, 97, 112, 1>>
+
+      assert Helpers.printable!(nil, nil, raw) == "TR_m7_TV4_Grotto_Underwater_Trap"
+    end
+
+    test "normalizes soft hyphen and non-breaking space without gluing words together" do
+      # SHY (0xAD) used as a hyphen and NBSP (0xA0) used as a space in book prose.
+      assert Helpers.printable!(nil, nil, <<"Mournhold", 0xAD, "a girl", 0xA0, "child">>) ==
+               "Mournhold-a girl child"
+    end
   end
 end
