@@ -23,7 +23,7 @@ defmodule Mix.Tasks.Resdayn.ImportCatalog do
   def run(_argv) do
     Logger.configure(level: :info)
 
-    Enum.map(@all_files, &Resdayn.Importer.Runner.run/1)
+    Enum.each(@all_files, &Resdayn.Importer.Runner.run/1)
     collate_named_quests()
     run_quest_analyzer()
     rebuild_search_index()
