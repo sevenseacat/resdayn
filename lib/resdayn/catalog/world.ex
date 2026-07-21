@@ -12,10 +12,7 @@ defmodule Resdayn.Catalog.World do
       define :get_npc_by_id, action: :read, get_by: :id
     end
 
-    resource __MODULE__.NPC.SkillValue do
-      define :trainers_for_skill, action: :trainers_for_skill, args: [:skill_id, :base_game_only]
-    end
-
+    resource __MODULE__.NPC.SkillValue
     resource __MODULE__.ReferencableObject
     resource __MODULE__.Container
 

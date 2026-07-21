@@ -31,5 +31,14 @@ defmodule Resdayn.Catalog.Characters.Skill do
     belongs_to :attribute, Resdayn.Catalog.Mechanics.Attribute,
       allow_nil?: false,
       attribute_type: :integer
+
+    # The NPCs who can train this skill, best first. `limit` is honored because
+    # loading a relationship uses a lateral join — so loading it across every
+    # skill is one query, not an N+1.
+    has_many :trainers, Resdayn.Catalog.World.NPC.SkillValue do
+      filter expr(trainable?)
+      sort value: :desc
+      limit 5
+    end
   end
 end
