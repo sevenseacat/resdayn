@@ -110,5 +110,9 @@ defmodule Resdayn.Catalog.World.NPC do
     first :cell_id, :cell_references, :cell_id
     first :cell_name, [:cell_references, :cell], :name
     count :related_quest_count, :quest_involvements, field: :quest_id, uniq?: true
+
+    # The skill ids an NPC can train — the top 3 (see `trained_skill_values`).
+    # The relationship's limit is honored here since ash_sql 0.6.6.
+    list :trained_skill_ids, :trained_skill_values, :skill_id
   end
 end
