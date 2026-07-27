@@ -55,50 +55,24 @@ defmodule Resdayn.Exporter.Helpers do
   def null_terminate(string), do: null_terminate(to_string(string))
 
   @doc """
-  Convert a UTF-8 string back to Windows-1252 encoding for ESP files.
+  Convert a UTF-8 string to Windows-1252 bytes for an ESP file.
 
-  Inverse of `Resdayn.Parser.Helpers.clean_string_fast/1`.
+  Delegates to `Resdayn.Windows1252.encode/1`, which drops any character with no
+  Windows-1252 representation.
 
   ## Examples
 
-      iex> encode_string("\u201CHello\u201D")
+      iex> encode_string("“Hello”")
       <<147, 72, 101, 108, 108, 111, 148>>
 
-      iex> encode_string("caf\u00E9")
+      iex> encode_string("café")
       <<99, 97, 102, 233>>
 
       iex> encode_string(nil)
       ""
   """
   def encode_string(nil), do: ""
-
-  def encode_string(string) when is_binary(string) do
-    string
-    |> String.to_charlist()
-    |> Enum.map(&encode_char/1)
-    |> :binary.list_to_bin()
-  end
-
-  # Unicode → Windows-1252 reverse mappings
-  # Ellipsis (the parser expands byte 133 to three ASCII dots, so we can't
-  # reliably reverse "..." back to a single byte — leave dots as-is)
-  # ' → left single quote
-  defp encode_char(0x2018), do: 145
-  # ' → right single quote
-  defp encode_char(0x2019), do: 146
-  # " → left double quote
-  defp encode_char(0x201C), do: 147
-  # " → right double quote
-  defp encode_char(0x201D), do: 148
-  # — → em dash
-  defp encode_char(0x2014), do: 151
-  # Latin-1 Supplement characters (U+00A0–U+00FF) map directly to the same
-  # byte values in Windows-1252
-  defp encode_char(cp) when cp in 0x00A0..0x00FF, do: cp
-  # ASCII range passes through unchanged
-  defp encode_char(cp) when cp in 0..127, do: cp
-  # Anything else we can't represent — drop it
-  defp encode_char(_), do: ??
+  def encode_string(string) when is_binary(string), do: Resdayn.Windows1252.encode(string)
 
   @doc """
   Reconstruct an integer bitmask from a map of flags.

@@ -46,7 +46,7 @@ defmodule Resdayn.Parser.Helpers do
   for debugging purposes
   """
   def printable!(source, field, name \\ "data", string) do
-    string = sanitize_string(string)
+    string = Resdayn.Windows1252.decode(string)
 
     if String.printable?(string) do
       if string == "" do
@@ -64,88 +64,6 @@ defmodule Resdayn.Parser.Helpers do
       end
     end
   end
-
-  # Decode a raw ESP/ESM string to UTF-8: convert from Windows-1252, truncate at the
-  # null padding, normalize line endings, and strip control-character corruption.
-  defp sanitize_string(string) do
-    string
-    |> decode_win1252(<<>>)
-    |> String.trim()
-  end
-
-  # 0x80–0x9F is the range where Windows-1252 puts printable symbols whose Unicode code
-  # point is not the byte value, so they need an explicit mapping. `nil` marks the five
-  # bytes that are undefined in the encoding; we drop them. (Matches `iconv -c`.)
-  @win1252_overrides %{
-    0x80 => 0x20AC,
-    0x81 => nil,
-    0x82 => 0x201A,
-    0x83 => 0x0192,
-    0x84 => 0x201E,
-    0x85 => 0x2026,
-    0x86 => 0x2020,
-    0x87 => 0x2021,
-    0x88 => 0x02C6,
-    0x89 => 0x2030,
-    0x8A => 0x0160,
-    0x8B => 0x2039,
-    0x8C => 0x0152,
-    0x8D => nil,
-    0x8E => 0x017D,
-    0x8F => nil,
-    0x90 => nil,
-    0x91 => 0x2018,
-    0x92 => 0x2019,
-    0x93 => 0x201C,
-    0x94 => 0x201D,
-    0x95 => 0x2022,
-    0x96 => 0x2013,
-    0x97 => 0x2014,
-    0x98 => 0x02DC,
-    0x99 => 0x2122,
-    0x9A => 0x0161,
-    0x9B => 0x203A,
-    0x9C => 0x0153,
-    0x9D => nil,
-    0x9E => 0x017E,
-    0x9F => 0x0178
-  }
-
-  # Byte→code-point table for the high range (128–255): 0xA0–0xFF map to themselves
-  # (code point == byte value), 0x80–0x9F come from @win1252_overrides above.
-  @win1252 Map.new(128..255, fn byte -> {byte, Map.get(@win1252_overrides, byte, byte)} end)
-
-  # CRLF → LF
-  defp decode_win1252(<<"\r\n", rest::binary>>, acc),
-    do: decode_win1252(rest, <<acc::binary, ?\n>>)
-
-  # Null byte ends the string — fields are null-padded to a fixed width, so everything
-  # past the first null is padding, not content.
-  defp decode_win1252(<<0, _::binary>>, acc), do: acc
-  defp decode_win1252(<<>>, acc), do: acc
-
-  # Control characters (except tab/newline) are corruption, not text — e.g. a stray SOH
-  # trailing a script-reference ID. Strip them.
-  defp decode_win1252(<<byte, rest::binary>>, acc)
-       when (byte < 0x20 or byte == 0x7F) and byte not in [?\t, ?\n],
-       do: decode_win1252(rest, acc)
-
-  # Normalize invisible spacing chars to their visible ASCII equivalents: NBSP → space,
-  # soft hyphen → hyphen. Both are used as ordinary space/hyphen in book prose.
-  defp decode_win1252(<<0xA0, rest::binary>>, acc), do: decode_win1252(rest, <<acc::binary, ?\s>>)
-  defp decode_win1252(<<0xAD, rest::binary>>, acc), do: decode_win1252(rest, <<acc::binary, ?->>)
-
-  # High range (128–255) — convert via the Windows-1252 table, dropping undefined bytes
-  defp decode_win1252(<<byte, rest::binary>>, acc) when byte >= 128 do
-    case Map.fetch!(@win1252, byte) do
-      nil -> decode_win1252(rest, acc)
-      code_point -> decode_win1252(rest, <<acc::binary, code_point::utf8>>)
-    end
-  end
-
-  # Printable ASCII (plus the tab/newline kept above) — passes through unchanged
-  defp decode_win1252(<<byte, rest::binary>>, acc),
-    do: decode_win1252(rest, <<acc::binary, byte>>)
 
   def null_separated!(source, field, string) do
     string
