@@ -11,7 +11,7 @@ defmodule Mix.Tasks.Resdayn.ExportDemo do
   alias Resdayn.Catalog.Dialogue.Response.Condition
   alias Resdayn.Catalog.Mechanics.Script
 
-  @output_path "../exported/goatmire_demo.esp"
+  @output_path "../exported/something_prepared_earlier.esp"
   @morrowind_esm_size 79_837_557
 
   # Outdoors in Gnisis — the dialogue NPC who walks over and coughs
@@ -38,17 +38,15 @@ defmodule Mix.Tasks.Resdayn.ExportDemo do
     }
   end
 
-  # Auto-running start script: after a delay, makes the NPC walk over to the
+  # Auto-running start script: after a delay, makes the NPC run over to the
   # player, cough, and trigger the greeting dialogue.
   defp attention_script do
     %Script{
       id: "goatmire_attention",
       start_script: true,
-      local_variables: ["timer", "dist", "px", "py", "pz", "stage"],
+      local_variables: ["dist", "px", "py", "pz", "stage"],
       text: """
       Begin goatmire_attention
-
-      float timer
       float dist
       float px
       float py
@@ -62,20 +60,16 @@ defmodule Mix.Tasks.Resdayn.ExportDemo do
       "abishpulu shand"->Disable
       "ughash gro-batul"->Disable
 
-      ; stage 0: waiting for timer; 1: AITravel issued; 2: greeting fired
+      ; stage 0: travelling to the player; 1: AITravel issued; 2: greeting fired
 
       if ( stage == 2 )
           return
       endif
 
       if ( stage == 0 )
-          set timer to ( timer + GetSecondsPassed )
-          if ( timer < 2 )
-              return
-          endif
-          set px to ( Player->GetPos x ) - 30
-          set py to ( Player->GetPos y ) - 30
-          set pz to ( Player->GetPos z ) + 30
+          set px to ( Player->GetPos x )
+          set py to ( Player->GetPos y )
+          set pz to ( Player->GetPos z )
           ; Silence his auto-greet so it doesn't pre-empt our cough
           "#{@npc}"->SetHello 0
           "#{@npc}"->ForceRun
@@ -86,7 +80,10 @@ defmodule Mix.Tasks.Resdayn.ExportDemo do
 
       set dist to ( "#{@npc}"->GetDistance Player )
 
-      if ( dist < 128 )
+      if ( dist < 350 )
+          ; Swap to follow AI at close range: it turns him to face the player
+          ; and keeps him facing them until they start the conversation
+          "#{@npc}"->AIFollow Player 0 0 0 0
           "#{@npc}"->Say "Vo\\d\\m\\Idl_DM001.mp3" "*cough cough*"
           MessageBox "Someone looks like they're trying to get your attention."
           set stage to 2
@@ -158,8 +155,7 @@ defmodule Mix.Tasks.Resdayn.ExportDemo do
           index: 10,
           content:
             "I had a conversation with Hainab Lasamsi and he seemed to be aware " <>
-              "that he's involved in my Goatmire talk demonstration. " <>
-              "This phenomenon should be studied."
+              "that he's involved in my Goatmire talk demonstration. But how?"
         }
       ]
     }
