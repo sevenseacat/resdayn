@@ -6,7 +6,7 @@ defmodule Resdayn.Exporter.Record.Tool do
   import Resdayn.Parser.DataSizes
   import Resdayn.Exporter.Helpers
 
-  def encode(tool) do
+  def encode(tool, _opts) do
     {type_code, data_subrecord} = encode_data(tool)
 
     subrecords =

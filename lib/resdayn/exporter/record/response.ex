@@ -19,7 +19,8 @@ defmodule Resdayn.Exporter.Record.Response do
   @function_codes Map.new(Parser.functions(), fn {code, atom} -> {atom, code} end)
   @operator_codes Map.new(Parser.operators(), fn {code, atom} -> {atom, code} end)
 
-  def encode(response, type \\ :topic) do
+  def encode(response, opts) do
+    type = Keyword.get(opts, :type, :topic)
     type_code = Map.fetch!(@type_codes, type)
     disposition = response.disposition || 0
     rank = response.speaker_faction_rank || -1

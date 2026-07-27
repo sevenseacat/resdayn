@@ -15,20 +15,15 @@ defmodule Resdayn.Catalog.Export.EspBuilder do
   Returns `{:ok, binary}` on success.
   """
   def run(query, _opts \\ []) do
-    overrides =
-      query
-      |> Ash.read!()
-      |> Ash.load!(:record)
-
+    overrides = Ash.read!(query, load: :record)
     records = Enum.map(overrides, & &1.record)
-    data_file = build_data_file()
 
-    {:ok, binary} = Resdayn.Exporter.build([data_file | records])
-    Enum.each(overrides, &Ash.destroy!/1)
+    {:ok, binary} = Resdayn.Exporter.build([build_header() | records])
+    Ash.bulk_destroy(query, :destroy, %{})
     {:ok, binary}
   end
 
-  defp build_data_file do
+  defp build_header do
     date = Date.utc_today() |> Calendar.strftime("%Y-%m-%d")
 
     %Resdayn.Catalog.Mechanics.DataFile{

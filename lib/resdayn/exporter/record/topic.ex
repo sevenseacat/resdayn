@@ -10,13 +10,13 @@ defmodule Resdayn.Exporter.Record.Topic do
 
   alias Resdayn.Exporter.Record.Response
 
-  def encode(topic) do
+  def encode(topic, _opts) do
     dial = encode_dial(topic.id, topic.type)
 
     infos =
       topic.responses
       |> link_responses()
-      |> Enum.map(&Response.encode(&1, topic.type))
+      |> Enum.map(&Response.encode(&1, type: topic.type))
 
     [dial | infos]
   end

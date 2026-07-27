@@ -13,7 +13,7 @@ defmodule Resdayn.Exporter.Record.Script do
   import Resdayn.Parser.DataSizes
   import Resdayn.Exporter.Helpers
 
-  def encode(script) do
+  def encode(script, _opts) do
     locals = script.local_variables || []
     {num_shorts, num_longs, num_floats} = count_variable_types(script.text)
 

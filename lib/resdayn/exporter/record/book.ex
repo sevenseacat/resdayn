@@ -6,7 +6,7 @@ defmodule Resdayn.Exporter.Record.Book do
   import Resdayn.Parser.DataSizes
   import Resdayn.Exporter.Helpers
 
-  def encode(book) do
+  def encode(book, _opts) do
     weight = Decimal.to_float(book.weight)
     skill_id = book.skill_id || -1
     flags = encode_bitmask(%{scroll: book.scroll}, scroll: 0x1)

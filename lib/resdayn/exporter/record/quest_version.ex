@@ -9,7 +9,7 @@ defmodule Resdayn.Exporter.Record.QuestVersion do
 
   alias Resdayn.Exporter.Record.Topic
 
-  def encode(quest) do
+  def encode(quest, _opts) do
     dial = Topic.encode_dial(quest.id, :journal)
 
     # Auto-generate a naming entry (QSTN) from quest.name at index 0,
