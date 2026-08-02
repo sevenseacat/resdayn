@@ -18,6 +18,7 @@ defmodule Resdayn.Importer.SearchIndex do
     {Resdayn.Catalog.Items.MiscellaneousItem, :misc_item, :icon_filename},
     {Resdayn.Catalog.World.NPC, :npc, nil},
     {Resdayn.Catalog.World.Creature, :creature, nil},
+    {Resdayn.Catalog.World.Container, :container, nil},
     {Resdayn.Catalog.World.Cell, :location, nil},
     {Resdayn.Catalog.World.Region, :region, nil},
     {Resdayn.Catalog.Characters.Faction, :faction, nil},

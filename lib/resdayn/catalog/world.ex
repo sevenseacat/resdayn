@@ -14,7 +14,10 @@ defmodule Resdayn.Catalog.World do
 
     resource __MODULE__.NPC.SkillValue
     resource __MODULE__.ReferencableObject
-    resource __MODULE__.Container
+
+    resource __MODULE__.Container do
+      define :get_container_by_id, action: :read, get_by: :id
+    end
 
     resource __MODULE__.Creature do
       define :get_creature_by_id, action: :read, get_by: :id

@@ -30,5 +30,8 @@ defmodule Resdayn.Catalog.World.Container do
 
     has_many :items_contained, Resdayn.Catalog.World.InventoryItem,
       destination_attribute: :holder_ref_id
+
+    has_many :cell_references, Resdayn.Catalog.World.Cell.CellReference,
+      destination_attribute: :reference_id
   end
 end
