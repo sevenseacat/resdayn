@@ -1,9 +1,34 @@
 defmodule Resdayn.Catalog.Referencable do
   @moduledoc """
-  An extension to add to all resources that can be imported from data files.
+  Marks a resource as a *referencable object* — something a cell reference or an
+  inventory item can point at (a weapon, book, NPC, door, …).
 
-  This extension will:
-  * Create a `ReferencableObject` whenever a record is created
+  > #### Not fully implemented {: .warning}
+  >
+  > Today this extension functions **only as a marker**. The importer checks
+  > whether a resource carries it (`Referencable in extensions`) to decide
+  > whether to populate the `referencable_objects` table for that resource — and
+  > then does the insert itself, in raw SQL
+  > (`Resdayn.Importer.RecordUpserter.upsert_referencable_objects/2`).
+  >
+  > Everything the transformer *adds* is currently dormant and unexercised:
+  >
+  >   * `CreateReferencableObject` / `DeleteReferencableObject` are registered on
+  >     the `:create` / `:destroy` actions, but nothing creates or destroys a
+  >     referencable resource through Ash — the importer is raw SQL, and the
+  >     resources' default `:create` actions don't even accept inputs yet. These
+  >     changes have never run.
+  >   * The `cell_references_count` / `inventory_items_count` aggregates and the
+  >     `:referencable_object` relationship are not referenced anywhere.
+  >
+  > This is vestigial from an earlier design that imported all data through Ash
+  > changesets (which *would* have fired the create change per record). That was
+  > far too slow and was replaced by the raw-SQL importer, which bypasses Ash
+  > actions and orphaned this machinery.
+  >
+  > To revive it, a create/delete UI would need to give these resources
+  > functional `:create` / `:destroy` actions (with real `accept` lists); the
+  > changes would then activate and should be covered by a test.
   """
   use Spark.Dsl.Extension, transformers: [__MODULE__.AddReference]
 
@@ -37,6 +62,8 @@ defmodule Resdayn.Catalog.Referencable do
         :count,
         [:referencable_object, :inventory_items]
       )
+      # Dormant — see the "Not fully implemented" note in the module doc. These
+      # changes are wired up but never fire (the importer bypasses Ash actions).
       |> Ash.Resource.Builder.add_change(
         {Resdayn.Catalog.Changes.CreateReferencableObject, object_type: object_type},
         on: [:create]
