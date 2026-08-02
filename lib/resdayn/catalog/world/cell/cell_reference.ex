@@ -69,4 +69,9 @@ defmodule Resdayn.Catalog.World.Cell.CellReference do
     belongs_to :soul, Resdayn.Catalog.World.Creature
     belongs_to :global_variable, Resdayn.Catalog.Mechanics.GlobalVariable
   end
+
+  calculations do
+    calculate :object, :struct, {Resdayn.Catalog.Calculations.TypedObject, field: :reference}
+    calculate :key_object, :struct, {Resdayn.Catalog.Calculations.TypedObject, field: :key}
+  end
 end

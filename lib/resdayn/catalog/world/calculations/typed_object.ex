@@ -21,6 +21,7 @@ defmodule Resdayn.Catalog.Calculations.TypedObject do
     # Group by object type for efficient batch loading
     typed_objects =
       records
+      |> Enum.filter(get_type)
       |> Enum.group_by(get_type)
       |> Enum.flat_map(fn {type, entries} ->
         object_ids = Enum.map(entries, get_id)
@@ -36,7 +37,10 @@ defmodule Resdayn.Catalog.Calculations.TypedObject do
 
     # Return in same order as input records
     Enum.map(records, fn record ->
-      Map.get(typed_objects, to_string(get_id.(record)))
+      case get_id.(record) do
+        nil -> nil
+        id -> Map.get(typed_objects, to_string(id))
+      end
     end)
   end
 
@@ -46,8 +50,8 @@ defmodule Resdayn.Catalog.Calculations.TypedObject do
       field = opts[:field]
 
       {
-        fn record -> Map.fetch!(record, field).type end,
-        fn record -> Map.fetch!(record, field).id end
+        fn record -> record |> Map.fetch!(field) |> then(&(&1 && &1.type)) end,
+        fn record -> record |> Map.fetch!(field) |> then(&(&1 && &1.id)) end
       }
     else
       # Separate type and id fields (e.g. Override with resource_type + record_id)
