@@ -14,8 +14,8 @@ defmodule Mix.Tasks.Resdayn.ExportDemo do
   @output_path "../exported/something_prepared_earlier.esp"
   @morrowind_esm_size 79_837_557
 
-  # Outdoors in Gnisis — the dialogue NPC who walks over and coughs
-  @npc "hainab lasamsi"
+  # Indoors in Gnisis — the dialogue NPC who walks over and coughs
+  @npc "athal nerano"
 
   def run(_argv) do
     records = [attention_script(), greeting(), many_others(), journal()]
@@ -53,12 +53,16 @@ defmodule Mix.Tasks.Resdayn.ExportDemo do
       float pz
       short stage
 
-      ; Disable a bunch of annoying NPCs that are getting in the way
-      "molvirian palenix"->Disable
-      "maeonius man-llu"->Disable
-      "largakh gro-bulfim"->Disable
-      "abishpulu shand"->Disable
-      "ughash gro-batul"->Disable
+      ; All the other NPCs inside the tradehouse, just in case we get some weird
+      ; pathing issues
+      "asha-ammu kutebani"->Disable
+      "clilias pullia"->Disable
+      "general darius"->Disable        ; note: id is "general darius", not "darius"
+      "ertius fulbenus"->Disable
+      "nash gro-khazor"->Disable
+      "snakha gro-marob"->Disable
+      "talms dralor"->Disable
+      "servant arg male"->Disable      ; this one is Utadeek
 
       ; stage 0: travelling to the player; 1: AITravel issued; 2: greeting fired
 
@@ -80,7 +84,7 @@ defmodule Mix.Tasks.Resdayn.ExportDemo do
 
       set dist to ( "#{@npc}"->GetDistance Player )
 
-      if ( dist < 350 )
+      if ( dist < 250 )
           ; Swap to follow AI at close range: it turns him to face the player
           ; and keeps him facing them until they start the conversation
           "#{@npc}"->AIFollow Player 0 0 0 0
@@ -154,7 +158,7 @@ defmodule Mix.Tasks.Resdayn.ExportDemo do
           id: "goatmire_journal_1",
           index: 10,
           content:
-            "I had a conversation with Hainab Lasamsi and he seemed to be aware " <>
+            "I had a conversation with Athal Nerano and he seemed to be aware " <>
               "that he's involved in my Goatmire talk demonstration. But how?"
         }
       ]
