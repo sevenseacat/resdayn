@@ -460,7 +460,7 @@ defmodule Resdayn.Importer.RecordUpserterIntegrationTest do
     end
   end
 
-  describe "Sound (Referencable)" do
+  describe "Sound" do
     test "imports correct count" do
       count = Ash.count!(Sound)
       assert count == 502
@@ -474,18 +474,16 @@ defmodule Resdayn.Importer.RecordUpserterIntegrationTest do
       assert sound.source_file_ids == ["Morrowind.esm"]
     end
 
-    test "creates corresponding ReferencableObject" do
-      # Sound should have a corresponding entry in referencable_objects
-      ref_obj = Ash.get!(ReferencableObject, "Fire")
-      assert ref_obj.type == :sound
-    end
+    # Nothing in the game data names a SOUN or SNDG at a reference site — not a cell
+    # reference, inventory item, or levelled list entry. They are referenced only
+    # through typed foreign keys, so they register no referencable objects.
+    test "sounds and sound generators are not referencable" do
+      %{rows: [[count]]} =
+        Resdayn.Repo.query!(
+          "SELECT count(*) FROM referencable_objects WHERE type IN ('sound', 'sound_generator')"
+        )
 
-    test "imports all sounds with ReferencableObject entries" do
-      sound_count = Ash.count!(Sound)
-      ref_count = Ash.count!(ReferencableObject, query: [filter: [type: :sound]])
-
-      assert sound_count == ref_count,
-             "Sound count (#{sound_count}) should match ReferencableObject count (#{ref_count})"
+      assert count == 0
     end
   end
 
@@ -855,7 +853,7 @@ defmodule Resdayn.Importer.RecordUpserterIntegrationTest do
     end
   end
 
-  describe "SoundGenerator (Referencable)" do
+  describe "SoundGenerator" do
     test "imports correct count" do
       count = Ash.count!(SoundGenerator)
       assert count == 231
@@ -866,19 +864,6 @@ defmodule Resdayn.Importer.RecordUpserterIntegrationTest do
       assert sound_gen.sound_id == Ash.CiString.new("FootBareRight")
       assert sound_gen.sound_type == :right_foot
       assert sound_gen.source_file_ids == ["Morrowind.esm"]
-    end
-
-    test "creates corresponding ReferencableObject" do
-      ref_obj = Ash.get!(ReferencableObject, "DEFAULT0001")
-      assert ref_obj.type == :sound_generator
-    end
-
-    test "imports all sound generators with ReferencableObject entries" do
-      sound_gen_count = Ash.count!(SoundGenerator)
-      ref_count = Ash.count!(ReferencableObject, query: [filter: [type: :sound_generator]])
-
-      assert sound_gen_count == ref_count,
-             "SoundGenerator count (#{sound_gen_count}) should match ReferencableObject count (#{ref_count})"
     end
   end
 

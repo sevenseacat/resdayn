@@ -11,8 +11,6 @@ defmodule Resdayn.Catalog.World.ReferencableObject.Type do
     miscellaneous_item: Resdayn.Catalog.Items.MiscellaneousItem,
     light: Resdayn.Catalog.Assets.Light,
     static_object: Resdayn.Catalog.Assets.StaticObject,
-    sound: Resdayn.Catalog.Assets.Sound,
-    sound_generator: Resdayn.Catalog.Assets.SoundGenerator,
     npc: Resdayn.Catalog.World.NPC,
     item_levelled_list: Resdayn.Catalog.Items.ItemLevelledList,
     creature_levelled_list: Resdayn.Catalog.World.CreatureLevelledList,

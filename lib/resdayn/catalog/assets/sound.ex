@@ -3,7 +3,7 @@ defmodule Resdayn.Catalog.Assets.Sound do
     otp_app: :resdayn,
     domain: Resdayn.Catalog.Assets,
     data_layer: AshPostgres.DataLayer,
-    extensions: [Resdayn.Catalog.Importable, Resdayn.Catalog.Referencable]
+    extensions: [Resdayn.Catalog.Importable]
 
   postgres do
     table "sounds"
