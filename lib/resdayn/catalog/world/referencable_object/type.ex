@@ -5,8 +5,7 @@ defmodule Resdayn.Catalog.World.ReferencableObject.Type do
 
   The game engine type-checks references — the console refuses to put a container
   in your inventory. Nothing in this schema enforced that, so `allowed/1`
-  reconstructs those rules from the shipped data: every combination MW/TB/BM/TR
-  actually uses is permitted, and the combinations none of them use are not.
+  reconstructs those rules from the shipped data.
 
   The sets are unions of three base kinds, plus at most the levelled list that
   resolves to the same kind. The one irregularity is that an item levelled list
@@ -54,7 +53,10 @@ defmodule Resdayn.Catalog.World.ReferencableObject.Type do
 
   @sites %{
     cell_reference: @item ++ @actor ++ @scenery ++ [:creature_levelled_list],
-    cell_reference_key: [:miscellaneous_item],
+    # Every one of the 2,051 keys in MW/TB/BM/TR is a misc item, but nothing is
+    # known to enforce that — editors take these as free text, so a plugin can name
+    # any item. Kept permissive so a legitimate one isn't rejected.
+    cell_reference_key: @item,
     inventory_object: @item ++ [:item_levelled_list],
     inventory_holder: @actor ++ [:container],
     item_levelled_list_entry: @item ++ [:item_levelled_list],

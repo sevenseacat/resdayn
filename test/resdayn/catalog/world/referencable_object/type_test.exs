@@ -28,6 +28,14 @@ defmodule Resdayn.Catalog.World.ReferencableObject.TypeTest do
       refute Type.allows?(:cell_reference, :item_levelled_list)
     end
 
+    # The whole corpus only ever uses misc items as keys, so this is deliberately
+    # looser than the observed data — see the comment on the site.
+    test "a key may be any carryable item, not only a misc item" do
+      assert Type.allows?(:cell_reference_key, :miscellaneous_item)
+      assert Type.allows?(:cell_reference_key, :book)
+      refute Type.allows?(:cell_reference_key, :door)
+    end
+
     test "a container holds inventory but is never itself held or listed" do
       assert Type.allows?(:inventory_holder, :container)
       refute Type.allows?(:inventory_object, :container)
