@@ -29,6 +29,18 @@ defmodule Resdayn.Catalog.Referencable do
   > To revive it, a create/delete UI would need to give these resources
   > functional `:create` / `:destroy` actions (with real `accept` lists); the
   > changes would then activate and should be covered by a test.
+
+  > #### Removing this extension from a resource {: .tip}
+  >
+  > `mix ash.codegen` will emit a `create index(:<table>, [:id])` alongside the
+  > dropped foreign key, to replace the index the FK provided. Delete it. `id` is
+  > already the primary key, so the index only duplicates `<table>_pkey`.
+  >
+  > Leaving it in is how 17 of these accumulated between May 2025 and August 2026
+  > (see `20260808121643_drop_redundant_id_indexes`). They were invisible to
+  > codegen the whole time, because AshPostgres diffs snapshot against snapshot
+  > and never against the database — so DDL that no snapshot records simply does
+  > not exist as far as future migrations are concerned.
   """
   use Spark.Dsl.Extension, transformers: [__MODULE__.AddReference]
 
