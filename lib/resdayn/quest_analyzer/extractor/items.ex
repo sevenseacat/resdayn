@@ -31,10 +31,11 @@ defmodule Resdayn.QuestAnalyzer.Extractor.Items do
   # ReferencableObject types that represent inventoriable items. NPC, creature,
   # static_object, container, etc. are intentionally excluded — those are
   # subjects of other involvement tables.
-  @item_object_types ~w(
-    weapon armor clothing book potion ingredient
-    alchemy_apparatus tool miscellaneous_item
-  )a
+  #
+  # Read from the reference-site rules rather than repeated here, so this can't
+  # drift from what `item_involvements.object_id` is declared to accept. Resolved
+  # at compile time because the guards below need a literal list.
+  @item_object_types Resdayn.Catalog.World.ReferencableObject.Type.allowed(:item_involvement)
 
   # Parsed effect functions that name an item via `:item_id`. Names match the
   # atoms emitted by `Resdayn.QuestAnalyzer.ScriptParser` (snake_case, e.g.
