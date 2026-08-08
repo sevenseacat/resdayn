@@ -15,9 +15,7 @@ defmodule Resdayn.Parser do
     parse_all_records(binary, [])
   end
 
-  @doc """
-  Return a stream of records as read from the ESM file.
-  """
+  @doc "Return a stream of records as read from the ESM file."
   def read(filename) do
     Stream.resource(
       fn -> File.open!(filename, [:binary]) end,
@@ -27,18 +25,15 @@ defmodule Resdayn.Parser do
   end
 
   defp read_record(file) do
-    # Each record has a 16-byte header, immediately followed by zero or more subrecords
+    # Each record has a 16-byte header, followed by zero or more subrecords
     case IO.binread(file, 16) do
-      :eof -> {:halt, file}
-      record -> {[parse_record(file, record)], file}
-    end
-  end
+      :eof ->
+        {:halt, file}
 
-  defp parse_record(
-         file,
-         <<type_raw::char(4), subrecord_size::uint32(), _header1::char(4), flags::uint32()>>
-       ) do
-    build_record(type_raw, flags, IO.binread(file, subrecord_size))
+      <<type_raw::char(4), subrecord_size::uint32(), _::char(4), flags::uint32()>> ->
+        subrecords = build_record(type_raw, flags, IO.binread(file, subrecord_size))
+        {[subrecords], file}
+    end
   end
 
   defp parse_all_records(<<>>, acc), do: Enum.reverse(acc)
