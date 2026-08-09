@@ -21,6 +21,6 @@ defmodule Resdayn.Catalog.Items.ItemLevelledList do
     attribute :for_each_item, :boolean, allow_nil?: false, default: false
     attribute :from_all_lower_levels, :boolean, allow_nil?: false, default: false
 
-    attribute :items, {:array, __MODULE__.Item}, default: []
+    attribute :entries, {:array, Resdayn.Catalog.LevelledListEntry}, default: []
   end
 end

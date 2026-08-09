@@ -6,19 +6,18 @@ defmodule Resdayn.Importer.Record.ItemLevelledList do
       records
       |> of_type(Resdayn.Parser.Record.ItemLevelledList)
       |> Enum.map(fn record ->
-        # Transform items to use item_ref_id instead of id
-        items =
+        entries =
           (record.data[:items] || [])
           |> Enum.map(fn item ->
             %{
-              item_ref_id: item.id,
+              object_ref_id: item.id,
               player_level: item.player_level
             }
           end)
 
         record.data
         |> Map.take([:id, :chance_none, :script_id])
-        |> Map.put(:items, items)
+        |> Map.put(:entries, entries)
         |> Map.put(:for_each_item, get_in(record.data, [:flags, :for_each_item]) || false)
         |> Map.put(
           :from_all_lower_levels,

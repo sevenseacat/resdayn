@@ -18,9 +18,11 @@ defmodule Resdayn.Catalog.World.CreatureLevelledList do
     attribute :id, Resdayn.Catalog.Types.RecordId, primary_key?: true, allow_nil?: false
 
     attribute :chance_none, :integer, allow_nil?: false, constraints: [min: 0, max: 100]
-    attribute :for_each_item, :boolean, allow_nil?: false, default: false
+
+    # LEVC has no per-item flag: bit 0x2 is never set across the 1,168 creature
+    # lists in MW/TB/BM/TR. LEVI uses both bits.
     attribute :from_all_lower_levels, :boolean, allow_nil?: false, default: false
 
-    attribute :creatures, {:array, __MODULE__.Creature}, default: []
+    attribute :entries, {:array, Resdayn.Catalog.LevelledListEntry}, default: []
   end
 end

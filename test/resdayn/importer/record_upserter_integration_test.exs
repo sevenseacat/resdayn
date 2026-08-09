@@ -23,6 +23,7 @@ defmodule Resdayn.Importer.RecordUpserterIntegrationTest do
   }
 
   alias Resdayn.Catalog.Characters.{Skill, Class, Birthsign, Race, BodyPart, Faction}
+  alias Resdayn.Catalog.LevelledListEntry
   alias Resdayn.Catalog.Assets.{Sound, Light, SoundGenerator}
 
   alias Resdayn.Catalog.Items.{
@@ -940,14 +941,29 @@ defmodule Resdayn.Importer.RecordUpserterIntegrationTest do
       assert list.source_file_ids == ["Morrowind.esm"]
     end
 
-    test "imports items embedded array correctly" do
+    test "imports entries correctly" do
       list = Ash.get!(ItemLevelledList, "random_pos")
-      assert is_list(list.items)
-      assert length(list.items) > 0
 
-      item = hd(list.items)
-      assert Map.has_key?(item, :item_ref_id)
-      assert Map.has_key?(item, :player_level)
+      assert Enum.all?(list.entries, &(&1.player_level == 1))
+
+      assert list.entries |> Enum.map(&to_string(&1.object_ref_id)) |> Enum.sort() == [
+               "Gold_001",
+               "Misc_Com_Pitcher_Metal_01",
+               "Misc_Com_Redware_Cup",
+               "Misc_SoulGem_Petty",
+               "misc_com_basket_02",
+               "misc_com_bottle_10",
+               "misc_com_bottle_15",
+               "misc_com_bottle_15",
+               "misc_com_metal_goblet_01",
+               "misc_com_metal_goblet_01",
+               "misc_com_plate_01",
+               "misc_com_redware_vase",
+               "misc_com_wood_bowl_04",
+               "misc_com_wood_cup_01",
+               "misc_com_wood_spoon_02",
+               "sc_paper plain"
+             ]
     end
 
     test "creates corresponding ReferencableObject" do
@@ -977,14 +993,27 @@ defmodule Resdayn.Importer.RecordUpserterIntegrationTest do
       assert list.source_file_ids == ["Morrowind.esm"]
     end
 
-    test "imports creatures embedded array correctly" do
+    # Every entry here is an NPC, not a creature — LEVC is a hostile actor spawn
+    # list, which is why the entry type is shared rather than creature-specific.
+    test "imports entries correctly" do
       list = Ash.get!(CreatureLevelledList, "l_vamp_cattle")
-      assert is_list(list.creatures)
-      assert length(list.creatures) == 4
 
-      creature = hd(list.creatures)
-      assert Map.has_key?(creature, :creature_ref_id)
-      assert Map.has_key?(creature, :player_level)
+      assert Enum.all?(list.entries, &(&1.player_level == 1))
+
+      assert list.entries |> Enum.map(&to_string(&1.object_ref_id)) |> Enum.sort() == [
+               "cattle_arg_f01",
+               "cattle_arg_f02",
+               "cattle_kha_f01",
+               "cattle_kha_f02"
+             ]
+    end
+
+    test "both levelled list types share one entry resource" do
+      item = Ash.get!(ItemLevelledList, "random_pos")
+      creature = Ash.get!(CreatureLevelledList, "l_vamp_cattle")
+
+      assert %LevelledListEntry{} = hd(item.entries)
+      assert %LevelledListEntry{} = hd(creature.entries)
     end
 
     test "creates corresponding ReferencableObject" do
