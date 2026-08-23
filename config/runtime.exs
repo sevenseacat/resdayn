@@ -1,14 +1,6 @@
 import Config
 
-if config_env() == :prod do
-  database_url =
-    System.get_env("DATABASE_URL") ||
-      raise """
-      environment variable DATABASE_URL is missing.
-      For example: ecto://USER:PASS@HOST/DATABASE
-      """
-
-  config :resdayn, Resdayn.Repo,
-    url: database_url,
-    pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10")
-end
+# Resdayn is a library -- it is never deployed on its own, and when it is used
+# as a path dependency this file is not loaded at all (only the top-level
+# application's runtime.exs is). Production configuration for Resdayn.Repo
+# therefore lives in the host application, in library/config/runtime.exs.
