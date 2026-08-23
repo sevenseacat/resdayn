@@ -33,3 +33,6 @@ notes/
 
 # The raw ESM files for integration tests
 priv/data/
+
+# Claude Code local settings
+.claude/
