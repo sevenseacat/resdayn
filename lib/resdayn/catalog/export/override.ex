@@ -23,8 +23,8 @@ defmodule Resdayn.Catalog.Export.Override do
   attributes do
     uuid_v7_primary_key :id
 
-    attribute :record_id, Resdayn.Catalog.Types.RecordId, allow_nil?: false, public?: true
-    attribute :resource_type, __MODULE__.ResourceType, allow_nil?: false, public?: true
+    attribute :record_id, Resdayn.Catalog.Types.RecordId, allow_nil?: false
+    attribute :resource_type, __MODULE__.ResourceType, allow_nil?: false
 
     timestamps()
   end

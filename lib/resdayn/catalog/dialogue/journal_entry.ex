@@ -10,8 +10,7 @@ defmodule Resdayn.Catalog.Dialogue.JournalEntry do
   end
 
   actions do
-    defaults [:read, :create, :update, :destroy]
-    default_accept [:id, :index, :content, :finishes_quest, :restarts_quest, :quest_version_id]
+    defaults [:read]
   end
 
   attributes do

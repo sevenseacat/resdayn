@@ -11,19 +11,16 @@ defmodule Resdayn.Catalog.Items.Weapon do
   end
 
   actions do
-    defaults [:read, :create, :update, :destroy]
+    defaults [:read]
   end
 
   attributes do
-    attribute :id, Resdayn.Catalog.Types.RecordId,
-      primary_key?: true,
-      allow_nil?: false,
-      public?: true
+    attribute :id, Resdayn.Catalog.Types.RecordId, primary_key?: true, allow_nil?: false
 
-    attribute :name, :string, public?: true
-    attribute :type, __MODULE__.Type, allow_nil?: false, public?: true
-    attribute :value, :integer, allow_nil?: false, constraints: [min: 0], public?: true
-    attribute :weight, :decimal, allow_nil?: false, constraints: [min: 0], public?: true
+    attribute :name, :string
+    attribute :type, __MODULE__.Type, allow_nil?: false
+    attribute :value, :integer, allow_nil?: false, constraints: [min: 0]
+    attribute :weight, :decimal, allow_nil?: false, constraints: [min: 0]
     attribute :nif_model_filename, :string, allow_nil?: false
     attribute :icon_filename, :string
     attribute :enchantment_points, :integer, allow_nil?: false, constraints: [min: 0, max: 65_535]
@@ -32,17 +29,9 @@ defmodule Resdayn.Catalog.Items.Weapon do
     attribute :speed, :float, allow_nil?: false, constraints: [min: 0]
     attribute :reach, :float, allow_nil?: false, constraints: [min: 0]
 
-    attribute :chop_magnitude, Resdayn.Catalog.Types.Range,
-      allow_nil?: false,
-      public?: true
-
-    attribute :slash_magnitude, Resdayn.Catalog.Types.Range,
-      allow_nil?: false,
-      public?: true
-
-    attribute :thrust_magnitude, Resdayn.Catalog.Types.Range,
-      allow_nil?: false,
-      public?: true
+    attribute :chop_magnitude, Resdayn.Catalog.Types.Range, allow_nil?: false
+    attribute :slash_magnitude, Resdayn.Catalog.Types.Range, allow_nil?: false
+    attribute :thrust_magnitude, Resdayn.Catalog.Types.Range, allow_nil?: false
 
     attribute :weapon_flags, {:array, __MODULE__.Flag}, default: []
   end

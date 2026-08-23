@@ -16,8 +16,7 @@ defmodule Resdayn.Catalog.World.InventoryItem do
   end
 
   actions do
-    defaults [:read, :create, :update, :destroy]
-    default_accept [:count, :restocking?, :holder_ref_id, :object_ref_id]
+    defaults [:read]
   end
 
   attributes do

@@ -10,20 +10,15 @@ defmodule Resdayn.Catalog.World.ReferencableObject do
   end
 
   actions do
-    defaults [:read, :update, :destroy]
-
-    create :create do
-      accept [:id, :type]
-    end
+    defaults [:read]
   end
 
   attributes do
     attribute :id, Resdayn.Catalog.Types.RecordId,
       primary_key?: true,
-      allow_nil?: false,
-      public?: true
+      allow_nil?: false
 
-    attribute :type, __MODULE__.Type, allow_nil?: false, public?: true
+    attribute :type, __MODULE__.Type, allow_nil?: false
   end
 
   relationships do

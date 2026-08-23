@@ -71,7 +71,7 @@ defmodule Resdayn.Catalog.QuestAnalysis.ActorInvolvement do
   end
 
   actions do
-    defaults [:read, :destroy]
+    defaults [:read]
 
     create :create do
       accept [

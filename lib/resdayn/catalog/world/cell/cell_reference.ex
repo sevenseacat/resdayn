@@ -16,28 +16,7 @@ defmodule Resdayn.Catalog.World.Cell.CellReference do
   end
 
   actions do
-    defaults [:read, :create, :update, :destroy]
-
-    default_accept [
-      :cell_id,
-      :reference_id,
-      :id,
-      :coordinates,
-      :count,
-      :scale,
-      :transport_to,
-      :usage_remaining,
-      :lock_difficulty,
-      :required_faction_rank,
-      :enchantment_charge,
-      :blocked,
-      :owner_id,
-      :owner_faction_id,
-      :key_id,
-      :trap_id,
-      :soul_id,
-      :global_variable_id
-    ]
+    defaults [:read]
   end
 
   attributes do

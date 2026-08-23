@@ -16,12 +16,11 @@ defmodule Resdayn.Catalog.Characters.Race.SkillBonus do
   end
 
   actions do
-    default_accept [:bonus, :race_id, :skill_id]
-    defaults [:read, :create, :update, :destroy]
+    defaults [:read]
   end
 
   attributes do
-    attribute :bonus, :integer, allow_nil?: false, public?: true, constraints: [min: 0]
+    attribute :bonus, :integer, allow_nil?: false, constraints: [min: 0]
   end
 
   relationships do

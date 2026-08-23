@@ -10,17 +10,12 @@ defmodule Resdayn.Catalog.LevelledListEntry do
 
   use Ash.Resource, data_layer: :embedded
 
-  actions do
-    defaults [:create, :read, :update, :destroy]
-    default_accept [:player_level, :object_ref_id]
-  end
-
   attributes do
-    attribute :player_level, :integer, allow_nil?: false, constraints: [min: 0]
+    attribute :player_level, :integer, allow_nil?: false, constraints: [min: 0], public?: true
   end
 
   relationships do
-    belongs_to :object_ref, Resdayn.Catalog.World.ReferencableObject
+    belongs_to :object_ref, Resdayn.Catalog.World.ReferencableObject, public?: true
   end
 
   calculations do

@@ -20,7 +20,7 @@ defmodule Resdayn.Catalog.Dialogue.Response do
   end
 
   actions do
-    defaults [:read, :create, :update, :destroy]
+    defaults [:read]
 
     read :for_npc do
       argument :npc_id, :string, allow_nil?: false
@@ -29,27 +29,6 @@ defmodule Resdayn.Catalog.Dialogue.Response do
       filter expr(valid_for_npc_id(npc_id: ^arg(:npc_id)))
       filter expr(topic_id == ^arg(:topic))
     end
-
-    default_accept [
-      :id,
-      :content,
-      :script_content,
-      :disposition,
-      :speaker_faction_rank,
-      :player_faction_rank,
-      :gender,
-      :conditions,
-      :topic_id,
-      :previous_response_id,
-      :next_response_id,
-      :speaker_npc_id,
-      :speaker_creature_id,
-      :speaker_class_id,
-      :speaker_faction_id,
-      :cell_name,
-      :player_faction_id,
-      :sound_filename
-    ]
   end
 
   attributes do

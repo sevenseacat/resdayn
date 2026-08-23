@@ -14,7 +14,7 @@ defmodule Resdayn.Catalog.World.NPC.SkillValue do
   end
 
   attributes do
-    attribute :value, :integer, allow_nil?: false, constraints: [min: 0], public?: true
+    attribute :value, :integer, allow_nil?: false, constraints: [min: 0]
   end
 
   relationships do

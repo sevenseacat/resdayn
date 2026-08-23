@@ -11,8 +11,7 @@ defmodule Resdayn.Catalog.Characters.Faction.Reaction do
   end
 
   actions do
-    defaults [:read, :create, :update, :destroy]
-    default_accept [:adjustment, :target_id]
+    defaults [:read]
   end
 
   attributes do
@@ -22,12 +21,10 @@ defmodule Resdayn.Catalog.Characters.Faction.Reaction do
   relationships do
     belongs_to :source, Resdayn.Catalog.Characters.Faction,
       allow_nil?: false,
-      primary_key?: true,
-      public?: true
+      primary_key?: true
 
     belongs_to :target, Resdayn.Catalog.Characters.Faction,
       allow_nil?: false,
-      primary_key?: true,
-      public?: true
+      primary_key?: true
   end
 end

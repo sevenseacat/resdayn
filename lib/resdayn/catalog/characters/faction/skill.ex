@@ -11,8 +11,7 @@ defmodule Resdayn.Catalog.Characters.Faction.Skill do
   end
 
   actions do
-    defaults [:create, :read, :update, :destroy]
-    default_accept [:faction_id, :skill_id]
+    defaults [:read]
   end
 
   relationships do

@@ -11,8 +11,7 @@ defmodule Resdayn.Catalog.Characters.Class.Skill do
   end
 
   actions do
-    defaults [:create, :read, :update, :destroy]
-    default_accept [:class_id, :category, :skill_id]
+    defaults [:read]
   end
 
   attributes do

@@ -22,18 +22,12 @@ defmodule Resdayn.Catalog.Characters.Race do
     attribute :playable, :boolean, allow_nil?: false
     attribute :beast, :boolean, allow_nil?: false
 
-    attribute :male_stats, __MODULE__.Stats,
-      allow_nil?: false,
-      public?: true
-
-    attribute :female_stats, __MODULE__.Stats,
-      allow_nil?: false,
-      public?: true
+    attribute :male_stats, __MODULE__.Stats, allow_nil?: false
+    attribute :female_stats, __MODULE__.Stats, allow_nil?: false
 
     attribute :special_spells, {:array, Resdayn.Catalog.Characters.SpellLink},
       allow_nil?: false,
-      default: [],
-      public?: true
+      default: []
   end
 
   relationships do

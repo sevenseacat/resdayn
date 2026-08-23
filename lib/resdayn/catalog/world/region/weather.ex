@@ -3,23 +3,6 @@ defmodule Resdayn.Catalog.World.Region.Weather do
     otp_app: :resdayn,
     data_layer: :embedded
 
-  actions do
-    defaults [:read, :create, :update, :destroy]
-
-    default_accept [
-      :clear,
-      :cloudy,
-      :foggy,
-      :overcast,
-      :rain,
-      :thunder,
-      :ash,
-      :blight,
-      :snow,
-      :blizzard
-    ]
-  end
-
   attributes do
     attribute :clear, :integer, allow_nil?: false, default: 0, public?: true
     attribute :cloudy, :integer, allow_nil?: false, default: 0, public?: true

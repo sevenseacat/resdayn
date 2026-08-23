@@ -51,7 +51,7 @@ defmodule Resdayn.Catalog.QuestAnalysis.ItemInvolvement do
   end
 
   actions do
-    defaults [:read, :destroy]
+    defaults [:read]
 
     create :create do
       accept [

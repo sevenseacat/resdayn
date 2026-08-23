@@ -27,20 +27,17 @@ defmodule Resdayn.Catalog.Mechanics.AppliedMagicEffect do
       primary_key?: true,
       allow_nil?: false
 
-    attribute :duration, :integer, allow_nil?: false, public?: true, constraints: [min: 0]
+    attribute :duration, :integer, allow_nil?: false, constraints: [min: 0]
 
     attribute :magnitude, Resdayn.Catalog.Types.Range,
       allow_nil?: false,
-      public?: true,
       constraints: [validate?: false]
 
-    attribute :range, Resdayn.Catalog.MagicRange, allow_nil?: false, public?: true
-    attribute :area, :integer, allow_nil?: false, public?: true, constraints: [min: 0]
+    attribute :range, Resdayn.Catalog.MagicRange, allow_nil?: false
+    attribute :area, :integer, allow_nil?: false, constraints: [min: 0]
   end
 
   relationships do
-    belongs_to :magic_effect, Resdayn.Catalog.Mechanics.MagicEffect,
-      allow_nil?: false,
-      public?: true
+    belongs_to :magic_effect, Resdayn.Catalog.Mechanics.MagicEffect, allow_nil?: false
   end
 end
