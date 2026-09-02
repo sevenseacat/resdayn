@@ -13,7 +13,10 @@ defmodule Resdayn.Exporter.Record.QuestVersion do
     dial = Topic.encode_dial(quest.id, :journal)
 
     # Auto-generate a naming entry (QSTN) from quest.name at index 0,
-    # followed by the actual journal entries
+    # followed by the actual journal entries. Real game data is messier - a
+    # journal can carry several QSTN entries, and the naming one is not always
+    # at index 0 - but this only ever runs on hand-built quests, not on
+    # round-tripped imports, so one name at index 0 is enough.
     name_entry = %{id: "#{quest.id}_name", index: 0, content: quest.name}
     journal_entries = ensure_list(quest.journal_entries)
     all_entries = [name_entry | journal_entries]

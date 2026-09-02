@@ -6,9 +6,20 @@ defmodule Resdayn.Importer.Record.JournalEntry do
       records
       |> chunked_dialogues(:journal)
       |> Enum.flat_map(fn {topic, entries} ->
+        # Discard the naming entry, and any other name sharing its index -
+        # MS_Warlords has two. A stray QSTN on a different index is a real
+        # journal entry that Bethesda mis-flagged, so keep it: CO_12a's entry
+        # 100 is set by the ColonyAssassin script and the player does see it.
+        naming_index =
+          case quest_name_response(entries) do
+            nil -> nil
+            response -> response.data[:disposition_or_journal_index]
+          end
+
         entries
-        |> Enum.reverse()
-        |> Enum.reject(& &1.data[:quest_name])
+        |> Enum.reject(
+          &(&1.data[:quest_name] && &1.data[:disposition_or_journal_index] == naming_index)
+        )
         |> Enum.map(fn entry ->
           %{
             id: entry.data.id,

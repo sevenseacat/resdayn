@@ -18,7 +18,6 @@ defmodule Resdayn.Importer.Record.DialogueResponse do
       |> Enum.map(fn {topic, responses} ->
         responses =
           responses
-          |> Enum.reverse()
           # Tamriel_Data has some "player voices" for added mods - skip
           |> Enum.reject(&(&1.data[:actor_id] == "player"))
           |> Enum.map(fn response ->

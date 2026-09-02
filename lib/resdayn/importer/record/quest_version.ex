@@ -11,7 +11,7 @@ defmodule Resdayn.Importer.Record.QuestVersion do
         # tweaks to vanilla quests, T_Rules_* infrastructure records — fall
         # through with just :id, which preserves any existing name set
         # by an earlier pass and lets source_file_ids accumulate.
-        case Enum.find(entries, fn resp -> resp.data[:quest_name] end) do
+        case quest_name_response(entries) do
           nil ->
             %{id: topic.data.id}
 

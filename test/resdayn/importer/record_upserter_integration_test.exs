@@ -1428,6 +1428,17 @@ defmodule Resdayn.Importer.RecordUpserterIntegrationTest do
       assert quest.name == "Report to Caius Cosades"
       assert quest.source_file_ids == ["Morrowind.esm", "Tribunal.esm"]
     end
+
+    # A journal DIAL can carry more than one QSTN-flagged INFO: Bethesda left the
+    # "name" quest status on a real entry in HR_Shurinbaal (index 10), and gave
+    # MS_Warlords two names at index 0. The engine takes the first in record order.
+    test "names a quest from the first QSTN entry when there are several" do
+      assert Ash.get!(Resdayn.Catalog.Dialogue.QuestVersion, "HR_Shurinbaal").name ==
+               "House Redoran: Shurinbaal"
+
+      assert Ash.get!(Resdayn.Catalog.Dialogue.QuestVersion, "MS_Warlords").name ==
+               "The Warlords"
+    end
   end
 
   describe "JournalEntry" do
@@ -1448,6 +1459,25 @@ defmodule Resdayn.Importer.RecordUpserterIntegrationTest do
       entry = hd(entries)
       assert entry.index >= 0
       assert entry.source_file_ids == ["Morrowind.esm"]
+    end
+
+    # Only the naming index is excluded, so HR_Shurinbaal's stray-QSTN entry 10
+    # survives, while both of MS_Warlords' index 0 names are dropped.
+    test "keeps stray QSTN entries but discards every name at the naming index" do
+      require Ash.Query
+
+      indices = fn quest_version_id ->
+        Resdayn.Catalog.Dialogue.JournalEntry
+        |> Ash.Query.filter(quest_version_id == ^quest_version_id)
+        |> Ash.read!()
+        |> Enum.map(& &1.index)
+        |> Enum.sort()
+      end
+
+      assert indices.("HR_Shurinbaal") == [10, 100]
+
+      assert indices.("MS_Warlords") ==
+               [10, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 200, 210]
     end
   end
 
