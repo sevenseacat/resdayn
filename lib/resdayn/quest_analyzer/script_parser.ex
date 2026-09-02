@@ -213,6 +213,9 @@ defmodule Resdayn.QuestAnalyzer.ScriptParser do
 
   def extract_journal_commands(content, script_map \\ %{}, opts \\ [])
 
+  # No content, no journal commands
+  def extract_journal_commands(nil, _, _), do: []
+
   def extract_journal_commands(content, script_map, opts) when is_binary(content) do
     extract_journal_commands(parse(content), script_map, opts)
   end
